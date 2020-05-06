@@ -12,9 +12,9 @@
 #include <core/profiler.h>
 #include <core/string_util.h>
 #include <core/math/path_util.h>
-#include <arch/models/arch_segment_service.hpp>
-#include <arch/models/wall_service.hpp>
-#include <arch/models/ushape_service.hpp>
+#include "../../models/arch_segment_service.hpp"
+#include "../../models/wall_service.hpp"
+#include "../../models/ushape_service.hpp"
 #include <event_horizon/native/poly/poly_services.hpp>
 
 #include "machine_learning/hu_moments.hpp"
@@ -655,6 +655,21 @@ namespace HouseMakerBitmap {
     void guessDoorsAndWindowsWithMachineLearning( FloorBSData *f, HouseBSData *house, const SourceImages& si ) {
         analyseWallForDoorsOrWindows( house, si, f );
         FloorService::removeUnPairedUShapes( f );
+
+        if ( f->doors.size() > 2 ) {
+            std::vector<std::shared_ptr<DoorBSData>> doorsWidth{};
+            for ( auto& door : f->doors ) {
+                doorsWidth.emplace_back( door );
+            }
+            std::sort( doorsWidth.begin(), doorsWidth.end(), []( const auto& l, const auto& r ) -> bool {
+                return l->width < r->width;
+            } );
+            for ( const auto& door : doorsWidth ) {
+                if ( door->width / doorsWidth[doorsWidth.size() / 2 - 1]->width > 2.0f ) {
+                    FloorService::swapWindowOrDoor( f, house, door->hash );
+                }
+            }
+        }
     }
 
     void rollbackStage1TyringToCloseRooms( std::array<std::shared_ptr<HouseBSData>, NumStrategies>& houses, const SourceImages& si ) {
@@ -761,20 +776,20 @@ namespace HouseMakerBitmap {
 
         for ( auto& f : house->mFloors ) {
 
-            if ( f->doors.size() > 2 ) {
-                std::vector<std::shared_ptr<DoorBSData>> doorsWidth{};
-                for ( auto& door : f->doors ) {
-                    doorsWidth.emplace_back( door );
-                }
-                std::sort( doorsWidth.begin(), doorsWidth.end(), []( const auto& l, const auto& r ) -> bool {
-                    return l->width < r->width;
-                } );
-                for ( const auto& door : doorsWidth ) {
-                    if ( door->width / doorsWidth[doorsWidth.size() / 2 - 1]->width > 2.0f ) {
-                        FloorService::swapWindowOrDoor( f.get(), house.get(), door->hash );
-                    }
-                }
-            }
+//            if ( f->doors.size() > 2 ) {
+//                std::vector<std::shared_ptr<DoorBSData>> doorsWidth{};
+//                for ( auto& door : f->doors ) {
+//                    doorsWidth.emplace_back( door );
+//                }
+//                std::sort( doorsWidth.begin(), doorsWidth.end(), []( const auto& l, const auto& r ) -> bool {
+//                    return l->width < r->width;
+//                } );
+//                for ( const auto& door : doorsWidth ) {
+//                    if ( door->width / doorsWidth[doorsWidth.size() / 2 - 1]->width > 2.0f ) {
+//                        FloorService::swapWindowOrDoor( f.get(), house.get(), door->hash );
+//                    }
+//                }
+//            }
 
             roomOCRScan( sourceImages, bsdata, f->rds );
             FloorService::addRoomsFromData( f.get());

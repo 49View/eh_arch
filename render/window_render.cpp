@@ -309,9 +309,9 @@ namespace WindowRender {
     GeomSPContainer make3dGeometry( SceneGraph& sg, WindowBSData *mData ) {
 
         auto mRootH = EF::create<Geom>( "Window" );
-        float inangle = -atan2( mData->insideRoomPointingNormal.y(), mData->insideRoomPointingNormal.x());
-        Quaternion rot(M_PI_2 + inangle, V3f::UP_AXIS);
-        mRootH->updateTransform( XZY::C( mData->center, 0.0f ), rot, V3f::ONE);
+//        float inangle = -atan2( mData->insideRoomPointingNormal.y(), mData->insideRoomPointingNormal.x());
+//        Quaternion rot(M_PI_2 + inangle, V3f::UP_AXIS);
+//        mRootH->updateTransform( XZY::C( mData->center, 0.0f ), rot, V3f::ONE);
 
         float windowsSillDepth = 0.04f;
         float currBaseOffset = mData->baseOffset < mData->ceilingHeight ? mData->baseOffset : mData->ceilingHeight;
@@ -329,6 +329,17 @@ namespace WindowRender {
         addWindowMeshes( sg, mRootH, mData, windowRect, windowsSillDepth );
 
         addCurtains( sg, mRootH, mData, windowRect, currBaseOffset + windowsSillDepth );
+
+        float vwangle = dot(mData->insideRoomPointingNormal, V2f::Y_AXIS);
+        float vwangle2 = atan2( -mData->insideRoomPointingNormal.y(), mData->insideRoomPointingNormal.x());
+        LOGRS("wangle " << vwangle );
+        LOGRS("wangle2 " << vwangle2 );
+        LOGRS("dirWidth " << mData->dirWidth );
+        LOGRS("dirWidth90 " << rotate90(mData->dirWidth) );
+        LOGRS("insideRoomPointingNormal " << mData->insideRoomPointingNormal );
+
+        Quaternion rot( vwangle2 + M_PI_2, V3f::UP_AXIS );
+        mRootH->updateTransform( XZY::C( mData->center, 0.0f ), rot, V3f::ONE ); //
 
         GeomSPContainer ret;
         ret.emplace_back( mRootH );

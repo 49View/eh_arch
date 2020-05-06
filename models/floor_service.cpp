@@ -511,8 +511,7 @@ void FloorService::swapWindowOrDoor( FloorBSData *f, HouseBSData *h, int64_t has
         FloorService::removeLinkedArch( f, hashOfTwoShape );
         FloorService::removeArch( f, hashOfTwoShape );
         if ( elem->asType == ArchType::WindowT ) {
-            FloorService::addWindowFromData( f, h->defaultWindowHeight, h->defaultWindowBaseOffset, elem->us1,
-                                             elem->us2 );
+            FloorService::addDoorFromData( f, h->doorHeight, elem->us1, elem->us2 );
         } else {
             FloorService::addWindowFromData( f, h->defaultWindowHeight, h->defaultWindowBaseOffset, elem->us1,
                                              elem->us2 );
