@@ -63,6 +63,8 @@ namespace HouseMakerBitmap {
         RoomNameMapping::map["garage"] = ASType::Garage;
         RoomNameMapping::map["garden room"] = ASType::Conservatory;
         RoomNameMapping::map["studio"] = ASType::Studio;
+
+        OCR::ocrInitEngine();
     }
 
     void generateSourceFileBC( const RawImage& _ri, SourceImages& si, HMBBSData& bsdata ) {
@@ -277,11 +279,12 @@ namespace HouseMakerBitmap {
     ASTypeT assignRoomTypeFromOcrString( HMBBSData& bsdata, const cv::Mat& maskedRoom,
                                          const JMATH::Rect2f& _bboxCoving ) {
 
+        std::string text = OCR::ocrTextRecognition( maskedRoom );
 
-        tesseract::TessBaseAPI ocrEngine;
-        cv::dnn::Net dnnNet;
-        OCR::ocrInitEngine( "/usr/local/share/opencv4/east/frozen_east_text_detection.pb", ocrEngine, dnnNet );
-        std::string text = OCR::ocrTextDetection( ocrEngine, dnnNet, maskedRoom );
+//        cv::dnn::Net dnnNet;
+//        dnnNet = cv::dnn::readNet( "/usr/local/share/opencv4/east/frozen_east_text_detection.pb" );
+//        std::string text = OCR::ocrTextDetection( dnnNet, maskedRoom );
+
         replaceAllStrings( text, "‘", "'" );
 
         std::vector<std::regex> regv;
@@ -364,9 +367,9 @@ namespace HouseMakerBitmap {
             cv::Mat origMasked;
             auto maskedRoom = maskedRoomMat( si, bsdata, cs, csBBox, 1, OCRThresholdMask::False, origMasked );
 
-//            cv::imshow(std::to_string(random()), maskedRoom);
-
             r.rtype = assignRoomTypeFromOcrString( bsdata, maskedRoom, csBBox );
+
+//            cv::imwrite(std::to_string(random()) + ".png", maskedRoom);
 
             //guessHuMomentsOfRoom( origMasked, r );
         }
@@ -775,22 +778,6 @@ namespace HouseMakerBitmap {
         auto house = runWallStrategies( sourceImages );
 
         for ( auto& f : house->mFloors ) {
-
-//            if ( f->doors.size() > 2 ) {
-//                std::vector<std::shared_ptr<DoorBSData>> doorsWidth{};
-//                for ( auto& door : f->doors ) {
-//                    doorsWidth.emplace_back( door );
-//                }
-//                std::sort( doorsWidth.begin(), doorsWidth.end(), []( const auto& l, const auto& r ) -> bool {
-//                    return l->width < r->width;
-//                } );
-//                for ( const auto& door : doorsWidth ) {
-//                    if ( door->width / doorsWidth[doorsWidth.size() / 2 - 1]->width > 2.0f ) {
-//                        FloorService::swapWindowOrDoor( f.get(), house.get(), door->hash );
-//                    }
-//                }
-//            }
-
             roomOCRScan( sourceImages, bsdata, f->rds );
             FloorService::addRoomsFromData( f.get());
         }

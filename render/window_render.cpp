@@ -302,7 +302,11 @@ namespace WindowRender {
     }
 
     void addCurtains( SceneGraph& sg, GeomSP mRootH, WindowBSData *mData, const Rect2f& _windowRect, float baseOff ) {
-        sg.GB<GT::Asset>( "curtain", mRootH, V3f{ 0.0f, 0.0f, -mData->depth - 0.04f }, GT::Tag( ArchType::CurtainT ),
+        auto s = sg.getGeomNameSize("curtain");
+        LOGRS("Curtain Size " << std::get<1>(s));
+        // Rescale the curtain with a % of slack so the curtain doesn't end exactly at window width
+        V3f curtainScale{  (mData->width * 1.25f) / std::get<1>(s).x(), 1.0f, 1.0f};
+        sg.GB<GT::Asset>( "curtain", mRootH, V3f{ 0.0f, 0.0f, -mData->depth - 0.04f }, GT::Scale(curtainScale), GT::Tag( ArchType::CurtainT ),
                           GT::M( mData->curtainMaterial ));
     }
 
@@ -330,14 +334,7 @@ namespace WindowRender {
 
         addCurtains( sg, mRootH, mData, windowRect, currBaseOffset + windowsSillDepth );
 
-        float vwangle = dot(mData->insideRoomPointingNormal, V2f::Y_AXIS);
         float vwangle2 = atan2( -mData->insideRoomPointingNormal.y(), mData->insideRoomPointingNormal.x());
-        LOGRS("wangle " << vwangle );
-        LOGRS("wangle2 " << vwangle2 );
-        LOGRS("dirWidth " << mData->dirWidth );
-        LOGRS("dirWidth90 " << rotate90(mData->dirWidth) );
-        LOGRS("insideRoomPointingNormal " << mData->insideRoomPointingNormal );
-
         Quaternion rot( vwangle2 + M_PI_2, V3f::UP_AXIS );
         mRootH->updateTransform( XZY::C( mData->center, 0.0f ), rot, V3f::ONE ); //
 
