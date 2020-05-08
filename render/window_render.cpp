@@ -303,7 +303,6 @@ namespace WindowRender {
 
     void addCurtains( SceneGraph& sg, GeomSP mRootH, WindowBSData *mData, const Rect2f& _windowRect, float baseOff ) {
         auto s = sg.getGeomNameSize("curtain");
-        LOGRS("Curtain Size " << std::get<1>(s));
         // Rescale the curtain with a % of slack so the curtain doesn't end exactly at window width
         V3f curtainScale{  (mData->width * 1.25f) / std::get<1>(s).x(), 1.0f, 1.0f};
         sg.GB<GT::Asset>( "curtain", mRootH, V3f{ 0.0f, 0.0f, -mData->depth - 0.04f }, GT::Scale(curtainScale), GT::Tag( ArchType::CurtainT ),
