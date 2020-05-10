@@ -19,6 +19,7 @@
 //}
 
 struct RoomPreData;
+class FurnitureMapStorage;
 
 struct DebugUShapeIntersection {
     UShape *s1 = nullptr;
@@ -86,7 +87,7 @@ class FloorService {
 public:
     static void externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& ws, std::vector<ArchSegment>& wse );
     static bool roomRecognition( FloorBSData *f );
-    static void guessFittings( FloorBSData *f );
+    static void guessFittings( FloorBSData *f, FurnitureMapStorage& furns );
     static std::string naturalLanguageFloorNumber( int numFloor );
     static bool findRoom( FloorBSData *f, int _floorNumber, ASTypeT _roomASTypeToFind,
                           std::shared_ptr<RoomBSData>& ret );

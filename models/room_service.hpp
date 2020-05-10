@@ -26,6 +26,8 @@ public:
         FT_Armchair,
         FT_Sofa,
         FT_Picture,
+        FT_CoffeeTable,
+        FT_DiningTable,
         FT_Invalid,
         Last
     };
@@ -39,6 +41,8 @@ public:
     static Type Armchair() { return Type::FT_Armchair; }
     static Type Sofa()     { return Type::FT_Sofa; }
     static Type Picture()  { return Type::FT_Picture; }
+    static Type CoffeeTable()  { return Type::FT_CoffeeTable; }
+    static Type DiningTable()  { return Type::FT_DiningTable; }
 
     static Type random() {
         return Type( unitRandI(Type::Last) );
@@ -277,6 +281,7 @@ public:
         rules.emplace_back( std::forward<Args>(args)... );
     }
     bool execute( RoomBSData* r, FurnitureMapStorage& furns, const FurnitureRuleFunctionContainer& funcRules ) const;
+    void clear();
 private:
     std::vector<FurniturePlacementRule> rules;
 };
@@ -302,8 +307,7 @@ namespace RoomService {
     void makeTriangles2d( RoomBSData* r );
     void calclMaxBoundingBox( RoomBSData* r );
 
-    void furnish( RoomBSData* r );
-    void furnishBedroom( RoomBSData* r );
+    void furnish( RoomBSData* r, FurnitureMapStorage& furns );
     const ArchSegment *getWallSegmentFor( RoomBSData* r, WSLO wslo, uint32_t _exactIndex = 0 );
 
     void clearFurniture( RoomBSData* r );
@@ -326,6 +330,7 @@ namespace RoomService {
     [[nodiscard]] bool cplaceMainWith2Sides( RoomBSData* r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd );
     [[nodiscard]] bool cplaceCornerWithDec( RoomBSData* r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd );
     [[nodiscard]] bool cplaceSetAlignedAtCorner( RoomBSData* r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd );
+    [[nodiscard]] bool cplaceSetAlignedMiddle( RoomBSData* r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd );
     [[nodiscard]] bool cplaceMiddleOfRoom( RoomBSData* r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd );
 
     // Furniture script loading
@@ -333,12 +338,14 @@ namespace RoomService {
             cplaceMainWith2Sides,
             cplaceCornerWithDec,
             cplaceSetAlignedAtCorner,
+            cplaceSetAlignedMiddle,
             cplaceMiddleOfRoom,
     };
     enum FurnitureRuleIndexNames {
         MainWith2Sides,
         CornerWithDec,
         SetAlignedAtCorner,
+        SetAlignedMiddle,
         MiddleOfRoom,
     };
     bool runRuleScript( RoomBSData* r, FurnitureMapStorage& furns, const FurnitureRuleScript& fs );

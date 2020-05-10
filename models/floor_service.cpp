@@ -465,12 +465,12 @@ bool FloorService::roomRecognition( FloorBSData *f ) {
     return roomsHaveBeenCalculatedCorrectly;
 }
 
-void FloorService::guessFittings( FloorBSData *f ) {
+void FloorService::guessFittings( FloorBSData *f, FurnitureMapStorage& furns ) {
     for ( auto& r : f->rooms ) {
         RoomService::calcOptimalLightingFittingPositions( r.get());
 //		RoomService::calcSkirtingSegments( r.get() );
         RoomService::addSocketsAndSwitches( r.get());
-        RoomService::furnish( r.get());
+        RoomService::furnish( r.get(), furns );
     }
 }
 

@@ -722,9 +722,9 @@ namespace HouseMakerBitmap {
         calculateScores( house, bsscores );
     }
 
-    void guessFittings( HouseBSData *house ) {
+    void guessFittings( HouseBSData *house, FurnitureMapStorage& furns ) {
         for ( auto& f : house->mFloors ) {
-            FloorService::guessFittings( f.get());
+            FloorService::guessFittings(f.get(), furns);
         }
     }
 
@@ -768,7 +768,7 @@ namespace HouseMakerBitmap {
         return bestScoringHouse( houses, bsscores );
     }
 
-    std::shared_ptr<HouseBSData> make( const RawImage& _data, HMBBSData& bsdata, const std::string& _name ) {
+    std::shared_ptr<HouseBSData> make( const RawImage& _data, HMBBSData& bsdata, const std::string& _name, FurnitureMapStorage& furns ) {
         PROFILE_BLOCK( "House service elaborate" );
         init();
 
@@ -784,7 +784,7 @@ namespace HouseMakerBitmap {
 
         gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
         rescaleIfNecessary( house.get(), sourceImages, bsdata );
-        guessFittings( house.get());
+        guessFittings( house.get(), furns);
 
         house->name = getFileNameOnly( _name );
 

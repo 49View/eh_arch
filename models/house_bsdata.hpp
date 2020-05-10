@@ -148,7 +148,7 @@ JSONDATA( FittedFurniture, name, symbolRef, size, position3d, xyLocation, height
 	Vector3f position3d = V3f::ZERO;
     Vector2f xyLocation = V2f::ZERO;
 	float heightOffset = 0.0f;
-	Quaternion rotation{ 1.0f, V3f::ZERO};
+	Quaternion rotation{ V3f::ZERO, 1.0f};
     V2f widthNormal = V2f::ZERO;
     V2f depthNormal = V2f::ZERO;
 	JMATH::AABB bbox3d = JMATH::AABB::INVALID;

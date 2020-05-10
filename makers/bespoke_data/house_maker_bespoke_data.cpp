@@ -45,7 +45,7 @@ void HouseMakerBespokeData::guessRooms() {
 }
 
 void HouseMakerBespokeData::guessFittings() {
-    for ( auto& f : mHouse->mFloors ) {
-        FloorService::guessFittings( f.get() );
-    }
+//    for ( auto& f : mHouse->mFloors ) {
+//        FloorService::guessFittings( f.get() );
+//    }
 }
