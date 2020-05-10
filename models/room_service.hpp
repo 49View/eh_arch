@@ -25,6 +25,9 @@ public:
         FT_Carpet,
         FT_Armchair,
         FT_Sofa,
+        FT_SideBoard,
+        FT_TVHanged,
+        FT_TVWithStand,
         FT_Picture,
         FT_CoffeeTable,
         FT_DiningTable,
@@ -40,7 +43,10 @@ public:
     static Type Carpet()   { return Type::FT_Carpet; }
     static Type Armchair() { return Type::FT_Armchair; }
     static Type Sofa()     { return Type::FT_Sofa; }
-    static Type Picture()  { return Type::FT_Picture; }
+    static Type SideBoard()    { return Type::FT_SideBoard; }
+    static Type TVHanged()     { return Type::FT_TVHanged; }
+    static Type TVWithStand()  { return Type::FT_TVWithStand; }
+    static Type Picture()      { return Type::FT_Picture; }
     static Type CoffeeTable()  { return Type::FT_CoffeeTable; }
     static Type DiningTable()  { return Type::FT_DiningTable; }
 

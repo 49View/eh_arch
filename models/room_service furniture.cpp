@@ -357,7 +357,7 @@ namespace RoomService {
         if ( fpd.hasDecorations()) {
             for ( const auto &dec : fpd.getDecorations()) {
                 auto decF = furns.spawn( dec );
-                float h1 = middleHeightFromObject( r, mainF, decF );
+                float h1 = checkBitWiseFlag(decF.flags, FF_CanBeHanged) ? middleHeightFromObject( r, mainF, decF ) : 0.00f;
                 completed &= h1 >= 0.0f;
                 if ( h1 >= 0.0f ) {
                     float h = mainF.size.y() + h1;
@@ -394,7 +394,7 @@ namespace RoomService {
         auto mainF = furns.spawn( main );
         completed = RS::placeWallAligned( r, mainF, refWall );
         // If it has more than 1 furniture then place them in front of the main furniture, like a coffee table in front of a sofa
-        if ( fpd.hasBase( 1 )) {
+        if ( fpd.hasBase( 1 ) ) {
             completed &= RS::placeAround( r, furns.spawn( fpd.getBase( 1 )), mainF, PPP::BottomCenter, fpd.getSlack() );
         }
         completed &= RS::placeDecorations( r, mainF, furns, fpd );
@@ -545,6 +545,10 @@ namespace RoomService {
                                                     WallSegmentIdentifier{ WSLOH::Longest() },
                                                     FurnitureSlacks{ inFrontOfSlack }
         } );
+        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::SetAlignedMiddle ),
+                                                    FurnitureRefs{{ FTH::SideBoard()},{ FTH::TVWithStand() }},
+                                                    WallSegmentIdentifier{ WSLOH::LongestOpposite() }
+        } );
         RS::runRuleScript( r, furns, ruleScript );
 //        FittedFurniture sofa{ std::string("sofa"), { 2.50f, 1.0f, 0.5f } };
 //        placeWallAligned( r, sofa, WallSegmentLenghtOrder::Longest );
@@ -589,7 +593,7 @@ FittedFurniture &FurnitureMapStorage::spawn( FT _ft ) {
 }
 
 void initializeDefaultFurnituresFlags( FT _ft, FittedFurniture &_ff ) {
-    if ( _ft == FTH::Carpet()) {
+    if ( _ft == FTH::Carpet() || _ft == FTH::TVWithStand()) {
         orBitWiseFlag( _ff.flags, FF_CanOverlap );
     }
     if ( _ft == FTH::Picture()) {
