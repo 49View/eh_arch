@@ -104,7 +104,7 @@ namespace HouseRender {
                     auto lKey = ResourceGroup::Light + lf.toString();
                     sg.add<Light>( lKey,
                                    Light{ LightType_Point, w->spotlightGeom, XZY::C( lf ) + V3f::UP_AXIS_NEG * 0.8f,
-                                          0.5f, 0.5f, V3f::Y_AXIS * 5.0f } );
+                                          0.005f, 0.005f, V3f::Y_AXIS * .5f } );
                 }
             }
             ret.ceiling = sg.GB<GT::Extrude>( PolyOutLine{ XZY::C( f->mPerimeterSegments ), V3f::UP_AXIS, 0.1f },

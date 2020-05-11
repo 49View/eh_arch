@@ -31,6 +31,7 @@ public:
         FT_Picture,
         FT_CoffeeTable,
         FT_DiningTable,
+        FT_Plant,
         FT_Invalid,
         Last
     };
@@ -49,6 +50,7 @@ public:
     static Type Picture()      { return Type::FT_Picture; }
     static Type CoffeeTable()  { return Type::FT_CoffeeTable; }
     static Type DiningTable()  { return Type::FT_DiningTable; }
+    static Type Plant()        { return Type::FT_Plant; }
 
     static Type random() {
         return Type( unitRandI(Type::Last) );

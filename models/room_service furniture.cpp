@@ -549,6 +549,12 @@ namespace RoomService {
                                                     FurnitureRefs{{ FTH::SideBoard()},{ FTH::TVWithStand() }},
                                                     WallSegmentIdentifier{ WSLOH::LongestOpposite() }
         } );
+        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::CornerWithDec ),
+                                                    FurnitureRefs{{ FTH::Plant()},{ FTH::Picture() }},
+                                                    WallSegmentIdentifier{ WSLOH::Longest() }
+        } );
+        ruleScript.addRule(
+                FurniturePlacementRule{ FurnitureRuleIndex( RS::MiddleOfRoom ), FurnitureRefs{{ FTH::Carpet() }}} );
         RS::runRuleScript( r, furns, ruleScript );
 //        FittedFurniture sofa{ std::string("sofa"), { 2.50f, 1.0f, 0.5f } };
 //        placeWallAligned( r, sofa, WallSegmentLenghtOrder::Longest );
