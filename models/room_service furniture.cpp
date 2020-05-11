@@ -471,10 +471,19 @@ namespace RoomService {
         _ff.bbox3d = AABB{ _ff.position3d - ( _ff.size * 0.5f ), _ff.position3d + ( _ff.size * 0.5f ) };
         _ff.bbox3d = _ff.bbox3d.rotate( _ff.rotation );
 
+        std::vector<Rect2f> doorBBox{};
+        for ( const auto& door : f->doors ) {
+            doorBBox.emplace_back(door->bbox);
+        }
+
         ClipperLib::Clipper c;
         ClipperLib::Paths solution;
         c.AddPath( V2fToPath( _ff.bbox3d.topDown().points()), ClipperLib::ptClip, true );
         c.AddPath( V2fToPath( r->mPerimeterSegments ), ClipperLib::ptSubject, true );
+        for ( const auto& dbbox : doorBBox ) {
+            c.AddPath( V2fToPath( dbbox.squaredBothSides().points()), ClipperLib::ptClip, true );
+        }
+
         c.Execute( ClipperLib::ctDifference, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero );
 
         if ( solution.size() == 2 ) {
