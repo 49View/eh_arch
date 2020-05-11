@@ -78,42 +78,23 @@ namespace WallRender {
 
     GeomSPContainer make3dGeometry( SceneGraph &sg, const WallBSData *mWall,
                                     const V3fVectorOfVector &ceilingContours ) {
-
         GeomSPContainer ret;
-
         size_t csize = mWall->epoints.size();
-//        bool isPartOfDoorOrWindow = false;
         size_t wrapExtraVert = mWall->wrapLastPoint != 0 ? 0 : 1;
 
         std::vector<QuadVector3fNormal> wallQuads;
         for ( auto t = 0u; t < csize - wrapExtraVert; t++ ) {
             if ( WallService::checkUShapeIndexStartIsDoorOrWindow( mWall, t )) {
-//                isPartOfDoorOrWindow = true;
                 continue;
             }
-
             for ( const auto &quad : WallService::vertsForWallAt( mWall, t, ceilingContours )) {
                 wallQuads.emplace_back( QuadVector3fNormal{ quad, XZY::C( mWall->enormals[t], 0.0f ) } );
             }
         }
 
         auto mainWall = sg.GB<GT::Mesh>( wallQuads, GT::M( mWall->material ), C4f::XTORGBA( mWall->color ),
-                                         GeomMappingData{ V2f{ 2.0f }}, GT::Tag( ArchType::WallT ));
+                                         GeomMappingData{ V2f{ 1.0f }}, GT::Tag( ArchType::WallT ));
         ret.emplace_back( mainWall );
-
-        // caps
-        if ( csize > 2 ) {
-//        sg.GB<GT::Poly>( mWall->epoints, GT::M("plaster_ultra_fine_spray"), C4f{C4f::PEACH.xyz(), 1.0f},
-//                         V3f::UP_AXIS * ( mWall->z + mWall->height) );
-//        sg.GB<GT::Poly>( mWall->epoints, GT::M("plaster_ultra_fine_spray"), C4f{C4f::PEACH.xyz(), 1.0f},
-//                         ReverseFlag::True,
-//                         V3f::UP_AXIS * mWall->z );
-//        if ( isPartOfDoorOrWindow ) {
-//            sg.GB<GT::Poly>( mWall->epoints, GT::M( "plaster_ultra_fine_spray" ), C4f{ C4f::PEACH.xyz(), 1.0f },
-//                             ReverseFlag::True,
-//                             V3f::UP_AXIS * ( mWall->z ));
-//        }
-        }
 
         return ret;
     }

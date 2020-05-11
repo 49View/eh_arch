@@ -68,42 +68,6 @@ void WallService::update( WallBSData *w, const std::vector<Vector2f>& epts ) {
     update( w );
 }
 
-
-std::shared_ptr<WallBSData> WallService::createWall( const std::vector<Vector2f>& epts,
-                                                     float _height,
-                                                     WallLastPointWrapT wlpw,
-                                                     float _z,
-                                                     uint32_t wf,
-                                                     const HouseHints::WallHints& uShapesHints ) {
-
-    auto w = std::make_shared<WallBSData>();
-    w->asType = ASType::Wall;
-    w->type = ArchType::WallT;
-    w->wrapLastPoint = wlpw;
-    w->epoints = epts;
-
-    removeCollinear( w->epoints, accuracy1Sqmm );
-    makeTriangles2d( w.get());
-
-    // Normals
-    int csize = static_cast<int>( w->epoints.size());
-    for ( auto t = 0; t < csize; t++ ) {
-        w->enormals.push_back(
-                normalize( rotate90( w->epoints[t] - w->epoints[getCircularArrayIndex( t + 1, csize )] )));
-        ASSERT( isValid( w->enormals[t].x()));
-        w->slinesGHType.push_back( static_cast<uint64_t>( GHType::WallPlaster ));
-    }
-
-    w->z = _z;
-    w->wallFlags = wf;
-    calcBBox( w.get());
-    w->width = w->bbox.width();
-    w->height = _height;
-    updateUShapes( w.get());
-
-    return w;
-}
-
 bool isInsideCeilingContour( const std::vector<std::vector<Vector3f>>& cd, const Vector2f& v1, float& topZ1,
                              int& hitLevel1 ) {
 
