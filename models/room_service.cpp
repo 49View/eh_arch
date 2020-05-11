@@ -306,9 +306,6 @@ namespace RoomService {
 
     void updateFromArchSegments( RoomBSData *r,
                                  const std::vector<std::vector<ArchSegment>>& ws ) {
-        //	r->SkirtingProfile( loadSkirtingProfile() );
-        //	r->CovingProfile( loadCovingProfile() );
-
         WallSegments( r, ws );
 
         calcLongestWall( r );
@@ -358,8 +355,8 @@ namespace RoomService {
     }
 
     bool roomNeedsCoving( const RoomBSData *r ) {
-        return ( r->asType != ASType::Bathroom && r->asType != ASType::ToiletRoom && r->asType != ASType::ShowerRoom &&
-                 r->asType != ASType::Ensuite );
+        return !(RS::hasType( r, ASType::Bathroom) || RS::hasType( r, ASType::ToiletRoom ) || RS::hasType( r, ASType::ShowerRoom ) ||
+                RS::hasType( r, ASType::Ensuite ));
     }
 
     float area( const RoomBSData *r ) {
@@ -467,6 +464,13 @@ namespace RoomService {
             ret += " / " + roomTypeToName(r->roomTypes[i]);
         }
         return ret;
+    }
+
+    bool hasType( const RoomBSData *r, ASTypeT roomType ) {
+        for ( const auto rt : r->roomTypes ) {
+            if ( rt == roomType ) return true;
+        }
+        return false;
     }
 
     bool isGeneric( const RoomBSData *r ) {

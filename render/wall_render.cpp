@@ -97,7 +97,7 @@ namespace WallRender {
             }
         }
 
-        auto mainWall = sg.GB<GT::Mesh>( wallQuads, GT::M( "plaster_spanish" ), C4f::XTORGBA( "#84cef9" ),
+        auto mainWall = sg.GB<GT::Mesh>( wallQuads, GT::M( mWall->material ), C4f::XTORGBA( mWall->color ),
                                          GeomMappingData{ V2f{ 2.0f }}, GT::Tag( ArchType::WallT ));
         ret.emplace_back( mainWall );
 

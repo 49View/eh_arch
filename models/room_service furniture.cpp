@@ -528,6 +528,7 @@ namespace RoomService {
     }
 
     void furnishBedroom( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
+        r->floorMaterial = "carpet,grey";
         FurnitureRuleScript ruleScript;
         V3f cornerSlack{ 0.05f, 0.0f, 0.0f };
         ruleScript.clear();
@@ -595,6 +596,42 @@ namespace RoomService {
         RS::runRuleScript( f, r, furns, ruleScript );
     }
 
+    void furnishBathroom( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
+        r->floorMaterial = "pavonazzo,tiles";
+
+//        for ( const auto& ws : r->mWallSegmentsSorted ) {
+//            if ( ws.tag == 3 )
+//            f->walls[ws.iWall]->material = "tiles";
+//            for ( auto& wall : f->walls ) {
+//                if ( wall->hash == ws.wallHash ) {
+//                    wall->material = "tiles";
+//                    break;
+//                }
+//            }
+//        }
+
+//        FurnitureRuleScript ruleScript;
+//        V3f tableSlack{ 0.5f, 0.5f, 0.0f };
+//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
+//                                                    FurnitureRefs{{ FTH::DiningTable() }},
+//                                                    WallSegmentIdentifier{ WSLOH::ExactIndex() },
+//                                                    FurnitureSlacks{ tableSlack }
+//        } );
+//        RS::runRuleScript( f, r, furns, ruleScript );
+    }
+
+    void furnishKitchen( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
+        r->floorMaterial = "yule,tiles";
+//        FurnitureRuleScript ruleScript;
+//        V3f tableSlack{ 0.5f, 0.5f, 0.0f };
+//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
+//                                                    FurnitureRefs{{ FTH::DiningTable() }},
+//                                                    WallSegmentIdentifier{ WSLOH::ExactIndex() },
+//                                                    FurnitureSlacks{ tableSlack }
+//        } );
+//        RS::runRuleScript( f, r, furns, ruleScript );
+    }
+
     void furnish( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
 
         std::vector<ASTypeT> prioritySorted[2];
@@ -614,13 +651,15 @@ namespace RoomService {
                 switch ( rtype ) {
                     case ASType::GenericRoom:
                         break;
+                    case ASType::Bathroom:
+                        furnishBathroom( f, r, furns );
+                        break;
                     case ASType::Kitchen:
-                        r->floorMaterial = "yule,tiles";
+                        furnishKitchen( f, r, furns );
                         break;
                     case ASType::BedroomDouble:
                     case ASType::BedroomMaster:
                     case ASType::BedroomSingle:
-                        r->floorMaterial = "carpet,grey";
                         furnishBedroom( f, r, furns );
                         break;
                     case ASType::LivingRoom:

@@ -378,6 +378,7 @@ namespace RoomService {
     size_t numTotalSegments( const RoomBSData *r );
     std::string roomName( const RoomBSData *r );
     std::string roomNames( const RoomBSData *r );
+    bool hasType( const RoomBSData *r, ASTypeT roomType );
     Vector4f roomColor( const RoomBSData *r );
     std::string roomTypeToName( ASTypeT ast );
     bool isGeneric( const RoomBSData *r );
