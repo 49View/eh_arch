@@ -276,9 +276,8 @@ namespace HouseMakerBitmap {
 //	return rmatMasked1PixelContour;
     }
 
-    ASTypeT assignRoomTypeFromOcrString( HMBBSData& bsdata, const cv::Mat& maskedRoom,
-                                         const JMATH::Rect2f& _bboxCoving ) {
-
+    void assignRoomTypeFromOcrString( HMBBSData& bsdata, const cv::Mat& maskedRoom,
+                                         const JMATH::Rect2f& _bboxCoving, std::vector<ASTypeT>& retType ) {
         std::string text = OCR::ocrTextRecognition( maskedRoom );
 
 //        cv::dnn::Net dnnNet;
@@ -293,7 +292,6 @@ namespace HouseMakerBitmap {
                 R"(([0-9]+\.*[0-9]*?)\s*(?:meters|meter|m)?\s*x\s*([0-9]+\.*[0-9]*)?\s*(?:meters|meter|m)?\s*)" );
         regv.emplace_back( R"(\(([0-9]+\.*[0-9]*)?\)\s*max?[^\(]+\(([0-9]+\.*[0-9]*)?\)\s*max?)" );
         Vector2f lOcrSize = Vector2f::ZERO;
-        ASTypeT retType = ASType::GenericRoom;
 
         std::istringstream iss( text );
         std::vector<std::string> allWords(( std::istream_iterator<std::string>( iss )),
@@ -304,7 +302,7 @@ namespace HouseMakerBitmap {
             std::transform( w.begin(), w.end(), w.begin(),
                             []( unsigned char c ) { return static_cast<unsigned char>(std::tolower( c )); } );
             if ( RoomNameMapping::map.find( w ) != RoomNameMapping::map.end()) {
-                retType = RoomNameMapping::map[w];
+                retType.emplace_back(RoomNameMapping::map[w]);
             }
         }
 
@@ -351,10 +349,6 @@ namespace HouseMakerBitmap {
                 textToSearch = base_match.suffix().str();
             }
         }
-
-//    roomsOCR.push_back( { maskedRoom, text } );
-
-        return retType;
     }
 
     void roomOCRScan( const SourceImages& si, HMBBSData& bsdata, std::vector<RoomPreData>& rws ) {
@@ -367,7 +361,7 @@ namespace HouseMakerBitmap {
             cv::Mat origMasked;
             auto maskedRoom = maskedRoomMat( si, bsdata, cs, csBBox, 1, OCRThresholdMask::False, origMasked );
 
-            r.rtype = assignRoomTypeFromOcrString( bsdata, maskedRoom, csBBox );
+            assignRoomTypeFromOcrString( bsdata, maskedRoom, csBBox, r.rtypes );
 
 //            cv::imwrite(std::to_string(random()) + ".png", maskedRoom);
 

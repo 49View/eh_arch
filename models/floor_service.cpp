@@ -369,7 +369,7 @@ bool addRoomSegments( FloorBSData *f, std::vector<ArchSegment>& ws, size_t first
     if ( isValidRoom ) {
         std::vector<std::vector<ArchSegment>> allRoomSegments;
         allRoomSegments.push_back( output );
-        f->rds.emplace_back( allRoomSegments, rbbox, ASType::GenericRoom );
+        f->rds.emplace_back( allRoomSegments, rbbox, std::vector<ASTypeT>{ASType::GenericRoom} );
     }
 
     return isValidRoom;

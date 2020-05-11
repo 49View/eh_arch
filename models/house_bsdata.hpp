@@ -226,12 +226,13 @@ JSONDATA_H( StairsBSData, ArchStructural
 JSONDATA_H( RoomBSData, ArchStructural
 		  , hash, type
 		  , asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d
-		  , z, mHasCoving, mBBoxCoving, floorType, mFittedFurniture, mWallSegments, mWallSegmentsSorted, mPerimeterSegments
+		  , roomTypes, z, mHasCoving, mBBoxCoving, floorType, mFittedFurniture, mWallSegments, mWallSegmentsSorted, mPerimeterSegments
 		  , mvCovingSegments, mvSkirtingSegments, mMaxEnclsingBoundingBox, mLightFittingsLocators, mSocketLocators, mSwichesLocators
 		  , maxSizeEnclosedHP1, maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite
 		  , mLongestWallOppositePoint, mPerimeter, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth, defaultCeilingThickness
 		  , ceilingMaterial, covingProfile, skirtingProfile, spotlightGeom )
-	float z = 0.0f;
+	std::vector<ASTypeT> roomTypes{ASType::GenericRoom};
+    float z = 0.0f;
 	bool mHasCoving = true;
 	Rect2f  mBBoxCoving = Rect2f::INVALID;
 	FloorMatTypeT floorType = 0;
@@ -267,15 +268,15 @@ JSONDATA_H( RoomBSData, ArchStructural
     std::string spotlightGeom = "spotlight_basic";
 };
 
-JSONDATA( RoomPreData, wallSegmentsInternal, bboxInternal, rtype )
+JSONDATA( RoomPreData, wallSegmentsInternal, bboxInternal, rtypes )
 
     RoomPreData( const std::vector<std::vector<ArchSegment>>& wallSegmentsInternal, const Rect2f& bboxInternal,
-                 ASTypeT rtype ) : wallSegmentsInternal( wallSegmentsInternal ), bboxInternal( bboxInternal ),
-                                   rtype( rtype ) {}
+                 const std::vector<ASTypeT>& _rtypes ) : wallSegmentsInternal( wallSegmentsInternal ), bboxInternal( bboxInternal ),
+                                   rtypes( _rtypes ) {}
 
     std::vector<std::vector<ArchSegment>> wallSegmentsInternal;
     Rect2f bboxInternal;
-    ASTypeT rtype;
+    std::vector<ASTypeT> rtypes;
 };
 
 JSONDATA_H( FloorBSData, ArchStructural

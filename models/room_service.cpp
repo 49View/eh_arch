@@ -21,7 +21,7 @@ namespace RoomService {
     std::shared_ptr<RoomBSData> createRoom( const RoomPreData& _preData, const float _floorHeight, const float _z ) {
         auto w = ServiceFactory::create<RoomBSData>();
         w->type = ArchType::RoomT;
-        w->asType = _preData.rtype;
+        w->roomTypes = _preData.rtypes;
         w->height = _floorHeight;
         w->width = _preData.bboxInternal.calcWidth();
         w->depth = _preData.bboxInternal.calcHeight();

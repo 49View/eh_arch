@@ -576,23 +576,27 @@ namespace RoomService {
     }
 
     void furnish( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
-        switch ( r->asType ) {
-            case ASType::GenericRoom:
-                break;
-            case ASType::Kitchen:
-                r->floorMaterial = "yule,tiles";
-                break;
-            case ASType::BedroomDouble:
-            case ASType::BedroomMaster:
-            case ASType::BedroomSingle:
-                r->floorMaterial = "carpet,grey";
-                furnishBedroom( f, r, furns );
-                break;
-            case ASType::LivingRoom:
-            case ASType::DiningRoom:
-            case ASType::Studio:
-                furnishLiving( f, r, furns );
-                break;
+
+        for ( const auto rtype : r->roomTypes ) {
+            switch ( rtype ) {
+                case ASType::GenericRoom:
+                    break;
+                case ASType::Kitchen:
+                    r->floorMaterial = "yule,tiles";
+                    break;
+                case ASType::BedroomDouble:
+                case ASType::BedroomMaster:
+                case ASType::BedroomSingle:
+                    r->floorMaterial = "carpet,grey";
+                    furnishBedroom( f, r, furns );
+                    break;
+                case ASType::LivingRoom:
+                case ASType::Studio:
+                    furnishLiving( f, r, furns );
+                    break;
+                case ASType::DiningRoom:
+                    break;
+            }
         }
     }
 
