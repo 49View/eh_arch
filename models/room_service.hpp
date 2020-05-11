@@ -36,24 +36,24 @@ public:
         Last
     };
 
-    static Type Bed()      { return Type::FT_Bed; }
-    static Type Bedside()  { return Type::FT_Bedside; }
-    static Type Shelf()    { return Type::FT_Shelf; }
+    static Type Bed() { return Type::FT_Bed; }
+    static Type Bedside() { return Type::FT_Bedside; }
+    static Type Shelf() { return Type::FT_Shelf; }
     static Type Wardrobe() { return Type::FT_Wardrobe; }
-    static Type Drawer()   { return Type::FT_Drawer; }
-    static Type Carpet()   { return Type::FT_Carpet; }
+    static Type Drawer() { return Type::FT_Drawer; }
+    static Type Carpet() { return Type::FT_Carpet; }
     static Type Armchair() { return Type::FT_Armchair; }
-    static Type Sofa()     { return Type::FT_Sofa; }
-    static Type SideBoard()    { return Type::FT_SideBoard; }
-    static Type TVHanged()     { return Type::FT_TVHanged; }
-    static Type TVWithStand()  { return Type::FT_TVWithStand; }
-    static Type Picture()      { return Type::FT_Picture; }
-    static Type CoffeeTable()  { return Type::FT_CoffeeTable; }
-    static Type DiningTable()  { return Type::FT_DiningTable; }
-    static Type Plant()        { return Type::FT_Plant; }
+    static Type Sofa() { return Type::FT_Sofa; }
+    static Type SideBoard() { return Type::FT_SideBoard; }
+    static Type TVHanged() { return Type::FT_TVHanged; }
+    static Type TVWithStand() { return Type::FT_TVWithStand; }
+    static Type Picture() { return Type::FT_Picture; }
+    static Type CoffeeTable() { return Type::FT_CoffeeTable; }
+    static Type DiningTable() { return Type::FT_DiningTable; }
+    static Type Plant() { return Type::FT_Plant; }
 
     static Type random() {
-        return Type( unitRandI(Type::Last) );
+        return Type( unitRandI( Type::Last ));
     }
 
     static Type at( size_t index ) {
@@ -61,7 +61,7 @@ public:
         return Type( index );
     }
     static size_t count() {
-        return Type::Last-1;
+        return Type::Last - 1;
     }
 };
 
@@ -69,6 +69,7 @@ using FT = FurnitureTypeHandler::Type;
 using FTH = FurnitureTypeHandler;
 
 class FurnitureMapStorage;
+
 enum class FFD;
 
 enum WallSegmentCorner {
@@ -89,15 +90,15 @@ public:
         Last
     };
 
-    static constexpr Type Longest()           { return Type::WSLO_Longest; }
-    static constexpr Type LongestOpposite()   { return Type::WSLO_LongestOpposite; }
-    static constexpr Type SecondLongest()     { return Type::WSLO_SecondLongest; }
-    static constexpr Type Shortest()          { return Type::WSLO_Shortest; }
-    static constexpr Type SecondShortest()    { return Type::WSLO_SecondShortest; }
-    static constexpr Type ExactIndex()        { return Type::WSLO_ExactIndex; }
+    static constexpr Type Longest() { return Type::WSLO_Longest; }
+    static constexpr Type LongestOpposite() { return Type::WSLO_LongestOpposite; }
+    static constexpr Type SecondLongest() { return Type::WSLO_SecondLongest; }
+    static constexpr Type Shortest() { return Type::WSLO_Shortest; }
+    static constexpr Type SecondShortest() { return Type::WSLO_SecondShortest; }
+    static constexpr Type ExactIndex() { return Type::WSLO_ExactIndex; }
 
     static Type random() {
-        return Type( unitRandI(Type::Last-2) );
+        return Type( unitRandI( Type::Last - 2 ));
     }
 
     static Type at( size_t index ) {
@@ -105,7 +106,7 @@ public:
         return Type( index );
     }
     static size_t count() {
-        return Type::Last-2;
+        return Type::Last - 2;
     }
 };
 
@@ -116,8 +117,8 @@ struct WallSegmentIdentifier {
     explicit WallSegmentIdentifier( WSLO type ) : type( type ) {}
     WallSegmentIdentifier( WSLO type, int index ) : type( type ), index( index ) {}
 
-    WSLO                   type = WSLOH::Longest();
-    int                    index = 0;
+    WSLO type = WSLOH::Longest();
+    int index = 0;
 };
 
 class FurniturePlacementRule;
@@ -125,7 +126,8 @@ class FurniturePlacementRule;
 using FurnitureRefs = std::vector<std::vector<FT>>;
 using FurnitureSlacks = std::vector<V3f>;
 using FurnitureRuleIndex = int;
-using FurnitureRuleFunction = std::function<bool( RoomBSData *, FurnitureMapStorage&, const FurniturePlacementRule& )>;
+using FurnitureRuleFunction = std::function<bool( FloorBSData*, RoomBSData *, FurnitureMapStorage &,
+                                                  const FurniturePlacementRule & )>;
 using FurnitureRuleFunctionContainer = std::vector<FurnitureRuleFunction>;
 
 namespace RoomService {
@@ -136,13 +138,13 @@ public:
     inline static constexpr size_t DECORATION_FURNITURE_INDEX = 1;
 
     template<typename ...Args>
-    explicit FurniturePlacementRule( Args&& ...args ) {
-        furnitureRefs.resize(2);
+    explicit FurniturePlacementRule( Args &&...args ) {
+        furnitureRefs.resize( 2 );
         (setParam( std::forward<Args>( args )), ...);
     }
 
     template<typename D>
-    void setParam( D&& _data ) {
+    void setParam( D &&_data ) {
         if constexpr ( std::is_same_v<D, FurnitureRefs> ) {
             furnitureRefs = _data;
             return;
@@ -152,7 +154,7 @@ public:
             return;
         }
         if constexpr ( std::is_same_v<D, WSLO> ) {
-            wallSegmentId = WallSegmentIdentifier{_data};
+            wallSegmentId = WallSegmentIdentifier{ _data };
             return;
         }
         if constexpr ( std::is_same_v<D, FurnitureSlacks> ) {
@@ -160,7 +162,7 @@ public:
             return;
         }
         if constexpr ( std::is_same_v<D, V3f> ) {
-            slack.emplace_back(_data);
+            slack.emplace_back( _data );
             return;
         }
         if constexpr ( std::is_same_v<D, WallSegmentCorner> ) {
@@ -171,7 +173,7 @@ public:
             ruleFunctionIndex = _data;
             return;
         }
-        LOGR("Houston we have a problem");
+        LOGR( "Houston we have a problem" );
     }
 
     [[nodiscard]] bool hasSomethingToDo() const {
@@ -179,26 +181,26 @@ public:
     }
 
     [[nodiscard]] bool hasFurnituresArray() const {
-        return !(furnitureRefs.empty());
+        return !( furnitureRefs.empty());
     }
     [[nodiscard]] bool hasDecorationsArray() const {
         return furnitureRefs.size() > DECORATION_FURNITURE_INDEX;
     }
 
     [[nodiscard]] bool hasFurnitures() const {
-        return (hasFurnituresArray() && !furnitureRefs[BASE_FURNITURE_INDEX].empty());
+        return ( hasFurnituresArray() && !furnitureRefs[BASE_FURNITURE_INDEX].empty());
     }
     [[nodiscard]] bool hasDecorations() const {
-        return (hasDecorationsArray() && !furnitureRefs[DECORATION_FURNITURE_INDEX].empty());
+        return ( hasDecorationsArray() && !furnitureRefs[DECORATION_FURNITURE_INDEX].empty());
     }
 
     [[nodiscard]] size_t baseFurnitureCount() const {
-        ASSERT( hasFurnituresArray() );
+        ASSERT( hasFurnituresArray());
         return furnitureRefs[BASE_FURNITURE_INDEX].size();
     }
 
     [[nodiscard]] size_t decorationFurnitureCount() const {
-        ASSERT( hasFurnitures() );
+        ASSERT( hasFurnitures());
         return furnitureRefs[DECORATION_FURNITURE_INDEX].size();
     }
 
@@ -207,7 +209,7 @@ public:
     }
 
     [[nodiscard]] bool hasDecoration( size_t _index ) const {
-        return( hasDecorationsArray() && decorationFurnitureCount() > _index );
+        return ( hasDecorationsArray() && decorationFurnitureCount() > _index );
     }
 
     [[nodiscard]] FT getBase( size_t _index ) const {
@@ -220,39 +222,39 @@ public:
         return furnitureRefs[DECORATION_FURNITURE_INDEX][_index];
     }
 
-    [[nodiscard]] const auto& getBases() const {
-        ASSERT( hasFurnituresArray() );
+    [[nodiscard]] const auto &getBases() const {
+        ASSERT( hasFurnituresArray());
         return furnitureRefs[BASE_FURNITURE_INDEX];
     }
 
-    [[nodiscard]] const auto& getDecorations() const {
-        ASSERT( hasDecorationsArray() );
+    [[nodiscard]] const auto &getDecorations() const {
+        ASSERT( hasDecorationsArray());
         return furnitureRefs[DECORATION_FURNITURE_INDEX];
     }
 
-    void addBase( const FT& _ft ) {
-        furnitureRefs[BASE_FURNITURE_INDEX].emplace_back(_ft);
+    void addBase( const FT &_ft ) {
+        furnitureRefs[BASE_FURNITURE_INDEX].emplace_back( _ft );
     }
 
-    void addDecoration( const FT& _ft ) {
-        furnitureRefs[DECORATION_FURNITURE_INDEX].emplace_back(_ft);;
+    void addDecoration( const FT &_ft ) {
+        furnitureRefs[DECORATION_FURNITURE_INDEX].emplace_back( _ft );;
     }
 
-    [[nodiscard]] const WallSegmentIdentifier& getWallSegmentId() const {
+    [[nodiscard]] const WallSegmentIdentifier &getWallSegmentId() const {
         return wallSegmentId;
     }
 
-    void setWallSegmentId( const WallSegmentIdentifier& _wallSegmentId ) {
+    void setWallSegmentId( const WallSegmentIdentifier &_wallSegmentId ) {
         FurniturePlacementRule::wallSegmentId = _wallSegmentId;
     }
 
-    [[nodiscard]] const V3f& getSlack( size_t _index = 0 ) const {
-        if (slack.size() <= _index ) return V3f::ZERO;
+    [[nodiscard]] const V3f &getSlack( size_t _index = 0 ) const {
+        if ( slack.size() <= _index ) return V3f::ZERO;
         return slack[_index];
     }
 
-    void setSlack( const V3f& _slack, size_t _index = 0 ) {
-        ASSERT(slack.size() > _index );
+    void setSlack( const V3f &_slack, size_t _index = 0 ) {
+        ASSERT( slack.size() > _index );
         slack[_index] = _slack;
     }
 
@@ -275,71 +277,80 @@ public:
     static FurniturePlacementRule randomGeneration();
 
 private:
-    FurnitureRuleIndex                    ruleFunctionIndex = 0;
-    FurnitureRefs                         furnitureRefs{};
-    WallSegmentIdentifier                 wallSegmentId{WSLOH::Longest()};
-    FurnitureSlacks                       slack{};
-    WallSegmentCorner                     preferredCorner = WSC_P1;
+    FurnitureRuleIndex ruleFunctionIndex = 0;
+    FurnitureRefs furnitureRefs{};
+    WallSegmentIdentifier wallSegmentId{ WSLOH::Longest() };
+    FurnitureSlacks slack{};
+    WallSegmentCorner preferredCorner = WSC_P1;
 };
 
 class FurnitureRuleScript {
 public:
     template<typename ...Args>
-    void addRule( Args&& ...args ) {
-        rules.emplace_back( std::forward<Args>(args)... );
+    void addRule( Args &&...args ) {
+        rules.emplace_back( std::forward<Args>( args )... );
     }
-    bool execute( RoomBSData* r, FurnitureMapStorage& furns, const FurnitureRuleFunctionContainer& funcRules ) const;
+    bool execute( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns, const FurnitureRuleFunctionContainer &funcRules ) const;
     void clear();
 private:
     std::vector<FurniturePlacementRule> rules;
 };
 
 namespace RoomService {
-    std::shared_ptr<RoomBSData> createRoom( const RoomPreData& _preData, float _floorHeight, float _z );
+    std::shared_ptr<RoomBSData> createRoom( const RoomPreData &_preData, float _floorHeight, float _z );
 
-    void updateFromArchSegments( RoomBSData* r, const std::vector<std::vector<ArchSegment>>& ws );
-    void calcOptimalLightingFittingPositions( RoomBSData* r );
-    void addSocketsAndSwitches( RoomBSData* r );
-    void calcSkirtingSegments( RoomBSData* r );
-    void setCoving( RoomBSData* r, bool _state );
-    void changeFloorType( RoomBSData* r, FloorMatTypeT _fmt );
-    std::vector<std::vector<Vector2f>> calcCovingSegments( const std::vector<std::vector<ArchSegment>>& ws );
+    void updateFromArchSegments( RoomBSData *r, const std::vector<std::vector<ArchSegment>> &ws );
+    void calcOptimalLightingFittingPositions( RoomBSData *r );
+    void addSocketsAndSwitches( RoomBSData *r );
+    void calcSkirtingSegments( RoomBSData *r );
+    void setCoving( RoomBSData *r, bool _state );
+    void changeFloorType( RoomBSData *r, FloorMatTypeT _fmt );
+    std::vector<std::vector<Vector2f>> calcCovingSegments( const std::vector<std::vector<ArchSegment>> &ws );
 
-    void calcBBox( RoomBSData* r );
-    void rescale( RoomBSData* r, float _scale );
+    void calcBBox( RoomBSData *r );
+    void rescale( RoomBSData *r, float _scale );
 
-    void addSocketIfSafe( RoomBSData* r, const std::vector<Vector2f>& cov, size_t indexSkirting,
+    void addSocketIfSafe( RoomBSData *r, const std::vector<Vector2f> &cov, size_t indexSkirting,
                           float safeSocketBoxWidth );
-    void calcLongestWall( RoomBSData* r );
-    void WallSegments( RoomBSData* r, const std::vector<std::vector<ArchSegment>>& val );
-    void makeTriangles2d( RoomBSData* r );
-    void calclMaxBoundingBox( RoomBSData* r );
+    void calcLongestWall( RoomBSData *r );
+    void WallSegments( RoomBSData *r, const std::vector<std::vector<ArchSegment>> &val );
+    void makeTriangles2d( RoomBSData *r );
+    void calclMaxBoundingBox( RoomBSData *r );
 
-    void furnish( RoomBSData* r, FurnitureMapStorage& furns );
-    const ArchSegment *getWallSegmentFor( RoomBSData* r, WSLO wslo, uint32_t _exactIndex = 0 );
+    void furnish( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns );
+    const ArchSegment *getWallSegmentFor( RoomBSData *r, WSLO wslo, uint32_t _exactIndex = 0 );
 
-    void clearFurniture( RoomBSData* r );
-    [[nodiscard]] bool addFurniture( RoomBSData* r, FittedFurniture& ff );
-    [[nodiscard]] bool placeWallAligned( RoomBSData* r, FittedFurniture& _ff,
+    void clearFurniture( RoomBSData *r );
+    [[nodiscard]] bool addFurniture( FloorBSData *f, RoomBSData *r, FittedFurniture &ff );
+    [[nodiscard]] bool placeWallAligned( FloorBSData *f, RoomBSData *r, FittedFurniture &_ff,
                                          WSLO wslo, uint32_t _exactIndex = 0 );
-    [[nodiscard]] bool placeWallCorner( RoomBSData* r, FittedFurniture& _ff,
-                          const ArchSegment *ls,
-                          const V2f& slack = V2f::ZERO,
-                          WallSegmentCorner wsc = WSC_P1,
-                          float _height = 0.0f );
-    [[nodiscard]] bool placeAround( RoomBSData* r, FittedFurniture& dest, const FittedFurniture& source, PivotPointPosition where,
-                      const V2f& slack = V2f::ZERO, float _height = 0.0f );
-    [[nodiscard]] bool placeWallAlong( RoomBSData* r, FittedFurniture& dest, const FittedFurniture& source,
-                         const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f& slack = V2f::ZERO, float _height = 0.0f );
-    [[nodiscard]] bool placeInBetween( RoomBSData* r, const std::vector<FittedFurniture>& fset, PivotPointPosition where,
-                                    const V2f& slack = V2f::ZERO, float _height = 0.0f );
+    [[nodiscard]] bool placeWallCorner( FloorBSData *f, RoomBSData *r, FittedFurniture &_ff,
+                                        const ArchSegment *ls,
+                                        const V2f &slack = V2f::ZERO,
+                                        WallSegmentCorner wsc = WSC_P1,
+                                        float _height = 0.0f );
+    [[nodiscard]] bool placeAround( FloorBSData *f, RoomBSData *r, FittedFurniture &dest, const FittedFurniture &source,
+                                    PivotPointPosition where,
+                                    const V2f &slack = V2f::ZERO, float _height = 0.0f );
+    [[nodiscard]] bool
+    placeWallAlong( FloorBSData *f, RoomBSData *r, FittedFurniture &dest, const FittedFurniture &source,
+                    const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f &slack = V2f::ZERO,
+                    float _height = 0.0f );
+    [[nodiscard]] bool
+    placeInBetween( FloorBSData *f, RoomBSData *r, const std::vector<FittedFurniture> &fset, PivotPointPosition where,
+                    const V2f &slack = V2f::ZERO, float _height = 0.0f );
 
     // Composite furnitures
-    [[nodiscard]] bool cplaceMainWith2Sides( RoomBSData* r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd );
-    [[nodiscard]] bool cplaceCornerWithDec( RoomBSData* r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd );
-    [[nodiscard]] bool cplaceSetAlignedAtCorner( RoomBSData* r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd );
-    [[nodiscard]] bool cplaceSetAlignedMiddle( RoomBSData* r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd );
-    [[nodiscard]] bool cplaceMiddleOfRoom( RoomBSData* r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd );
+    [[nodiscard]] bool cplaceMainWith2Sides( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns,
+                                             const FurniturePlacementRule &fpd );
+    [[nodiscard]] bool
+    cplaceCornerWithDec( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns, const FurniturePlacementRule &fpd );
+    [[nodiscard]] bool cplaceSetAlignedAtCorner( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns,
+                                                 const FurniturePlacementRule &fpd );
+    [[nodiscard]] bool cplaceSetAlignedMiddle( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns,
+                                               const FurniturePlacementRule &fpd );
+    [[nodiscard]] bool
+    cplaceMiddleOfRoom( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns, const FurniturePlacementRule &fpd );
 
     // Furniture script loading
     static FurnitureRuleFunctionContainer functionRules = {
@@ -356,36 +367,36 @@ namespace RoomService {
         SetAlignedMiddle,
         MiddleOfRoom,
     };
-    bool runRuleScript( RoomBSData* r, FurnitureMapStorage& furns, const FurnitureRuleScript& fs );
+    bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns, const FurnitureRuleScript &fs );
 
     // Query
-    Vector2f maxEnclsingBoundingBoxCenter( const RoomBSData* r );
-    size_t numTotalSegments( const RoomBSData* r );
-    std::string roomName( const RoomBSData* r );
-    Vector4f roomColor( const RoomBSData* r );
+    Vector2f maxEnclsingBoundingBoxCenter( const RoomBSData *r );
+    size_t numTotalSegments( const RoomBSData *r );
+    std::string roomName( const RoomBSData *r );
+    Vector4f roomColor( const RoomBSData *r );
     std::string roomTypeToName( ASTypeT ast );
     bool isGeneric( const RoomBSData *r );
-    bool checkMaxSizeEnclosure( const RoomBSData* r, Vector2f& ep1, Vector2f& ep2, const Vector2f& ncheck );
-    bool roomNeedsCoving( const RoomBSData* r );
-    bool intersectLine2d( const RoomBSData* r, Vector2f const& p0, Vector2f const& p1, Vector2f& i );
-    float area( const RoomBSData* r );
-    bool findOppositeWallFromPoint( const RoomBSData* r, const Vector2f& p1, const Vector2f& normal,
-                                    std::pair<size_t, size_t>& ret, Vector2f& iPoint );
+    bool checkMaxSizeEnclosure( const RoomBSData *r, Vector2f &ep1, Vector2f &ep2, const Vector2f &ncheck );
+    bool roomNeedsCoving( const RoomBSData *r );
+    bool intersectLine2d( const RoomBSData *r, Vector2f const &p0, Vector2f const &p1, Vector2f &i );
+    float area( const RoomBSData *r );
+    bool findOppositeWallFromPoint( const RoomBSData *r, const Vector2f &p1, const Vector2f &normal,
+                                    std::pair<size_t, size_t> &ret, Vector2f &iPoint );
     float furnitureAngleFromWall( const ArchSegment *ls );
-    float furnitureAngleFromNormal( const Vector2f& normal );
+    float furnitureAngleFromNormal( const Vector2f &normal );
     Vector2f furnitureNormalFromAngle( float angle );
-    roomTypeIndex sortedSegmentToPairIndex( const RoomBSData* r, int si );
-    ArchSegment *longestSegmentOpposite( const RoomBSData* r );
-    ArchSegment *longestSegmentCornerP1( const RoomBSData* r );
-    ArchSegment *longestSegmentCornerP2( const RoomBSData* r );
-    const ArchSegment *longestSegment( const RoomBSData* r );
-    const ArchSegment *secondShortestSegment( const RoomBSData* r );
-    const ArchSegment *thirdLongestSegment( const RoomBSData* r );
-    const ArchSegment *shortestSegment( const RoomBSData* r );
-    const ArchSegment *secondShortestSegment( const RoomBSData* r );
-    const ArchSegment *segmentAtIndex( const RoomBSData* r, uint32_t _index);
+    roomTypeIndex sortedSegmentToPairIndex( const RoomBSData *r, int si );
+    ArchSegment *longestSegmentOpposite( const RoomBSData *r );
+    ArchSegment *longestSegmentCornerP1( const RoomBSData *r );
+    ArchSegment *longestSegmentCornerP2( const RoomBSData *r );
+    const ArchSegment *longestSegment( const RoomBSData *r );
+    const ArchSegment *secondShortestSegment( const RoomBSData *r );
+    const ArchSegment *thirdLongestSegment( const RoomBSData *r );
+    const ArchSegment *shortestSegment( const RoomBSData *r );
+    const ArchSegment *secondShortestSegment( const RoomBSData *r );
+    const ArchSegment *segmentAtIndex( const RoomBSData *r, uint32_t _index );
     // bsdata getters
-    float skirtingDepth( const RoomBSData* r );
+    float skirtingDepth( const RoomBSData *r );
 
 }
 

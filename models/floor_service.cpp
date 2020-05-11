@@ -470,7 +470,7 @@ void FloorService::guessFittings( FloorBSData *f, FurnitureMapStorage& furns ) {
         RoomService::calcOptimalLightingFittingPositions( r.get());
 //		RoomService::calcSkirtingSegments( r.get() );
         RoomService::addSocketsAndSwitches( r.get());
-        RoomService::furnish( r.get(), furns );
+        RoomService::furnish( f, r.get(), furns );
     }
 }
 
