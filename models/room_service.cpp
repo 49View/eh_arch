@@ -458,11 +458,19 @@ namespace RoomService {
     }
 
     std::string roomName( const RoomBSData *r ) {
-        return roomTypeToName( r->asType );
+        return roomTypeToName( r->roomTypes[0] );
+    }
+
+    std::string roomNames( const RoomBSData *r ) {
+        std::string ret = roomTypeToName(r->roomTypes[0]);
+        for ( auto i = 1UL; i < r->roomTypes.size(); i++ ) {
+            ret += " / " + roomTypeToName(r->roomTypes[i]);
+        }
+        return ret;
     }
 
     bool isGeneric( const RoomBSData *r ) {
-        return r->asType == ASType::GenericRoom;
+        return r->asType == ASType::GenericRoom && r->roomTypes.size() == 1 && r->roomTypes[0] == ASType::GenericRoom;
     }
 
     std::string roomTypeToName( ASTypeT ast ) {

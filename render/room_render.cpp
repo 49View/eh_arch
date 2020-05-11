@@ -29,7 +29,7 @@ namespace RoomRender {
 //            rr.draw<DLine>( data->mPerimeterSegments, 0.03f, C4f::RED, false );
 //        }
         if ( !RoomService::isGeneric(data) ) {
-            rr.draw<DText2d>( FDS{ RoomService::roomName(data), sg.FM().get(S::DEFAULT_FONT).get(), data->bbox.centreLeft(), .4f }, C4f::BLACK, _pm );
+            rr.draw<DText2d>( FDS{ RoomService::roomNames(data), sg.FM().get(S::DEFAULT_FONT).get(), data->bbox.centreLeft(), .4f }, C4f::BLACK, _pm );
         }
 
         for ( const auto& ff : data->mFittedFurniture ) {

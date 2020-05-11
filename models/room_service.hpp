@@ -323,7 +323,7 @@ namespace RoomService {
     void clearFurniture( RoomBSData *r );
     [[nodiscard]] bool addFurniture( FloorBSData *f, RoomBSData *r, FittedFurniture &ff );
     [[nodiscard]] bool placeWallAligned( FloorBSData *f, RoomBSData *r, FittedFurniture &_ff,
-                                         WSLO wslo, uint32_t _exactIndex = 0 );
+                                         WSLO wslo, float extraSlack = 0.0f, uint32_t _exactIndex = 0 );
     [[nodiscard]] bool placeWallCorner( FloorBSData *f, RoomBSData *r, FittedFurniture &_ff,
                                         const ArchSegment *ls,
                                         const V2f &slack = V2f::ZERO,
@@ -349,6 +349,8 @@ namespace RoomService {
                                                  const FurniturePlacementRule &fpd );
     [[nodiscard]] bool cplaceSetAlignedMiddle( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns,
                                                const FurniturePlacementRule &fpd );
+    [[nodiscard]] bool cplaceSetBestFit( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns,
+                                               const FurniturePlacementRule &fpd );
     [[nodiscard]] bool
     cplaceMiddleOfRoom( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns, const FurniturePlacementRule &fpd );
 
@@ -358,6 +360,7 @@ namespace RoomService {
             cplaceCornerWithDec,
             cplaceSetAlignedAtCorner,
             cplaceSetAlignedMiddle,
+            cplaceSetBestFit,
             cplaceMiddleOfRoom,
     };
     enum FurnitureRuleIndexNames {
@@ -365,6 +368,7 @@ namespace RoomService {
         CornerWithDec,
         SetAlignedAtCorner,
         SetAlignedMiddle,
+        FRBestFit,
         MiddleOfRoom,
     };
     bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns, const FurnitureRuleScript &fs );
@@ -373,6 +377,7 @@ namespace RoomService {
     Vector2f maxEnclsingBoundingBoxCenter( const RoomBSData *r );
     size_t numTotalSegments( const RoomBSData *r );
     std::string roomName( const RoomBSData *r );
+    std::string roomNames( const RoomBSData *r );
     Vector4f roomColor( const RoomBSData *r );
     std::string roomTypeToName( ASTypeT ast );
     bool isGeneric( const RoomBSData *r );

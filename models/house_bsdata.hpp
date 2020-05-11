@@ -231,7 +231,7 @@ JSONDATA_H( RoomBSData, ArchStructural
 		  , maxSizeEnclosedHP1, maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite
 		  , mLongestWallOppositePoint, mPerimeter, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth, defaultCeilingThickness
 		  , ceilingMaterial, covingProfile, skirtingProfile, spotlightGeom )
-	std::vector<ASTypeT> roomTypes{ASType::GenericRoom};
+	std::vector<ASTypeT> roomTypes{};
     float z = 0.0f;
 	bool mHasCoving = true;
 	Rect2f  mBBoxCoving = Rect2f::INVALID;

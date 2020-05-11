@@ -349,6 +349,10 @@ namespace HouseMakerBitmap {
                 textToSearch = base_match.suffix().str();
             }
         }
+
+        // If it has found at least a room remove the default generic room
+        if ( retType.size() > 1 ) retType.erase(retType.begin());
+
     }
 
     void roomOCRScan( const SourceImages& si, HMBBSData& bsdata, std::vector<RoomPreData>& rws ) {

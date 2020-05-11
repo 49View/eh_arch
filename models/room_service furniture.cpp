@@ -326,13 +326,13 @@ namespace RoomService {
     }
 
     bool placeWallAligned( FloorBSData* f, RoomBSData *r, FittedFurniture &_ff,
-                           const WSLO wslo, uint32_t _exactIndex ) {
+                           const WSLO wslo, float extraSlack, uint32_t _exactIndex ) {
 
         auto ls = getWallSegmentFor( r, wslo, _exactIndex );
         if ( !ls ) return false;
         if ( checkBitWiseFlag( ls->tag, WF_IsDoorPart ) || checkBitWiseFlag( ls->tag, WF_IsWindowPart )) return false;
 
-        Vector2f offset = ls->normal * (( _ff.size.depth() * 0.5f ) + skirtingDepth( r ));
+        Vector2f offset = ls->normal * (( _ff.size.depth() * 0.5f ) + skirtingDepth( r ) + extraSlack);
         _ff.xyLocation = ls->middle + offset;
         _ff.rotation = Quaternion{ RoomService::furnitureAngleFromWall( ls ), V3f::UP_AXIS };
         _ff.widthNormal = ls->crossNormal;
@@ -392,7 +392,24 @@ namespace RoomService {
         WSLO refWall = fpd.getWallSegmentId().type;
         bool completed = true;
         auto mainF = furns.spawn( main );
-        completed = RS::placeWallAligned( f, r, mainF, refWall );
+        completed = RS::placeWallAligned( f, r, mainF, refWall);
+        // If it has more than 1 furniture then place them in front of the main furniture, like a coffee table in front of a sofa
+        if ( fpd.hasBase( 1 ) ) {
+            completed &= RS::placeAround( f, r, furns.spawn( fpd.getBase( 1 )), mainF, PPP::BottomCenter, fpd.getSlack() );
+        }
+        completed &= RS::placeDecorations( f, r, mainF, furns, fpd );
+        return completed;
+    }
+
+    bool cplaceSetBestFit( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns, const FurniturePlacementRule &fpd ) {
+        FT main = fpd.getBase( 0 );
+        WSLO refWall = fpd.getWallSegmentId().type;
+        bool completed = true;
+        auto mainF = furns.spawn( main );
+        for ( auto rwIndex = 0UL; rwIndex < r->mWallSegmentsSorted.size(); rwIndex++ ) {
+            completed = RS::placeWallAligned( f, r, mainF, refWall, fpd.getSlack(0).x(), rwIndex );
+            if ( completed ) break;
+        }
         // If it has more than 1 furniture then place them in front of the main furniture, like a coffee table in front of a sofa
         if ( fpd.hasBase( 1 ) ) {
             completed &= RS::placeAround( f, r, furns.spawn( fpd.getBase( 1 )), mainF, PPP::BottomCenter, fpd.getSlack() );
@@ -565,37 +582,57 @@ namespace RoomService {
         ruleScript.addRule(
                 FurniturePlacementRule{ FurnitureRuleIndex( RS::MiddleOfRoom ), FurnitureRefs{{ FTH::Carpet() }}} );
         RS::runRuleScript( f, r, furns, ruleScript );
-//        FittedFurniture sofa{ std::string("sofa"), { 2.50f, 1.0f, 0.5f } };
-//        placeWallAligned( r, sofa, WallSegmentLenghtOrder::Longest );
-//
-//        FittedFurniture tvStand{ std::string("sideboard"), { 1.50f, 0.55f, 0.5f } };
-//        placeWallAligned( r, tvStand, WallSegmentLenghtOrder::SecondLongest );
-//
-//        r->mFittedFurniture.push_back( sofa );
-//        r->mFittedFurniture.push_back( tvStand );
+    }
+
+    void furnishDining( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
+        FurnitureRuleScript ruleScript;
+        V3f tableSlack{ 0.5f, 0.5f, 0.0f };
+        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
+                                                    FurnitureRefs{{ FTH::DiningTable() }},
+                                                    WallSegmentIdentifier{ WSLOH::ExactIndex() },
+                                                    FurnitureSlacks{ tableSlack }
+        } );
+        RS::runRuleScript( f, r, furns, ruleScript );
     }
 
     void furnish( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
 
+        std::vector<ASTypeT> prioritySorted[2];
         for ( const auto rtype : r->roomTypes ) {
             switch ( rtype ) {
-                case ASType::GenericRoom:
-                    break;
-                case ASType::Kitchen:
-                    r->floorMaterial = "yule,tiles";
-                    break;
-                case ASType::BedroomDouble:
-                case ASType::BedroomMaster:
-                case ASType::BedroomSingle:
-                    r->floorMaterial = "carpet,grey";
-                    furnishBedroom( f, r, furns );
-                    break;
-                case ASType::LivingRoom:
-                case ASType::Studio:
-                    furnishLiving( f, r, furns );
-                    break;
                 case ASType::DiningRoom:
+                    prioritySorted[1].emplace_back(rtype);
                     break;
+                default:
+                    prioritySorted[0].emplace_back(rtype);
+                    break;
+            }
+        }
+
+        for ( const auto&  prioritySort : prioritySorted ) {
+            for ( const auto rtype : prioritySort ) {
+                switch ( rtype ) {
+                    case ASType::GenericRoom:
+                        break;
+                    case ASType::Kitchen:
+                        r->floorMaterial = "yule,tiles";
+                        break;
+                    case ASType::BedroomDouble:
+                    case ASType::BedroomMaster:
+                    case ASType::BedroomSingle:
+                        r->floorMaterial = "carpet,grey";
+                        furnishBedroom( f, r, furns );
+                        break;
+                    case ASType::LivingRoom:
+                    case ASType::Studio:
+                        furnishLiving( f, r, furns );
+                        break;
+                    case ASType::DiningRoom:
+                        furnishDining( f, r, furns );
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
