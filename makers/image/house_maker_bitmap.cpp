@@ -67,7 +67,7 @@ namespace HouseMakerBitmap {
         OCR::ocrInitEngine();
     }
 
-    void generateSourceFileBC( const RawImage& _ri, SourceImages& si, HMBBSData& bsdata ) {
+    void generateSourceFileBC( const RawImage &_ri, SourceImages &si, HMBBSData &bsdata ) {
         cv::Mat inputSourcePngImage;
 
         inputSourcePngImage = decodeRawImageIntoMat( _ri );
@@ -100,9 +100,9 @@ namespace HouseMakerBitmap {
         threshold( lSourceFileImageGray, si.sourceFileImageBin, 254.0, 255.0, cv::THRESH_BINARY );
     }
 
-    float calcMaxScore( const std::vector<WallEvalData>& wed, int64_t& wt ) {
+    float calcMaxScore( const std::vector<WallEvalData> &wed, int64_t &wt ) {
         float maxScore = 0.0f;
-        for ( auto& e : wed ) {
+        for ( auto &e : wed ) {
             if ( e.score > maxScore ) {
                 maxScore = e.score;
                 wt = e.thickness;
@@ -111,19 +111,20 @@ namespace HouseMakerBitmap {
         return maxScore;
     }
 
-    void guessNumberOfFloors( HouseBSData *house, const SourceImages& si ) {
-        std::vector<JMATH::Rect2f> floorRects = getFloorplanRects( si.sourceFileImageOriginalGray, HMBBSData::defaultPixelCM());
-        for ( auto& floorRect : floorRects ) {
+    void guessNumberOfFloors( HouseBSData *house, const SourceImages &si ) {
+        std::vector<JMATH::Rect2f> floorRects = getFloorplanRects( si.sourceFileImageOriginalGray,
+                                                                   HMBBSData::defaultPixelCM());
+        for ( auto &floorRect : floorRects ) {
             HouseService::addFloorFromData( house, floorRect );
         }
     }
 
-    void gatherWallsData( std::vector<std::vector<Vector2f>>& wall_lines, WallEvalData& wed ) {
+    void gatherWallsData( std::vector<std::vector<Vector2f>> &wall_lines, WallEvalData &wed ) {
         wed.numWalls += wall_lines.size();
         int64_t ni = 0;
         float totalWallsLength = 0.0f;
         float numSLines = 0;
-        for ( auto& w : wall_lines ) {
+        for ( auto &w : wall_lines ) {
             int csize = static_cast<int>( w.size());
             ni += csize;
             for ( auto t = 0; t < csize; t++ ) {
@@ -136,7 +137,7 @@ namespace HouseMakerBitmap {
     }
 
     bool
-    checkWindowAndDoorsPatternInArea( HouseBSData *house, const SourceImages& si,
+    checkWindowAndDoorsPatternInArea( HouseBSData *house, const SourceImages &si,
                                       FloorBSData *f, UShape *w1,
                                       UShape *w2, bool forceInsert = true ) {
 
@@ -185,8 +186,8 @@ namespace HouseMakerBitmap {
 //        matchedType = ((aggDoor > agg) || (agg < 4.0)) ? ArchType::WindowT : ArchType::DoorT;
 
         if ( matchedType != ArchType::GenericT ) {
-            if ( matchedType == ArchType::DoorT ) LOGR( "Found Door\n");
-            if ( matchedType == ArchType::WindowT ) LOGR( "Found Window\n");
+            if ( matchedType == ArchType::DoorT ) LOGR( "Found Door\n" );
+            if ( matchedType == ArchType::WindowT ) LOGR( "Found Window\n" );
 
             w1->type = matchedType;
             w2->type = matchedType;
@@ -205,17 +206,17 @@ namespace HouseMakerBitmap {
         return false;
     }
 
-    void analyseWallForDoorsOrWindows( HouseBSData *house, const SourceImages& si, FloorBSData *f ) {
+    void analyseWallForDoorsOrWindows( HouseBSData *house, const SourceImages &si, FloorBSData *f ) {
         auto sp = FloorService::alignSuitableUShapesFromWalls( f );
-        for ( const auto& us : sp ) {
+        for ( const auto &us : sp ) {
             checkWindowAndDoorsPatternInArea( house, si, f, us.first, us.second );
         }
     }
 
-    cv::Mat maskedRoomMat( const SourceImages& si, HMBBSData& bsdata,
-                           const std::vector<std::vector<Vector2f>>& ws,
+    cv::Mat maskedRoomMat( const SourceImages &si, HMBBSData &bsdata,
+                           const std::vector<std::vector<Vector2f>> &ws,
                            const JMATH::Rect2f _bbox,
-                           int resizeFactor, OCRThresholdMask useThreshold, cv::Mat& origMask ) {
+                           int resizeFactor, OCRThresholdMask useThreshold, cv::Mat &origMask ) {
         JMATH::Rect2f dbox = _bbox;
         dbox *= bsdata.Pixel1CM();
         JMATH::Rect2f dboxInv = dbox;//Rect2f( dbox.left(), invTop, dbox.left() + dbox.width(), dbox.height() + invTop );
@@ -231,9 +232,9 @@ namespace HouseMakerBitmap {
 
         // Create Polygon from vertices
         std::vector<std::vector<cv::Point>> ROI_Poly;
-        for ( const auto& covs : ws ) {
+        for ( const auto &covs : ws ) {
             std::vector<cv::Point> np;
-            for ( const auto& cov : covs ) {
+            for ( const auto &cov : covs ) {
                 Vector2f origP = ( cov * bsdata.Pixel1CM());
                 Vector2f p = origP - dboxInv.topLeft();
                 np.emplace_back( static_cast<int>( p.x()), static_cast<int>( p.y()));
@@ -241,7 +242,7 @@ namespace HouseMakerBitmap {
             ROI_Poly.push_back( np );
         }
         // Fill polygon white
-        if ( !ROI_Poly.empty() ) {
+        if ( !ROI_Poly.empty()) {
             mask.setTo( cv::Scalar( 0 ));
             fillPoly( mask, ROI_Poly, 255 );
         } else {
@@ -276,8 +277,8 @@ namespace HouseMakerBitmap {
 //	return rmatMasked1PixelContour;
     }
 
-    void assignRoomTypeFromOcrString( HMBBSData& bsdata, const cv::Mat& maskedRoom,
-                                         const JMATH::Rect2f& _bboxCoving, std::vector<ASTypeT>& retType ) {
+    void assignRoomTypeFromOcrString( HMBBSData &bsdata, const cv::Mat &maskedRoom,
+                                      const JMATH::Rect2f &_bboxCoving, std::vector<ASTypeT> &retType ) {
         std::string text = OCR::ocrTextRecognition( maskedRoom );
 
 //        cv::dnn::Net dnnNet;
@@ -297,12 +298,12 @@ namespace HouseMakerBitmap {
         std::vector<std::string> allWords(( std::istream_iterator<std::string>( iss )),
                                           std::istream_iterator<std::string>());
 
-        for ( auto& ws : allWords ) {
+        for ( auto &ws : allWords ) {
             std::string w = ws;
             std::transform( w.begin(), w.end(), w.begin(),
                             []( unsigned char c ) { return static_cast<unsigned char>(std::tolower( c )); } );
             if ( RoomNameMapping::map.find( w ) != RoomNameMapping::map.end()) {
-                retType.emplace_back(RoomNameMapping::map[w]);
+                retType.emplace_back( RoomNameMapping::map[w] );
             }
         }
 
@@ -351,24 +352,38 @@ namespace HouseMakerBitmap {
         }
 
         // If it has found at least a room remove the default generic room
-        if ( retType.size() > 1 ) retType.erase(retType.begin());
+        if ( retType.size() > 1 ) retType.erase( retType.begin());
 
     }
 
-    void roomOCRScan( const SourceImages& si, HMBBSData& bsdata, std::vector<RoomPreData>& rws ) {
+    void assignRoomTypeFromBeingClever( RoomPreData& r ) {
+        // First check:
+        // Count number of doors and windows a room has, if it has 1 door and no windows... Probably it's a bathroom!
+        if ( r.rtypes.size() == 1 && r.rtypes[0] == ASType::GenericRoom ) {
+            size_t doorWallCounts = 0;
+            size_t windowWallCounts = 0;
+            if ( r.wallSegmentsInternal.size() == 1 ) {
+                for ( const auto &ws : r.wallSegmentsInternal[0] ) {
+                    if ( checkBitWiseFlag(ws.tag, WF_IsDoorPart) ) doorWallCounts++;
+                    if ( checkBitWiseFlag(ws.tag, WF_IsWindowPart) ) windowWallCounts++;
+                }
+            }
+            if ( doorWallCounts == 1 && windowWallCounts == 0 ) {
+                r.rtypes[0] = ASType::Bathroom;
+            }
+        }
+    }
+
+    void roomOCRScan( const SourceImages &si, HMBBSData &bsdata, std::vector<RoomPreData> &rws ) {
         // OCR for rooms
-        for ( auto& r : rws ) {
+        for ( auto &r : rws ) {
             auto cs = RoomService::calcCovingSegments( r.wallSegmentsInternal );
-
             JMATH::Rect2f csBBox = getContainingBBox( cs );
-
             cv::Mat origMasked;
             auto maskedRoom = maskedRoomMat( si, bsdata, cs, csBBox, 1, OCRThresholdMask::False, origMasked );
-
             assignRoomTypeFromOcrString( bsdata, maskedRoom, csBBox, r.rtypes );
-
+            assignRoomTypeFromBeingClever(r);
 //            cv::imwrite(std::to_string(random()) + ".png", maskedRoom);
-
             //guessHuMomentsOfRoom( origMasked, r );
         }
 
@@ -378,13 +393,13 @@ namespace HouseMakerBitmap {
         if ( pcmSize > 0 ) {
             float median = 0.0f;
             if ( pcmSize <= 2 ) {
-                for ( auto& pcm :  bsdata.pixelCMFromOCR ) {
+                for ( auto &pcm :  bsdata.pixelCMFromOCR ) {
                     median += pcm;
                 }
                 median /= static_cast<float>( pcmSize );
             } else {
                 std::sort( bsdata.pixelCMFromOCR.begin(), bsdata.pixelCMFromOCR.end(),
-                           []( const float& a, const float& b ) -> bool { return a > b; } );
+                           []( const float &a, const float &b ) -> bool { return a > b; } );
                 median = lerp( 0.5f, bsdata.pixelCMFromOCR[pcmSize / 2],
                                bsdata.pixelCMFromOCR[( pcmSize / 2 ) - 1] );
             }
@@ -403,7 +418,7 @@ namespace HouseMakerBitmap {
     }
 
     std::vector<std::vector<Vector2f>>
-    evaluateWalls( const SourceImages& si, const Rect2f& _floorBoundaries, int strategyIndex,
+    evaluateWalls( const SourceImages &si, const Rect2f &_floorBoundaries, int strategyIndex,
                    float thickness ) {
         cv::Mat gray_mw;
 
@@ -411,9 +426,9 @@ namespace HouseMakerBitmap {
         return Wall::simplifyWalls( gray_mw, strategyIndex, thickness );
     }
 
-    bool checkAllWedCalculated( const std::vector<WallEvalData>& wed ) {
+    bool checkAllWedCalculated( const std::vector<WallEvalData> &wed ) {
         auto percCalculated = 0u;
-        for ( auto& e : wed ) {
+        for ( auto &e : wed ) {
             if ( e.elaborated ) ++percCalculated;
         }
         bool allCalculated = percCalculated == wed.size();
@@ -424,7 +439,7 @@ namespace HouseMakerBitmap {
         return allCalculated;
     }
 
-    void guessHuMomentsOfRoom( const cv::Mat& src_gray, RoomPreData& r, int thresh ) {
+    void guessHuMomentsOfRoom( const cv::Mat &src_gray, RoomPreData &r, int thresh ) {
 
 //    auto hus = huMomentsOnImage( src_gray, thresh );
 //
@@ -443,7 +458,7 @@ namespace HouseMakerBitmap {
 //    }
     }
 
-    float polygonArea( const V2fVector& points ) {
+    float polygonArea( const V2fVector &points ) {
         float area = 0.0f;   // Accumulates area
         size_t j = points.size() - 1;
 
@@ -454,13 +469,13 @@ namespace HouseMakerBitmap {
         return area / 2.0f;
     }
 
-    void calculateScores( HouseBSData *house, HMBScores& bsdata ) {
+    void calculateScores( HouseBSData *house, HMBScores &bsdata ) {
 
         float maxScoreFloor = 0.0f;
         size_t totalWalls = 0;
         float totalArea = 0.0f;
-        for ( auto& f : house->mFloors ) {
-            for ( const auto& rr : f->rds ) {
+        for ( auto &f : house->mFloors ) {
+            for ( const auto &rr : f->rds ) {
                 V2fVector perimeterSegments{};
                 float perimeter = 0.0f;
                 WallService::perimeterFromSegments( rr.wallSegmentsInternal, perimeterSegments, perimeter );
@@ -473,8 +488,8 @@ namespace HouseMakerBitmap {
             maxScoreFloor += f->rds.size() * 10.0f;
             maxScoreFloor += f->windows.size();
             maxScoreFloor += f->doors.size();
-            for ( const auto& rw : f->rds ) {
-                for ( const auto& rww : rw.wallSegmentsInternal ) {
+            for ( const auto &rw : f->rds ) {
+                for ( const auto &rww : rw.wallSegmentsInternal ) {
                     totalWalls += rww.size();
                 }
             }
@@ -485,14 +500,14 @@ namespace HouseMakerBitmap {
         LOGRS( "[MAX_ROOM_SCORE] " << maxScoreFloor );
     }
 
-    void guessRooms( FloorBSData *f, bool& allRoomsAreFullyClosed ) {
+    void guessRooms( FloorBSData *f, bool &allRoomsAreFullyClosed ) {
         allRoomsAreFullyClosed &= FloorService::roomRecognition( f );
     }
 
-    bool findApproxAreaStrings( const std::string& _val ) {
+    bool findApproxAreaStrings( const std::string &_val ) {
 
         std::vector<std::string> singleWords = split( _val, ' ' );
-        for ( auto& ws : singleWords ) {
+        for ( auto &ws : singleWords ) {
             if ( ws.find( "approx" ) != std::string::npos ) return true;
             if ( ws.find( "area" ) != std::string::npos ) return true;
             if ( ws.find( "gross" ) != std::string::npos ) return true;
@@ -502,7 +517,7 @@ namespace HouseMakerBitmap {
         return false;
     }
 
-    void gatherGeneralTextInformations( HouseBSData *house, const SourceImages& si, HMBBSData& bsdata ) {
+    void gatherGeneralTextInformations( HouseBSData *house, const SourceImages &si, HMBBSData &bsdata ) {
         float newSqm = -1.0f;
 //    std::vector<std::vector<Vector2f>> ws;
 //    cv::Mat origMat;
@@ -563,11 +578,11 @@ namespace HouseMakerBitmap {
 
     }
 
-    void rescaleIfNecessary( HouseBSData *house, const SourceImages& si, HMBBSData& bsdata ) {
+    void rescaleIfNecessary( HouseBSData *house, const SourceImages &si, HMBBSData &bsdata ) {
         if ( bsdata.medianPCM != 0.0f ) {
             float newPCM = bsdata.medianPCM * 0.01f;
             bsdata.PixelCM( newPCM );
-            for ( auto& floor : house->mFloors ) {
+            for ( auto &floor : house->mFloors ) {
                 FloorService::rescale( floor.get(), bsdata.medianPCM );
             }
             bsdata.medianPCM = 0.0f;
@@ -577,7 +592,7 @@ namespace HouseMakerBitmap {
 
         // House root dimensions
         house->bbox = Rect2f::INVALID;
-        for ( const auto& floor : house->mFloors ) {
+        for ( const auto &floor : house->mFloors ) {
             house->bbox.merge( floor->bbox );
         }
         house->center = house->bbox.centre();
@@ -586,16 +601,16 @@ namespace HouseMakerBitmap {
     std::mutex g_pages_mutex;
 
     void
-    floorPlanEvaluateWallThickness( HouseBSData *house, const SourceImages& si, WallsEvaluation& weval,
+    floorPlanEvaluateWallThickness( HouseBSData *house, const SourceImages &si, WallsEvaluation &weval,
                                     int strategyIndex,
                                     int thickness,
                                     const float floorPlanScale ) {
-        WallEvalData& wed = weval.mWallEvalDataExt[thickness];
+        WallEvalData &wed = weval.mWallEvalDataExt[thickness];
         wed.thickness = thickness;
 
         std::vector<JMATH::Rect2f> stairsCC;
 
-        for ( auto& f : house->mFloors ) {
+        for ( auto &f : house->mFloors ) {
             auto ws = evaluateWalls( si, f->bbox * floorPlanScale, strategyIndex, static_cast<float>( thickness ));
             std::lock_guard<std::mutex> guard( g_pages_mutex );
             weval.mWallEvaluationMapping[std::make_tuple( f->number, strategyIndex, thickness )] = ws;
@@ -607,7 +622,7 @@ namespace HouseMakerBitmap {
         wed.elaborated = true;
     }
 
-    void guessWallsByIncrementalSearch( HouseBSData *house, const SourceImages& si, const HMBScores& bsdata ) {
+    void guessWallsByIncrementalSearch( HouseBSData *house, const SourceImages &si, const HMBScores &bsdata ) {
         WallsEvaluation weval;
         WallEvalData wed;
         int minPixelWidth = bsdata.minWallPixelWidth;
@@ -629,7 +644,7 @@ namespace HouseMakerBitmap {
                     } );
         }
         std::for_each( weval.mWallsThreadsExt.begin(), weval.mWallsThreadsExt.end(),
-                       []( std::thread& t ) { t.join(); } );
+                       []( std::thread &t ) { t.join(); } );
         weval.mMaxExternalScore = calcMaxScore( weval.mWallEvalDataExt, weval.mExtEvalWallThickness );
 
         if ( weval.mMaxExternalScore > maxScore ) {
@@ -639,12 +654,12 @@ namespace HouseMakerBitmap {
         LOGRS( "[MAXSCORE] " << weval.mMaxExternalScore );
 
         if ( weval.mExtEvalWallThickness > 0 ) {
-            for ( auto& f : house->mFloors ) {
+            for ( auto &f : house->mFloors ) {
                 auto wallPoints = weval.mWallEvaluationMapping[{ static_cast<int>( f->number ),
                                                                  bestStrategy,
                                                                  static_cast<int>( weval.mExtEvalWallThickness ) }];
-                for ( auto& ws : wallPoints ) {
-                    for ( auto& w : ws ) {
+                for ( auto &ws : wallPoints ) {
+                    for ( auto &w : ws ) {
                         w *= HMBBSData::defaultPixelCM();
                     }
                 }
@@ -653,19 +668,19 @@ namespace HouseMakerBitmap {
         }
     }
 
-    void guessDoorsAndWindowsWithMachineLearning( FloorBSData *f, HouseBSData *house, const SourceImages& si ) {
+    void guessDoorsAndWindowsWithMachineLearning( FloorBSData *f, HouseBSData *house, const SourceImages &si ) {
         analyseWallForDoorsOrWindows( house, si, f );
         FloorService::removeUnPairedUShapes( f );
 
         if ( f->doors.size() > 2 ) {
             std::vector<std::shared_ptr<DoorBSData>> doorsWidth{};
-            for ( auto& door : f->doors ) {
+            for ( auto &door : f->doors ) {
                 doorsWidth.emplace_back( door );
             }
-            std::sort( doorsWidth.begin(), doorsWidth.end(), []( const auto& l, const auto& r ) -> bool {
+            std::sort( doorsWidth.begin(), doorsWidth.end(), []( const auto &l, const auto &r ) -> bool {
                 return l->width < r->width;
             } );
-            for ( const auto& door : doorsWidth ) {
+            for ( const auto &door : doorsWidth ) {
                 if ( door->width / doorsWidth[doorsWidth.size() / 2 - 1]->width > 2.0f ) {
                     FloorService::swapWindowOrDoor( f, house, door->hash );
                 }
@@ -673,22 +688,23 @@ namespace HouseMakerBitmap {
         }
     }
 
-    void rollbackStage1TyringToCloseRooms( std::array<std::shared_ptr<HouseBSData>, NumStrategies>& houses, const SourceImages& si ) {
+    void rollbackStage1TyringToCloseRooms( std::array<std::shared_ptr<HouseBSData>, NumStrategies> &houses,
+                                           const SourceImages &si ) {
         for ( auto t = 0u; t < NumStrategies; t++ ) {
             auto house = houses[t].get();
-            bool allRoomsAreFullyClosed=true;
-            for ( auto& f : house->mFloors ) {
+            bool allRoomsAreFullyClosed = true;
+            for ( auto &f : house->mFloors ) {
                 // Querying potentially missing ushapes that closes rooms
-                for ( auto& seg : f->orphanedUShapes ) {
+                for ( auto &seg : f->orphanedUShapes ) {
                     V2f i{ V2f::ZERO };
                     V2f p1 = seg.middle + seg.crossNormals[0] * 0.01f;
                     V2f p2 = seg.middle + seg.crossNormals[0] * 10000.0f;
                     auto archHit = FloorService::intersectLine2dMin( f.get(), p1, p2, i,
                                                                      WallFlags::WF_IsWindowPart |
                                                                      WallFlags::WF_IsDoorPart );
-                    if ( archHit.hit && !FloorService::isInsideRoomRDS( lerp(0.5f, p1, i), f->rds )) {
+                    if ( archHit.hit && !FloorService::isInsideRoomRDS( lerp( 0.5f, p1, i ), f->rds )) {
                         V2fVector ushapeBump{};
-                        ushapeBump.resize(4);
+                        ushapeBump.resize( 4 );
                         float dist = distance( seg.middle, i );
                         ushapeBump[2] = seg.points[1] + seg.crossNormals[0] * dist - seg.crossNormals[0] * 0.01f;
                         ushapeBump[1] = seg.points[2] + seg.crossNormals[0] * dist - seg.crossNormals[0] * 0.01f;
@@ -709,25 +725,25 @@ namespace HouseMakerBitmap {
         }
     }
 
-    void strategiesLoop( HouseBSData *house, const SourceImages& si, HMBScores& bsscores ) {
+    void strategiesLoop( HouseBSData *house, const SourceImages &si, HMBScores &bsscores ) {
         guessNumberOfFloors( house, si );
         guessWallsByIncrementalSearch( house, si, bsscores );
         bsscores.allRoomsAreFullyClosed = true;
-        for ( auto& f : house->mFloors ) {
+        for ( auto &f : house->mFloors ) {
             guessDoorsAndWindowsWithMachineLearning( f.get(), house, si );
             guessRooms( f.get(), bsscores.allRoomsAreFullyClosed );
         }
         calculateScores( house, bsscores );
     }
 
-    void guessFittings( HouseBSData *house, FurnitureMapStorage& furns ) {
-        for ( auto& f : house->mFloors ) {
-            FloorService::guessFittings(f.get(), furns);
+    void guessFittings( HouseBSData *house, FurnitureMapStorage &furns ) {
+        for ( auto &f : house->mFloors ) {
+            FloorService::guessFittings( f.get(), furns );
         }
     }
 
-    std::shared_ptr<HouseBSData> bestScoringHouse( std::array<std::shared_ptr<HouseBSData>, NumStrategies>& houses,
-                                                   std::array<HMBScores, NumStrategies>& bsscores ) {
+    std::shared_ptr<HouseBSData> bestScoringHouse( std::array<std::shared_ptr<HouseBSData>, NumStrategies> &houses,
+                                                   std::array<HMBScores, NumStrategies> &bsscores ) {
         std::shared_ptr<HouseBSData> house = nullptr;
         float maxScore = -1.0f;
         for ( auto si = 0u; si < NumStrategies; si++ ) {
@@ -740,15 +756,15 @@ namespace HouseMakerBitmap {
         return house;
     }
 
-    bool needsRollbacks( const std::array<HMBScores, NumStrategies>& bsscores ) {
+    bool needsRollbacks( const std::array<HMBScores, NumStrategies> &bsscores ) {
         bool isAtLeastARoomOk = false;
-        for ( const auto& elem : bsscores ) {
+        for ( const auto &elem : bsscores ) {
             isAtLeastARoomOk |= elem.allRoomsAreFullyClosed;
         }
         return !isAtLeastARoomOk;
     }
 
-    std::shared_ptr<HouseBSData> runWallStrategies( const SourceImages& sourceImages ) {
+    std::shared_ptr<HouseBSData> runWallStrategies( const SourceImages &sourceImages ) {
         PROFILE_BLOCK( "Wall strategies" );
 
         std::array<std::shared_ptr<HouseBSData>, NumStrategies> houses{};
@@ -766,7 +782,8 @@ namespace HouseMakerBitmap {
         return bestScoringHouse( houses, bsscores );
     }
 
-    std::shared_ptr<HouseBSData> make( const RawImage& _data, HMBBSData& bsdata, const std::string& _name, FurnitureMapStorage& furns ) {
+    std::shared_ptr<HouseBSData>
+    make( const RawImage &_data, HMBBSData &bsdata, const std::string &_name, FurnitureMapStorage &furns ) {
         PROFILE_BLOCK( "House service elaborate" );
         init();
 
@@ -775,14 +792,14 @@ namespace HouseMakerBitmap {
 
         auto house = runWallStrategies( sourceImages );
 
-        for ( auto& f : house->mFloors ) {
+        for ( auto &f : house->mFloors ) {
             roomOCRScan( sourceImages, bsdata, f->rds );
             FloorService::addRoomsFromData( f.get());
         }
 
         gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
         rescaleIfNecessary( house.get(), sourceImages, bsdata );
-        guessFittings( house.get(), furns);
+        guessFittings( house.get(), furns );
 
         house->name = getFileNameOnly( _name );
 
