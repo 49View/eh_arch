@@ -468,7 +468,6 @@ bool FloorService::roomRecognition( FloorBSData *f ) {
 void FloorService::guessFittings( FloorBSData *f, FurnitureMapStorage& furns ) {
     for ( auto& r : f->rooms ) {
         RoomService::calcOptimalLightingFittingPositions( r.get());
-//		RoomService::calcSkirtingSegments( r.get() );
         RoomService::addSocketsAndSwitches( r.get());
         RoomService::furnish( f, r.get(), furns );
     }

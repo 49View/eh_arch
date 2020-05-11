@@ -67,8 +67,9 @@ namespace RoomService {
         if ( distance( cov[indexSkirting], cov[indexSkirting + 1] ) > safeSocketBoxWidth ) {
             Vector2f snormal = normalize( cov[indexSkirting] - cov[indexSkirting + 1] );
             Vector2f sanePos = cov[indexSkirting] + ( -snormal * safeSocketBoxWidth * 0.5f );
+            Vector2f saneSocketPos = cov[indexSkirting] + ( -snormal * safeSocketBoxWidth );
             float fa = furnitureAngleFromNormal( rotate90( snormal ));
-            r->mSocketLocators.emplace_back( sanePos, fa );
+            r->mSocketLocators.emplace_back( saneSocketPos, fa );
             if ( indexSkirting == 0 ) {
                 r->mSwichesLocators.emplace_back( sanePos, fa );
             }

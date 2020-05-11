@@ -33,6 +33,8 @@ namespace HOD { // HighOrderDependency
                 ret.addDep( ResourceGroup::Profile, room->covingProfile );
                 ret.addDep( ResourceGroup::Profile, room->skirtingProfile );
                 ret.addDep( ResourceGroup::Geom, room->spotlightGeom );
+                ret.addDep( ResourceGroup::Geom, "powersocket" );
+                ret.addDep( ResourceGroup::Geom, "lightswitch" );
 
                 for ( const auto& furn : room->mFittedFurniture ) {
                     ret.addDep( ResourceGroup::Geom, furn.name );

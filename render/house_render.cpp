@@ -106,6 +106,12 @@ namespace HouseRender {
                                    Light{ LightType_Point, w->spotlightGeom, XZY::C( lf ) + V3f::UP_AXIS_NEG * 0.8f,
                                           0.005f, 0.005f, V3f::Y_AXIS * .5f } );
                 }
+                for ( const auto& lf : w->mSwichesLocators ) {
+                    sg.GB<GT::Asset>( "lightswitch", V3f{lf.x(), 1.2f, lf.y()}, GT::Rotate( Quaternion{ lf.z(), V3f::UP_AXIS} ));
+                }
+                for ( const auto& lf : w->mSocketLocators ) {
+                    sg.GB<GT::Asset>( "powersocket", V3f{lf.x(), .252f, lf.y()}, GT::Rotate( Quaternion{ lf.z(), V3f::UP_AXIS} ));
+                }
             }
             ret.ceiling = sg.GB<GT::Extrude>( PolyOutLine{ XZY::C( f->mPerimeterSegments ), V3f::UP_AXIS, 0.1f },
                                               V3f{ V3f::UP_AXIS * mData->defaultCeilingHeigh },
