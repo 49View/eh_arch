@@ -705,11 +705,9 @@ void FurnitureMapStorage::addIndex( FT _ft, FittedFurniture &_ff ) {
     index.emplace( _ft, _ff );
 }
 
-
-void FurnitureMapStorage::addIndex( FT _ft, const std::string &_name, const std::string &_symbolRef ) {
-    auto fpair = sg.getGeomNameSize( _name );
-    auto ff = FittedFurniture{ fpair, _symbolRef };
-    this->addIndex( _ft, ff );
+void FurnitureMapStorage::addIndex( const FurnitureSet& f ) {
+    auto ff = FittedFurniture{ {f.name, f.bboxSize }, f.symbol };
+    this->addIndex( FT(f.ftype), ff );
 }
 
 FurniturePlacementRule FurniturePlacementRule::randomGeneration() {
@@ -722,4 +720,48 @@ FurniturePlacementRule FurniturePlacementRule::randomGeneration() {
     ret.setPreferredCorner( WallSegmentCorner( unitRandI( 2 )));
 
     return ret;
+}
+void RoomServiceFurniture::addDefaultFurnitureSet( const std::string &_name ) {
+    std::string brimnes_bed = "Brimnes";
+    std::string lauter_selije = "lauter_selije";
+    std::string hemnes_shelf = "hemnes_shelf";
+    std::string hemnes_drawer = "hemnes_drawer";
+    std::string soderhamn = "soderhamn";
+    std::string carpet_flottebo = "carpet";
+    std::string Strandmon = "strandmon";
+    std::string pictures_set_3 = "pictures2";
+    std::string coffeeTable = "noguchi";
+    std::string diningTable = "ktc,table,round";
+    std::string sideBoard = "sideboard";
+    std::string tv = "sony,tv";
+    std::string plant1 = "plant,spider";
+
+    std::string queenBedIcon = "fia,queen,icon";
+    std::string bedSideIcon = "fia,bedside";
+    std::string sofaIcon = "fia,sofa,3seaters";
+    std::string wardrobeIcon = "fia,wardrobe";
+    std::string shelfIcon = "fia,shelf";
+    std::string armchairIcon = "fia,armchair";
+    std::string coffeeTableIcon = "fia,coffee,table";
+
+    FurnitureSetContainer furnitureSet{};
+    furnitureSet.name = _name;
+    furnitureSet.set.emplace_back( FTH::Bed(), brimnes_bed, V3f::ZERO, queenBedIcon );
+    furnitureSet.set.emplace_back( FTH::Bedside(), lauter_selije, V3f::ZERO, bedSideIcon );
+    furnitureSet.set.emplace_back( FTH::Shelf(), hemnes_shelf, V3f::ZERO, shelfIcon );
+    furnitureSet.set.emplace_back( FTH::Wardrobe(), hemnes_drawer, V3f::ZERO, wardrobeIcon );
+    furnitureSet.set.emplace_back( FTH::Drawer(), hemnes_drawer, V3f::ZERO, wardrobeIcon );
+    furnitureSet.set.emplace_back( FTH::Sofa(), soderhamn, V3f::ZERO, sofaIcon );
+    furnitureSet.set.emplace_back( FTH::Picture(), pictures_set_3, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::Carpet(), carpet_flottebo, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::Armchair(), Strandmon, V3f::ZERO, armchairIcon );
+    furnitureSet.set.emplace_back( FTH::CoffeeTable(), coffeeTable, V3f::ZERO, coffeeTableIcon );
+    furnitureSet.set.emplace_back( FTH::DiningTable(), diningTable, V3f::ZERO, coffeeTableIcon );
+    furnitureSet.set.emplace_back( FTH::SideBoard(), sideBoard, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::TVWithStand(), tv, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::Plant(), plant1, V3f::ZERO, S::SQUARE );
+
+    Http::post( Url{ "/furnitureset" }, furnitureSet.serialize(), []( HttpResponeParams &res ) {
+        LOGRS( res.bufferString );
+    } );
 }

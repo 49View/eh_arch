@@ -13,6 +13,8 @@
 
 #include "house_bsdata.hpp"
 
+class FurnitureMapStorage;
+
 class HouseService {
 public:
 	// Create
@@ -42,6 +44,7 @@ public:
 	static std::shared_ptr<RoomBSData> getRoomOnFloor( std::shared_ptr<HouseBSData> _house, int floorIndex, int roomIndex );
 	static bool whichRoomAmI( std::shared_ptr<HouseBSData> _house, const Vector2f& _pos, std::shared_ptr<RoomBSData>& outRoom );
 	static Vector2f centrePointOfBiggestRoom( std::shared_ptr<HouseBSData> _house );
+    static void guessFittings( HouseBSData *house, FurnitureMapStorage &furns );
 
 private:
 	// Update

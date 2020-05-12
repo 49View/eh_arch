@@ -238,3 +238,8 @@ void HouseService::clearFurniture( std::shared_ptr<HouseBSData> _house ) {
         FloorService::clearFurniture( f.get() );
     }
 }
+void HouseService::guessFittings( HouseBSData *house, FurnitureMapStorage &furns ) {
+    for ( auto &f : house->mFloors ) {
+        FloorService::guessFittings( f.get(), furns );
+    }
+}
