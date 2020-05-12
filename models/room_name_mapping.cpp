@@ -8,4 +8,23 @@
 
 #include "room_name_mapping.hpp"
 
-std::map<std::string, ASTypeT> RoomNameMapping::map;
+std::map<std::string, ASTypeT> RoomNameMapping::map {
+        {"bedroom",  ASType::BedroomDouble},
+        {"bedmom",  ASType::BedroomDouble},
+        {"conservatory",  ASType::Conservatory},
+        {"dining",  ASType::DiningRoom},
+        {"recreation",  ASType::LivingRoom},
+        {"reception",  ASType::LivingRoom},
+        {"recepnon",  ASType::LivingRoom},
+        {"living",  ASType::LivingRoom},
+        {"lounge",  ASType::LivingRoom},
+        {"kitchen",  ASType::Kitchen},
+        {"khchen",  ASType::Kitchen},
+        {"bathroom",  ASType::Bathroom},
+        {"ensuite",  ASType::Ensuite},
+        {"en-suite",  ASType::Ensuite},
+        {"en-suile",  ASType::Ensuite},
+        {"garage",  ASType::Garage},
+        {"garden room",  ASType::Conservatory},
+        {"studio",  ASType::Studio}
+};

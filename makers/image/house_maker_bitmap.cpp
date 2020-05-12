@@ -44,29 +44,6 @@ constexpr size_t NumStrategies = 3;
 
 namespace HouseMakerBitmap {
 
-    void init() {
-        RoomNameMapping::map["bedroom"] = ASType::BedroomDouble;
-        RoomNameMapping::map["bedmom"] = ASType::BedroomDouble;
-        RoomNameMapping::map["conservatory"] = ASType::Conservatory;
-        RoomNameMapping::map["dining"] = ASType::DiningRoom;
-        RoomNameMapping::map["recreation"] = ASType::LivingRoom;
-        RoomNameMapping::map["reception"] = ASType::LivingRoom;
-        RoomNameMapping::map["recepnon"] = ASType::LivingRoom;
-        RoomNameMapping::map["living"] = ASType::LivingRoom;
-        RoomNameMapping::map["lounge"] = ASType::LivingRoom;
-        RoomNameMapping::map["kitchen"] = ASType::Kitchen;
-        RoomNameMapping::map["khchen"] = ASType::Kitchen;
-        RoomNameMapping::map["bathroom"] = ASType::Bathroom;
-        RoomNameMapping::map["ensuite"] = ASType::Ensuite;
-        RoomNameMapping::map["en-suite"] = ASType::Ensuite;
-        RoomNameMapping::map["en-suile"] = ASType::Ensuite;
-        RoomNameMapping::map["garage"] = ASType::Garage;
-        RoomNameMapping::map["garden room"] = ASType::Conservatory;
-        RoomNameMapping::map["studio"] = ASType::Studio;
-
-        OCR::ocrInitEngine();
-    }
-
     void generateSourceFileBC( const RawImage &_ri, SourceImages &si, HMBBSData &bsdata ) {
         cv::Mat inputSourcePngImage;
 
@@ -375,6 +352,8 @@ namespace HouseMakerBitmap {
     }
 
     void roomOCRScan( const SourceImages &si, HMBBSData &bsdata, std::vector<RoomPreData> &rws ) {
+        // Init OCR, dont worry, the OCR init will done only once per run...
+        OCR::ocrInitEngine();
         // OCR for rooms
         for ( auto &r : rws ) {
             auto cs = RoomService::calcCovingSegments( r.wallSegmentsInternal );
@@ -518,7 +497,7 @@ namespace HouseMakerBitmap {
     }
 
     void gatherGeneralTextInformations( HouseBSData *house, const SourceImages &si, HMBBSData &bsdata ) {
-        float newSqm = -1.0f;
+//        float newSqm = -1.0f;
 //    std::vector<std::vector<Vector2f>> ws;
 //    cv::Mat origMat;
 //    auto maskedRoom = maskedRoomMat( si, ws, JMATH::Rect2f( 0, 0, sourceFileImage.cols * bsdata.PixelCM(),
@@ -570,12 +549,11 @@ namespace HouseMakerBitmap {
 //            allLines.push_back( origLine );
 //        }
 //    }
-
-        if ( newSqm > 0.0f && bsdata.medianPCM == 0.0f ) {
-            float houseArea = HouseService::area( house );
-            bsdata.medianPCM = sqrt( newSqm / houseArea );
-        }
-
+//
+//        if ( newSqm > 0.0f && bsdata.medianPCM == 0.0f ) {
+//            float houseArea = HouseService::area( house );
+//            bsdata.medianPCM = sqrt( newSqm / houseArea );
+//        }
     }
 
     void rescaleIfNecessary( HouseBSData *house, const SourceImages &si, HMBBSData &bsdata ) {
@@ -785,7 +763,6 @@ namespace HouseMakerBitmap {
     std::shared_ptr<HouseBSData>
     make( const RawImage &_data, HMBBSData &bsdata, const std::string &_name, FurnitureMapStorage &furns ) {
         PROFILE_BLOCK( "House service elaborate" );
-        init();
 
         SourceImages sourceImages;
         generateSourceFileBC( _data, sourceImages, bsdata );
@@ -797,9 +774,9 @@ namespace HouseMakerBitmap {
             FloorService::addRoomsFromData( f.get());
         }
 
-        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
+//        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
         rescaleIfNecessary( house.get(), sourceImages, bsdata );
-        guessFittings( house.get(), furns );
+//        guessFittings( house.get(), furns );
 
         house->name = getFileNameOnly( _name );
 
