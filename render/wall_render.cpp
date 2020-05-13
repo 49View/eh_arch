@@ -92,10 +92,34 @@ namespace WallRender {
             }
         }
 
-        auto mainWall = sg.GB<GT::Mesh>( wallQuads, GT::M( mWall->material ), C4f::XTORGBA( mWall->color ),
-                                         GeomMappingData{ V2f{ 1.0f }}, GT::Tag( ArchType::WallT ));
+        auto mainWall = sg.GB<GT::Mesh>( wallQuads, GeomMappingData{ V2f{ 1.0f }}, GT::Tag( ArchType::WallT ));
         ret.emplace_back( mainWall );
 
+        return ret;
+    }
+
+    std::vector<QuadVector3fNormal> createArchSegmentQuads( const std::vector<ArchSegment> &wss ) {
+        std::vector<QuadVector3fNormal> wallQuads;
+        for ( const auto &ws : wss ) {
+            for ( const auto zh : ws.zHeights ) {
+                V3f v1 = XZY::C( ws.p1, zh.x());
+                V3f v2 = XZY::C( ws.p2, zh.x());
+                V3f v3 = v1 + V3f::UP_AXIS * zh.y();
+                V3f v4 = v2 + V3f::UP_AXIS * zh.y();
+                auto quad = QuadVector3f{{ v1, v2, v4, v3 }};
+                wallQuads.emplace_back( QuadVector3fNormal{ quad, XZY::C( ws.normal, 0.0f ) } );
+            }
+        }
+        return wallQuads;
+    }
+
+    GeomSPContainer renderWalls( SceneGraph &sg, const std::vector<ArchSegment> &wss, const std::string &wallMaterial,
+                                 const C4f &wallColor ) {
+        GeomSPContainer ret;
+        std::vector<QuadVector3fNormal> wallQuads = createArchSegmentQuads( wss );
+        auto mainWall = sg.GB<GT::Mesh>( wallQuads, GT::M( wallMaterial ), wallColor,
+                                         GeomMappingData{ V2f{ 1.0f }}, GT::Tag( ArchType::WallT ));
+        ret.emplace_back( mainWall );
         return ret;
     }
 

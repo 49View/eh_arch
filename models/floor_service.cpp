@@ -248,7 +248,7 @@ std::vector<std::pair<UShape *, UShape *>> FloorService::alignSuitableUShapesFro
     return shapePairs;
 }
 
-bool isIndexInUShape( size_t t, WallBSData *w ) {
+bool FloorService::isIndexInUShape( size_t t, WallBSData *w ) {
     int csize = static_cast<int>( w->epoints.size());
     auto p1 = w->epoints[t];
     auto p2 = w->epoints[cai( t + 1, csize )];
@@ -298,9 +298,9 @@ FloorService::externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& w
             }
             auto plasterType = bFound ? GHType::WallPlasterInternal : GHType::WallPlasterExternal;
             orBitWiseFlag( w->slinesGHType[t], plasterType );
-            auto as = ArchSegmentService::createArchSegment( f->number, vn, t, w->hash, w->epoints[t], w->epoints[t1],
+            auto as = ArchSegmentService::createArchSegment( f->walls, f->number, vn, t, w->hash, w->epoints[t], w->epoints[t1],
                                                              middlePoint, w->enormals[t], w->wallFlags,
-                                                             w->sequencePart );
+                                                             w->sequencePart, w->z, w->height );
             if ( bFound ) ws.push_back( as ); else wse.push_back( as );
             vn++;
         }
@@ -423,6 +423,7 @@ float FloorService::updatePerimeter( FloorBSData *f, const std::vector<ArchSegme
         lPerimeter += ArchSegmentService::length( q );
     }
     removeCollinear( f->mPerimeterSegments, 0.001f );
+    f->perimeterArchSegments = singleRoomSegmentsExternal;
 
     return lPerimeter;
 }

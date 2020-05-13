@@ -9,8 +9,6 @@
 
 class SceneGraph;
 
-class HouseRenderContainer;
-
 class Renderer;
 
 struct HouseBSData;

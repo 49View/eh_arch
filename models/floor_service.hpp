@@ -131,6 +131,7 @@ public:
     intersectLine2dMin( const FloorBSData *f, Vector2f const& p0, Vector2f const& p1, Vector2f& i,
                         uint32_t filterFlags = 0xffffffff );
     static bool isInsideRoomRDS( const V2f& i, const std::vector<RoomPreData>& rds );
+    static bool isIndexInUShape( size_t t, WallBSData *w );
     static bool whichRoomAmI( const FloorBSData *f, const Vector2f& _pos, std::shared_ptr<RoomBSData>& outRoom );
     static int64_t findWallIndex( const FloorBSData *f, int64_t hash );
     static bool findWallAt( const FloorBSData *f, const Vector2f& matPos, std::vector<ArchStructural *>& ret );

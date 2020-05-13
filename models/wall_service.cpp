@@ -453,30 +453,30 @@ Vector3f WallService::middlePointAt( const WallBSData *w, size_t index ) {
 
 void WallService::addToArchSegment( const WallBSData *w, const int32_t floorNumber, const int32_t wallNumber,
                                     std::vector<ArchSegment>& ws ) {
-    int csize = static_cast<int>( w->epoints.size());
-
-    for ( auto t = 0; t < csize - ( w->wrapLastPoint == WallLastPointWrap::No ); t++ ) {
-        int t1 = getCircularArrayIndex( t + 1, csize );
-        if ( !checkIndexAreInMiddleAnyUSHape( w, t, t1 )) {
-            ws.push_back( ArchSegmentService::createArchSegment( floorNumber, wallNumber, t, w->hash, w->epoints[t],
-                                                                 w->epoints[t1], middlePointAt( w, t ).xy(),
-                                                                 w->enormals[t], w->wallFlags, w->sequencePart ));
-        }
-    }
+//    int csize = static_cast<int>( w->epoints.size());
+//
+//    for ( auto t = 0; t < csize - ( w->wrapLastPoint == WallLastPointWrap::No ); t++ ) {
+//        int t1 = getCircularArrayIndex( t + 1, csize );
+//        if ( !checkIndexAreInMiddleAnyUSHape( w, t, t1 )) {
+//            ws.push_back( ArchSegmentService::createArchSegment( floorNumber, wallNumber, t, w->hash, w->epoints[t],
+//                                                                 w->epoints[t1], middlePointAt( w, t ).xy(),
+//                                                                 w->enormals[t], w->wallFlags, w->sequencePart, w->z, w->height ));
+//        }
+//    }
 }
 
 void WallService::addToArchSegmentInternal( const WallBSData *w, const int32_t floorNumber, const int32_t wallNumber,
                                             std::vector<ArchSegment>& ws ) {
-    int csize = static_cast<int>( w->epoints.size());
-
-    for ( auto t = 0; t < csize - ( w->wrapLastPoint == WallLastPointWrap::No ); t++ ) {
-        int t1 = getCircularArrayIndex( t + 1, csize );
-        if ( !checkBitWiseFlag( w->slinesGHType[t], GHType::WallPlasterExternal )) {
-            ws.push_back( ArchSegmentService::createArchSegment( floorNumber, wallNumber, t, w->hash, w->epoints[t],
-                                                                 w->epoints[t1], middlePointAt( w, t ).xy(),
-                                                                 w->enormals[t], w->wallFlags, w->sequencePart ));
-        }
-    }
+//    int csize = static_cast<int>( w->epoints.size());
+//
+//    for ( auto t = 0; t < csize - ( w->wrapLastPoint == WallLastPointWrap::No ); t++ ) {
+//        int t1 = getCircularArrayIndex( t + 1, csize );
+//        if ( !checkBitWiseFlag( w->slinesGHType[t], GHType::WallPlasterExternal )) {
+//            ws.push_back( ArchSegmentService::createArchSegment( floorNumber, wallNumber, t, w->hash, w->epoints[t],
+//                                                                 w->epoints[t1], middlePointAt( w, t ).xy(),
+//                                                                 w->enormals[t], w->wallFlags, w->sequencePart, w->z, w->height ));
+//        }
+//    }
 }
 
 void WallService::getArchSegments( const WallBSData *w, const int32_t floorNumber, const int32_t wallNumber,

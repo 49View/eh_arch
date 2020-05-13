@@ -9,6 +9,7 @@
 #include "room_render.hpp"
 #include "window_render.hpp"
 #include "door_render.hpp"
+#include "floor_render.hpp"
 #include <poly/vdata_assembler.h>
 #include <poly/scene_graph.h>
 #include <graphics/ghtypes.hpp>
@@ -17,10 +18,6 @@
 namespace HouseRender {
 
     void make2dGeometry( Renderer& rr, SceneGraph& sg, const HouseBSData *mData, const RDSPreMult& _pm, Use2dDebugRendering bDrawDebug ) {
-
-//        for ( const auto& seg : FloorServiceIntermediateData::RCUnconnectedSegments() ) {
-//            rr.draw<DLine>( seg.first, seg.second, 0.015f, true, Color4f::RANDA1() );
-//        }
 
         bool drawDebug = bDrawDebug == Use2dDebugRendering::True;
 
@@ -65,75 +62,13 @@ namespace HouseRender {
 //            }
 //            ++q;
 //        }
-
-//        for ( const auto& seg : FloorServiceIntermediateData::WSG() ) {
-//            rr.draw<DLine>( seg.p1, seg.p2, 0.035f );
-//        }
-//        for ( const auto& seg : FloorServiceIntermediateData::WSGE() ) {
-//            rr.draw<DLine>( seg.p1, seg.p2, 0.04f, C4f::CYAN );
-//        }
-
     }
 
     HouseRenderContainer make3dGeometry( SceneGraph& sg, const HouseBSData *mData ) {
-
         HouseRenderContainer ret{};
-
         sg.addSkybox( mData->defaultSkybox );
         for ( const auto& f : mData->mFloors ) {
-            auto lFloorPath = FloorService::calcPlainPath( f.get());
-
-            for ( const auto& w : f->walls ) {
-                auto ws = WallRender::make3dGeometry( sg, w.get(), f->ceilingContours );
-                ret.wallsGB.insert( ret.wallsGB.end(), ws.begin(), ws.end());
-            }
-            for ( const auto& w : f->rooms ) {
-                auto wc = RoomRender::createCovingSegments( sg, w.get());
-                auto ws = RoomRender::createSkirtingSegments( sg, w.get());
-                ret.covingGB.insert( ret.covingGB.end(), wc.begin(), wc.end());
-                ret.skirtingGB.insert( ret.skirtingGB.end(), ws.begin(), ws.end());
-
-                auto outline = PolyOutLine{ XZY::C( w->mPerimeterSegments ), V3f::UP_AXIS, 0.1f };
-                ret.floor = sg.GB<GT::Extrude>( outline,
-                                                V3f{ V3f::UP_AXIS * -0.1f },
-                                                GT::M( w->floorMaterial ),
-                                                GT::Tag( ArchType::FloorT ));
-
-                for ( const auto& lf : w->mLightFittingsLocators ) {
-                    auto spotlightGeom = sg.GB<GT::Asset>( w->spotlightGeom, XZY::C( lf ));
-                    auto lKey = ResourceGroup::Light + lf.toString();
-                    sg.add<Light>( lKey,
-                                   Light{ LightType_Point, w->spotlightGeom, XZY::C( lf ) + V3f::UP_AXIS_NEG * 0.8f,
-                                          0.005f, 0.005f, V3f::Y_AXIS * .5f } );
-                }
-                for ( const auto& lf : w->mSwichesLocators ) {
-                    sg.GB<GT::Asset>( "lightswitch", V3f{lf.x(), 1.2f, lf.y()}, GT::Rotate( Quaternion{ lf.z(), V3f::UP_AXIS} ));
-                }
-                for ( const auto& lf : w->mSocketLocators ) {
-                    sg.GB<GT::Asset>( "powersocket", V3f{lf.x(), .252f, lf.y()}, GT::Rotate( Quaternion{ lf.z(), V3f::UP_AXIS} ));
-                }
-            }
-            ret.ceiling = sg.GB<GT::Extrude>( PolyOutLine{ XZY::C( f->mPerimeterSegments ), V3f::UP_AXIS, 0.1f },
-                                              V3f{ V3f::UP_AXIS * mData->defaultCeilingHeigh },
-                                              GT::M( f->defaultCeilingMaterial ),
-                                              GT::Tag( ArchType::CeilingT ));
-        }
-
-        for ( const auto& f : mData->mFloors ) {
-            for ( const auto& w : f->windows ) {
-                auto ws = WindowRender::make3dGeometry( sg, w.get());
-                ret.windowsGB.insert( ret.windowsGB.end(), ws.begin(), ws.end());
-            }
-            for ( const auto& w : f->doors ) {
-                auto ws = DoorRender::make3dGeometry( sg, w.get());
-                ret.doorsGB.insert( ret.doorsGB.end(), ws.begin(), ws.end());
-            }
-            for ( const auto& w : f->rooms ) {
-                for ( const auto& fur : w->mFittedFurniture ) {
-                    auto furn = sg.GB<GT::Asset>( fur.name, fur.position3d, GT::Rotate( fur.rotation ));
-                    ret.furnituresGB.emplace_back( furn );
-                }
-            }
+            FloorRender::make3dGeometry( sg, f.get(), ret );
         }
         return ret;
     }

@@ -24,12 +24,13 @@ namespace HOD { // HighOrderDependency
 
         ret.addDep( ResourceGroup::Image, data->defaultSkybox );
         for ( const auto& floor : data->mFloors ) {
-            for ( const auto& wall : floor->walls ) {
-                ret.addDep( ResourceGroup::Material, wall->material );
-            }
+            ret.addDep( ResourceGroup::Material, floor->externalWallsMaterial );
             for ( const auto& room : floor->rooms ) {
+                ret.addDep( ResourceGroup::Material, room->wallMaterial );
                 ret.addDep( ResourceGroup::Material, room->ceilingMaterial );
                 ret.addDep( ResourceGroup::Material, room->floorMaterial );
+                ret.addDep( ResourceGroup::Material, room->covingMaterial );
+                ret.addDep( ResourceGroup::Material, room->skirtingMaterial );
                 ret.addDep( ResourceGroup::Profile, room->covingProfile );
                 ret.addDep( ResourceGroup::Profile, room->skirtingProfile );
                 ret.addDep( ResourceGroup::Geom, room->spotlightGeom );
