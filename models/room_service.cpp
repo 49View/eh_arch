@@ -335,7 +335,7 @@ namespace RoomService {
 //	Profile skirtingProfile{ "skirting_kensington" };
 //	return skirtingProfile.width();
         // TODO: Re-enable profiles
-        return .02f;
+        return roomNeedsCoving(r) ? 0.02f : 0.0f;
     }
 
     void setCoving( RoomBSData *r, bool _state ) {

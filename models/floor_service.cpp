@@ -466,6 +466,27 @@ bool FloorService::roomRecognition( FloorBSData *f ) {
     return roomsHaveBeenCalculatedCorrectly;
 }
 
+void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
+    for ( auto& w : f->windows ) {
+        auto v2p = ClipperLib::V2fToPath( w->bbox.squared().points());
+        for ( const auto& r : f->rooms ) {
+            ClipperLib::Clipper c;
+            ClipperLib::Paths solution;
+            c.AddPath(v2p, ClipperLib::ptSubject, true);
+            c.AddPath(ClipperLib::V2fToPath(r->mPerimeterSegments), ClipperLib::ptClip, true);
+            c.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+            if ( !solution.empty()) {
+                w->roomTypes = r->roomTypes;
+                if ( RoomService::hasType(r.get(), ASType::Kitchen) ) {
+                    w->hasCurtains = false;
+                    w->hasBlinds = true;
+                }
+                break;
+            }
+        }
+    }
+}
+
 void FloorService::guessFittings( FloorBSData *f, FurnitureMapStorage& furns ) {
     for ( auto& r : f->rooms ) {
         RoomService::calcOptimalLightingFittingPositions( r.get());

@@ -104,6 +104,7 @@ public:
     static void addCeilingContour( FloorBSData *f, const std::vector<Vector3f>& cc );
 
     // Update
+    static void calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f );
     static std::vector<UShape *> allUShapes( FloorBSData *f );
     static void ushapesReconciliation( FloorBSData *f );
     static void

@@ -116,6 +116,8 @@ namespace WindowRender {
 
     void addBlinds( SceneGraph& sg, GeomSP mRootH, WindowBSData *mData, const Rect2f& _rect ) {
 
+        if ( !mData->hasBlinds ) return;
+
         // Blind constants
         float bw = _rect.width();
         float bh = _rect.height();
@@ -302,6 +304,8 @@ namespace WindowRender {
     }
 
     void addCurtains( SceneGraph& sg, GeomSP mRootH, WindowBSData *mData, const Rect2f& _windowRect, float baseOff ) {
+        if ( !mData->hasCurtains ) return;
+
         auto s = sg.getGeomNameSize("curtain");
         // Rescale the curtain with a % of slack so the curtain doesn't end exactly at window width
         V3f curtainScale{  (mData->width * 1.25f) / std::get<1>(s).x(), 1.0f, 1.0f};
@@ -328,7 +332,7 @@ namespace WindowRender {
 
         addPlastersAroundEdges( sg, mRootH, mData, currBaseOffset );
         addTopBottomWallPieces( sg, mRootH, mData );
-//        addBlinds( sg, mRootH, mData, windowRect );
+        addBlinds( sg, mRootH, mData, windowRect );
         addWindowMeshes( sg, mRootH, mData, windowRect, windowsSillDepth );
 
         addCurtains( sg, mRootH, mData, windowRect, currBaseOffset + windowsSillDepth );

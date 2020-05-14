@@ -480,7 +480,7 @@ namespace RoomService {
                 auto p3 = ls2->p2;
                 if ( detectWindingOrder(p1, p2, p3) == WindingOrder::CCW ) {
                     auto prevFurn = furns.spawn(fset.front());
-                    completed = RS::placeWallCorner( f, r, prevFurn, ls, fpd.getSlack().xy(), WSC_P2);
+                    completed = RS::placeWallCorner( f, r, prevFurn, ls2, fpd.getSlack().xy(), WSC_P1);
                     if ( completed ) break;
                 }
             }
@@ -499,14 +499,6 @@ namespace RoomService {
         return fs.execute( f, r, furns, RS::functionRules );
     }
 
-    ClipperLib::Path V2fToPath( const std::vector<Vector2f> &_values ) {
-        ClipperLib::Path ret;
-        for ( auto &p : _values ) {
-            ret << p;
-        }
-        return ret;
-    }
-
     bool addFurniture( FloorBSData* f, RoomBSData *r, FittedFurniture &_ff ) {
         _ff.position3d = XZY::C( _ff.xyLocation, _ff.heightOffset );
         _ff.bbox3d = AABB{ _ff.position3d - ( _ff.size * 0.5f ), _ff.position3d + ( _ff.size * 0.5f ) };
@@ -514,11 +506,11 @@ namespace RoomService {
 
         ClipperLib::Clipper c;
         ClipperLib::Paths solution;
-        c.AddPath( V2fToPath( _ff.bbox3d.topDown().points()), ClipperLib::ptSubject, true );
+        c.AddPath( ClipperLib::V2fToPath( _ff.bbox3d.topDown().points()), ClipperLib::ptSubject, true );
         for ( const auto& door : f->doors ) {
-            c.AddPath( V2fToPath( door->bbox.squaredBothSides().points()), ClipperLib::ptClip, true );
+            c.AddPath( ClipperLib::V2fToPath( door->bbox.squared().points()), ClipperLib::ptClip, true );
         }
-        c.AddPath( V2fToPath( r->mPerimeterSegments ), ClipperLib::ptClip, true );
+        c.AddPath( ClipperLib::V2fToPath( r->mPerimeterSegments ), ClipperLib::ptClip, true );
 
         c.Execute( ClipperLib::ctDifference, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero );
 
@@ -641,6 +633,7 @@ namespace RoomService {
 
     void furnishKitchen( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
         r->floorMaterial = "yule,tiles";
+        r->wallMaterial = "terrazzo,tiles";
     }
 
     void furnish( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {

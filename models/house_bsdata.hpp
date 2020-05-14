@@ -183,14 +183,17 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
            wallFlags, asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart,
-           mTriangles2d, numPanels, sillThickness, mainFrameWidth, minPanelWidth, baseOffset, insideRoomPointingNormal,
-           curtainGeom, curtainMaterial)
+           mTriangles2d, roomTypes, numPanels, sillThickness, mainFrameWidth, minPanelWidth, baseOffset,
+           insideRoomPointingNormal, hasBlinds, hasCurtains, curtainGeom, curtainMaterial)
+    std::vector<ASTypeT> roomTypes{};
     int32_t numPanels = 0;
     float sillThickness = 0.02f;
     float mainFrameWidth = 0.06f;
     float minPanelWidth = 0.06f;
     float baseOffset = 0.2f;
     V2f insideRoomPointingNormal = V2f::ZERO;
+    bool hasBlinds = false;
+    bool hasCurtains = true;
     std::string curtainGeom = "curtain";
     std::string curtainMaterial = "diamante,curtain";
 };

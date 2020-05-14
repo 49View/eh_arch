@@ -765,7 +765,8 @@ namespace HouseMakerBitmap {
 
         for ( auto &f : house->mFloors ) {
             roomOCRScan( sourceImages, bsdata, f->rds );
-            FloorService::addRoomsFromData( f.get());
+            FloorService::addRoomsFromData(f.get());
+            FloorService::calcWhichRoomDoorsAndWindowsBelong(f.get());
         }
 
 //        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
