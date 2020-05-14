@@ -14,8 +14,6 @@
 #include <core/observable.h>
 
 #include "../wall_calculus.hpp"
-
-//#include "../../managers/house_manager.h"
 #include "../../models/house_bsdata.hpp"
 #include "../../models/house_service.hpp"
 #include "../../models/floor_service.hpp"
@@ -105,5 +103,5 @@ struct WallsEvaluation {
 };
 
 namespace HouseMakerBitmap {
-    std::shared_ptr<HouseBSData> make( const RawImage& _image, HMBBSData& mHMBBSData, const std::string& _name, FurnitureMapStorage& furns );
+    std::shared_ptr<HouseBSData> make( const RawImage& _image, HMBBSData& mHMBBSData, const std::string& _name );
 };

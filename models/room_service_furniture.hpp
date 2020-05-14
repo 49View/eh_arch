@@ -26,7 +26,7 @@ JSONDATA( FurnitureSetContainer, name, set )
 
 class FurnitureMapStorage {
 public:
-    explicit FurnitureMapStorage( SceneGraph& _sg ) : sg( _sg ) {}
+    FurnitureMapStorage() = default;
 
     void addIndex( const FurnitureSet& _fs );
     void addIndex( FT _ft, FittedFurniture& _ff );
@@ -35,7 +35,6 @@ public:
 private:
     FurnitureMultiMap storage{};
     FurnitureMap index{};
-    SceneGraph& sg;
 };
 
 namespace RoomServiceFurniture {

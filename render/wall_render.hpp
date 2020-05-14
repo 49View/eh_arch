@@ -17,7 +17,7 @@ class SceneGraph;
 class Renderer;
 struct RDSPreMult;
 enum class Use2dDebugRendering;
-class ArchSegment;
+struct ArchSegment;
 
 namespace WallRender  {
     void make2dGeometry( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, Use2dDebugRendering bDrawDebug, const RDSPreMult& pm );

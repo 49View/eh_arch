@@ -223,8 +223,8 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
            mMaxEnclsingBoundingBox, mLightFittingsLocators, mSocketLocators, mSwichesLocators, maxSizeEnclosedHP1,
            maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite,
            mLongestWallOppositePoint, mPerimeter, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth,
-           defaultCeilingThickness, wallMaterial, wallColor, ceilingMaterial, covingProfile, skirtingProfile,
-           skirtingMaterial, covingMaterial, skirtingColor, covingColor, spotlightGeom)
+           defaultCeilingThickness, wallMaterial, wallColor, floorMaterial, ceilingMaterial, covingProfile,
+           skirtingProfile, skirtingMaterial, covingMaterial, skirtingColor, covingColor, spotlightGeom)
     std::vector<ASTypeT> roomTypes{};
     float z = 0.0f;
     bool mHasCoving = true;

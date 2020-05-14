@@ -474,7 +474,7 @@ namespace RoomService {
             for ( auto i = 0u; i < wss.size(); ++i ) {
                 auto ls = &wss[i];
                 if ( checkBitWiseFlag( ls->tag, WF_IsDoorPart ) || checkBitWiseFlag( ls->tag, WF_IsWindowPart )) continue;
-                auto ls2 = &wss[getCircularArrayIndex(i+1, wss.size())];
+                auto ls2 = &wss[cai(i+1, wss.size())];
                 auto p1 = ls->p1;
                 auto p2 = ls->p2;
                 auto p3 = ls2->p2;

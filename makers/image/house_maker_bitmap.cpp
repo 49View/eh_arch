@@ -755,7 +755,7 @@ namespace HouseMakerBitmap {
     }
 
     std::shared_ptr<HouseBSData>
-    make( const RawImage &_data, HMBBSData &bsdata, const std::string &_name, FurnitureMapStorage &furns ) {
+    make( const RawImage &_data, HMBBSData &bsdata, const std::string &_name ) {
         PROFILE_BLOCK( "House service elaborate" );
 
         SourceImages sourceImages;
