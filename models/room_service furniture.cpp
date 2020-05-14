@@ -430,6 +430,7 @@ namespace RoomService {
         auto prevFurn = furns.spawn( fset.front());
         completed = RS::placeWallCorner( f, r, prevFurn, ls, fpd.getSlack().xy(), fpd.getPreferredCorner());
         if ( !completed ) return false;
+
         for ( size_t t = 1; t < fset.size(); t++ ) {
             auto currFurn = furns.spawn( fset[t] );
             completed &= RS::placeWallAlong( f, r, currFurn, prevFurn, ls, fpd.getPreferredCorner(),
@@ -465,6 +466,29 @@ namespace RoomService {
         return completed;
     }
 
+    bool cplacedFirstAvailableCorner( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns, const FurniturePlacementRule &fpd ) {
+        const std::vector<FT> &fset = fpd.getBases();
+        bool completed = true;
+
+        for ( const auto& wss : r->mWallSegments ) {
+            for ( auto i = 0u; i < wss.size(); ++i ) {
+                auto ls = &wss[i];
+                if ( checkBitWiseFlag( ls->tag, WF_IsDoorPart ) || checkBitWiseFlag( ls->tag, WF_IsWindowPart )) continue;
+                auto ls2 = &wss[getCircularArrayIndex(i+1, wss.size())];
+                auto p1 = ls->p1;
+                auto p2 = ls->p2;
+                auto p3 = ls2->p2;
+                if ( detectWindingOrder(p1, p2, p3) == WindingOrder::CCW ) {
+                    auto prevFurn = furns.spawn(fset.front());
+                    completed = RS::placeWallCorner( f, r, prevFurn, ls, fpd.getSlack().xy(), WSC_P2);
+                    if ( completed ) break;
+                }
+            }
+        }
+
+        return completed;
+    }
+
     bool cplaceMiddleOfRoom( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns, const FurniturePlacementRule &fpd ) {
         auto center = RS::maxEnclsingBoundingBoxCenter( r );
 
@@ -488,22 +512,17 @@ namespace RoomService {
         _ff.bbox3d = AABB{ _ff.position3d - ( _ff.size * 0.5f ), _ff.position3d + ( _ff.size * 0.5f ) };
         _ff.bbox3d = _ff.bbox3d.rotate( _ff.rotation );
 
-        std::vector<Rect2f> doorBBox{};
-        for ( const auto& door : f->doors ) {
-            doorBBox.emplace_back(door->bbox);
-        }
-
         ClipperLib::Clipper c;
         ClipperLib::Paths solution;
-        c.AddPath( V2fToPath( _ff.bbox3d.topDown().points()), ClipperLib::ptClip, true );
-        c.AddPath( V2fToPath( r->mPerimeterSegments ), ClipperLib::ptSubject, true );
-        for ( const auto& dbbox : doorBBox ) {
-            c.AddPath( V2fToPath( dbbox.squaredBothSides().points()), ClipperLib::ptClip, true );
+        c.AddPath( V2fToPath( _ff.bbox3d.topDown().points()), ClipperLib::ptSubject, true );
+        for ( const auto& door : f->doors ) {
+            c.AddPath( V2fToPath( door->bbox.squaredBothSides().points()), ClipperLib::ptClip, true );
         }
+        c.AddPath( V2fToPath( r->mPerimeterSegments ), ClipperLib::ptClip, true );
 
         c.Execute( ClipperLib::ctDifference, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero );
 
-        if ( solution.size() == 2 ) {
+        if ( solution.empty() ) {
             if ( !_ff.checkIf( FF_CanOverlap )) {
                 for ( const auto &furn : r->mFittedFurniture ) {
                     if ( _ff.heightOffset != furn.heightOffset ) {
@@ -538,7 +557,7 @@ namespace RoomService {
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::CornerWithDec ),
                                                     FurnitureRefs{{ FTH::Bedside() },
                                                                   { FTH::Picture() }}, WSLOH::Longest(),
-                                                    cornerSlack } );
+                                                    FurnitureSlacks{cornerSlack} } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::SetAlignedAtCorner ),
                                                     FurnitureRefs{{ FTH::Shelf(), FTH::Shelf(), FTH::Sofa() }},
                                                     WSLOH::Longest(),
@@ -597,39 +616,31 @@ namespace RoomService {
     }
 
     void furnishBathroom( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
+        FurnitureRuleScript ruleScript;
         r->floorMaterial = "pavonazzo,tiles";
+        r->wallMaterial = "yule,tiles";
+        r->wallColor = C4f::WHITE;
+        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRFirstAvailableCorner ),
+                                                    FurnitureRefs{{ FTH::Shower() }}
+        } );
+        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
+                                                    FurnitureRefs{{ FTH::Toilet() }},
+                                                    WallSegmentIdentifier{ WSLOH::ExactIndex() }
+        } );
+        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
+                                                    FurnitureRefs{{ FTH::BathroomSink() }},
+                                                    WallSegmentIdentifier{ WSLOH::ExactIndex() }
+        } );
+        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
+                                                    FurnitureRefs{{ FTH::BathroomTowerRadiator() }},
+                                                    WallSegmentIdentifier{ WSLOH::ExactIndex() }
+        } );
+        RS::runRuleScript( f, r, furns, ruleScript );
 
-//        for ( const auto& ws : r->mWallSegmentsSorted ) {
-//            if ( ws.tag == 3 )
-//            f->walls[ws.iWall]->material = "tiles";
-//            for ( auto& wall : f->walls ) {
-//                if ( wall->hash == ws.wallHash ) {
-//                    wall->material = "tiles";
-//                    break;
-//                }
-//            }
-//        }
-
-//        FurnitureRuleScript ruleScript;
-//        V3f tableSlack{ 0.5f, 0.5f, 0.0f };
-//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
-//                                                    FurnitureRefs{{ FTH::DiningTable() }},
-//                                                    WallSegmentIdentifier{ WSLOH::ExactIndex() },
-//                                                    FurnitureSlacks{ tableSlack }
-//        } );
-//        RS::runRuleScript( f, r, furns, ruleScript );
     }
 
     void furnishKitchen( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
         r->floorMaterial = "yule,tiles";
-//        FurnitureRuleScript ruleScript;
-//        V3f tableSlack{ 0.5f, 0.5f, 0.0f };
-//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
-//                                                    FurnitureRefs{{ FTH::DiningTable() }},
-//                                                    WallSegmentIdentifier{ WSLOH::ExactIndex() },
-//                                                    FurnitureSlacks{ tableSlack }
-//        } );
-//        RS::runRuleScript( f, r, furns, ruleScript );
     }
 
     void furnish( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
@@ -735,6 +746,10 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string &_name ) {
     std::string sideBoard = "sideboard";
     std::string tv = "sony,tv";
     std::string plant1 = "plant,spider";
+    std::string toilet = "urby,toilet";
+    std::string shower = "generic,shower,round";
+    std::string bathroomSink = "urby,sink";
+    std::string bathroomTowerRadiator = "bathroom,tower,radiator";
 
     std::string queenBedIcon = "fia,queen,icon";
     std::string bedSideIcon = "fia,bedside";
@@ -743,6 +758,8 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string &_name ) {
     std::string shelfIcon = "fia,shelf";
     std::string armchairIcon = "fia,armchair";
     std::string coffeeTableIcon = "fia,coffee,table";
+    std::string toiletIcon = "fia,toilet";
+    std::string bathroomSinkIcon = "fia,double,sink";
 
     FurnitureSetContainer furnitureSet{};
     furnitureSet.name = _name;
@@ -760,6 +777,10 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string &_name ) {
     furnitureSet.set.emplace_back( FTH::SideBoard(), sideBoard, V3f::ZERO, S::SQUARE );
     furnitureSet.set.emplace_back( FTH::TVWithStand(), tv, V3f::ZERO, S::SQUARE );
     furnitureSet.set.emplace_back( FTH::Plant(), plant1, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::Toilet(), toilet, V3f::ZERO, toiletIcon );
+    furnitureSet.set.emplace_back( FTH::Shower(), shower, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::BathroomSink(), bathroomSink, V3f::ZERO, bathroomSinkIcon );
+    furnitureSet.set.emplace_back( FTH::BathroomTowerRadiator(), bathroomTowerRadiator, V3f::ZERO, S::SQUARE );
 
     Http::post( Url{ "/furnitureset" }, furnitureSet.serialize(), []( HttpResponeParams &res ) {
         LOGRS( res.bufferString );

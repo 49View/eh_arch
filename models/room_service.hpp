@@ -33,6 +33,10 @@ public:
         FT_DiningTable,
         FT_Plant,
         FT_Invalid,
+        FT_Toilet,
+        FT_Shower,
+        FT_BathroomSink,
+        FT_BathroomTowerRadiator,
         Last
     };
 
@@ -51,6 +55,10 @@ public:
     static Type CoffeeTable() { return Type::FT_CoffeeTable; }
     static Type DiningTable() { return Type::FT_DiningTable; }
     static Type Plant() { return Type::FT_Plant; }
+    static Type Toilet() { return Type::FT_Toilet; }
+    static Type Shower() { return Type::FT_Shower; }
+    static Type BathroomSink() { return Type::FT_BathroomSink; }
+    static Type BathroomTowerRadiator() { return Type::FT_BathroomTowerRadiator; }
 
     static Type random() {
         return Type( unitRandI( Type::Last ));
@@ -86,6 +94,7 @@ public:
         WSLO_Shortest,
         WSLO_SecondShortest,
         WSLO_ExactIndex,
+        WSLO_FirstAvailable,
         WSLO_Invalid,
         Last
     };
@@ -96,6 +105,7 @@ public:
     static constexpr Type Shortest() { return Type::WSLO_Shortest; }
     static constexpr Type SecondShortest() { return Type::WSLO_SecondShortest; }
     static constexpr Type ExactIndex() { return Type::WSLO_ExactIndex; }
+    static constexpr Type FirstAvailable() { return Type::WSLO_FirstAvailable; }
 
     static Type random() {
         return Type( unitRandI( Type::Last - 2 ));
@@ -351,6 +361,8 @@ namespace RoomService {
                                                const FurniturePlacementRule &fpd );
     [[nodiscard]] bool cplaceSetBestFit( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns,
                                                const FurniturePlacementRule &fpd );
+    [[nodiscard]] bool cplacedFirstAvailableCorner( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns,
+                                         const FurniturePlacementRule &fpd );
     [[nodiscard]] bool
     cplaceMiddleOfRoom( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns, const FurniturePlacementRule &fpd );
 
@@ -361,6 +373,7 @@ namespace RoomService {
             cplaceSetAlignedAtCorner,
             cplaceSetAlignedMiddle,
             cplaceSetBestFit,
+            cplacedFirstAvailableCorner,
             cplaceMiddleOfRoom,
     };
     enum FurnitureRuleIndexNames {
@@ -369,6 +382,7 @@ namespace RoomService {
         SetAlignedAtCorner,
         SetAlignedMiddle,
         FRBestFit,
+        FRFirstAvailableCorner,
         MiddleOfRoom,
     };
     bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage &furns, const FurnitureRuleScript &fs );
