@@ -220,6 +220,35 @@ JSONDATA_H(StairsBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albed
     std::string name = "";
 };
 
+JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath, kitchenUnitsNormals,
+         kitchenWorktopDepth, kitchenWorktopHeight, worktopThickness, skirtingHeight, kitchenSkirtingRecess,
+         kitchenUnitsRecess, drawersPadding, drawersThickness, longDrawersSize, worktopMaterial, unitsMaterial,
+         sinkModel, ovenPanelModel, microwaveModel, cooktopModel, drawersHandleModel)
+    std::vector<Vector3f> kitchenWorktopPath;
+    std::vector<Vector3f> kitchenSkirtingPath;
+    std::vector<Vector3f> kitchenUnitsPath;
+    std::vector<Vector3f> kitchenUnitsNormals;
+
+    // kitchen lengths, dimensions, etc...
+    float kitchenWorktopDepth = 0.59f;
+    float kitchenWorktopHeight = 0.88f;
+    float worktopThickness = 0.045f;
+    float skirtingHeight = 0.12f;
+    float kitchenSkirtingRecess = 0.065f;
+    float kitchenUnitsRecess = 0.04f;
+    Vector2f drawersPadding = V2f::ONE * .004f;
+    float drawersThickness = 0.02f;
+    Vector2f longDrawersSize = V2f{ 0.8f, 0.7f };
+
+    std::string worktopMaterial = "marble,anemone";
+    std::string unitsMaterial = "wood,beech";
+    std::string sinkModel = "ktc,sink,double,chrome";
+    std::string ovenPanelModel = "ktc,oven,flat";
+    std::string microwaveModel = "ktc,microwave";
+    std::string cooktopModel = "ktc,cooktop";
+    std::string drawersHandleModel = "ktc,handle,arc";
+};
+
 JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
            linkedHash, sequencePart, mTriangles2d, roomTypes, z, mHasCoving, mBBoxCoving, floorType, mFittedFurniture,
            mWallSegments, mWallSegmentsSorted, mPerimeterSegments, mvCovingSegments, mvSkirtingSegments,
@@ -269,6 +298,9 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     C4f skirtingColor = C4f::WHITE;
     C4f covingColor = C4f::WHITE;
     std::string spotlightGeom = "spotlight_basic";
+
+    // Ad-hoc room type data, it's a bit redundant but I'll leave it here until I found a better place
+    KitchenData kitchenData;
 };
 
 JSONDATA(RoomPreData, wallSegmentsInternal, bboxInternal, rtypes)

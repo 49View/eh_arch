@@ -9,7 +9,6 @@
 #include <core/resources/resource_builder.hpp>
 #include <poly/scene_graph.h>
 #include <poly/vdata_assembler.h>
-#include <graphics/renderer.h>
 #include <poly/follower.hpp>
 #include "../models/house_bsdata.hpp"
 #include "../models/room_service.hpp"
@@ -17,38 +16,13 @@
 
 namespace KitchenRender {
 
-    struct KitchenCabinetFiller {
-        Vector3f p1;
-        Vector3f p2;
-        Vector3f normal;
-        Vector3f inwardN;
-    };
-
-    struct KitchenData {
-        std::vector<Vector3f> kitchenWorktopPath;
-        std::vector<Vector3f> kitchenSkirtingPath;
-        std::vector<Vector3f> kitchenUnitsPath;
-
-        // kitchen lengths, dimensions, etc...
-        float kitchenWorktopDepth = 0.59f;
-        float kitchenWorktopHeight = 0.05f;
-        float worktopHeight = 0.88f;
-        float kitchenSkirtingRecess = 0.06f;
-        float kitchenUnitsRecess = 0.02f;
-        Vector2f drawersPadding = V2f::ONE*.01f;
-        float drawersThickness = 0.02f;
-        Vector2f longDrawersSize = V2f{ 0.4f, 0.7f };
-        Vector2f kitchenSkirtingSize;
-
-        std::string worktopMaterial = "granite";
-    };
-
-    void calcLShapeOffset( const V3f& p1, const V3f& p2, const V3f& p3, const V2f& n1, const V2f& n2, float depth, float offset, std::vector<Vector3f>& path ) {
-        Vector2f p1s = ( p1 + ( Vector3f(n1, 0.0f) * ( depth - offset ))).xy();
-        Vector2f p3s = ( p3 + ( Vector3f(n2, 0.0f) * ( depth - offset ))).xy();
+    void calcLShapeOffset( const V3f& p1, const V3f& p2, const V3f& p3, const V2f& n1, const V2f& n2, float depth,
+                           float offset, std::vector<Vector3f>& path ) {
+        Vector2f p1s = ( p1 + ( Vector3f(n1, 0.0f) * ( depth - offset ) ) ).xy();
+        Vector2f p3s = ( p3 + ( Vector3f(n2, 0.0f) * ( depth - offset ) ) ).xy();
         Vector2f p2s = Vector2f::ZERO;
         if ( !intersection(p1s, p1s + normalize(p2.xy() - p1.xy()) * 10000.0f, p3s,
-                           p3s + normalize(p2.xy() - p3.xy()) * 10000.0f, p2s)) {
+                           p3s + normalize(p2.xy() - p3.xy()) * 10000.0f, p2s) ) {
             ASSERT(0);
         }
         path.emplace_back(p1s);
@@ -56,7 +30,7 @@ namespace KitchenRender {
         path.emplace_back(p3s);
     }
 
-    void createMasterPath( SceneGraph& sg, RoomBSData *w, KitchenData& _kitchenData ) {
+    void createMasterPath( RoomBSData *w, KitchenData& _kitchenData ) {
         const ArchSegment *ls = RoomService::longestSegment(w);
         std::pair<size_t, size_t> oppositeWallForLShape;
         Vector2f iPointlShape = Vector2f::ZERO;
@@ -71,26 +45,31 @@ namespace KitchenRender {
         } else {
             ArchSegment *lso = &w->mWallSegments[oppositeWallForLShape.first][oppositeWallForLShape.second];
             Vector2f iPoint = Vector2f::ZERO;
-            if ( distance(lso->p1, iPointlShape) < distance(lso->p2, iPointlShape)) {
+            if ( distance(lso->p1, iPointlShape) < distance(lso->p2, iPointlShape) ) {
                 iPoint = lso->p1 + ( lso->crossNormal * _kitchenData.kitchenWorktopDepth * 0.5f );
             } else {
                 iPoint = lso->p2 + ( -lso->crossNormal * _kitchenData.kitchenWorktopDepth * 0.5f );
             }
             if ( RoomService::findOppositeWallFromPoint(w, iPoint, lso->normal, oppositeWallForLShape,
-                                                        iPointlShape)) {
+                                                        iPointlShape) ) {
                 Vector3f p1 = { ( ls->p1 + ls->normal * _kitchenData.kitchenWorktopDepth * 0.5f ),
-                                _kitchenData.worktopHeight };
+                                _kitchenData.kitchenWorktopHeight };
                 Vector3f p2 = { ( iPointlShape +
                                   w->mWallSegments[oppositeWallForLShape.first][oppositeWallForLShape.second].normal *
-                                  _kitchenData.kitchenWorktopDepth * 0.5f ), _kitchenData.worktopHeight };
-                Vector3f p3 = { iPoint, _kitchenData.worktopHeight };
+                                  _kitchenData.kitchenWorktopDepth * 0.5f ), _kitchenData.kitchenWorktopHeight };
+                Vector3f p3 = { iPoint, _kitchenData.kitchenWorktopHeight };
                 _kitchenData.kitchenWorktopPath.push_back(p1);
                 _kitchenData.kitchenWorktopPath.push_back(p2);
                 _kitchenData.kitchenWorktopPath.push_back(p3);
+                _kitchenData.kitchenUnitsNormals.emplace_back(lso->normal);
+                _kitchenData.kitchenUnitsNormals.emplace_back(lso->normal);
+                _kitchenData.kitchenUnitsNormals.emplace_back(ls->normal);
 
                 // Skirting
-                calcLShapeOffset(p1, p2, p3, ls->normal, lso->crossNormal, _kitchenData.kitchenWorktopDepth * 0.5f, _kitchenData.kitchenSkirtingRecess, _kitchenData.kitchenSkirtingPath );
-                calcLShapeOffset(p1, p2, p3, ls->normal, lso->crossNormal, _kitchenData.kitchenWorktopDepth * 0.5f, _kitchenData.kitchenUnitsRecess, _kitchenData.kitchenUnitsPath );
+                calcLShapeOffset(p1, p2, p3, ls->normal, lso->crossNormal, _kitchenData.kitchenWorktopDepth * 0.5f,
+                                 _kitchenData.kitchenSkirtingRecess, _kitchenData.kitchenSkirtingPath);
+                calcLShapeOffset(p1, p2, p3, ls->normal, lso->crossNormal, _kitchenData.kitchenWorktopDepth * 0.5f,
+                                 _kitchenData.kitchenUnitsRecess, _kitchenData.kitchenUnitsPath);
             }
         }
 
@@ -99,115 +78,94 @@ namespace KitchenRender {
         ASSERT(_kitchenData.kitchenWorktopPath.size() > 0);
     }
 
-    void addKitchenDrawer( SceneGraph& sg, const Vector3f& p1, const Vector3f& p2, const Vector2f& drawersSize,
-                           const Vector2f& drawersPadding, float drawerDepth, int verticalIndex ) {
-        std::vector<Vector3f> vcabinet;
-        Vector3f pDir = normalize(p2 - p1);
+    bool middleDrawerIndex( int index, int range ) {
+        return ( range % 2 == 0 ) ? index == range / 2 - 1 : index == ( range - 1 ) / 2;
+    }
 
-        Vector3f a = p1 + ( pDir * drawersPadding.x());
-        Vector3f b = p2 - ( pDir * drawersPadding.x());
-        Vector3f hOffset1 =
-                ( Vector3f::Z_AXIS * ( drawersSize.y() * verticalIndex )) + ( Vector3f::Z_AXIS * drawersPadding.y());
-        Vector3f hOffset2 = ( Vector3f::Z_AXIS * ( drawersSize.y() * ( verticalIndex + 1 ))) -
-                            ( Vector3f::Z_AXIS * drawersPadding.y());
-        vcabinet.push_back(a - hOffset1);
-        vcabinet.push_back(b - hOffset1);
-        vcabinet.push_back(b - hOffset2);
-        vcabinet.push_back(a - hOffset2);
-
-        sg.GB<GT::Extrude>(V2nff{ drawersSize, V3f::UP_AXIS, drawersSize.y() }, XZY::C(p1));
+    V2f oppositePointOnWallFor( RoomBSData *w, const V2f& input, const V2f& direction ) {
+        V2f ln1 = direction;
+        V2f ln2 = -ln1;
+        V2f ln = V2f::ZERO;
+        std::pair<size_t, size_t> targetWall[2];
+        V2f hittingPoint[2];
+        V2f ret = V2f::ZERO;
+        bool fo1 = RoomService::findOppositeWallFromPoint(w, input, ln1, targetWall[0],
+                                                          hittingPoint[0], IncludeWindowsOrDoors::WindowsOnly);
+        bool fo2 = RoomService::findOppositeWallFromPoint(w, input, ln2, targetWall[1],
+                                                          hittingPoint[1], IncludeWindowsOrDoors::WindowsOnly);
+        ASSERT(fo1 || fo2);
+        if ( distance(hittingPoint[0], input) < distance(hittingPoint[1], input) || ( fo1 && !fo2 ) ) {
+            ln = -ln1;
+            ret = hittingPoint[0];
+        } else if ( distance(hittingPoint[0], input) > distance(hittingPoint[1], input) || ( fo2 && !fo1 ) ) {
+            ln = -ln2;
+            ret = hittingPoint[1];
+        }
+        return ret;
     }
 
     void createUnits( SceneGraph& sg, RoomBSData *w, KitchenData& _kitchenData ) {
 
-//        Follower fl_kitchenWorktop(accuracyNone, FollowerFlags::Defaults, "KitchenWorktop", MappingDirection::Y_POS, true);
-//        auto wtop = Profile{};
-//        wtop.createRect(V2f{_kitchenData.kitchenWorktopDepth, _kitchenData.kitchenWorktopHeight });
-//        FollowerService::extrude( fl_kitchenWorktop, XZY::C(_kitchenData.kitchenWorktopPath), wtop, MappingDirection::Y_POS );
-
-//        fl_kitchenWorktop.extrude(_kitchenData.kitchenWorktopPath, wtop,
-//                                                  FollowerGap(_kitchenData.kitchenWorktopPath.size()));
         std::vector<Vector3f> wcoords = _kitchenData.kitchenUnitsPath;
-        std::vector<KitchenCabinetFiller> fillerPs;
+        float dp = _kitchenData.drawersPadding.x();
+        float drawW = _kitchenData.longDrawersSize.x();
+        float unitEdgeEnd = _kitchenData.drawersThickness;
+//        float topOfWorktop = _kitchenData.kitchenWorktopHeight + _kitchenData.worktopThickness * 0.5f;
 
-//        for ( size_t t = wcoords.size() - _kitchenData.kitchenWorktopPath.size(); t < wcoords.size() - 1; t++ ) {
-        for ( size_t t = 0; t < wcoords.size()-1; t++ ) {
-            Vector3f p1 = { wcoords[t], _kitchenData.worktopHeight - _kitchenData.kitchenWorktopHeight * 0.5f };
+        for ( size_t t = 0; t < wcoords.size() - 1; t++ ) {
+            Vector3f p1 = { wcoords[t], _kitchenData.kitchenWorktopHeight - _kitchenData.worktopThickness * 0.5f };
             Vector3f p2 = { wcoords[cai(t + 1, wcoords.size())],
-                            _kitchenData.worktopHeight - _kitchenData.kitchenWorktopHeight * 0.5f };
+                            _kitchenData.kitchenWorktopHeight - _kitchenData.worktopThickness * 0.5f };
             Vector3f pDir = normalize(p2 - p1);
-            Vector3f inwardN = -normalize(cross(pDir, Vector3f::Z_AXIS));
 
-//            p1 += ( inwardN * ( _kitchenData.drawerDepth + _kitchenData.drawerRecessFromWorktop ));
-//            p2 += ( inwardN * ( _kitchenData.drawerDepth + _kitchenData.drawerRecessFromWorktop ));
             float widthOfSegment = distance(p1, p2);
-            int numDrawers = (int) ( widthOfSegment /
-                                     ( _kitchenData.longDrawersSize.x() + _kitchenData.drawersPadding.x()));
-            float finalPadding = fmodf(widthOfSegment, _kitchenData.longDrawersSize.x());
-            int extraPaddingI = finalPadding > 0.0f ? 1 : 0;
-            for ( int q = 0; q < numDrawers + extraPaddingI; q++ ) {
-                float drawW = _kitchenData.longDrawersSize.x();
-                if (( q == ( numDrawers + extraPaddingI - 1 )) && ( extraPaddingI > 0 )) {
-                    drawW = finalPadding;
-                }
-                Vector3f a = p1 + ( pDir * _kitchenData.longDrawersSize.x()) * (float) q;
-                Vector3f b = a + ( pDir * drawW );
-                int numDrawersInVertical = static_cast<int>(
-                        ( _kitchenData.worktopHeight - _kitchenData.kitchenWorktopHeight * 0.5f ) /
-                        _kitchenData.longDrawersSize.y());
-                _kitchenData.kitchenSkirtingSize.setY(max(_kitchenData.kitchenSkirtingSize.y(),
-                                                          fmod(( _kitchenData.worktopHeight -
-                                                                 _kitchenData.kitchenWorktopHeight * 0.5f ),
-                                                               _kitchenData.longDrawersSize.y())));
-                for ( auto m = 0; m < numDrawersInVertical; m++ ) {
-                    auto linex = FollowerService::createLinePath(a, b, _kitchenData.drawersThickness, 0.2f);
-                    sg.GB<GT::Extrude>(PolyOutLine{linex, V3f::UP_AXIS, 0.5f });
-                }
-            }
-            fillerPs.push_back({ p1, p2, pDir, inwardN });
-        }
+            float widthForUnitsAvailable = ( widthOfSegment - unitEdgeEnd * 2.0f );
+            float widthOfDrawersWithGap = ( _kitchenData.longDrawersSize.x() + dp * 2.0f );
+            int numDrawers = (int) ( widthForUnitsAvailable / widthOfDrawersWithGap );
+            float finalPadding = fmodf(widthForUnitsAvailable, widthOfDrawersWithGap);
+            for ( int q = 0; q < numDrawers + 1; q++ ) {
+                if ( ( q == ( numDrawers ) ) && ( finalPadding < 0.01f ) ) continue;
+                float drawerWidth = ( q == numDrawers ) ? finalPadding : drawW;
+                Vector3f a = ( p1 + pDir * unitEdgeEnd ) +
+                             ( ( pDir * ( _kitchenData.longDrawersSize.x() + dp ) ) * (float) q );
+                Vector3f b = a + ( pDir * ( drawerWidth - dp ) );
 
-        // Filller(s)
-//        Profile kitchenFillerProfile = loadKitchenWorktopProfile(_kitchenData.kitchenFillerSize);
-//        kitchenFillerProfile.move(Vector2f::Y_AXIS * kitchenFillerProfile.height() * 0.5f + Vector2f::Y_AXIS *
-//                                                                                            ( _kitchenData.kitchenSkirtingSize.y() -
-//                                                                                              _kitchenData.kitchenWorktopHeight *
-//                                                                                              0.5f -
-//                                                                                              _kitchenData.drawersPadding.y()));
-//        for ( size_t t = 0; t < fillerPs.size() - 1; t++ ) {
-//            std::vector<Vector3f> fillerPath;
-//            Vector2f p1 = fillerPs[t].p2.xy() - fillerPs[t].inwardN.xy() * _kitchenData.kitchenFillerSize.x() * 0.5f +
-//                          fillerPs[t].normal.xy() * _kitchenData.drawersPadding.x();
-//            Vector2f p3 =
-//                    fillerPs[t + 1].p1.xy() - fillerPs[t + 1].inwardN.xy() * _kitchenData.kitchenFillerSize.x() * 0.5f -
-//                    fillerPs[t + 1].normal.xy() * _kitchenData.drawersPadding.x();
-//            Vector2f p2 = Vector2f::ZERO;
-//            if ( !intersection(p1, p1 + fillerPs[t].normal.xy() * 10000.0f,
-//                               p3, p3 - fillerPs[t + 1].normal.xy() * 10000.0f, p2)) {
-//                ASSERT(0);
-//            }
-//            fillerPath.push_back(p1);
-//            fillerPath.push_back(p2);
-//            fillerPath.push_back(p3);
-//            auto ch = rootH->addChildren(
-//                    Follower(mAccuracy, FollowerFlags::Defaults, "KitchenFiller", MappingDirection::X_POS,
-//                             true).extrude(fillerPath, kitchenFillerProfile, FollowerGap(fillerPath.size())));
-//        }
+                float unitYSizeAvailable = _kitchenData.kitchenWorktopHeight - _kitchenData.skirtingHeight + (dp*2);
+                for ( int m = 0; m < 2; m++ ) {
+                    float unitHeight = m == 0 ? unitYSizeAvailable*0.75f : unitYSizeAvailable*.25f;
+                    float uz = _kitchenData.skirtingHeight + ( m == 0 ? 0.0f : unitYSizeAvailable*0.75f+dp );
+                    auto linex = FollowerService::createLinePath(a, b, _kitchenData.drawersThickness, uz);
+                    sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, unitHeight },
+                                       GT::M(_kitchenData.unitsMaterial));
+                    sg.GB<GT::Asset>(_kitchenData.drawersHandleModel, XZY::C(lerp(0.5f, a, b), uz));
+                }
+
+//                if ( t == 0 && middleDrawerIndex(q, numDrawers + 1) ) {
+//                    auto middleP = oppositePointOnWallFor(w, lerp(0.5f, a, b), rotate90(pDir.xy()));
+//                    sg.GB<GT::Asset>(_kitchenData.cooktopModel, XZY::C(middleP, topOfWorktop));
+//                    sg.GB<GT::Asset>(_kitchenData.ovenPanelModel, XZY::C(lerp(0.5f, a, b)));
+//                }
+//                if ( t == 1 && middleDrawerIndex(q, numDrawers + 1) ) {
+//                    auto middleP = oppositePointOnWallFor(w, lerp(0.5f, a, b), rotate90(pDir.xy()));
+//                    sg.GB<GT::Asset>(_kitchenData.sinkModel, XZY::C(middleP, topOfWorktop));
+//                }
+            }
+        }
     }
 
     void render( SceneGraph& sg, RoomBSData *w, HouseRenderContainer& ret ) {
-        KitchenData kitchenData;
-        createMasterPath(sg, w, kitchenData);
+        KitchenData kitchenData = w->kitchenData;
+        createMasterPath(w, kitchenData);
+        createUnits(sg, w, kitchenData);
 
         auto wtop = std::make_shared<Profile>();
-        wtop->createRect(V2f{ kitchenData.kitchenWorktopDepth, kitchenData.kitchenWorktopHeight });
+        wtop->createRect(V2f{ kitchenData.kitchenWorktopDepth, kitchenData.worktopThickness });
         sg.GB<GT::Follower>(XZY::C(kitchenData.kitchenWorktopPath), wtop, GT::M(kitchenData.worktopMaterial));
 
         auto wtop2 = std::make_shared<Profile>();
-        wtop2->createRect(V2f{ 0.02f, 0.1f });
-        sg.GB<GT::Follower>(XZY::C(kitchenData.kitchenSkirtingPath), wtop2);
+        wtop2->createRect(V2f{ 0.02f, kitchenData.skirtingHeight });
+        sg.GB<GT::Follower>(XZY::C(kitchenData.kitchenSkirtingPath, kitchenData.skirtingHeight * 0.5f), wtop2);
 
-        createUnits(sg, w, kitchenData);
     }
 
 }

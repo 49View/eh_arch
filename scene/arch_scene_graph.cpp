@@ -42,8 +42,14 @@ namespace HOD { // HighOrderDependency
                     ret.addDep( ResourceGroup::Profile, furn.symbolRef );
                 }
 
-                // Will load Kitchen and batroom sets here
-                ret.addDep( ResourceGroup::Material, "granite" );
+                // Will load Kitchen and bathroom sets here
+                ret.addDep( ResourceGroup::Material, room->kitchenData.worktopMaterial );
+                ret.addDep( ResourceGroup::Material, room->kitchenData.unitsMaterial );
+                ret.addDep( ResourceGroup::Geom, room->kitchenData.sinkModel );
+                ret.addDep( ResourceGroup::Geom, room->kitchenData.ovenPanelModel );
+                ret.addDep( ResourceGroup::Geom, room->kitchenData.microwaveModel );
+                ret.addDep( ResourceGroup::Geom, room->kitchenData.cooktopModel );
+                ret.addDep( ResourceGroup::Geom, room->kitchenData.drawersHandleModel );
             }
             for ( const auto& door : floor->doors ) {
                 ret.addDep( ResourceGroup::Profile, door->architraveProfile );
