@@ -628,12 +628,12 @@ namespace RoomService {
                                                     WallSegmentIdentifier{ WSLOH::ExactIndex() }
         } );
         RS::runRuleScript( f, r, furns, ruleScript );
-
     }
 
     void furnishKitchen( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
         r->floorMaterial = "yule,tiles";
         r->wallMaterial = "terrazzo,tiles";
+
     }
 
     void furnish( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {

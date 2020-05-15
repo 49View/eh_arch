@@ -304,12 +304,35 @@ namespace RoomService {
         r->mMaxEnclsingBoundingBox.push_back( v4 );
     }
 
+    bool findOppositeWallFromPoint( const RoomBSData* r, const Vector2f& p1, const Vector2f& normal, std::pair<size_t, size_t>& ret, Vector2f& iPoint ) {
+        V2f i{};
+        float minDist = std::numeric_limits<float>::max();
+        for ( auto t = 0u; t < r->mWallSegments.size(); t++ ) {
+            for ( auto m = 0u; m < r->mWallSegments[t].size(); m++ ) {
+                if ( ( r->mWallSegments[t][m].tag & WallFlags::WF_IsDoorPart ) > 0 ||
+                     ( r->mWallSegments[t][m].tag & WallFlags::WF_IsWindowPart ) > 0 ) {
+                    continue;
+                }
+                Vector2f normalOpposite = r->mWallSegments[t][m].normal;
+                if ( isScalarEqual( dot( normalOpposite, normal ), -1.0f ) ) {
+                    if ( intersection( r->mWallSegments[t][m].p1, r->mWallSegments[t][m].p2, p1, p1 + ( normal*1000.0f ), i ) ) {
+                        float dist = distance( p1, i );
+                        if ( dist < minDist ) {
+                            ret = std::make_pair( t, m );
+                            iPoint = i;
+                            minDist = dist;
+                        }
+                    }
+                }
+            }
+        }
+        return minDist != std::numeric_limits<float>::max();
+    }
+
     void updateFromArchSegments( RoomBSData *r,
                                  const std::vector<std::vector<ArchSegment>>& ws ) {
         WallSegments( r, ws );
-
         calcLongestWall( r );
-
         calcBBox( r );
     }
 

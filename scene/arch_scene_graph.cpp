@@ -41,6 +41,9 @@ namespace HOD { // HighOrderDependency
                     ret.addDep( ResourceGroup::Geom, furn.name );
                     ret.addDep( ResourceGroup::Profile, furn.symbolRef );
                 }
+
+                // Will load Kitchen and batroom sets here
+                ret.addDep( ResourceGroup::Material, "granite" );
             }
             for ( const auto& door : floor->doors ) {
                 ret.addDep( ResourceGroup::Profile, door->architraveProfile );

@@ -18,6 +18,7 @@
 #include "../models/room_service.hpp"
 #include "house_render.hpp"
 #include "wall_render.hpp"
+#include "kitchen_render.hpp"
 
 namespace RoomRender {
 
@@ -122,6 +123,9 @@ namespace RoomRender {
         for ( const auto &fur : w->mFittedFurniture ) {
             auto furn = sg.GB<GT::Asset>( fur.name, fur.position3d, GT::Rotate( fur.rotation ));
             ret.furnituresGB.emplace_back( furn );
+        }
+        if ( RoomService::hasType(w, ASType::Kitchen) ) {
+            KitchenRender::render(sg, w, ret);
         }
     }
 }
