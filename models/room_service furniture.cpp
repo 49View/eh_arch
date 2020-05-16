@@ -95,6 +95,16 @@ namespace RoomService {
         return &r->mWallSegmentsSorted[_index];
     }
 
+    const ArchSegment *segmentAt( const RoomBSData *r, roomTypeIndex rti ) {
+        return &r->mWallSegments[rti.first][cai( rti.second, r->mWallSegments[rti.first].size())];
+    }
+
+    const ArchSegment *walkSegment( const RoomBSData *r, const ArchSegment* ls, WalkSegmentDirection wsd ) {
+        auto rti = sortedSegmentToPairIndex(r, ls);
+        rti.second += wsd == WalkSegmentDirection::Left ? -1 : 1;
+        return segmentAt(r, rti);
+    }
+
     void calcLongestWall( RoomBSData *r ) {
         float maxLength = 0.0f;
 
@@ -137,13 +147,13 @@ namespace RoomService {
         }
     }
 
-    ArchSegment *longestSegmentCornerP1( RoomBSData *r ) {
+    const ArchSegment *longestSegmentCornerP1( const RoomBSData *r ) {
         roomTypeIndex rti = sortedSegmentToPairIndex( r, r->mLongestWall );
         return &r->mWallSegments[rti.first][getCircularArrayIndex( rti.second - 1,
                                                                    static_cast<int32_t>( r->mWallSegments[rti.first].size()))];
     }
 
-    ArchSegment *longestSegmentCornerP2( RoomBSData *r ) {
+    const ArchSegment *longestSegmentCornerP2( const RoomBSData *r ) {
         roomTypeIndex rti = sortedSegmentToPairIndex( r, r->mLongestWall );
         return &r->mWallSegments[rti.first][getCircularArrayIndex( rti.second + 1,
                                                                    static_cast<int32_t>( r->mWallSegments[rti.first].size()))];
@@ -154,6 +164,24 @@ namespace RoomService {
             return nullptr;
         }
         return &r->mWallSegmentsSorted[r->mLongestWallOpposite];
+    }
+
+    Distance2dNormalPair walkAlongWallsUntilCornerChanges( const RoomBSData *r, const ArchSegment* ls, WalkSegmentDirection wsd, IncludeWindowsOrDoors bwd ) {
+        Distance2dNormalPair ret{0.0f, V2f::ZERO};
+        bool bNormalsSimilar = true;
+        bool bwdFlag = true;
+        const ArchSegment* lswp = nullptr;
+        while ( bNormalsSimilar && bwdFlag )  {
+            const auto* lswn = walkSegment(r, lswp ? lswp : ls, wsd);
+            if ( lswp ) bNormalsSimilar = isVerySimilar(lswp->normal, lswn->normal, 0.05f);
+            bwdFlag = RS::checkIncludeDoorsWindowsFlag(lswn, bwd);
+            if ( bNormalsSimilar && bwdFlag ) {
+                ret.distance += distance(lswn->p1, lswn->p2);
+                ret.normal = lswn->normal;
+                lswp = lswn;
+            }
+        }
+        return ret;
     }
 
     float middleHeightFromObject( RoomBSData *r, FittedFurniture &base, FittedFurniture &dec ) {
@@ -631,8 +659,9 @@ namespace RoomService {
     }
 
     void furnishKitchen( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
-        r->floorMaterial = "yule,tiles";
-        r->wallMaterial = "terrazzo,tiles";
+        r->floorMaterial = "parquet,red";
+        r->wallMaterial = "yule,flemish,tiles";
+        r->wallColor = C4f::WHITE;
 
     }
 

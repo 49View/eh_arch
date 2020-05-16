@@ -220,17 +220,28 @@ JSONDATA_H(StairsBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albed
     std::string name = "";
 };
 
-JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath, kitchenUnitsNormals,
+JSONDATA(KitchenPath, p1, p2, normal, cookerPos, sinkPos, hasCooker, hasSink)
+    V2f p1;
+    V2f p2;
+    V2f normal;
+    V2f cookerPos = V2f::ZERO;
+    V2f sinkPos = V2f::ZERO;
+    bool hasCooker = false;
+    bool hasSink = false;
+    KitchenPath( const V2f& p1, const V2f& p2, const V2f& normal ) : p1(p1), p2(p2), normal(normal) {}
+};
+
+JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
          kitchenWorktopDepth, kitchenWorktopHeight, worktopThickness, skirtingHeight, kitchenSkirtingRecess,
          kitchenUnitsRecess, drawersPadding, drawersThickness, longDrawersSize, worktopMaterial, unitsMaterial,
-         sinkModel, ovenPanelModel, microwaveModel, cooktopModel, drawersHandleModel)
-    std::vector<Vector3f> kitchenWorktopPath;
-    std::vector<Vector3f> kitchenSkirtingPath;
-    std::vector<Vector3f> kitchenUnitsPath;
-    std::vector<Vector3f> kitchenUnitsNormals;
+         sinkModel, ovenPanelModel, microwaveModel, cooktopModel, extractorHoodModel, drawersHandleModel)
+    std::vector<KitchenPath> kitchenWorktopPath;
+    std::vector<KitchenPath> kitchenSkirtingPath;
+    std::vector<KitchenPath> kitchenUnitsPath;
+
 
     // kitchen lengths, dimensions, etc...
-    float kitchenWorktopDepth = 0.59f;
+    float kitchenWorktopDepth = 0.64f;
     float kitchenWorktopHeight = 0.88f;
     float worktopThickness = 0.045f;
     float skirtingHeight = 0.12f;
@@ -238,7 +249,7 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     float kitchenUnitsRecess = 0.04f;
     Vector2f drawersPadding = V2f::ONE * .004f;
     float drawersThickness = 0.02f;
-    Vector2f longDrawersSize = V2f{ 0.8f, 0.7f };
+    Vector2f longDrawersSize = V2f{ 0.6f, 0.7f };
 
     std::string worktopMaterial = "marble,anemone";
     std::string unitsMaterial = "wood,beech";
@@ -246,6 +257,7 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     std::string ovenPanelModel = "ktc,oven,flat";
     std::string microwaveModel = "ktc,microwave";
     std::string cooktopModel = "ktc,cooktop";
+    std::string extractorHoodModel = "ktc,extractor,hood";
     std::string drawersHandleModel = "ktc,handle,arc";
 };
 

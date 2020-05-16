@@ -87,6 +87,11 @@ enum class IncludeWindowsOrDoors {
     Both
 };
 
+enum class WalkSegmentDirection {
+    Left,
+    Right
+};
+
 enum WallSegmentCorner {
     WSC_P1 = 0,
     WSC_P2
@@ -137,6 +142,16 @@ struct WallSegmentIdentifier {
     WSLO type = WSLOH::Longest();
     int index = 0;
 };
+
+template<typename T>
+struct DistanceNormalPair {
+    float distance;
+    T normal;
+    DistanceNormalPair( float distance, const T& normal ) : distance(distance), normal(normal) {}
+};
+
+using Distance2dNormalPair = DistanceNormalPair<V2f>;
+using Distance3dNormalPair = DistanceNormalPair<V3f>;
 
 class FurniturePlacementRule;
 
@@ -405,6 +420,7 @@ namespace RoomService {
     std::string roomTypeToName( ASTypeT ast );
     bool isGeneric( const RoomBSData *r );
     bool checkMaxSizeEnclosure( const RoomBSData *r, Vector2f& ep1, Vector2f& ep2, const Vector2f& ncheck );
+    bool checkIncludeDoorsWindowsFlag( const ArchSegment* ls, IncludeWindowsOrDoors bwd );
     bool roomNeedsCoving( const RoomBSData *r );
     bool intersectLine2d( const RoomBSData *r, Vector2f const& p0, Vector2f const& p1, Vector2f& i );
     float area( const RoomBSData *r );
@@ -415,15 +431,22 @@ namespace RoomService {
     float furnitureAngleFromNormal( const Vector2f& normal );
     Vector2f furnitureNormalFromAngle( float angle );
     roomTypeIndex sortedSegmentToPairIndex( const RoomBSData *r, int si );
+    roomTypeIndex sortedSegmentToPairIndex( const RoomBSData *r, const ArchSegment *ls );
     ArchSegment *longestSegmentOpposite( const RoomBSData *r );
-    ArchSegment *longestSegmentCornerP1( const RoomBSData *r );
-    ArchSegment *longestSegmentCornerP2( const RoomBSData *r );
+    const ArchSegment *longestSegmentCornerP1( const RoomBSData *r );
+    const ArchSegment *longestSegmentCornerP2( const RoomBSData *r );
     const ArchSegment *longestSegment( const RoomBSData *r );
+    const ArchSegment *secondLongestSegment( const RoomBSData *r );
     const ArchSegment *secondShortestSegment( const RoomBSData *r );
     const ArchSegment *thirdLongestSegment( const RoomBSData *r );
     const ArchSegment *shortestSegment( const RoomBSData *r );
     const ArchSegment *secondShortestSegment( const RoomBSData *r );
     const ArchSegment *segmentAtIndex( const RoomBSData *r, uint32_t _index );
+    const ArchSegment *segmentAt( const RoomBSData *r, roomTypeIndex rdi );
+    const ArchSegment *walkSegment( const RoomBSData *r, const ArchSegment *ls, WalkSegmentDirection wsd );
+    Distance2dNormalPair
+    walkAlongWallsUntilCornerChanges( const RoomBSData *r, const ArchSegment *ls, WalkSegmentDirection wsd,
+                                      IncludeWindowsOrDoors bwd );
     // bsdata getters
     float skirtingDepth( const RoomBSData *r );
 

@@ -210,6 +210,18 @@ namespace RoomService {
         return foundAny;
     }
 
+    bool checkIncludeDoorsWindowsFlag( const ArchSegment* ls, IncludeWindowsOrDoors bwd ) {
+        if ( bwd != IncludeWindowsOrDoors::Both ) {
+            if (checkBitWiseFlag(ls->tag, WallFlags::WF_IsDoorPart)) {
+                if ( (bwd == IncludeWindowsOrDoors::None) || (bwd != IncludeWindowsOrDoors::DoorsOnly) ) return false;
+            }
+            if (checkBitWiseFlag(ls->tag, WallFlags::WF_IsWindowPart)) {
+                if ( bwd == IncludeWindowsOrDoors::None || bwd != IncludeWindowsOrDoors::WindowsOnly ) return false;
+            }
+        }
+        return true;
+    }
+
     void WallSegments( RoomBSData *r, const std::vector<std::vector<ArchSegment>>& val ) {
         r->mWallSegments = val;
 
@@ -408,6 +420,21 @@ namespace RoomService {
             for ( auto m = 0u; m < r->mWallSegments[t].size(); m++ ) {
                 if ( r->mWallSegments[t][m].p1 == r->mWallSegmentsSorted[si].p1 &&
                      r->mWallSegments[t][m].p2 == r->mWallSegmentsSorted[si].p2 ) {
+                    rti = std::make_pair(t, m);
+                    return rti;
+                }
+            }
+        }
+        return rti;
+    }
+
+    roomTypeIndex sortedSegmentToPairIndex( const RoomBSData *r, const ArchSegment* ls ) {
+        roomTypeIndex rti = std::make_pair(-1, -1);
+
+        for ( auto t = 0u; t < r->mWallSegments.size(); t++ ) {
+            for ( auto m = 0u; m < r->mWallSegments[t].size(); m++ ) {
+                if ( r->mWallSegments[t][m].p1 == ls->p1 &&
+                     r->mWallSegments[t][m].p2 == ls->p2 ) {
                     rti = std::make_pair(t, m);
                     return rti;
                 }
