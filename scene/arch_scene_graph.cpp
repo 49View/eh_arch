@@ -49,6 +49,7 @@ namespace HOD { // HighOrderDependency
                 ret.addDep( ResourceGroup::Geom, room->kitchenData.ovenPanelModel );
                 ret.addDep( ResourceGroup::Geom, room->kitchenData.microwaveModel );
                 ret.addDep( ResourceGroup::Geom, room->kitchenData.cooktopModel );
+                ret.addDep( ResourceGroup::Geom, room->kitchenData.fridgeModel );
                 ret.addDep( ResourceGroup::Geom, room->kitchenData.extractorHoodModel );
                 ret.addDep( ResourceGroup::Geom, room->kitchenData.drawersHandleModel );
             }
