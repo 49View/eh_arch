@@ -5,9 +5,9 @@
 #include "kitchen_room_service.hpp"
 
 #include <core/math/path_util.h>
-#include <core/resources/profile.hpp>
 #include "../models/house_bsdata.hpp"
 #include "../models/room_service.hpp"
+#include "../models/room_service_furniture.hpp"
 
 namespace KitchenRoomService {
     void calcLShapeOffset( const V3f& p1, const V3f& p2, const V3f& p3, const V2f& n1, const V2f& n2, float depth,
@@ -118,9 +118,12 @@ namespace KitchenRoomService {
         KitchenData& kd = w->kitchenData;
         std::pair<size_t, size_t> targetWall;
         V2f hittingPoint;
-        auto cookerHalfWidth = sg.GM(kd.extractorHoodModel)->BBox3d()->calcWidth() * 0.5f;
-        auto ovenHalfWidth = sg.GM(kd.ovenPanelModel)->BBox3d()->calcWidth() * 0.5f;
-        auto sinkHalfWidth = sg.GM(kd.sinkModel)->BBox3d()->calcWidth() * 0.5f;
+        auto cooker = furns.spawn(FTH::FT_Cooktop);
+        auto oven = furns.spawn(FTH::FT_OvenPanel);
+        auto sink = furns.spawn(FTH::FT_Sink);
+        auto cookerHalfWidth = cooker.size.width()*0.5;
+        auto ovenHalfWidth = oven.size.width()*0.5;
+        auto sinkHalfWidth = sink.size.width()*0.5;
         auto carryingIndex = 0u;
         for ( auto t = 0u; t < kd.kitchenWorktopPath.size(); t++ ) {
             auto& kup = kd.kitchenWorktopPath[t];
@@ -148,7 +151,7 @@ namespace KitchenRoomService {
                     bool hit = RoomService::findOppositeWallFromPoint(w, mp, -kup.normal, targetWall,
                                                                       hittingPoint, IncludeWindowsOrDoors::WindowsOnly);
                     if ( hit ) {
-                        kup.sinkPos = hittingPoint;
+                        kup.sinkPos = oppositePointOnWallFor(w, hittingPoint, -kup.normal);
                         kup.flags.hasSink = true;
                         break;
                     }

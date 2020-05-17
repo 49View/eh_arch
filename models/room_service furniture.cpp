@@ -15,6 +15,7 @@
 #include "floor_service.hpp"
 #include "arch_segment_service.hpp"
 #include "room_service_furniture.hpp"
+#include "kitchen_room_service.hpp"
 
 bool FurnitureRuleScript::execute( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns,
                                    const FurnitureRuleFunctionContainer &funcRules ) const {
@@ -662,8 +663,8 @@ namespace RoomService {
         r->floorMaterial = "parquet,red";
         r->wallMaterial = "yule,flemish,tiles";
         r->wallColor = C4f::WHITE;
-        createMasterPath(r, furns);
-        createUnits(r, furns);
+        KitchenRoomService::createMasterPath(r, furns);
+        KitchenRoomService::createUnits(r, furns);
     }
 
     void furnish( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
