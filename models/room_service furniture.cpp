@@ -572,34 +572,34 @@ namespace RoomService {
         V3f cornerSlack{ 0.05f, 0.0f, 0.0f };
         ruleScript.clear();
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::MainWith2Sides ),
-                                                    FurnitureRefs{{ FTH::Bed(), FTH::Bedside(), FTH::Bedside() },
-                                                                  { FTH::Picture() }}, WSLOH::SecondLongest() } );
+                                                    FurnitureRefs{{ FTH::FT_Bed, FTH::FT_Bedside, FTH::FT_Bedside },
+                                                                  { FTH::FT_Picture }}, WSLOH::SecondLongest() } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::CornerWithDec ),
-                                                    FurnitureRefs{{ FTH::Bedside() },
-                                                                  { FTH::Picture() }}, WSLOH::Longest(),
+                                                    FurnitureRefs{{ FTH::FT_Bedside },
+                                                                  { FTH::FT_Picture }}, WSLOH::Longest(),
                                                     FurnitureSlacks{cornerSlack} } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::SetAlignedAtCorner ),
-                                                    FurnitureRefs{{ FTH::Shelf(), FTH::Shelf(), FTH::Sofa() }},
+                                                    FurnitureRefs{{ FTH::FT_Shelf, FTH::FT_Shelf, FTH::FT_Sofa }},
                                                     WSLOH::Longest(),
                                                     FurnitureSlacks{ cornerSlack, V3f::ZERO, cornerSlack }} );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::SetAlignedAtCorner ),
-                                                    FurnitureRefs{{ FTH::Wardrobe(), FTH::Wardrobe() }},
+                                                    FurnitureRefs{{ FTH::FT_Wardrobe, FTH::FT_Wardrobe }},
                                                     WSLOH::LongestOpposite(), WSC_P2 } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::SetAlignedAtCorner ),
-                                                    FurnitureRefs{{ FTH::Shelf(), FTH::Wardrobe(), FTH::Armchair() }},
+                                                    FurnitureRefs{{ FTH::FT_Shelf, FTH::FT_Wardrobe, FTH::FT_Armchair }},
                                                     WallSegmentIdentifier{ WSLOH::ExactIndex(), 3 },
                                                     FurnitureSlacks{ V3f::ZERO, V3f::ZERO, cornerSlack * 0.5f },
                                                     WSC_P2 } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::SetAlignedAtCorner ),
-                                                    FurnitureRefs{{ FTH::Armchair() }},
+                                                    FurnitureRefs{{ FTH::FT_Armchair }},
                                                     WallSegmentIdentifier{ WSLOH::ExactIndex(), 4 },
                                                     WSC_P2 } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::SetAlignedAtCorner ),
-                                                    FurnitureRefs{{ FTH::Armchair() }},
+                                                    FurnitureRefs{{ FTH::FT_Armchair }},
                                                     WallSegmentIdentifier{ WSLOH::ExactIndex(), 4 },
                                                     WSC_P1 } );
         ruleScript.addRule(
-                FurniturePlacementRule{ FurnitureRuleIndex( RS::MiddleOfRoom ), FurnitureRefs{{ FTH::Carpet() }}} );
+                FurniturePlacementRule{ FurnitureRuleIndex( RS::MiddleOfRoom ), FurnitureRefs{{ FTH::FT_Carpet }}} );
         RS::runRuleScript( f, r, furns, ruleScript );
     }
 
@@ -607,20 +607,20 @@ namespace RoomService {
         FurnitureRuleScript ruleScript;
         V3f inFrontOfSlack{ 0.0f, 0.2f, 0.0f };
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::SetAlignedMiddle ),
-                                                    FurnitureRefs{{ FTH::Sofa(), FTH::CoffeeTable() }},
+                                                    FurnitureRefs{{ FTH::FT_Sofa, FTH::FT_CoffeeTable }},
                                                     WallSegmentIdentifier{ WSLOH::Longest() },
                                                     FurnitureSlacks{ inFrontOfSlack }
         } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::SetAlignedMiddle ),
-                                                    FurnitureRefs{{ FTH::SideBoard()},{ FTH::TVWithStand() }},
+                                                    FurnitureRefs{{ FTH::FT_SideBoard},{ FTH::FT_TVWithStand }},
                                                     WallSegmentIdentifier{ WSLOH::LongestOpposite() }
         } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::CornerWithDec ),
-                                                    FurnitureRefs{{ FTH::Plant()},{ FTH::Picture() }},
+                                                    FurnitureRefs{{ FTH::FT_Plant},{ FTH::FT_Picture }},
                                                     WallSegmentIdentifier{ WSLOH::Longest() }
         } );
         ruleScript.addRule(
-                FurniturePlacementRule{ FurnitureRuleIndex( RS::MiddleOfRoom ), FurnitureRefs{{ FTH::Carpet() }}} );
+                FurniturePlacementRule{ FurnitureRuleIndex( RS::MiddleOfRoom ), FurnitureRefs{{ FTH::FT_Carpet }}} );
         RS::runRuleScript( f, r, furns, ruleScript );
     }
 
@@ -628,7 +628,7 @@ namespace RoomService {
         FurnitureRuleScript ruleScript;
         V3f tableSlack{ 0.5f, 0.5f, 0.0f };
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
-                                                    FurnitureRefs{{ FTH::DiningTable() }},
+                                                    FurnitureRefs{{ FTH::FT_DiningTable }},
                                                     WallSegmentIdentifier{ WSLOH::ExactIndex() },
                                                     FurnitureSlacks{ tableSlack }
         } );
@@ -641,18 +641,18 @@ namespace RoomService {
         r->wallMaterial = "yule,tiles";
         r->wallColor = C4f::WHITE;
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRFirstAvailableCorner ),
-                                                    FurnitureRefs{{ FTH::Shower() }}
+                                                    FurnitureRefs{{ FTH::FT_Shower }}
         } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
-                                                    FurnitureRefs{{ FTH::Toilet() }},
+                                                    FurnitureRefs{{ FTH::FT_Toilet }},
                                                     WallSegmentIdentifier{ WSLOH::ExactIndex() }
         } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
-                                                    FurnitureRefs{{ FTH::BathroomSink() }},
+                                                    FurnitureRefs{{ FTH::FT_BathroomSink }},
                                                     WallSegmentIdentifier{ WSLOH::ExactIndex() }
         } );
         ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex( RS::FRBestFit ),
-                                                    FurnitureRefs{{ FTH::BathroomTowerRadiator() }},
+                                                    FurnitureRefs{{ FTH::FT_BathroomTowerRadiator }},
                                                     WallSegmentIdentifier{ WSLOH::ExactIndex() }
         } );
         RS::runRuleScript( f, r, furns, ruleScript );
@@ -662,7 +662,8 @@ namespace RoomService {
         r->floorMaterial = "parquet,red";
         r->wallMaterial = "yule,flemish,tiles";
         r->wallColor = C4f::WHITE;
-
+        createMasterPath(r, furns);
+        createUnits(r, furns);
     }
 
     void furnish( FloorBSData* f, RoomBSData *r, FurnitureMapStorage &furns ) {
@@ -725,10 +726,10 @@ FittedFurniture &FurnitureMapStorage::spawn( FT _ft ) {
 }
 
 void initializeDefaultFurnituresFlags( FT _ft, FittedFurniture &_ff ) {
-    if ( _ft == FTH::Carpet() || _ft == FTH::TVWithStand()) {
+    if ( _ft == FTH::FT_Carpet || _ft == FTH::FT_TVWithStand) {
         orBitWiseFlag( _ff.flags, FF_CanOverlap );
     }
-    if ( _ft == FTH::Picture()) {
+    if ( _ft == FTH::FT_Picture) {
         orBitWiseFlag( _ff.flags, FF_CanBeHanged | FF_isDecoration );
     }
 }
@@ -773,6 +774,15 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string &_name ) {
     std::string bathroomSink = "urby,sink";
     std::string bathroomTowerRadiator = "bathroom,tower,radiator";
 
+    std::string sinkModel           = "ktc,sink,double,chrome";
+    std::string ovenPanelModel      = "ktc,oven,flat";
+    std::string microwaveModel      = "ktc,microwave";
+    std::string cooktopModel        = "ktc,cooktop";
+    std::string fridgeModel         = "ktc,fridge,single";
+    std::string extractorHoodModel  = "ktc,extractor,hood";
+    std::string drawersHandleModel  = "ktc,handle,long,contemporary";
+
+
     std::string queenBedIcon = "fia,queen,icon";
     std::string bedSideIcon = "fia,bedside";
     std::string sofaIcon = "fia,sofa,3seaters";
@@ -785,24 +795,33 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string &_name ) {
 
     FurnitureSetContainer furnitureSet{};
     furnitureSet.name = _name;
-    furnitureSet.set.emplace_back( FTH::Bed(), brimnes_bed, V3f::ZERO, queenBedIcon );
-    furnitureSet.set.emplace_back( FTH::Bedside(), lauter_selije, V3f::ZERO, bedSideIcon );
-    furnitureSet.set.emplace_back( FTH::Shelf(), hemnes_shelf, V3f::ZERO, shelfIcon );
-    furnitureSet.set.emplace_back( FTH::Wardrobe(), hemnes_drawer, V3f::ZERO, wardrobeIcon );
-    furnitureSet.set.emplace_back( FTH::Drawer(), hemnes_drawer, V3f::ZERO, wardrobeIcon );
-    furnitureSet.set.emplace_back( FTH::Sofa(), soderhamn, V3f::ZERO, sofaIcon );
-    furnitureSet.set.emplace_back( FTH::Picture(), pictures_set_3, V3f::ZERO, S::SQUARE );
-    furnitureSet.set.emplace_back( FTH::Carpet(), carpet_flottebo, V3f::ZERO, S::SQUARE );
-    furnitureSet.set.emplace_back( FTH::Armchair(), Strandmon, V3f::ZERO, armchairIcon );
-    furnitureSet.set.emplace_back( FTH::CoffeeTable(), coffeeTable, V3f::ZERO, coffeeTableIcon );
-    furnitureSet.set.emplace_back( FTH::DiningTable(), diningTable, V3f::ZERO, coffeeTableIcon );
-    furnitureSet.set.emplace_back( FTH::SideBoard(), sideBoard, V3f::ZERO, S::SQUARE );
-    furnitureSet.set.emplace_back( FTH::TVWithStand(), tv, V3f::ZERO, S::SQUARE );
-    furnitureSet.set.emplace_back( FTH::Plant(), plant1, V3f::ZERO, S::SQUARE );
-    furnitureSet.set.emplace_back( FTH::Toilet(), toilet, V3f::ZERO, toiletIcon );
-    furnitureSet.set.emplace_back( FTH::Shower(), shower, V3f::ZERO, S::SQUARE );
-    furnitureSet.set.emplace_back( FTH::BathroomSink(), bathroomSink, V3f::ZERO, bathroomSinkIcon );
-    furnitureSet.set.emplace_back( FTH::BathroomTowerRadiator(), bathroomTowerRadiator, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_Bed, brimnes_bed, V3f::ZERO, queenBedIcon );
+    furnitureSet.set.emplace_back( FTH::FT_Bedside, lauter_selije, V3f::ZERO, bedSideIcon );
+    furnitureSet.set.emplace_back( FTH::FT_Shelf, hemnes_shelf, V3f::ZERO, shelfIcon );
+    furnitureSet.set.emplace_back( FTH::FT_Wardrobe, hemnes_drawer, V3f::ZERO, wardrobeIcon );
+    furnitureSet.set.emplace_back( FTH::FT_Drawer, hemnes_drawer, V3f::ZERO, wardrobeIcon );
+    furnitureSet.set.emplace_back( FTH::FT_Sofa, soderhamn, V3f::ZERO, sofaIcon );
+    furnitureSet.set.emplace_back( FTH::FT_Picture, pictures_set_3, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_Carpet, carpet_flottebo, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_Armchair, Strandmon, V3f::ZERO, armchairIcon );
+    furnitureSet.set.emplace_back( FTH::FT_CoffeeTable, coffeeTable, V3f::ZERO, coffeeTableIcon );
+    furnitureSet.set.emplace_back( FTH::FT_DiningTable, diningTable, V3f::ZERO, coffeeTableIcon );
+    furnitureSet.set.emplace_back( FTH::FT_SideBoard, sideBoard, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_TVWithStand, tv, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_Plant, plant1, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_Toilet, toilet, V3f::ZERO, toiletIcon );
+    furnitureSet.set.emplace_back( FTH::FT_Shower, shower, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_BathroomSink, bathroomSink, V3f::ZERO, bathroomSinkIcon );
+    furnitureSet.set.emplace_back( FTH::FT_BathroomTowerRadiator, bathroomTowerRadiator, V3f::ZERO, S::SQUARE );
+
+
+    furnitureSet.set.emplace_back( FTH::FT_Sink, sinkModel         , V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_OvenPanel, ovenPanelModel    , V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_Microwave, microwaveModel    , V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_Cooktop, cooktopModel      , V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_Fridge, fridgeModel       , V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_ExtractorHood, extractorHoodModel, V3f::ZERO, S::SQUARE );
+    furnitureSet.set.emplace_back( FTH::FT_DrawersHandle, drawersHandleModel, V3f::ZERO, S::SQUARE );
 
     Http::post( Url{ "/furnitureset" }, furnitureSet.serialize(), []( HttpResponeParams &res ) {
         LOGRS( res.bufferString );

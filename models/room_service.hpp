@@ -32,33 +32,21 @@ public:
         FT_CoffeeTable,
         FT_DiningTable,
         FT_Plant,
-        FT_Invalid,
         FT_Toilet,
         FT_Shower,
         FT_BathroomSink,
         FT_BathroomTowerRadiator,
+        FT_Sink,
+        FT_OvenPanel,
+        FT_Microwave,
+        FT_Cooktop,
+        FT_Fridge,
+        FT_ExtractorHood,
+        FT_DrawersHandle,
+
+        FT_Invalid,
         Last
     };
-
-    static Type Bed() { return Type::FT_Bed; }
-    static Type Bedside() { return Type::FT_Bedside; }
-    static Type Shelf() { return Type::FT_Shelf; }
-    static Type Wardrobe() { return Type::FT_Wardrobe; }
-    static Type Drawer() { return Type::FT_Drawer; }
-    static Type Carpet() { return Type::FT_Carpet; }
-    static Type Armchair() { return Type::FT_Armchair; }
-    static Type Sofa() { return Type::FT_Sofa; }
-    static Type SideBoard() { return Type::FT_SideBoard; }
-    static Type TVHanged() { return Type::FT_TVHanged; }
-    static Type TVWithStand() { return Type::FT_TVWithStand; }
-    static Type Picture() { return Type::FT_Picture; }
-    static Type CoffeeTable() { return Type::FT_CoffeeTable; }
-    static Type DiningTable() { return Type::FT_DiningTable; }
-    static Type Plant() { return Type::FT_Plant; }
-    static Type Toilet() { return Type::FT_Toilet; }
-    static Type Shower() { return Type::FT_Shower; }
-    static Type BathroomSink() { return Type::FT_BathroomSink; }
-    static Type BathroomTowerRadiator() { return Type::FT_BathroomTowerRadiator; }
 
     static Type random() {
         return Type(unitRandI(Type::Last));

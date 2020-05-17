@@ -296,7 +296,6 @@ namespace KitchenRender {
                 auto linex4 = FollowerService::createLinePath(sinkp4b, sinkp4a, topAndBottomDepth,
                                                               kd.kitchenWorktopHeight);
                 sg.GB<GT::Extrude>(PolyOutLine{ linex4, V3f::UP_AXIS, kd.worktopThickness }, GT::M(kd.worktopMaterial));
-
             }
         }
 

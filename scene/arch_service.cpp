@@ -41,23 +41,23 @@ void ArchService::loadHouse( ResourceRef name ) {
 
 //        FurnitureRuleScript ruleScript;
 //        V3f cornerSlack{0.2f, 0.0f, 0.0f};
-//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::MainWith2Sides),     FurnitureRefs{{ FTH::Bed(), FTH::Bedside(), FTH::Bedside()}, { FTH::Picture()}}, WSLOH::SecondLongest()} );
-//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::CornerWithDec),      FurnitureRefs{{ FTH::Bedside()}, { FTH::Picture()}}, WSLOH::Longest(), cornerSlack } );
-//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner), FurnitureRefs{{ FTH::Shelf(), FTH::Shelf(), FTH::Sofa()}}, WSLOH::Longest(), FurnitureSlacks{ cornerSlack, V3f::ZERO, cornerSlack } });
-//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner), FurnitureRefs{{ FTH::Wardrobe(), FTH::Wardrobe()}}, WSLOH::LongestOpposite(), WSC_P2 } );
+//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::MainWith2Sides),     FurnitureRefs{{ FTH::FT_Bed, FTH::FT_Bedside, FTH::FT_Bedside}, { FTH::FT_Picture}}, WSLOH::SecondLongest()} );
+//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::CornerWithDec),      FurnitureRefs{{ FTH::FT_Bedside}, { FTH::FT_Picture}}, WSLOH::Longest(), cornerSlack } );
+//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner), FurnitureRefs{{ FTH::FT_Shelf, FTH::FT_Shelf, FTH::FT_Sofa}}, WSLOH::Longest(), FurnitureSlacks{ cornerSlack, V3f::ZERO, cornerSlack } });
+//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner), FurnitureRefs{{ FTH::FT_Wardrobe, FTH::FT_Wardrobe}}, WSLOH::LongestOpposite(), WSC_P2 } );
 //        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner),
-//                                                    FurnitureRefs{{ FTH::Shelf(), FTH::Wardrobe(), FTH::Armchair()}},
+//                                                    FurnitureRefs{{ FTH::FT_Shelf, FTH::FT_Wardrobe, FTH::FT_Armchair}},
 //                                                    WallSegmentIdentifier{ WSLOH::ExactIndex(), 3},
 //                                                    FurnitureSlacks{ V3f::ZERO, V3f::ZERO, cornerSlack*0.5f }, WSC_P2 } );
 //        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner),
-//                                                    FurnitureRefs{{ FTH::Armchair()}},
+//                                                    FurnitureRefs{{ FTH::FT_Armchair}},
 //                                                    WallSegmentIdentifier{ WSLOH::ExactIndex(), 4},
 //                                                    WSC_P2 } );
 //        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner),
-//                                                    FurnitureRefs{{ FTH::Armchair()}},
+//                                                    FurnitureRefs{{ FTH::FT_Armchair}},
 //                                                    WallSegmentIdentifier{ WSLOH::ExactIndex(), 4},
 //                                                    WSC_P1 } );
-//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::MiddleOfRoom), FurnitureRefs{{ FTH::Carpet()} }} );
+//        ruleScript.addRule( FurniturePlacementRule{ FurnitureRuleIndex(RS::MiddleOfRoom), FurnitureRefs{{ FTH::FT_Carpet} }} );
 //        bool completed = true;
 //        for ( const auto& f : house->mFloors ) {
 //            for ( const auto& w : f->rooms ) {
