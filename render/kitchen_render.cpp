@@ -38,23 +38,23 @@ namespace KitchenRender {
         V2f inward = ( normal * kd.kitchenWorktopDepth * 0.5f );
         V2f inwardSkirting = ( normal * skirtingOffset );
         V2f inwardUnits = ( normal * unitOffset );
+        V2f crossNormal = normalize(p2 - p1);
 
-        kd.kitchenWorktopPath.emplace_back(p1 + inward, p2 + inward, normal);
+        kd.kitchenWorktopPath.emplace_back(p1 + inward, p2 + inward, normal, crossNormal);
         auto middle = lerp(0.5f, p1, p2);
         V2f lp1Dir = normalize(middle - p1);
         V2f lp2Dir = normalize(middle - p2);
-//        V2f inW1 = isMain ? ( lp1Dir * kd.kitchenWorktopDepth ) : V2f::ZERO;
-//        V2f inW2 = isMain ? ( lp2Dir * kd.kitchenWorktopDepth ) : V2f::ZERO;
 
         V2f inW1 = isMain ? ( lp1Dir * ( skirtingOffset + sho ) ) : lp1Dir * -( kd.kitchenSkirtingRecess );
         V2f inW2 = isMain ? ( lp2Dir * ( skirtingOffset + sho ) ) : V2f::ZERO;
 
-        kd.kitchenSkirtingPath.emplace_back(p1 + inwardSkirting + inW1, p2 + inwardSkirting + inW2, normal);
+        kd.kitchenSkirtingPath.emplace_back(p1 + inwardSkirting + inW1, p2 + inwardSkirting + inW2, normal,
+                                            crossNormal);
 
         inW1 = isMain ? ( lp1Dir * ( unitOffset + dho ) ) : lp1Dir * -kd.kitchenUnitsRecess;
         inW2 = isMain ? ( lp2Dir * ( unitOffset + dho ) ) : V2f::ZERO;
 
-        kd.kitchenUnitsPath.emplace_back(p1 + inwardUnits + inW1, p2 + inwardUnits + inW2, normal);
+        kd.kitchenUnitsPath.emplace_back(p1 + inwardUnits + inW1, p2 + inwardUnits + inW2, normal, crossNormal);
     }
 
     void createMasterPath( RoomBSData *w, KitchenData& kd ) {
@@ -111,41 +111,41 @@ namespace KitchenRender {
         return ret;
     }
 
-    void drawFlatDoubleDrawer( SceneGraph& sg, const KitchenPath& kup, const Quaternion& rotation, const V3f& a,
-                               const V3f& b, KitchenData& kd ) {
+    void addDrawersSequencially( KitchenData& kd, const V2f& p1s, const V2f& p2s, const V2f& normal ) {
         float dp = kd.drawersPadding.x();
-        float unitYSizeAvailable = kd.kitchenWorktopHeight - kd.skirtingHeight + ( dp * 2 );
-        for ( int m = 0; m < 2; m++ ) {
-            float unitHeight = m == 0 ? unitYSizeAvailable * 0.75f : unitYSizeAvailable * .25f;
-            float uz = kd.skirtingHeight + ( m == 0 ? 0.0f : unitYSizeAvailable * 0.75f + dp );
-            auto linex = FollowerService::createLinePath(a, b, kd.drawersThickness, uz);
-            sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, unitHeight },
-                               GT::M(kd.unitsMaterial));
-            auto handleWidth = sg.GM(kd.drawersHandleModel)->BBox3d()->calcWidth();
-            if ( distance(a, b) > handleWidth * 1.2f ) {
-                auto rotationHandle = rotation;
-                V3f mixHandlePos = { 0.5f, 0.5f, 0.5f };
-                if ( m == 0 ) {
-                    auto rotationZ = Quaternion{ M_PI_2, V3f::Z_AXIS };
-                    rotationHandle = rotationZ * rotation;
-                    mixHandlePos.setX(0.15f);
-                    mixHandlePos.setY(0.15f);
-                }
-                sg.GB<GT::Asset>(kd.drawersHandleModel,
-                                 XZY::C(mix(a, b, mixHandlePos) + kup.normal * kd.drawersThickness * 0.5f,
-                                        uz + unitHeight * 0.5f), GT::Rotate(rotationHandle));
-            }
+        float drawW = kd.longDrawersSize.x();
+
+        V3f p1 = { p1s, kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f };
+        V3f p2 = { p2s, kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f };
+        V3f pDir = normalize(p2 - p1);
+
+        float widthOfSegment = distance(p1, p2);
+        float widthForUnitsAvailable = widthOfSegment;
+        int numDrawers = (int) ( widthForUnitsAvailable / drawW );
+        float finalPadding = fmodf(widthForUnitsAvailable, drawW);
+        for ( int q = 0; q < numDrawers + 1; q++ ) {
+            if ( ( q == ( numDrawers ) ) && ( finalPadding < 0.01f ) ) continue;
+            float drawerWidth = ( q == numDrawers ) ? finalPadding : drawW;
+            Vector3f a = p1 + ( pDir * drawW * (float) q ) + ( pDir * dp );
+            Vector3f b = a + ( pDir * ( drawerWidth - dp * 2.0f ) );
+            kd.kitchenDrawers.emplace_back(a, b, normal);
         }
+    }
+
+    void addDrawersFromPoint( KitchenData& kd, float pointDelta, float gapWidth, const KitchenPath& kup ) {
+        V2f pd = lerp(pointDelta, kup.p1, kup.p2);
+        V2f pd1 = pd - kup.crossNormal * gapWidth;
+        V2f pd2 = pd + kup.crossNormal * gapWidth;
+        addDrawersSequencially(kd, kup.p1, pd1, kup.normal);
+        addDrawersSequencially(kd, pd2, kup.p2, kup.normal);
     }
 
     void createUnits( SceneGraph& sg, RoomBSData *w, KitchenData& kd ) {
 
-        float dp = kd.drawersPadding.x();
-        float drawW = kd.longDrawersSize.x();
-
         std::pair<size_t, size_t> targetWall;
         V2f hittingPoint;
         auto cookerHalfWidth = sg.GM(kd.extractorHoodModel)->BBox3d()->calcWidth() * 0.5f;
+        auto ovenHalfWidth = sg.GM(kd.ovenPanelModel)->BBox3d()->calcWidth() * 0.5f;
         auto sinkHalfWidth = sg.GM(kd.sinkModel)->BBox3d()->calcWidth() * 0.5f;
         auto carryingIndex = 0u;
         for ( auto t = 0u; t < kd.kitchenWorktopPath.size(); t++ ) {
@@ -158,6 +158,7 @@ namespace KitchenRender {
                                                                   hittingPoint);
                 if ( hit ) {
                     kup.cookerPos = hittingPoint;
+                    kup.cookerPosDelta = posDelta;
                     kup.flags.hasCooker = true;
                     carryingIndex = t + 1;
                     break;
@@ -181,22 +182,40 @@ namespace KitchenRender {
             }
         }
 
-        for ( const auto& kup : kd.kitchenUnitsPath ) {
-            V3f p1 = { kup.p1, kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f };
-            V3f p2 = { kup.p2, kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f };
-            V3f pDir = normalize(p2 - p1);
-            auto rotation = Quaternion{ RoomService::furnitureAngleFromNormal(kup.normal), V3f::UP_AXIS };
+        for ( auto t = 0u; t < kd.kitchenWorktopPath.size(); t++ ) {
+            auto& kup = kd.kitchenUnitsPath[t];
+            auto& kwp = kd.kitchenWorktopPath[t];
+            if ( kwp.flags.hasCooker ) {
+                addDrawersFromPoint(kd, kwp.cookerPosDelta, ovenHalfWidth, kup);
+            } else {
+                addDrawersSequencially(kd, kup.p1, kup.p2, kup.normal);
+            }
+        }
+    }
 
-            float widthOfSegment = distance(p1, p2);
-            float widthForUnitsAvailable = widthOfSegment;
-            int numDrawers = (int) ( widthForUnitsAvailable / drawW );
-            float finalPadding = fmodf(widthForUnitsAvailable, drawW);
-            for ( int q = 0; q < numDrawers + 1; q++ ) {
-                if ( ( q == ( numDrawers ) ) && ( finalPadding < 0.01f ) ) continue;
-                float drawerWidth = ( q == numDrawers ) ? finalPadding : drawW;
-                Vector3f a = p1 + ( pDir * drawW * (float)q ) + (pDir*dp);
-                Vector3f b = a + ( pDir * (drawerWidth - dp*2.0f) );
-                drawFlatDoubleDrawer(sg, kup, rotation, a, b, kd);
+    void drawFlatDoubleDrawer( SceneGraph& sg, KitchenData& kd, const KitchenDrawer& kup ) {
+        auto rotation = Quaternion{ RoomService::furnitureAngleFromNormal(kup.normal), V3f::UP_AXIS };
+        float dp = kd.drawersPadding.x();
+        float unitYSizeAvailable = kd.kitchenWorktopHeight - kd.skirtingHeight + ( dp * 2 );
+        for ( int m = 0; m < 2; m++ ) {
+            float unitHeight = m == 0 ? unitYSizeAvailable * 0.75f : unitYSizeAvailable * .25f;
+            float uz = kd.skirtingHeight + ( m == 0 ? 0.0f : unitYSizeAvailable * 0.75f + dp );
+            auto linex = FollowerService::createLinePath(kup.p1, kup.p2, kd.drawersThickness, uz);
+            sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, unitHeight },
+                               GT::M(kd.unitsMaterial));
+            auto handleWidth = sg.GM(kd.drawersHandleModel)->BBox3d()->calcWidth();
+            if ( distance(kup.p1, kup.p2) > handleWidth * 1.2f ) {
+                auto rotationHandle = rotation;
+                V3f mixHandlePos = { 0.5f, 0.5f, 0.5f };
+                if ( m == 0 ) {
+                    auto rotationZ = Quaternion{ M_PI_2, V3f::Z_AXIS };
+                    rotationHandle = rotationZ * rotation;
+                    mixHandlePos.setX(0.15f);
+                    mixHandlePos.setY(0.15f);
+                }
+                sg.GB<GT::Asset>(kd.drawersHandleModel,
+                                 XZY::C(mix(kup.p1, kup.p2, mixHandlePos) + kup.normal * kd.drawersThickness * 0.5f,
+                                        uz + unitHeight * 0.5f), GT::Rotate(rotationHandle));
             }
         }
     }
@@ -205,6 +224,10 @@ namespace KitchenRender {
         KitchenData kd = w->kitchenData;
         createMasterPath(w, kd);
         createUnits(sg, w, kd);
+
+        for ( const auto& kwd : kd.kitchenDrawers ) {
+            drawFlatDoubleDrawer(sg, kd, kwd);
+        }
 
         for ( const auto& kwp : kd.kitchenWorktopPath ) {
             if ( !kwp.flags.hasSink ) {
@@ -216,9 +239,9 @@ namespace KitchenRender {
                 // instead of clipping an hole through it as I still don't trust booleans they are still too risky
                 auto sinkHalfDepth = sg.GM(kd.sinkModel)->BBox3d()->calcDepth() * 0.5f;
                 // Add some filling to make sure the whole sink is cover, ie to cover up round edges
-                auto sinkHalfWidth = (sg.GM(kd.sinkModel)->BBox3d()->calcWidth() * 0.5f)-0.02f;
+                auto sinkHalfWidth = ( sg.GM(kd.sinkModel)->BBox3d()->calcWidth() * 0.5f ) - 0.02f;
                 auto kn = normalize(kwp.p2 - kwp.p1);
-                auto sinko1 =  kwp.sinkPos + kwp.normal*kd.kitchenWorktopDepth*0.5f;
+                auto sinko1 = kwp.sinkPos + kwp.normal * kd.kitchenWorktopDepth * 0.5f;
                 auto knhw = kn * sinkHalfWidth;
                 auto sinkp1 = sinko1 - knhw;
                 auto sinkp2 = sinko1 + knhw;
@@ -230,18 +253,18 @@ namespace KitchenRender {
 
                 // Right side of the worktop
                 auto linex2 = FollowerService::createLinePath(sinkp2, kwp.p2, kd.kitchenWorktopDepth,
-                                                             kd.kitchenWorktopHeight);
+                                                              kd.kitchenWorktopHeight);
                 sg.GB<GT::Extrude>(PolyOutLine{ linex2, V3f::UP_AXIS, kd.worktopThickness }, GT::M(kd.worktopMaterial));
 
                 // Add some filling (0.02f) for the top/bottom also
-                float topAndBottomDepth = ((kd.kitchenWorktopDepth - sinkHalfDepth*2.0f) * 0.5f)+0.02f;
+                float topAndBottomDepth = ( ( kd.kitchenWorktopDepth - sinkHalfDepth * 2.0f ) * 0.5f ) + 0.02f;
 
                 // Top side of the worktop
-                auto topSideOffset = (kwp.normal*(kd.kitchenWorktopDepth*0.5f-topAndBottomDepth*0.5f));
+                auto topSideOffset = ( kwp.normal * ( kd.kitchenWorktopDepth * 0.5f - topAndBottomDepth * 0.5f ) );
                 auto sinkp3a = sinkp1 + topSideOffset;
                 auto sinkp3b = sinkp2 + topSideOffset;
                 auto linex3 = FollowerService::createLinePath(sinkp3b, sinkp3a, topAndBottomDepth,
-                                                             kd.kitchenWorktopHeight);
+                                                              kd.kitchenWorktopHeight);
                 sg.GB<GT::Extrude>(PolyOutLine{ linex3, V3f::UP_AXIS, kd.worktopThickness }, GT::M(kd.worktopMaterial));
 
                 // Bottom side of the worktop
@@ -282,7 +305,6 @@ namespace KitchenRender {
                                  GT::Rotate(rotation));
             }
         }
-
     }
 
 }

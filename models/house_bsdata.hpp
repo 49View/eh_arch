@@ -227,15 +227,28 @@ JSONDATA(KitchenPathFlags, mainSegment, hasCooker, hasSink, hasFridge)
     bool hasFridge = false;
 };
 
-JSONDATA(KitchenPath, p1, p2, normal, cookerPos, sinkPos, fridgePos)
+JSONDATA(KitchenPath, p1, p2, normal, crossNormal, cookerPos, sinkPos, fridgePos)
     V2f p1;
     V2f p2;
     V2f normal;
+    V2f crossNormal;
     V2f cookerPos = V2f::ZERO;
+    float cookerPosDelta = 0.0f;
     V2f sinkPos = V2f::ZERO;
+    float sinkPosDelta = 0.0f;
     V2f fridgePos = V2f::ZERO;
+    float fridgePosDelta = 0.0f;
     KitchenPathFlags flags{};
-    KitchenPath( const V2f& p1, const V2f& p2, const V2f& normal ) : p1(p1), p2(p2), normal(normal) {}
+    KitchenPath( const V2f& p1, const V2f& p2, const V2f& normal, const V2f& crossNormal ) : p1(p1), p2(p2),
+                                                                                             normal(normal),
+                                                                                             crossNormal(crossNormal) {}
+};
+
+JSONDATA(KitchenDrawer, p1, p2, normal)
+    V3f p1;
+    V3f p2;
+    V2f normal;
+    KitchenDrawer( const V3f& p1, const V3f& p2, const V2f& normal ) : p1(p1), p2(p2), normal(normal) {}
 };
 
 JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
@@ -246,6 +259,7 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     std::vector<KitchenPath> kitchenWorktopPath;
     std::vector<KitchenPath> kitchenSkirtingPath;
     std::vector<KitchenPath> kitchenUnitsPath;
+    std::vector<KitchenDrawer> kitchenDrawers;
 
     // kitchen lengths, dimensions, etc...
     float kitchenWorktopDepth = 0.64f;
