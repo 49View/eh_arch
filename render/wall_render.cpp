@@ -116,9 +116,11 @@ namespace WallRender {
     GeomSPContainer renderWalls( SceneGraph &sg, const std::vector<ArchSegment> &wss, const std::string &wallMaterial,
                                  const C4f &wallColor ) {
         GeomSPContainer ret;
+        GeomMappingData mapping{ V2f{ 1.0f }};
+        mapping.direction = MappingDirection::Y_POS;
         std::vector<QuadVector3fNormal> wallQuads = createArchSegmentQuads( wss );
         auto mainWall = sg.GB<GT::Mesh>( wallQuads, GT::M( wallMaterial ), wallColor,
-                                         GeomMappingData{ V2f{ 1.0f }}, GT::Tag( ArchType::WallT ));
+                                         mapping, GT::Tag( ArchType::WallT ));
         ret.emplace_back( mainWall );
         return ret;
     }

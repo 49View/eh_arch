@@ -128,8 +128,14 @@ namespace KitchenRender {
             float drawerWidth = ( q == numDrawers ) ? finalPadding : drawW;
             Vector3f a = p1 + ( pDir * drawW * (float) q ) + ( pDir * dp );
             Vector3f b = a + ( pDir * ( drawerWidth - dp * 2.0f ) );
-            kd.kitchenDrawers.emplace_back(a, b, normal);
+            kd.kitchenDrawers.emplace_back(a, b, normal, KitchenDrawerType::FlatBasic);
         }
+    }
+
+    void addDrawersFiller( KitchenData& kd, const V2f& p1s, const V2f& p2s, const V2f& normal, const C4f& color ) {
+        V3f p1 = { p1s, kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f };
+        V3f p2 = { p2s, kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f };
+        kd.kitchenDrawers.emplace_back(p1, p2, normal, KitchenDrawerType::Filler, color);
     }
 
     void addDrawersFromPoint( KitchenData& kd, float pointDelta, float gapWidth, const KitchenPath& kup ) {
@@ -138,6 +144,8 @@ namespace KitchenRender {
         V2f pd2 = pd + kup.crossNormal * gapWidth;
         addDrawersSequencially(kd, kup.p1, pd1, kup.normal);
         addDrawersSequencially(kd, pd2, kup.p2, kup.normal);
+        // Filler
+        addDrawersFiller(kd, pd1, pd2, kup.normal, C4f::DARK_GRAY);
     }
 
     void createUnits( SceneGraph& sg, RoomBSData *w, KitchenData& kd ) {
@@ -220,13 +228,28 @@ namespace KitchenRender {
         }
     }
 
+    void drawFillerDrawer( SceneGraph& sg, KitchenData& kd, const KitchenDrawer& kuw ) {
+        float dp = kd.drawersPadding.x();
+        float unitHeight = kd.kitchenWorktopHeight - (kd.skirtingHeight + ( dp * 2 ));
+        float uz = kd.skirtingHeight;
+        auto linex = FollowerService::createLinePath(kuw.p1, kuw.p2, kd.drawersThickness, uz);
+        sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, unitHeight }, GT::M(kd.unitsMaterial), kuw.color);
+    }
+
     void render( SceneGraph& sg, RoomBSData *w, HouseRenderContainer& ret ) {
         KitchenData kd = w->kitchenData;
         createMasterPath(w, kd);
         createUnits(sg, w, kd);
 
         for ( const auto& kwd : kd.kitchenDrawers ) {
-            drawFlatDoubleDrawer(sg, kd, kwd);
+            switch ( kwd.type) {
+                case KitchenDrawerType::Filler:
+                    drawFillerDrawer(sg, kd, kwd);
+                    break;
+                case KitchenDrawerType::FlatBasic:
+                    drawFlatDoubleDrawer(sg, kd, kwd);
+                    break;
+            }
         }
 
         for ( const auto& kwp : kd.kitchenWorktopPath ) {
@@ -287,15 +310,16 @@ namespace KitchenRender {
             auto rotation = Quaternion{ RoomService::furnitureAngleFromNormal(kup.normal), V3f::UP_AXIS };
             if ( kup.flags.hasCooker ) {
                 auto mp = kup.cookerPos;
+                auto extractorHeight = sg.GM(kd.extractorHoodModel)->BBox3d()->calcHeight();
                 sg.GB<GT::Asset>(kd.cooktopModel,
                                  XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, topOfWorktop),
                                  GT::Rotate(rotation));
                 sg.GB<GT::Asset>(kd.extractorHoodModel,
-                                 XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, topOfWorktop + 0.5f),
+                                 XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, w->height-extractorHeight),
                                  GT::Rotate(rotation));
                 sg.GB<GT::Asset>(kd.ovenPanelModel,
                                  XZY::C(mp + kup.normal * ( kd.kitchenWorktopDepth - kd.kitchenUnitsRecess ),
-                                        topOfWorktop - kd.worktopThickness), GT::Rotate(rotation));
+                                        topOfWorktop - kd.worktopThickness - kd.drawersPadding.y()), GT::Rotate(rotation));
             }
             if ( kup.flags.hasSink ) {
                 auto mp = kup.sinkPos;

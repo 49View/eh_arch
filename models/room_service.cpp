@@ -22,41 +22,11 @@ namespace RoomService {
         auto w = ServiceFactory::create<RoomBSData>();
         w->type = ArchType::RoomT;
         w->roomTypes = _preData.rtypes;
+        w->mHasCoving = !RS::hasType(w.get(), ASType::Kitchen);
         w->height = _floorHeight;
         w->width = _preData.bboxInternal.calcWidth();
         w->depth = _preData.bboxInternal.calcHeight();
         w->z = _z;
-
-        switch ( w->asType ) {
-            case ASType::Kitchen:
-                w->floorType = FloorMatType::Tiles;
-                break;
-
-            case ASType::BedroomSingle:
-            case ASType::BedroomDouble:
-            case ASType::BedroomMaster:
-                w->floorType = FloorMatType::Carpet;
-                break;
-
-            case ASType::Bathroom:
-            case ASType::Ensuite:
-            case ASType::ShowerRoom:
-            case ASType::ToiletRoom:
-                w->floorType = FloorMatType::Tiles;
-                break;
-
-            case ASType::GenericRoom:
-            case ASType::LivingRoom:
-            case ASType::Studio:
-            case ASType::Conservatory:
-            case ASType::DiningRoom:
-            case ASType::GamesRoom:
-            case ASType::Laundry:
-            case ASType::Hallway:
-            case ASType::Garage:
-            default:
-                w->floorType = FloorMatType::Wood;
-        }
 
         return w;
     }

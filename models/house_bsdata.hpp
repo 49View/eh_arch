@@ -244,11 +244,21 @@ JSONDATA(KitchenPath, p1, p2, normal, crossNormal, cookerPos, sinkPos, fridgePos
                                                                                              crossNormal(crossNormal) {}
 };
 
-JSONDATA(KitchenDrawer, p1, p2, normal)
-    V3f p1;
-    V3f p2;
-    V2f normal;
-    KitchenDrawer( const V3f& p1, const V3f& p2, const V2f& normal ) : p1(p1), p2(p2), normal(normal) {}
+namespace KitchenDrawerType {
+    const static uint64_t FlatBasic = 0;
+    const static uint64_t Filler = 1;
+};
+
+using KitchenDrawerTypeT = uint64_t;
+
+JSONDATA(KitchenDrawer, p1, p2, normal, type, color)
+    V3f p1 = V2f::ZERO;
+    V3f p2 = V2f::ZERO;
+    V2f normal = V2f::ZERO;
+    KitchenDrawerTypeT type = 0;
+    Color4f color = C4f::WHITE;
+    KitchenDrawer( const V3f& p1, const V3f& p2, const V2f& normal, KitchenDrawerTypeT type, const Color4f& color = C4f::WHITE )
+            : p1(p1), p2(p2), normal(normal), type(type), color(color) {}
 };
 
 JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
@@ -397,10 +407,10 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albe
     std::string declaredSQm = "";
     std::string defaultSkybox = "";
     HouseSourceData sourceData;
-    float doorHeight = 1.97f;
-    float defaultWindowHeight = 1.50f;
+    float doorHeight = 1.94f;
+    float defaultWindowHeight = 1.30f;
     float defaultWindowBaseOffset = 0.90f;
-    float defaultCeilingHeigh = 2.75f;
+    float defaultCeilingHeigh = 2.45f;
     float defaultGroundHeight = 0.3f;
     float windowsillExpansion = 0.04f;
     float windowFrameThickness = 0.04f;
