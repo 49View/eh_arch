@@ -343,6 +343,8 @@ namespace RoomService {
 
     void clearFurniture( RoomBSData *r );
     [[nodiscard]] bool addFurniture( FloorBSData *f, RoomBSData *r, FittedFurniture& ff );
+    bool placeManually( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff, const V2f& _pos, const Quaternion& _rot,
+                        const V2f& _widthNormal, const V2f& _depthNormal );
     [[nodiscard]] bool placeWallAligned( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff,
                                          WSLO wslo, float extraSlack = 0.0f, uint32_t _exactIndex = 0 );
     [[nodiscard]] bool placeWallCorner( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff,
@@ -408,7 +410,7 @@ namespace RoomService {
     std::string roomTypeToName( ASTypeT ast );
     bool isGeneric( const RoomBSData *r );
     bool checkMaxSizeEnclosure( const RoomBSData *r, Vector2f& ep1, Vector2f& ep2, const Vector2f& ncheck );
-    bool checkIncludeDoorsWindowsFlag( const ArchSegment* ls, IncludeWindowsOrDoors bwd );
+    bool checkIncludeDoorsWindowsFlag( const ArchSegment *ls, IncludeWindowsOrDoors bwd );
     bool roomNeedsCoving( const RoomBSData *r );
     bool intersectLine2d( const RoomBSData *r, Vector2f const& p0, Vector2f const& p1, Vector2f& i );
     float area( const RoomBSData *r );

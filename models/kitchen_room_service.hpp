@@ -5,11 +5,12 @@
 #pragma once
 
 struct RoomBSData;
+struct FloorBSData;
 class FurnitureMapStorage;
 
 namespace KitchenRoomService {
-    void createMasterPath( RoomBSData *w, FurnitureMapStorage &furns );
-    void createUnits( RoomBSData *w, FurnitureMapStorage &furns );
+    void createMasterPath( FloorBSData *f, RoomBSData *w, FurnitureMapStorage &furns );
+    void createUnits( FloorBSData *f, RoomBSData *w, FurnitureMapStorage &furns );
 }
 
 

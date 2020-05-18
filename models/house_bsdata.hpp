@@ -227,7 +227,7 @@ JSONDATA(KitchenPathFlags, mainSegment, hasCooker, hasSink, hasFridge)
     bool hasFridge = false;
 };
 
-JSONDATA(KitchenPath, p1, p2, normal, crossNormal, cookerPos, sinkPos, fridgePos)
+JSONDATA(KitchenPath, p1, p2, normal, crossNormal, cookerPos, cookerPosDelta, sinkPos, fridgePos, flags)
     V2f p1;
     V2f p2;
     V2f normal;
@@ -235,9 +235,7 @@ JSONDATA(KitchenPath, p1, p2, normal, crossNormal, cookerPos, sinkPos, fridgePos
     V2f cookerPos = V2f::ZERO;
     float cookerPosDelta = 0.0f;
     V2f sinkPos = V2f::ZERO;
-    float sinkPosDelta = 0.0f;
     V2f fridgePos = V2f::ZERO;
-    float fridgePosDelta = 0.0f;
     KitchenPathFlags flags{};
     KitchenPath( const V2f& p1, const V2f& p2, const V2f& normal, const V2f& crossNormal ) : p1(p1), p2(p2),
                                                                                              normal(normal),
