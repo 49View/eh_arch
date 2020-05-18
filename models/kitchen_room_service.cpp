@@ -9,6 +9,11 @@
 #include "../models/room_service.hpp"
 #include "../models/room_service_furniture.hpp"
 
+enum class HasFakeFiller {
+    True,
+    False
+};
+
 namespace KitchenRoomService {
     void calcLShapeOffset( const V3f& p1, const V3f& p2, const V3f& p3, const V2f& n1, const V2f& n2, float depth,
                            float offset, std::vector<Vector3f>& path ) {
@@ -31,30 +36,12 @@ namespace KitchenRoomService {
         V2f p2 = p2c;
         float skirtingOffset = ( kd.kitchenWorktopDepth - kd.kitchenSkirtingRecess - sho );
         float unitOffset = ( kd.kitchenWorktopDepth - kd.kitchenUnitsRecess - dho );
+        float topUnitOffset = ( kd.kitchenWorktopDepth - kd.kitchenTopUnitsRecess - dho );
         V2f inward = ( normal * kd.kitchenWorktopDepth * 0.5f );
         V2f inwardSkirting = ( normal * skirtingOffset );
         V2f inwardUnits = ( normal * unitOffset );
+        V2f inwardTopUnits = ( normal * topUnitOffset );
         V2f crossNormal = normalize(p2 - p1);
-
-//        if ( !isMain ) {
-//            // Place the fridge somewhere around the end of the secondary segment
-//            auto fridge = furns.spawn(FTH::FT_Fridge);
-//            auto fridgeWidth = fridge.size.width();
-//            auto fridgeDepth = fridge.size.depth();
-//            if ( distance(p1, p2) > fridgeWidth * 1.2f ) { // giving it a bit of slack (*1.2f)
-//                std::pair<size_t, size_t> targetWall;
-//                float fridgeSlackGap = 0.15f;
-//                V2f hittingPoint;
-//                V2f mp = p2 - (crossNormal * (fridgeWidth * 0.5f + fridgeSlackGap) );
-//                bool hit = RoomService::findOppositeWallFromPoint(w, mp, -normal, targetWall,
-//                                                                  hittingPoint, IncludeWindowsOrDoors::None);
-//                if ( hit ) {
-//                    auto rot = Quaternion{ RoomService::furnitureAngleFromNormal(normal), V3f::UP_AXIS };
-//                    RS::placeManually(f, w, fridge, hittingPoint+(normal*fridgeDepth*0.5f), rot, crossNormal, normal);
-//                    p2 = mp - (crossNormal * (fridgeWidth * 0.5f));
-//                }
-//            }
-//        }
 
         kd.kitchenWorktopPath.emplace_back(p1 + inward, p2 + inward, normal, crossNormal);
         auto middle = lerp(0.5f, p1, p2);
@@ -71,6 +58,12 @@ namespace KitchenRoomService {
         inW2 = isMain ? ( lp2Dir * ( unitOffset + dho ) ) : V2f::ZERO;
 
         kd.kitchenUnitsPath.emplace_back(p1 + inwardUnits + inW1, p2 + inwardUnits + inW2, normal, crossNormal);
+
+        inW1 = isMain ? ( lp1Dir * ( topUnitOffset + dho ) ) : lp1Dir * -kd.kitchenTopUnitsRecess;
+        inW2 = isMain ? ( lp2Dir * ( topUnitOffset + dho ) ) : V2f::ZERO;
+
+        kd.kitchenTopUnitsPath.emplace_back(p1 + inwardTopUnits + inW1, p2 + inwardTopUnits + inW2, normal, crossNormal);
+
     }
 
     bool middleDrawerIndex( int index, int range ) {
@@ -99,13 +92,13 @@ namespace KitchenRoomService {
         return ret;
     }
 
-    void addDrawersSequencially( KitchenData& kd, const V2f& p1s, const V2f& p2s, const V2f& normal ) {
+    void addDrawersSequencially( KitchenData& kd, const V2f& p1s, const V2f& p2s, float z, float unitHeight, const V2f& normal, KitchenDrawerTypeT drawerType ) {
         float dp = kd.drawersPadding.x();
         float drawW = kd.longDrawersSize.x();
 
-        V3f p1 = { p1s, kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f };
-        V3f p2 = { p2s, kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f };
-        V3f pDir = normalize(p2 - p1);
+        V2f p1 = p1s;
+        V2f p2 = p2s;
+        V2f pDir = normalize(p2 - p1);
 
         float widthOfSegment = distance(p1, p2);
         float widthForUnitsAvailable = widthOfSegment;
@@ -116,24 +109,24 @@ namespace KitchenRoomService {
             float drawerWidth = ( q == numDrawers ) ? finalPadding : drawW;
             Vector3f a = p1 + ( pDir * drawW * (float) q ) + ( pDir * dp );
             Vector3f b = a + ( pDir * ( drawerWidth - dp * 2.0f ) );
-            kd.kitchenDrawers.emplace_back(a, b, normal, KitchenDrawerType::FlatBasic);
+            kd.kitchenDrawers.emplace_back(a, b, z, unitHeight, normal, drawerType);
         }
     }
 
-    void addDrawersFiller( KitchenData& kd, const V2f& p1s, const V2f& p2s, const V2f& normal, const C4f& color ) {
-        V3f p1 = { p1s, kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f };
-        V3f p2 = { p2s, kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f };
-        kd.kitchenDrawers.emplace_back(p1, p2, normal, KitchenDrawerType::Filler, color);
+    void addDrawersFiller( KitchenData& kd, const V2f& p1s, const V2f& p2s, float z, float unitHeight, const V2f& normal, KitchenDrawerTypeT drawerType, const C4f& color ) {
+        kd.kitchenDrawers.emplace_back(p1s, p2s, z, unitHeight, normal, drawerType, color);
     }
 
-    void addDrawersFromPoint( KitchenData& kd, float pointDelta, float gapWidth, const KitchenPath& kup ) {
+    void addDrawersFromPoint( KitchenData& kd, float z, float unitHeight, float pointDelta, float gapWidth, const KitchenPath& kup, HasFakeFiller hff ) {
         V2f pd = lerp(pointDelta, kup.p1, kup.p2);
         V2f pd1 = pd - kup.crossNormal * gapWidth;
         V2f pd2 = pd + kup.crossNormal * gapWidth;
-        addDrawersSequencially(kd, kup.p1, pd1, kup.normal);
-        addDrawersSequencially(kd, pd2, kup.p2, kup.normal);
+        addDrawersSequencially(kd, kup.p1, pd1, z, unitHeight, kup.normal, KitchenDrawerType::FlatBasic);
+        addDrawersSequencially(kd, pd2, kup.p2, z, unitHeight, kup.normal, KitchenDrawerType::FlatBasic);
         // Filler
-        addDrawersFiller(kd, pd1, pd2, kup.normal, C4f::DARK_GRAY);
+        if ( hff ==HasFakeFiller::True ) {
+            addDrawersFiller(kd, pd1, pd2, z,  unitHeight, kup.normal, KitchenDrawerType::Filler, C4f::DARK_GRAY);
+        }
     }
 
     void createUnits( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
@@ -147,6 +140,8 @@ namespace KitchenRoomService {
         auto ovenHalfWidth = oven.size.width() * 0.5;
         auto sinkHalfWidth = sink.size.width() * 0.5;
         auto carryingIndex = 0u;
+        float floorLevel = kd.skirtingHeight;// kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f;
+        float unitHeight = kd.kitchenWorktopHeight - (kd.skirtingHeight + ( kd.drawersPadding.x() * 2 ));
         for ( auto t = 0u; t < kd.kitchenWorktopPath.size(); t++ ) {
             auto& kup = kd.kitchenWorktopPath[t];
             float posDelta = 0.5f;
@@ -185,9 +180,26 @@ namespace KitchenRoomService {
             auto& kup = kd.kitchenUnitsPath[t];
             auto& kwp = kd.kitchenWorktopPath[t];
             if ( kwp.flags.hasCooker ) {
-                addDrawersFromPoint(kd, kwp.cookerPosDelta, ovenHalfWidth, kup);
+                addDrawersFromPoint(kd, floorLevel, unitHeight, kwp.cookerPosDelta, ovenHalfWidth, kup, HasFakeFiller::True);
             } else {
-                addDrawersSequencially(kd, kup.p1, kup.p2, kup.normal);
+                addDrawersSequencially(kd, kup.p1, kup.p2, floorLevel, unitHeight, kup.normal, KitchenDrawerType::FlatBasic);
+            }
+        }
+    }
+
+    void createTopUnits( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
+        KitchenData& kd = w->kitchenData;
+
+        for ( auto t = 0u; t < kd.kitchenWorktopPath.size(); t++ ) {
+            auto& kup = kd.kitchenTopUnitsPath[t];
+            auto& kwp = kd.kitchenWorktopPath[t];
+            float z = w->height-kd.longDrawersSize.y()-kd.topUnitsCeilingGap;
+            if ( kwp.flags.hasCooker ) {
+                auto extractorHood = furns.spawn(FTH::FT_ExtractorHood);
+                auto extractorHoodHalfWidth = extractorHood.size.width() * 0.5;
+                addDrawersFromPoint(kd, z, kd.longDrawersSize.y(), kwp.cookerPosDelta, extractorHoodHalfWidth, kup, HasFakeFiller::False);
+            } else {
+                addDrawersSequencially(kd, kup.p1, kup.p2, z, kd.longDrawersSize.y(), kup.normal, KitchenDrawerType::FlatBasic);
             }
         }
     }
@@ -231,22 +243,23 @@ namespace KitchenRoomService {
 
             V2f inward = ( ls->normal * kd.kitchenWorktopDepth );
 
-
             V2f lsp1 = ls->p2 + inward;
             V2f lsp2 = lsp1 + ls->normal * ( dfr.distance - ( kd.kitchenWorktopDepth ) );
             addWorktopSegment(f, w, furns, kd, lsp1, lsp2, dfr.normal, false);
 
             V2f lspl1 = ls->p1 + inward;
             V2f lspl2 = lspl1 + ls->normal * ( dfl.distance - ( kd.kitchenWorktopDepth ) );
-
             // Place the fridge somewhere around the end of the secondary segment
             addFridge(f, w, furns, lspl1, lspl2, dfl.normal, ls->normal);
-
             addWorktopSegment(f, w, furns, kd, lspl1, lspl2, dfl.normal, false);
-
 
             break;
         }
     }
 
+    void createKitchen( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
+        KitchenRoomService::createMasterPath(f, w, furns);
+        KitchenRoomService::createUnits(f, w, furns);
+        KitchenRoomService::createTopUnits(f, w, furns);
+    }
 }

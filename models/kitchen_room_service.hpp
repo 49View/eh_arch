@@ -9,8 +9,7 @@ struct FloorBSData;
 class FurnitureMapStorage;
 
 namespace KitchenRoomService {
-    void createMasterPath( FloorBSData *f, RoomBSData *w, FurnitureMapStorage &furns );
-    void createUnits( FloorBSData *f, RoomBSData *w, FurnitureMapStorage &furns );
+    void createKitchen( FloorBSData *f, RoomBSData *w, FurnitureMapStorage &furns );
 }
 
 

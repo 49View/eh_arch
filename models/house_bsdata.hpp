@@ -249,24 +249,29 @@ namespace KitchenDrawerType {
 
 using KitchenDrawerTypeT = uint64_t;
 
-JSONDATA(KitchenDrawer, p1, p2, normal, type, color)
-    V3f p1 = V2f::ZERO;
-    V3f p2 = V2f::ZERO;
+JSONDATA(KitchenDrawer, p1, p2, z, normal, type, color)
+    V2f p1 = V2f::ZERO;
+    V2f p2 = V2f::ZERO;
+    float z = 0.0f;
+    float unitHeight = 0.7f;
     V2f normal = V2f::ZERO;
     KitchenDrawerTypeT type = 0;
     Color4f color = C4f::WHITE;
-    KitchenDrawer( const V3f& p1, const V3f& p2, const V2f& normal, KitchenDrawerTypeT type, const Color4f& color = C4f::WHITE )
-            : p1(p1), p2(p2), normal(normal), type(type), color(color) {}
+    KitchenDrawer( const V2f& p1, const V2f& p2, float z, float unitHeight, const V2f& normal, KitchenDrawerTypeT type,
+                   const Color4f& color = C4f::WHITE ) : p1(p1), p2(p2), z(z), unitHeight(unitHeight), normal(normal),
+                                                         type(type),
+                                                         color(color) {}
 };
 
 JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
          kitchenWorktopDepth, kitchenWorktopHeight, worktopThickness, skirtingHeight, kitchenSkirtingRecess,
-         kitchenUnitsRecess, drawersPadding, drawersThickness, skirtingThickness, longDrawersSize, worktopMaterial,
-         unitsMaterial, sinkModel, ovenPanelModel, microwaveModel, cooktopModel, fridgeModel, extractorHoodModel,
-         drawersHandleModel)
+         kitchenUnitsRecess, kitchenTopUnitsRecess, drawersPadding, drawersThickness, skirtingThickness,
+         topUnitsCeilingGap, longDrawersSize, worktopMaterial, unitsMaterial, sinkModel, ovenPanelModel, microwaveModel,
+         cooktopModel, fridgeModel, extractorHoodModel, drawersHandleModel)
     std::vector<KitchenPath> kitchenWorktopPath;
     std::vector<KitchenPath> kitchenSkirtingPath;
     std::vector<KitchenPath> kitchenUnitsPath;
+    std::vector<KitchenPath> kitchenTopUnitsPath;
     std::vector<KitchenDrawer> kitchenDrawers;
 
     // kitchen lengths, dimensions, etc...
@@ -276,10 +281,12 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     float skirtingHeight = 0.12f;
     float kitchenSkirtingRecess = 0.065f;
     float kitchenUnitsRecess = 0.04f;
+    float kitchenTopUnitsRecess = 0.30f;
     Vector2f drawersPadding = V2f::ONE * .004f;
     float drawersThickness = 0.02f;
     float skirtingThickness = 0.02f;
-    Vector2f longDrawersSize = V2f{ 0.6f, 0.7f };
+    float topUnitsCeilingGap = 0.05f;
+    Vector2f longDrawersSize = V2f{ 0.6f, 0.9f };
 
     std::string worktopMaterial = "marble,anemone";
     std::string unitsMaterial = "wood,beech";

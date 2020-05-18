@@ -19,18 +19,19 @@ namespace KitchenRender {
     void drawFlatDoubleDrawer( SceneGraph& sg, KitchenData& kd, const KitchenDrawer& kup ) {
         auto rotation = Quaternion{ RoomService::furnitureAngleFromNormal(kup.normal), V3f::UP_AXIS };
         float dp = kd.drawersPadding.x();
-        float unitYSizeAvailable = kd.kitchenWorktopHeight - kd.skirtingHeight + ( dp * 2 );
+        float unitYSizeAvailable = kup.unitHeight;
         for ( int m = 0; m < 2; m++ ) {
             float unitHeight = m == 0 ? unitYSizeAvailable * 0.75f : unitYSizeAvailable * .25f;
-            float uz = kd.skirtingHeight + ( m == 0 ? 0.0f : unitYSizeAvailable * 0.75f + dp );
+            float uz = kup.z + ( m == 0 ? 0.0f : unitYSizeAvailable * 0.75f + dp );
             auto linex = FollowerService::createLinePath(kup.p1, kup.p2, kd.drawersThickness, uz);
             sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, unitHeight },
                                GT::M(kd.unitsMaterial));
             auto handleWidth = sg.GM(kd.drawersHandleModel)->BBox3d()->calcWidth();
-            if ( distance(kup.p1, kup.p2) > handleWidth * 1.2f ) {
+            float drawerWidth = distance(kup.p1, kup.p2);
+            if ( drawerWidth > handleWidth * 1.2f ) {
                 auto rotationHandle = rotation;
                 V3f mixHandlePos = { 0.5f, 0.5f, 0.5f };
-                if ( m == 0 ) {
+                if ( unitHeight > drawerWidth ) {
                     auto rotationZ = Quaternion{ M_PI_2, V3f::Z_AXIS };
                     rotationHandle = rotationZ * rotation;
                     mixHandlePos.setX(0.15f);
@@ -44,11 +45,8 @@ namespace KitchenRender {
     }
 
     void drawFillerDrawer( SceneGraph& sg, KitchenData& kd, const KitchenDrawer& kuw ) {
-        float dp = kd.drawersPadding.x();
-        float unitHeight = kd.kitchenWorktopHeight - (kd.skirtingHeight + ( dp * 2 ));
-        float uz = kd.skirtingHeight;
-        auto linex = FollowerService::createLinePath(kuw.p1, kuw.p2, kd.drawersThickness, uz);
-        sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, unitHeight }, GT::M(kd.unitsMaterial), kuw.color);
+        auto linex = FollowerService::createLinePath(kuw.p1, kuw.p2, kd.drawersThickness, kuw.z);
+        sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kuw.unitHeight }, GT::M(kd.unitsMaterial), kuw.color);
     }
 
     void render( SceneGraph& sg, RoomBSData *w, HouseRenderContainer& ret ) {

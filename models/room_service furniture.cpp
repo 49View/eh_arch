@@ -691,11 +691,10 @@ namespace RoomService {
     }
 
     void furnishKitchen( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
-        r->floorMaterial = "parquet,red";
+        r->floorMaterial = "parquet,american";
         r->wallMaterial = "yule,flemish,tiles";
         r->wallColor = C4f::WHITE;
-        KitchenRoomService::createMasterPath(f, r, furns);
-        KitchenRoomService::createUnits(f, r, furns);
+        KitchenRoomService::createKitchen(f, r, furns);
     }
 
     void furnish( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
