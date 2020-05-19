@@ -133,6 +133,10 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     bool operator!=( const ArchSegment& rhs ) const {
         return !( rhs == *this );
     }
+
+    [[nodiscard]] float length() const {
+        return distance(p1,p2);
+    }
 };
 
 enum FittedFurnitureFlags {

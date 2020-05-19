@@ -434,7 +434,8 @@ namespace RoomService {
     const ArchSegment *segmentAtIndex( const RoomBSData *r, uint32_t _index );
     const ArchSegment *segmentAt( const RoomBSData *r, roomTypeIndex rdi );
     const ArchSegment *walkSegment( const RoomBSData *r, const ArchSegment *ls, WalkSegmentDirection wsd );
-    Distance2dNormalPair
+    float lengthOfArchSegments( const std::vector<const ArchSegment*>& input );
+    std::vector<const ArchSegment*>
     walkAlongWallsUntilCornerChanges( const RoomBSData *r, const ArchSegment *ls, WalkSegmentDirection wsd,
                                       IncludeWindowsOrDoors bwd );
     // bsdata getters

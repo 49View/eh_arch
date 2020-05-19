@@ -167,10 +167,10 @@ namespace RoomService {
         return &r->mWallSegmentsSorted[r->mLongestWallOpposite];
     }
 
-    Distance2dNormalPair
+    std::vector<const ArchSegment*>
     walkAlongWallsUntilCornerChanges( const RoomBSData *r, const ArchSegment *ls, WalkSegmentDirection wsd,
                                       IncludeWindowsOrDoors bwd ) {
-        Distance2dNormalPair ret{ 0.0f, V2f::ZERO };
+        std::vector<const ArchSegment*> ret;
         bool bNormalsSimilar = true;
         bool bwdFlag = true;
         const ArchSegment *lswp = nullptr;
@@ -179,10 +179,17 @@ namespace RoomService {
             if ( lswp ) bNormalsSimilar = isVerySimilar(lswp->normal, lswn->normal, 0.05f);
             bwdFlag = RS::checkIncludeDoorsWindowsFlag(lswn, bwd);
             if ( bNormalsSimilar && bwdFlag ) {
-                ret.distance += distance(lswn->p1, lswn->p2);
-                ret.normal = lswn->normal;
+                ret.emplace_back(lswn);
                 lswp = lswn;
             }
+        }
+        return ret;
+    }
+
+    float lengthOfArchSegments( const std::vector<const ArchSegment*>& input ) {
+        float ret = 0.0f;
+        for ( const auto& as : input ) {
+            ret +=as->length();
         }
         return ret;
     }
