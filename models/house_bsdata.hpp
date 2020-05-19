@@ -135,7 +135,7 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     }
 
     [[nodiscard]] float length() const {
-        return distance(p1,p2);
+        return distance(p1, p2);
     }
 };
 
@@ -231,40 +231,68 @@ JSONDATA(KitchenPathFlags, mainSegment, hasCooker, hasSink, hasFridge)
     bool hasFridge = false;
 };
 
-JSONDATA(KitchenPath, p1, p2, normal, crossNormal, cookerPos, cookerPosDelta, sinkPos, fridgePos, flags)
+JSONDATA(KitchenPath, p1, p2, normal, crossNormal, depth, cookerPos, cookerPosDelta, sinkPos, fridgePos, flags)
     V2f p1;
     V2f p2;
     V2f normal;
     V2f crossNormal;
+    float depth = 0.0f;
     V2f cookerPos = V2f::ZERO;
     float cookerPosDelta = 0.0f;
     V2f sinkPos = V2f::ZERO;
     V2f fridgePos = V2f::ZERO;
     KitchenPathFlags flags{};
-    KitchenPath( const V2f& p1, const V2f& p2, const V2f& normal, const V2f& crossNormal ) : p1(p1), p2(p2),
-                                                                                             normal(normal),
-                                                                                             crossNormal(crossNormal) {}
+    KitchenPath( const V2f& p1, const V2f& p2, const V2f& normal, const V2f& crossNormal, float depth ) : p1(p1),
+                                                                                                          p2(p2),
+                                                                                                          normal(normal),
+                                                                                                          crossNormal(
+                                                                                                                  crossNormal),
+                                                                                                          depth(depth) {}
 };
 
 namespace KitchenDrawerType {
-    const static uint64_t FlatBasic = 0;
-    const static uint64_t Filler = 1;
+    const static uint64_t Custom = 1;
+    const static uint64_t Filler = 2;
+    const static uint64_t FlatBasic = 3;
+    const static uint64_t FlatVertical25_75 = 4;
 };
 
 using KitchenDrawerTypeT = uint64_t;
 
-JSONDATA(KitchenDrawer, p1, p2, z, normal, type, color)
+JSONDATA(KitchenDrawerCustomShapeCol, size, profileName)
+    V2f size;
+    std::string profileName;
+};
+
+JSONDATA(KitchenDrawerCustomShapeRow, cols)
+    std::vector<KitchenDrawerCustomShapeCol> cols;
+};
+
+JSONDATA(KitchenDrawerCustomShape, rows)
+    std::vector<KitchenDrawerCustomShapeRow> rows;
+};
+
+JSONDATA(KitchenDrawerShape, type, customShapeGrid)
+    KitchenDrawerTypeT type = 0;
+    KitchenDrawerCustomShape customShapeGrid{};
+    KitchenDrawerShape( KitchenDrawerTypeT type = KitchenDrawerType::FlatBasic ) : type(type) {}
+};
+
+JSONDATA(KitchenDrawer, p1, p2, z, unitHeight, depth, normal, shape, color)
     V2f p1 = V2f::ZERO;
     V2f p2 = V2f::ZERO;
     float z = 0.0f;
     float unitHeight = 0.7f;
+    float depth = 0.3f;
     V2f normal = V2f::ZERO;
-    KitchenDrawerTypeT type = 0;
+    KitchenDrawerShape shape{KitchenDrawerType::FlatBasic};
     Color4f color = C4f::WHITE;
-    KitchenDrawer( const V2f& p1, const V2f& p2, float z, float unitHeight, const V2f& normal, KitchenDrawerTypeT type,
-                   const Color4f& color = C4f::WHITE ) : p1(p1), p2(p2), z(z), unitHeight(unitHeight), normal(normal),
-                                                         type(type),
-                                                         color(color) {}
+    KitchenDrawer( const V2f& p1, const V2f& p2, float z, float unitHeight, float depth, const V2f& normal,
+                   KitchenDrawerShape shape, const Color4f& color = C4f::WHITE ) : p1(p1), p2(p2), z(z),
+                                                                                  unitHeight(unitHeight),
+                                                                                  depth(depth), normal(normal),
+                                                                                  shape(shape),
+                                                                                  color(color) {}
 };
 
 JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,

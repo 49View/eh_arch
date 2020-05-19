@@ -9,12 +9,16 @@
 #include "../models/room_service.hpp"
 #include "../models/room_service_furniture.hpp"
 
-enum class HasFakeFiller {
-    True,
-    False
-};
-
 namespace KitchenRoomService {
+
+    namespace KitchenDrawerCreateFlags {
+        static const uint64_t None = 0;
+        static const uint64_t NoDepth = 1 << 0;
+        static const uint64_t HasFakeFiller = 1 << 1;
+    };
+
+    using KitchenDrawerCreateFlagsT = uint64_t;
+
     void calcLShapeOffset( const V3f& p1, const V3f& p2, const V3f& p3, const V2f& n1, const V2f& n2, float depth,
                            float offset, std::vector<Vector3f>& path ) {
         Vector2f p1s = ( p1 + ( Vector3f(n1, 0.0f) * ( depth - offset ) ) ).xy();
@@ -35,12 +39,13 @@ namespace KitchenRoomService {
         float dho = kd.drawersThickness * 0.5f;
         float skirtingOffset = ( kd.kitchenWorktopDepth - kd.kitchenSkirtingRecess - sho );
         float unitOffset = ( kd.kitchenWorktopDepth - kd.kitchenUnitsRecess - dho );
-        V2f inward = ( normal * kd.kitchenWorktopDepth * 0.5f );
+        float masterOffset = kd.kitchenWorktopDepth * 0.5f;
+        V2f inward = ( normal * masterOffset );
         V2f inwardSkirting = ( normal * skirtingOffset );
         V2f inwardUnits = ( normal * unitOffset );
         V2f crossNormal = normalize(p2 - p1);
 
-        kd.kitchenWorktopPath.emplace_back(p1 + inward, p2 + inward, normal, crossNormal);
+        kd.kitchenWorktopPath.emplace_back(p1 + inward, p2 + inward, normal, crossNormal, masterOffset);
         auto middle = lerp(0.5f, p1, p2);
         V2f lp1Dir = normalize(middle - p1);
         V2f lp2Dir = normalize(middle - p2);
@@ -49,12 +54,13 @@ namespace KitchenRoomService {
         V2f inW2 = isMain ? ( lp2Dir * ( skirtingOffset + sho ) ) : V2f::ZERO;
 
         kd.kitchenSkirtingPath.emplace_back(p1 + inwardSkirting + inW1, p2 + inwardSkirting + inW2, normal,
-                                            crossNormal);
+                                            crossNormal, skirtingOffset);
 
         inW1 = isMain ? ( lp1Dir * ( unitOffset + dho ) ) : lp1Dir * -kd.kitchenUnitsRecess;
         inW2 = isMain ? ( lp2Dir * ( unitOffset + dho ) ) : V2f::ZERO;
 
-        kd.kitchenUnitsPath.emplace_back(p1 + inwardUnits + inW1, p2 + inwardUnits + inW2, normal, crossNormal);
+        kd.kitchenUnitsPath.emplace_back(p1 + inwardUnits + inW1, p2 + inwardUnits + inW2, normal, crossNormal,
+                                         unitOffset);
     }
 
     void
@@ -74,11 +80,18 @@ namespace KitchenRoomService {
         V2f inW2 = isMain ? ( lp2Dir * ( topUnitOffset + dho ) ) : V2f::ZERO;
 
         kd.kitchenTopUnitsPath.emplace_back(p1 + inwardTopUnits + inW1, p2 + inwardTopUnits + inW2, normal,
-                                            crossNormal);
+                                            crossNormal, topUnitOffset);
     }
 
     bool middleDrawerIndex( int index, int range ) {
         return ( range % 2 == 0 ) ? index == range / 2 - 1 : index == ( range - 1 ) / 2;
+    }
+
+    void addDrawer( KitchenData& kd, const V2f& p1s, const V2f& p2s, float z, float unitHeight, float depth,
+                    const V2f& normal, KitchenDrawerTypeT drawerType,
+                    KitchenDrawerCreateFlagsT hff = KitchenDrawerCreateFlags::None, const C4f& color = C4f::WHITE ) {
+        float computedDepth = checkBitWiseFlag(hff, KitchenDrawerCreateFlags::NoDepth) ? 0.0f : depth;
+        kd.kitchenDrawers.emplace_back(p1s, p2s, z, unitHeight, computedDepth, normal, drawerType, color);
     }
 
     V2f oppositePointOnWallFor( RoomBSData *w, const V2f& input, const V2f& direction ) {
@@ -104,7 +117,8 @@ namespace KitchenRoomService {
     }
 
     void addDrawersSequencially( KitchenData& kd, const V2f& p1s, const V2f& p2s, float z, float unitHeight,
-                                 const V2f& normal, KitchenDrawerTypeT drawerType ) {
+                                 float depth, const V2f& normal, KitchenDrawerTypeT drawerType,
+                                 KitchenDrawerCreateFlagsT hff = KitchenDrawerCreateFlags::None ) {
         float dp = kd.drawersPadding.x();
         float drawW = kd.longDrawersSize.x();
 
@@ -121,26 +135,23 @@ namespace KitchenRoomService {
             float drawerWidth = ( q == numDrawers ) ? finalPadding : drawW;
             Vector3f a = p1 + ( pDir * drawW * (float) q ) + ( pDir * dp );
             Vector3f b = a + ( pDir * ( drawerWidth - dp * 2.0f ) );
-            kd.kitchenDrawers.emplace_back(a, b, z, unitHeight, normal, drawerType);
+            addDrawer(kd, a, b, z, unitHeight, depth, normal, drawerType, hff);
         }
     }
 
-    void
-    addDrawersFiller( KitchenData& kd, const V2f& p1s, const V2f& p2s, float z, float unitHeight, const V2f& normal,
-                      KitchenDrawerTypeT drawerType, const C4f& color ) {
-        kd.kitchenDrawers.emplace_back(p1s, p2s, z, unitHeight, normal, drawerType, color);
-    }
-
     void addDrawersFromPoint( KitchenData& kd, float z, float unitHeight, float pointDelta, float gapWidth,
-                              const KitchenPath& kup, HasFakeFiller hff ) {
+                              const KitchenPath& kup, KitchenDrawerCreateFlagsT hff = KitchenDrawerCreateFlags::None ) {
         V2f pd = lerp(pointDelta, kup.p1, kup.p2);
         V2f pd1 = pd - kup.crossNormal * gapWidth;
         V2f pd2 = pd + kup.crossNormal * gapWidth;
-        addDrawersSequencially(kd, kup.p1, pd1, z, unitHeight, kup.normal, KitchenDrawerType::FlatBasic);
-        addDrawersSequencially(kd, pd2, kup.p2, z, unitHeight, kup.normal, KitchenDrawerType::FlatBasic);
+        addDrawersSequencially(kd, kup.p1, pd1, z, unitHeight, kup.depth, kup.normal, KitchenDrawerType::FlatBasic,
+                               hff);
+        addDrawersSequencially(kd, pd2, kup.p2, z, unitHeight, kup.depth, kup.normal, KitchenDrawerType::FlatBasic,
+                               hff);
         // Filler
-        if ( hff == HasFakeFiller::True ) {
-            addDrawersFiller(kd, pd1, pd2, z, unitHeight, kup.normal, KitchenDrawerType::Filler, C4f::DARK_GRAY);
+        if ( checkBitWiseFlag(hff, KitchenDrawerCreateFlags::HasFakeFiller) ) {
+            addDrawer(kd, pd1, pd2, z, unitHeight, kup.depth, kup.normal, KitchenDrawerType::Filler, hff,
+                      C4f::DARK_GRAY);
         }
     }
 
@@ -196,10 +207,10 @@ namespace KitchenRoomService {
             auto& kwp = kd.kitchenWorktopPath[t];
             if ( kwp.flags.hasCooker ) {
                 addDrawersFromPoint(kd, floorLevel, unitHeight, kwp.cookerPosDelta, ovenHalfWidth, kup,
-                                    HasFakeFiller::True);
+                                    KitchenDrawerCreateFlags::HasFakeFiller | KitchenDrawerCreateFlags::NoDepth);
             } else {
-                addDrawersSequencially(kd, kup.p1, kup.p2, floorLevel, unitHeight, kup.normal,
-                                       KitchenDrawerType::FlatBasic);
+                addDrawersSequencially(kd, kup.p1, kup.p2, floorLevel, unitHeight, kup.depth, kup.normal,
+                                       KitchenDrawerType::FlatBasic, KitchenDrawerCreateFlags::NoDepth);
             }
         }
     }
@@ -214,10 +225,9 @@ namespace KitchenRoomService {
             if ( kwp.flags.hasCooker ) {
                 auto extractorHood = furns.spawn(FTH::FT_ExtractorHood);
                 auto extractorHoodHalfWidth = extractorHood.size.width() * 0.5;
-                addDrawersFromPoint(kd, z, kd.longDrawersSize.y(), kwp.cookerPosDelta, extractorHoodHalfWidth, kup,
-                                    HasFakeFiller::False);
+                addDrawersFromPoint(kd, z, kd.longDrawersSize.y(), kwp.cookerPosDelta, extractorHoodHalfWidth, kup);
             } else {
-                addDrawersSequencially(kd, kup.p1, kup.p2, z, kd.longDrawersSize.y(), kup.normal,
+                addDrawersSequencially(kd, kup.p1, kup.p2, z, kd.longDrawersSize.y(), kup.depth, kup.normal,
                                        KitchenDrawerType::FlatBasic);
             }
         }

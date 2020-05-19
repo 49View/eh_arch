@@ -16,16 +16,43 @@
 
 namespace KitchenRender {
 
+    void addCabinetPart(KitchenData& kd, const KitchenDrawer& kup, std::vector<PolyOutLine>& drawerOutlines) {
+        if ( kup.depth > 0.0f ) {
+            float dp = kd.drawersPadding.x();
+            float dt = kd.drawersThickness;
+            // Draw all sides
+            V3f p1f[2];
+            V3f p2f[2];
+            V3f p1b[2];
+            V3f p2b[2];
+            float totalGap = ( dt * 0.5f ) + dp;
+            V2f wdepth = kup.normal * -( kup.depth - totalGap );
+            V2f dho = kup.normal * -totalGap;
+            for ( int t = 0; t < 2; t++ ) {
+                float z = kup.z + ( t * kup.unitHeight ) - ( t * dt );
+                p1f[t] = XZY::C({ kup.p1 + dho, z });
+                p2f[t] = XZY::C({ kup.p2 + dho, z });
+                p1b[t] = XZY::C({ kup.p1 + wdepth, z });
+                p2b[t] = XZY::C({ kup.p2 + wdepth, z });
+            }
+            std::vector<V3f> basePoly{ p1f[0], p2f[0], p2b[0], p1b[0] };
+            drawerOutlines.emplace_back(basePoly, V3f::UP_AXIS, kup.unitHeight);
+        }
+    }
+
     void drawFlatDoubleDrawer( SceneGraph& sg, KitchenData& kd, const KitchenDrawer& kup ) {
         auto rotation = Quaternion{ RoomService::furnitureAngleFromNormal(kup.normal), V3f::UP_AXIS };
         float dp = kd.drawersPadding.x();
         float unitYSizeAvailable = kup.unitHeight;
+        std::vector<PolyOutLine> drawerOutlines;
+
+        addCabinetPart(kd, kup, drawerOutlines);
+
         for ( int m = 0; m < 2; m++ ) {
-            float unitHeight = m == 0 ? unitYSizeAvailable * 0.75f : unitYSizeAvailable * .25f;
+            float unitHeight = ( m == 0 ? unitYSizeAvailable * 0.75f : unitYSizeAvailable * .25f ) - dp;
             float uz = kup.z + ( m == 0 ? 0.0f : unitYSizeAvailable * 0.75f + dp );
             auto linex = FollowerService::createLinePath(kup.p1, kup.p2, kd.drawersThickness, uz);
-            sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, unitHeight },
-                               GT::M(kd.unitsMaterial));
+            drawerOutlines.emplace_back(linex, V3f::UP_AXIS, unitHeight);
             auto handleWidth = sg.GM(kd.drawersHandleModel)->BBox3d()->calcWidth();
             float drawerWidth = distance(kup.p1, kup.p2);
             if ( drawerWidth > handleWidth * 1.2f ) {
@@ -42,6 +69,8 @@ namespace KitchenRender {
                                         uz + unitHeight * 0.5f), GT::Rotate(rotationHandle));
             }
         }
+
+        sg.GB<GT::Extrude>(drawerOutlines, GT::M(kd.unitsMaterial));
     }
 
     void drawFillerDrawer( SceneGraph& sg, KitchenData& kd, const KitchenDrawer& kuw ) {
@@ -53,7 +82,7 @@ namespace KitchenRender {
         KitchenData kd = w->kitchenData;
 
         for ( const auto& kwd : kd.kitchenDrawers ) {
-            switch ( kwd.type) {
+            switch ( kwd.shape.type ) {
                 case KitchenDrawerType::Filler:
                     drawFillerDrawer(sg, kd, kwd);
                     break;
@@ -125,11 +154,12 @@ namespace KitchenRender {
                                  XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, topOfWorktop),
                                  GT::Rotate(rotation));
                 sg.GB<GT::Asset>(kd.extractorHoodModel,
-                                 XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, w->height-extractorHeight),
+                                 XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, w->height - extractorHeight),
                                  GT::Rotate(rotation));
                 sg.GB<GT::Asset>(kd.ovenPanelModel,
                                  XZY::C(mp + kup.normal * ( kd.kitchenWorktopDepth - kd.kitchenUnitsRecess ),
-                                        topOfWorktop - kd.worktopThickness - kd.drawersPadding.y()), GT::Rotate(rotation));
+                                        topOfWorktop - kd.worktopThickness - kd.drawersPadding.y()),
+                                 GT::Rotate(rotation));
             }
             if ( kup.flags.hasSink ) {
                 sg.GB<GT::Asset>(kd.sinkModel,
