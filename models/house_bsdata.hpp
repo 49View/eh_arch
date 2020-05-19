@@ -295,7 +295,7 @@ JSONDATA(KitchenDrawer, p1, p2, z, unitHeight, depth, normal, shape, color)
                                                                                   color(color) {}
 };
 
-JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
+JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath, kitchenTopUnitsPath, kitchenDrawers,
          kitchenWorktopDepth, kitchenWorktopHeight, worktopThickness, skirtingHeight, kitchenSkirtingRecess,
          kitchenUnitsRecess, kitchenTopUnitsRecess, drawersPadding, drawersThickness, skirtingThickness,
          topUnitsCeilingGap, longDrawersSize, worktopMaterial, unitsMaterial, sinkModel, ovenPanelModel, microwaveModel,
@@ -338,7 +338,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
            maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite,
            mLongestWallOppositePoint, mPerimeter, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth,
            defaultCeilingThickness, wallMaterial, wallColor, floorMaterial, ceilingMaterial, covingProfile,
-           skirtingProfile, skirtingMaterial, covingMaterial, skirtingColor, covingColor, spotlightGeom)
+           skirtingProfile, skirtingMaterial, covingMaterial, skirtingColor, covingColor, spotlightGeom, kitchenData)
     std::vector<ASTypeT> roomTypes{};
     float z = 0.0f;
     bool mHasCoving = true;
@@ -380,7 +380,6 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     C4f skirtingColor = C4f::WHITE;
     C4f covingColor = C4f::WHITE;
     std::string spotlightGeom = "spotlight_basic";
-
     // Ad-hoc room type data, it's a bit redundant but I'll leave it here until I found a better place
     KitchenData kitchenData;
 };
