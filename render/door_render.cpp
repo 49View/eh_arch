@@ -243,7 +243,7 @@ namespace DoorRender {
         // This 2.5f here is to leave space for the frame trim, the inner frame trim, and the 0.5 is a bit of air between it.
         V2f doorSize{ mData->width, mData->height - doorTrim*2.5f };
         englishDoor( sg, child, doorSize, V3f::ZERO );
-        Quaternion rot( -0.79f, V3f::UP_AXIS );
+        Quaternion rot( -M_PI_2, V3f::UP_AXIS );
         child->updateTransform( doorPivot, rot, V3f::ONE );
 
         return child;
