@@ -4,16 +4,26 @@
 
 #include "arch_scene_graph.hpp"
 #include <core/resources/resource_builder.hpp>
+#include <core/math/plane3f.h>
+#include <core/raw_image.h>
+#include <core/TTF.h>
+#include <core/camera.h>
+#include <core/resources/profile.hpp>
+#include <core/resources/material.h>
+#include <render_scene_graph/render_orchestrator.h>
+#include <core/resources/resource_builder.hpp>
+#include <core/math/vector_util.hpp>
+#include <core/lightmap_exchange_format.h>
+#include <graphics/lightmap_manager.hpp>
+#include <graphics/render_light_manager.h>
+#include <graphics/shader_manager.h>
+#include <poly/collision_mesh.hpp>
 #include <poly/scene_graph.h>
-#include <utility>
+#include <eh_arch/models/house_bsdata.hpp>
+#include <eh_arch/render/house_render.hpp>
+#include <eh_arch/models/house_service.hpp>
 
-LoadedResouceCallbackContainer ArchSceneGraph::resourceCallbackHouse;
-
-ArchSceneGraph::ArchSceneGraph( HouseManager& _hm, FurnitureMapStorage& _furns ) :  hm(_hm), furns(_furns) {
-    hm.connect( [](const ResourceTransfer<HouseBSData>& _val ) {
-        LOGRS( "[ASG-Resource] Add " << ArchResourceVersioning<HouseBSData>::Prefix() << ": "  << *_val.names.begin() );
-        if ( _val.ccf ) _val.ccf(_val.hash);
-    });
+ArchSceneGraph::ArchSceneGraph( SceneGraph& _sg, RenderOrchestrator& _rsg, FurnitureMapStorage& _furns ) : sg(_sg), rsg(_rsg), furns(_furns) {
 }
 
 namespace HOD { // HighOrderDependency
@@ -68,28 +78,65 @@ namespace HOD { // HighOrderDependency
     }
 }
 
-void ArchSceneGraph::loadHouse( std::string _names, HttpResouceCB _ccf ) {
-    B<HB>( _names ).load( std::move(_ccf) );
+void ArchSceneGraph::calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> houseJson ) {
+    auto m = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
+    float vmax = max(houseJson->bbox.bottomRight().x(), houseJson->bbox.bottomRight().y());
+//    float padding = vmax*0.03f;
+    float screenFloorplanRatio = (1.0f/4.0f);
+    float screenPadding = 0.03f;
+    float vmaxScale = vmax / screenFloorplanRatio;
+    auto vr = 1.0f/ vmaxScale;
+    m->scale( V3f{vr, -vr, -vr});
+    m->translate( V3f{getScreenAspectRatio-screenFloorplanRatio-screenPadding, screenFloorplanRatio, screenFloorplanRatio});
+    floorplanNavigationMatrix = m;
 }
 
-void ArchSceneGraph::loadHouse( const HouseBSData& _res ) {
-    B<HB>( _res.name ).addIM( _res );
+void ArchSceneGraph::showHouse( ) {
+
+    HOD::resolver<HouseBSData>( sg, houseJson.get(), [&]() {
+        calcFloorplanNavigationTransform(houseJson);
+        sg.loadCollisionMesh( HouseService::createCollisionMesh( houseJson.get() ) );
+        HouseRender::make2dGeometry( rsg.RR(), sg, houseJson.get(), RDSPreMult(*floorplanNavigationMatrix.get()), Use2dDebugRendering::False );
+        HouseRender::make3dGeometry( sg, houseJson.get() );
+
+        V2f cobr = HouseService::centerOfBiggestRoom( houseJson.get() );
+        V3f lngp = V3f{ cobr.x(), 1.6f, cobr.y() };
+        sg.setLastKnownGoodPosition(lngp);
+
+        rsg.setRigCameraController<CameraControlWalk>();
+        Timeline::play( rsg.DC()->QAngleAnim(), 0,
+                        KeyFramePair{ 0.1f, quatCompose( V3f{ 0.0f, 0.0f, 0.0f } ) } );
+        Timeline::play( rsg.DC()->PosAnim(), 0,
+                        KeyFramePair{ 0.1f, lngp} );
+    } );
+
 }
 
-void ArchSceneGraph::loadCallbacks() {
-    loadResourceCallback<HouseBSData, HB>(resourceCallbackHouse);
+void ArchSceneGraph::loadHouse( const std::string& _pid ) {
+    Http::get( Url{"/propertybim/" + _pid}, [this]( HttpResponeParams params ) {
+        houseJson = std::make_shared<HouseBSData>( params.bufferString );
+        callbackStream = std::make_pair(houseJson, true);
+    } );
+
+//    B<HB>( _names ).load( std::move(_ccf) );
 }
 
+void ArchSceneGraph::consumeCallbacks() {
+    if ( callbackStream.second ) {
+        showHouse();
+        callbackStream.second = false;
+    }
+}
 void ArchSceneGraph::update() {
 
-    static bool firstFrameEver = true;
+    consumeCallbacks();
 
-    if ( firstFrameEver ) {
-        firstFrameEver = false;
-        return;
+    sg.cameraCollisionDetection(rsg.DC());
+    if ( floorplanNavigationMatrix ) {
+        rsg.drawCameraLocator( *floorplanNavigationMatrix.get() );
     }
-
-    loadCallbacks();
-
-    HM().update();
 }
+
+//void ArchSceneGraph::publishHouse( std::shared_ptr<HouseBSData> _house, const std::string& _name ) {
+//    asg.HM().publish( _house, _name );
+//}

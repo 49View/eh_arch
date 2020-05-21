@@ -13,6 +13,84 @@
 #include "room_service.hpp"
 
 #include "core/file_manager.h"
+#include "poly/collision_mesh.hpp"
+
+
+std::shared_ptr<FloorBSData> HouseService::addFloorFromData( HouseBSData* _house, const JMATH::Rect2f& _rect ) {
+
+    std::shared_ptr<FloorBSData> f = std::make_shared<FloorBSData>();
+    f->asType = ASType::Floor;
+    f->height = _house->defaultCeilingHeigh;
+    f->anchorPoint = JMATH::Rect2fFeature::bottomRight;
+    f->number = static_cast<int>( _house->mFloors.size() );
+    f->bbox = _rect;
+    f->ceilingContours.push_back( f->bbox.points3d( f->height ) );
+    f->z = f->number * ( _house->defaultGroundHeight + _house->defaultCeilingHeigh );
+    f->concreteHeight = _house->defaultGroundHeight;
+    f->doorHeight = _house->doorHeight;
+    f->windowHeight = _house->defaultWindowHeight;
+    f->windowBaseOffset = _house->defaultWindowBaseOffset;
+    f->hasCoving = true;
+
+    _house->mFloors.push_back( f );
+
+    return f;
+}
+
+std::shared_ptr<CollisionMesh> HouseService::createCollisionMesh( const HouseBSData *house ) {
+    auto ret = std::make_shared<CollisionMesh>();
+
+    ret->bbox = house->bbox;
+    for ( const auto& f : house->mFloors ) {
+        CollisionGroup cg{};
+        cg.bbox = f->bbox;
+        for ( const auto& r : f->rooms ) {
+            CollisionRoom cr{};
+            cr.bbox = r->bbox;
+            for ( const auto& ls : r->mWallSegmentsSorted ) {
+                if ( !checkBitWiseFlag(ls.tag, WF_IsDoorPart) ) {
+                    cr.collisionCollisionElement.emplace_back( ls.p1, ls.p2, ls.normal );
+                }
+            }
+            cg.collisionRooms.emplace_back(cr);
+        }
+        ret->collisionGroups.emplace_back(cg);
+    }
+    return ret;
+}
+
+template <typename T>
+bool rayIntersectInternal( std::shared_ptr<HouseBSData> _house, const std::vector<std::shared_ptr<T>>& archs, const Vector3f& origin, const Vector3f& dir, float& minNear, std::shared_ptr<ArchStructural> found ) {
+    bool bHasBeenFound = false;
+
+    for ( const auto& e : archs ) {
+        float nearV = 0.0f;
+        if ( ArchStructuralService::intersectLine( e.get(), origin, dir, nearV ) ) {
+            if ( nearV < minNear ) {
+                minNear = nearV;
+                found = e;
+                bHasBeenFound = true;
+            }
+        }
+    }
+
+    return bHasBeenFound;
+}
+
+V2f HouseService::centerOfBiggestRoom( const HouseBSData *house ) {
+    using floatV2fPair = std::pair<float, V2f>;
+    std::vector<floatV2fPair> roomSizes;
+
+    for ( const auto& f : house->mFloors ) {
+        for ( const auto& room : f->rooms ) {
+            roomSizes.emplace_back( room->mPerimeter, RS::maxEnclsingBoundingBoxCenter(room.get()) );
+        }
+    }
+
+    std::sort( roomSizes.begin(), roomSizes.end(), []( const floatV2fPair &a, const floatV2fPair &b ) -> bool { return a.first > b.first; } );
+
+    return roomSizes[0].second;
+}
 
 bool HouseService::findFloorOrRoomAt( std::shared_ptr<HouseBSData> _house, const Vector2f& pos, int& floorIndex ) {
 	for ( size_t t = 0; t < _house->mFloors.size(); t++ ) {
@@ -79,24 +157,6 @@ int HouseService::floorIndexAtHeight( std::shared_ptr<HouseBSData> _house, float
 		}
 	}
 	return whatOnZFloor;
-}
-
-template <typename T>
-bool HouseService::rayIntersectInternal( std::shared_ptr<HouseBSData> _house, const std::vector<std::shared_ptr<T>>& archs, const Vector3f& origin, const Vector3f& dir, float& minNear, std::shared_ptr<ArchStructural> found ) {
-	bool bHasBeenFound = false;
-
-	for ( const auto& e : archs ) {
-		float nearV = 0.0f;
-		if ( ArchStructuralService::intersectLine( e.get(), origin, dir, nearV ) ) {
-			if ( nearV < minNear ) {
-				minNear = nearV;
-				found = e;
-				bHasBeenFound = true;
-			}
-		}
-	}
-
-	return bHasBeenFound;
 }
 
 std::shared_ptr<RoomBSData> HouseService::getRoomByName( std::shared_ptr<HouseBSData> _house, const std::string& roomName ) {
@@ -193,27 +253,6 @@ bool HouseService::whichRoomAmI( std::shared_ptr<HouseBSData> _house, const Vect
 		}
 	}
 	return false;
-}
-
-std::shared_ptr<FloorBSData> HouseService::addFloorFromData( HouseBSData* _house, const JMATH::Rect2f& _rect ) {
-
-	std::shared_ptr<FloorBSData> f = std::make_shared<FloorBSData>();
-	f->asType = ASType::Floor;
-	f->height = _house->defaultCeilingHeigh;
-	f->anchorPoint = JMATH::Rect2fFeature::bottomRight;
-	f->number = static_cast<int>( _house->mFloors.size() );
-	f->bbox = _rect;
-	f->ceilingContours.push_back( f->bbox.points3d( f->height ) );
-	f->z = f->number * ( _house->defaultGroundHeight + _house->defaultCeilingHeigh );
-	f->concreteHeight = _house->defaultGroundHeight;
-	f->doorHeight = _house->doorHeight;
-	f->windowHeight = _house->defaultWindowHeight;
-	f->windowBaseOffset = _house->defaultWindowBaseOffset;
-	f->hasCoving = true;
-
-	_house->mFloors.push_back( f );
-
-	return f;
 }
 
 void HouseService::removeArch( std::shared_ptr<HouseBSData> _house, int64_t hashToRemove ) {
