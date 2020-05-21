@@ -485,22 +485,17 @@ std::vector<RoomBSData*> FloorService::roomsIntersectingBBox( FloorBSData *f, co
 
 void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
     for ( auto& w : f->windows ) {
-        auto v2p = ClipperLib::V2fToPath(w->bbox.squared().points());
-        for ( auto& r : f->rooms ) {
-            ClipperLib::Clipper c;
-            ClipperLib::Paths solution;
-            c.AddPath(v2p, ClipperLib::ptSubject, true);
-            c.AddPath(ClipperLib::V2fToPath(r->mPerimeterSegments), ClipperLib::ptClip, true);
-            c.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
-            if ( !solution.empty() ) {
-                w->roomTypes = r->roomTypes;
-                r->windows.emplace_back(w->hash);
-                if ( RoomService::hasType(r.get(), ASType::Kitchen) ) {
-                    w->hasCurtains = false;
-                    w->hasBlinds = true;
-                }
-                break;
+        auto rooms = FloorService::roomsIntersectingBBox( f, w->bbox.squared(), true );
+        if ( !rooms.empty() ) {
+            auto r = rooms[0];
+            w->roomTypes = r->roomTypes;
+            w->rooms.emplace_back(r->hash);
+            r->windows.emplace_back(w->hash);
+            if ( RoomService::hasType(r, ASType::Kitchen) ) {
+                w->hasCurtains = false;
+                w->hasBlinds = true;
             }
+            break;
         }
     }
 
@@ -508,6 +503,7 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
         auto rooms = FloorService::roomsIntersectingBBox( f, w->bbox.squared(), false );
         for ( const auto& r : rooms ) {
             r->doors.emplace_back(w->hash);
+            w->rooms.emplace_back(r->hash);
         }
         // If it has only 1 room collided with it means that it's an external door
         if ( rooms.size() == 1 ) {
@@ -515,6 +511,14 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
         }
     }
 
+    // Now we have all doors and windows connected, try to use some more guessing to help us out.
+
+    // Guess hallways by checking if a room has no windows and more than 2 doors.
+    for ( auto& r : f->rooms ) {
+        if ( r->doors.size() > 2 && r->windows.empty() )  {
+            r->roomTypes.emplace_back(ASType::Hallway);
+        }
+    }
 }
 
 void FloorService::guessFittings( FloorBSData *f, FurnitureMapStorage& furns ) {

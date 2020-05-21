@@ -171,9 +171,11 @@ JSONDATA(FittedFurniture, name, symbolRef, size, position3d, xyLocation, heightO
 };
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
-           asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d, subType,
-           pivotIndex, orientation, doorGeomThickness, architraveWidth, mDoorFrameProfile, openingAngleMax,
-           openingAngleMin, isMainDoor, architraveProfile)
+           asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
+           rooms, roomTypes, subType, pivotIndex, orientation, doorGeomThickness, architraveWidth, mDoorFrameProfile,
+           openingAngleMax, openingAngleMin, isMainDoor, architraveProfile)
+    std::vector<int64_t> rooms;
+    std::vector<ASTypeT> roomTypes{};
     ArchSubTypeT subType = ArchSubType::DoorSingle;
     DoorPivotIndexT pivotIndex = DoorPivotIndex::W1;
     DoorOrientationT orientation = DoorOrientation::W1_CW;
@@ -188,8 +190,9 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
            wallFlags, asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart,
-           mTriangles2d, roomTypes, numPanels, sillThickness, mainFrameWidth, minPanelWidth, baseOffset,
+           mTriangles2d, rooms, roomTypes, numPanels, sillThickness, mainFrameWidth, minPanelWidth, baseOffset,
            insideRoomPointingNormal, hasBlinds, hasCurtains, curtainGeom, curtainMaterial)
+    std::vector<int64_t> rooms;
     std::vector<ASTypeT> roomTypes{};
     int32_t numPanels = 0;
     float sillThickness = 0.02f;
