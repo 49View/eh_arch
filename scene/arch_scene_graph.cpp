@@ -131,7 +131,6 @@ void ArchSceneGraph::update() {
 
     consumeCallbacks();
 
-    sg.cameraCollisionDetection(rsg.DC());
     if ( floorplanNavigationMatrix ) {
         rsg.drawCameraLocator( *floorplanNavigationMatrix.get() );
     }
