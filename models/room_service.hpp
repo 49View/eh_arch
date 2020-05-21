@@ -414,6 +414,7 @@ namespace RoomService {
     bool roomNeedsCoving( const RoomBSData *r );
     bool intersectLine2d( const RoomBSData *r, Vector2f const& p0, Vector2f const& p1, Vector2f& i );
     float area( const RoomBSData *r );
+    bool isPointInsideRoom( const RoomBSData *r, const V2f& point );
     bool findOppositeWallFromPoint( const RoomBSData *r, const Vector2f& p1, const Vector2f& normal,
                                     std::pair<size_t, size_t>& ret, Vector2f& iPoint,
                                     IncludeWindowsOrDoors bwd = IncludeWindowsOrDoors::None );

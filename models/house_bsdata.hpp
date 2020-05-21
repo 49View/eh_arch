@@ -173,7 +173,7 @@ JSONDATA(FittedFurniture, name, symbolRef, size, position3d, xyLocation, heightO
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
            asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d, subType,
            pivotIndex, orientation, doorGeomThickness, architraveWidth, mDoorFrameProfile, openingAngleMax,
-           openingAngleMin, architraveProfile)
+           openingAngleMin, isMainDoor, architraveProfile)
     ArchSubTypeT subType = ArchSubType::DoorSingle;
     DoorPivotIndexT pivotIndex = DoorPivotIndex::W1;
     DoorOrientationT orientation = DoorOrientation::W1_CW;
@@ -182,6 +182,7 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     std::string mDoorFrameProfile = ""; //Profile mDoorFrameProfile;
     float openingAngleMax = M_PI;
     float openingAngleMin = 0.0f;
+    bool isMainDoor = false;
     std::string architraveProfile = "architrave,ovolo";
 };
 
@@ -285,14 +286,14 @@ JSONDATA(KitchenDrawer, p1, p2, z, unitHeight, depth, normal, shape, color)
     float unitHeight = 0.7f;
     float depth = 0.3f;
     V2f normal = V2f::ZERO;
-    KitchenDrawerShape shape{KitchenDrawerType::FlatBasic};
+    KitchenDrawerShape shape{ KitchenDrawerType::FlatBasic };
     Color4f color = C4f::WHITE;
     KitchenDrawer( const V2f& p1, const V2f& p2, float z, float unitHeight, float depth, const V2f& normal,
                    KitchenDrawerShape shape, const Color4f& color = C4f::WHITE ) : p1(p1), p2(p2), z(z),
-                                                                                  unitHeight(unitHeight),
-                                                                                  depth(depth), normal(normal),
-                                                                                  shape(shape),
-                                                                                  color(color) {}
+                                                                                   unitHeight(unitHeight),
+                                                                                   depth(depth), normal(normal),
+                                                                                   shape(shape),
+                                                                                   color(color) {}
 };
 
 JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath, kitchenTopUnitsPath, kitchenDrawers,
@@ -332,14 +333,17 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
 };
 
 JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
-           linkedHash, sequencePart, mTriangles2d, roomTypes, z, mHasCoving, mBBoxCoving, floorType, mFittedFurniture,
+           linkedHash, sequencePart, mTriangles2d, roomTypes, windows, doors, z, mHasCoving, mBBoxCoving, floorType,
+           mFittedFurniture,
            mWallSegments, mWallSegmentsSorted, mPerimeterSegments, mvCovingSegments, mvSkirtingSegments,
            mMaxEnclsingBoundingBox, mLightFittingsLocators, mSocketLocators, mSwichesLocators, maxSizeEnclosedHP1,
            maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite,
-           mLongestWallOppositePoint, mPerimeter, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth,
+           mLongestWallOppositePoint, mPerimeter, area, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth,
            defaultCeilingThickness, wallMaterial, wallColor, floorMaterial, ceilingMaterial, covingProfile,
            skirtingProfile, skirtingMaterial, covingMaterial, skirtingColor, covingColor, spotlightGeom, kitchenData)
     std::vector<ASTypeT> roomTypes{};
+    std::vector<int64_t> windows;
+    std::vector<int64_t> doors;
     float z = 0.0f;
     bool mHasCoving = true;
     Rect2f mBBoxCoving = Rect2f::INVALID;
@@ -365,6 +369,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     int32_t mLongestWallOpposite = -1;
     Vector2f mLongestWallOppositePoint = Vector2f::ZERO;
     float mPerimeter = 0.0f;
+    float area = 0.0f;
     float mCovingPerimeter = 0.0f;
     float minLightFittingDistance = 2.0f;
     float mArchiTravesWidth = 0.1f;

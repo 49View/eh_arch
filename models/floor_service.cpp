@@ -466,17 +466,35 @@ bool FloorService::roomRecognition( FloorBSData *f ) {
     return roomsHaveBeenCalculatedCorrectly;
 }
 
+std::vector<RoomBSData*> FloorService::roomsIntersectingBBox( FloorBSData *f, const Rect2f& bbox, bool earlyOut ) {
+    std::vector<RoomBSData*> ret{};
+    auto v2p = ClipperLib::V2fToPath(bbox.points());
+    for ( auto& r : f->rooms ) {
+        ClipperLib::Clipper c;
+        ClipperLib::Paths solution;
+        c.AddPath(v2p, ClipperLib::ptSubject, true);
+        c.AddPath(ClipperLib::V2fToPath(r->mPerimeterSegments), ClipperLib::ptClip, true);
+        c.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+        if ( !solution.empty() ) {
+            ret.emplace_back(r.get());
+            if ( earlyOut ) break;
+        }
+    }
+    return ret;
+}
+
 void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
     for ( auto& w : f->windows ) {
-        auto v2p = ClipperLib::V2fToPath( w->bbox.squared().points());
-        for ( const auto& r : f->rooms ) {
+        auto v2p = ClipperLib::V2fToPath(w->bbox.squared().points());
+        for ( auto& r : f->rooms ) {
             ClipperLib::Clipper c;
             ClipperLib::Paths solution;
             c.AddPath(v2p, ClipperLib::ptSubject, true);
             c.AddPath(ClipperLib::V2fToPath(r->mPerimeterSegments), ClipperLib::ptClip, true);
             c.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
-            if ( !solution.empty()) {
+            if ( !solution.empty() ) {
                 w->roomTypes = r->roomTypes;
+                r->windows.emplace_back(w->hash);
                 if ( RoomService::hasType(r.get(), ASType::Kitchen) ) {
                     w->hasCurtains = false;
                     w->hasBlinds = true;
@@ -485,6 +503,18 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
             }
         }
     }
+
+    for ( auto& w : f->doors ) {
+        auto rooms = FloorService::roomsIntersectingBBox( f, w->bbox.squared(), false );
+        for ( const auto& r : rooms ) {
+            r->doors.emplace_back(w->hash);
+        }
+        // If it has only 1 room collided with it means that it's an external door
+        if ( rooms.size() == 1 ) {
+            w->isMainDoor=true;
+        }
+    }
+
 }
 
 void FloorService::guessFittings( FloorBSData *f, FurnitureMapStorage& furns ) {
@@ -886,4 +916,8 @@ void FloorService::rollbackToCalculatedWalls( FloorBSData *f ) {
     f->doors.clear();
     f->stairs.clear();
     f->orphanedUShapes.clear();
+}
+
+bool FloorService::hasAnyWall( const FloorBSData *f ) {
+    return !f->walls.empty();
 }

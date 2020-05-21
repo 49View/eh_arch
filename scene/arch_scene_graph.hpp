@@ -17,7 +17,7 @@ class ArchSceneGraph {
 public:
     explicit ArchSceneGraph( SceneGraph& _sg, RenderOrchestrator& _rsg, FurnitureMapStorage& _furns );
 
-    void showHouse();
+    void showHouse(std::shared_ptr<HouseBSData> _houseJson);
     void loadHouse( const std::string& _pid );
     void calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> houseJson );
 
@@ -27,8 +27,6 @@ public:
 
 protected:
 
-    void publishAndAddCallback();
-    void realTimeCallbacks();
     void consumeCallbacks();
 
 protected:

@@ -83,78 +83,78 @@ struct ArchSegmentBucket {
     }
 };
 
-class FloorService {
-public:
-    static void externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& ws, std::vector<ArchSegment>& wse );
-    static bool roomRecognition( FloorBSData *f );
-    static void guessFittings( FloorBSData *f, FurnitureMapStorage& furns );
-    static std::string naturalLanguageFloorNumber( int numFloor );
-    static bool findRoom( FloorBSData *f, int _floorNumber, ASTypeT _roomASTypeToFind,
+namespace FloorService {
+    void externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& ws, std::vector<ArchSegment>& wse );
+    bool roomRecognition( FloorBSData *f );
+    void guessFittings( FloorBSData *f, FurnitureMapStorage& furns );
+    std::string naturalLanguageFloorNumber( int numFloor );
+    bool findRoom( FloorBSData *f, int _floorNumber, ASTypeT _roomASTypeToFind,
                           std::shared_ptr<RoomBSData>& ret );
 
     // Create
-    static void
+    void
     addWallsFromData( FloorBSData *f, const V2fVectorOfVector& floorWalls,
                       WallLastPointWrapT wpw = WallLastPointWrap::No );
-    static void addRoomsFromData( FloorBSData *f );
-    static void addDoorFromData( FloorBSData *f, float _doorHeight, const UShape& w1, const UShape& w2,
+    void addRoomsFromData( FloorBSData *f );
+    void addDoorFromData( FloorBSData *f, float _doorHeight, const UShape& w1, const UShape& w2,
                                  ArchSubTypeT st = ArchSubType::NotApplicable );
-    static void addWindowFromData( FloorBSData *f, float _windowHeight, float _defaultWindowBaseOffset,
+    void addWindowFromData( FloorBSData *f, float _windowHeight, float _defaultWindowBaseOffset,
                                    const UShape& w1, const UShape& w2 );
-    static void addCeilingContour( FloorBSData *f, const std::vector<Vector3f>& cc );
+    void addCeilingContour( FloorBSData *f, const std::vector<Vector3f>& cc );
 
     // Update
-    static void calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f );
-    static std::vector<UShape *> allUShapes( FloorBSData *f );
-    static void ushapesReconciliation( FloorBSData *f );
-    static void
+    void calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f );
+    std::vector<UShape *> allUShapes( FloorBSData *f );
+    void ushapesReconciliation( FloorBSData *f );
+    void
     changeTypeOfSelectedElementTo( FloorBSData *f, ArchStructural *source, ArchType t,
                                    ArchSubTypeT st );
-    static void rescale( FloorBSData *f, float _scale );
-    static void setCoving( FloorBSData *f, bool _state );
-    static void updateFromNewDoorOrWindow( FloorBSData *f );
-    static std::vector<std::pair<UShape *, UShape *> > alignSuitableUShapesFromWalls( FloorBSData *f );
-    static bool checkTwoUShapesDoNotIntersectAnything( FloorBSData *f, UShape *s1, UShape *s2 );
-    static void
+    void rescale( FloorBSData *f, float _scale );
+    void setCoving( FloorBSData *f, bool _state );
+    void updateFromNewDoorOrWindow( FloorBSData *f );
+    std::vector<std::pair<UShape *, UShape *> > alignSuitableUShapesFromWalls( FloorBSData *f );
+    bool checkTwoUShapesDoNotIntersectAnything( FloorBSData *f, UShape *s1, UShape *s2 );
+    void
     changeUShapeType( FloorBSData *f, const UShape& sourceUShape1, const UShape& sourceUShape2,
                       ArchType _type );
-    static void swapWindowOrDoor( FloorBSData *f, HouseBSData *h, int64_t hashOfTwoShape );
+    void swapWindowOrDoor( FloorBSData *f, HouseBSData *h, int64_t hashOfTwoShape );
     // Delete
-    static void removeArch( FloorBSData *f, int64_t hashToRemove );
-    static void clearFurniture( FloorBSData *f );
+    void removeArch( FloorBSData *f, int64_t hashToRemove );
+    void clearFurniture( FloorBSData *f );
 
     // Query
-    static bool hasAnyWall( const FloorBSData *f ) { return !f->walls.empty(); }
+    bool hasAnyWall( const FloorBSData *f );
 
-    static std::vector<Vector2f> allFloorePoints( const FloorBSData *f );
-    static bool intersectLine2d( const FloorBSData *f, Vector2f const& p0, Vector2f const& p1, Vector2f& i );
-    static ArchIntersection
+    std::vector<Vector2f> allFloorePoints( const FloorBSData *f );
+    bool intersectLine2d( const FloorBSData *f, Vector2f const& p0, Vector2f const& p1, Vector2f& i );
+    ArchIntersection
     intersectLine2dMin( const FloorBSData *f, Vector2f const& p0, Vector2f const& p1, Vector2f& i,
                         uint32_t filterFlags = 0xffffffff );
-    static bool isInsideRoomRDS( const V2f& i, const std::vector<RoomPreData>& rds );
-    static bool isIndexInUShape( size_t t, WallBSData *w );
-    static bool whichRoomAmI( const FloorBSData *f, const Vector2f& _pos, std::shared_ptr<RoomBSData>& outRoom );
-    static int64_t findWallIndex( const FloorBSData *f, int64_t hash );
-    static bool findWallAt( const FloorBSData *f, const Vector2f& matPos, std::vector<ArchStructural *>& ret );
-    static bool findRoomAt( const FloorBSData *f, const Vector2f& matPos, std::vector<ArchStructural *>& ret );
-    static ArchStructural *findElementWithHash( const FloorBSData *f, int64_t hash );
-    static std::vector<ArchStructural *> findElementWithLinkedHash( const FloorBSData *f, int64_t hash );
-    static float area( const FloorBSData *f );
+    bool isInsideRoomRDS( const V2f& i, const std::vector<RoomPreData>& rds );
+    bool isIndexInUShape( size_t t, WallBSData *w );
+    bool whichRoomAmI( const FloorBSData *f, const Vector2f& _pos, std::shared_ptr<RoomBSData>& outRoom );
+    std::vector<RoomBSData*> roomsIntersectingBBox( FloorBSData *f, const Rect2f& bbox, bool earlyOut );
+    int64_t findWallIndex( const FloorBSData *f, int64_t hash );
+    bool findWallAt( const FloorBSData *f, const Vector2f& matPos, std::vector<ArchStructural *>& ret );
+    bool findRoomAt( const FloorBSData *f, const Vector2f& matPos, std::vector<ArchStructural *>& ret );
+    ArchStructural *findElementWithHash( const FloorBSData *f, int64_t hash );
+    std::vector<ArchStructural *> findElementWithLinkedHash( const FloorBSData *f, int64_t hash );
+    float area( const FloorBSData *f );
 
-    static bool
+    bool
     isInsideCeilingContour( const FloorBSData *f, const Vector2f& v1, float& topZ1, int& hitLevel1 );
-    static void centrePointOfBiggestRoom( const FloorBSData *f, float& _currMaxArea,
+    void centrePointOfBiggestRoom( const FloorBSData *f, float& _currMaxArea,
                                           Vector2f& _currCenter );
-    static ClipperLib::Paths calcPlainPath( const FloorBSData *f );
+    ClipperLib::Paths calcPlainPath( const FloorBSData *f );
 
     // Update
-    static void calcBBox( FloorBSData *f );
-    static float updatePerimeter( FloorBSData *f, const std::vector<ArchSegment>& singleRoomSegmentsExternal );
-    static void rollbackToCalculatedWalls( FloorBSData *f );
+    void calcBBox( FloorBSData *f );
+    float updatePerimeter( FloorBSData *f, const std::vector<ArchSegment>& singleRoomSegmentsExternal );
+    void rollbackToCalculatedWalls( FloorBSData *f );
 
     // Remove
-    static void removeLinkedArch( FloorBSData *f, int64_t hashToRemove );
-    static void removeWalls( FloorBSData *f );
-    static void removeWalls( FloorBSData *f, float wwidth );
-    static void removeUnPairedUShapes( FloorBSData *f );
+    void removeLinkedArch( FloorBSData *f, int64_t hashToRemove );
+    void removeWalls( FloorBSData *f );
+    void removeWalls( FloorBSData *f, float wwidth );
+    void removeUnPairedUShapes( FloorBSData *f );
 };

@@ -91,8 +91,9 @@ void ArchSceneGraph::calcFloorplanNavigationTransform( std::shared_ptr<HouseBSDa
     floorplanNavigationMatrix = m;
 }
 
-void ArchSceneGraph::showHouse( ) {
+void ArchSceneGraph::showHouse(std::shared_ptr<HouseBSData> _houseJson) {
 
+    houseJson = _houseJson;
     HOD::resolver<HouseBSData>( sg, houseJson.get(), [&]() {
         calcFloorplanNavigationTransform(houseJson);
         sg.loadCollisionMesh( HouseService::createCollisionMesh( houseJson.get() ) );
@@ -104,10 +105,8 @@ void ArchSceneGraph::showHouse( ) {
         sg.setLastKnownGoodPosition(lngp);
 
         rsg.setRigCameraController<CameraControlWalk>();
-        Timeline::play( rsg.DC()->QAngleAnim(), 0,
-                        KeyFramePair{ 0.1f, quatCompose( V3f{ 0.0f, 0.0f, 0.0f } ) } );
-        Timeline::play( rsg.DC()->PosAnim(), 0,
-                        KeyFramePair{ 0.1f, lngp} );
+        rsg.DC()->setQuatAngles(V3f{ 0.0f, M_PI_4, 0.0f });
+        rsg.DC()->setPosition(lngp);
     } );
 
 }
@@ -123,7 +122,7 @@ void ArchSceneGraph::loadHouse( const std::string& _pid ) {
 
 void ArchSceneGraph::consumeCallbacks() {
     if ( callbackStream.second ) {
-        showHouse();
+        showHouse(callbackStream.first);
         callbackStream.second = false;
     }
 }

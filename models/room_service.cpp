@@ -224,6 +224,7 @@ namespace RoomService {
         r->mBBoxCoving = getContainingBBox(r->mvCovingSegments);
         calclMaxBoundingBox(r);
         makeTriangles2d(r);
+        r->area = RS::area(r);
     }
 
     void makeTriangles2d( RoomBSData *r ) {
@@ -381,6 +382,23 @@ namespace RoomService {
             ret += fabs(( a.x() - c.x() ) * ( b.y() - a.y() ) - ( a.x() - b.x() ) * ( c.y() - a.y() )) / 2;
         }
         return ret;
+    }
+
+    bool isPointInsideRoom( const RoomBSData *r, const V2f& point ) {
+
+        if ( r->bbox.contains(point) ) {
+            for ( auto& vts : r->mTriangles2d ) {
+                auto a = std::get<0>(vts);
+                auto b = std::get<1>(vts);
+                auto c = std::get<2>(vts);
+                if ( isInsideTriangle(point, a, b, c) ) {
+                    return true;
+                }
+            }
+
+        }
+
+        return false;
     }
 
     roomTypeIndex sortedSegmentToPairIndex( const RoomBSData *r, int si ) {
