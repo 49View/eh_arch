@@ -308,7 +308,8 @@ namespace WindowRender {
 
         auto s = sg.getGeomNameSize("curtain");
         // Rescale the curtain with a % of slack so the curtain doesn't end exactly at window width
-        V3f curtainScale{  (mData->width * 1.25f) / std::get<1>(s).x(), 1.0f, 1.0f};
+        float totalHeight = mData->baseOffset + mData->height + mData->sillThickness;
+        V3f curtainScale{  (mData->width * 1.25f) / std::get<1>(s).x(), totalHeight / std::get<1>(s).y(), 1.0f};
         sg.GB<GT::Asset>( "curtain", mRootH, V3f{ 0.0f, 0.0f, -mData->depth - 0.04f }, GT::Scale(curtainScale), GT::Tag( ArchType::CurtainT ),
                           GT::M( mData->curtainMaterial ));
     }
@@ -316,9 +317,6 @@ namespace WindowRender {
     GeomSPContainer make3dGeometry( SceneGraph& sg, WindowBSData *mData ) {
 
         auto mRootH = EF::create<Geom>( "Window" );
-//        float inangle = -atan2( mData->insideRoomPointingNormal.y(), mData->insideRoomPointingNormal.x());
-//        Quaternion rot(M_PI_2 + inangle, V3f::UP_AXIS);
-//        mRootH->updateTransform( XZY::C( mData->center, 0.0f ), rot, V3f::ONE);
 
         float windowsSillDepth = 0.04f;
         float currBaseOffset = mData->baseOffset < mData->ceilingHeight ? mData->baseOffset : mData->ceilingHeight;

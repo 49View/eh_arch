@@ -21,10 +21,6 @@ std::shared_ptr<WindowBSData> WindowService::createWindow( float _windowHeight, 
 	d1->us1.type = ArchType::WindowT;
 	d1->us2.type = ArchType::WindowT;
 	d1->height = _windowHeight;
-	d1->sillThickness = 2.0f;
-	d1->thickness = 3.0f;
-	d1->mainFrameWidth = 3.0f;
-	d1->minPanelWidth = 60.0f;
 	d1->ceilingHeight = _ceilingHeight;
 	d1->baseOffset = _defaultWindowBaseOffset;
 
