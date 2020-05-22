@@ -76,11 +76,6 @@ namespace DoorRender {
         drawSingleDoor2d( rr, data->us1.middle, data->us2.middle, data->us2.width, color, _pm );
     }
 
-
-    void addInnerDoorFrame( GeomSP door, const Vector2f &doorInnerBumpSize, float doorTrim, float doorGeomThickness );
-
-    void addDoorGeom( GeomSP door );
-
     std::shared_ptr<Profile> makeEnglishDoorProfile( const Vector2f &vv2fs ) {
 
         std::vector<Vector2f> points;
@@ -181,7 +176,7 @@ namespace DoorRender {
 //
 //// Custom profiles
 //
-    std::shared_ptr<Profile> makeInnerDoorFrameProfile( float _depth, float doorGeomThickness ) {
+    std::shared_ptr<Profile> makeInnerDoorFrameProfile( float _depth, float doorGeomThickness, int dIndex ) {
 
         float thickness = _depth;
         float th = thickness * 0.5f;
@@ -201,6 +196,9 @@ namespace DoorRender {
         auto doorFrame_profile = std::make_shared<Profile>();
         doorFrame_profile->Name( pname );
         doorFrame_profile->createArbitrary( points );
+        if ( dIndex == 1 ) {
+            doorFrame_profile->flip(V2f::Y_AXIS);
+        }
 
         return doorFrame_profile;
     }
@@ -220,8 +218,8 @@ namespace DoorRender {
     }
 
 
-    void addInnerDoorFrame( SceneGraph &sg, GeomSP mRootH, const DoorBSData *mData ) {
-        auto doorProfile = makeInnerDoorFrameProfile( mData->depth, mData->doorGeomThickness );
+    void addInnerDoorFrame( SceneGraph &sg, GeomSP mRootH, const DoorBSData *mData, int dIndex ) {
+        auto doorProfile = makeInnerDoorFrameProfile( mData->depth, mData->doorGeomThickness, dIndex );
         sg.addProfileIM( doorProfile->Name(), *doorProfile );
 
         // Add inner frame
@@ -239,13 +237,16 @@ namespace DoorRender {
                             V3f{ 0.0f, doorPivot.yz() } );
     }
 
-    auto addDoorGeom( SceneGraph &sg, GeomSP mRootH, const DoorBSData *mData, const V3f &doorPivot ) {
+    auto addDoorGeom( SceneGraph &sg, GeomSP mRootH, const DoorBSData *mData, const V3f &doorPivot, int dIndex ) {
         auto child = mRootH->addChildren("ActualDoor");
-        // This 2.5f here is to leave space for the frame trim, the inner frame trim, and the 0.5 is a bit of air between it.
+        float maxOpeningAngle = (dIndex == 1 || dIndex == 2) ?  -M_PI_2 : M_PI_2;
+        float depthGap = dIndex == 1 ?  mData->doorGeomThickness : 0.0f;
         float gapBetweenDoorEdgeAndHinges = 0.003f;
-        V2f doorSize{ mData->width - doorTrim*2.0f - gapBetweenDoorEdgeAndHinges*2.0f, mData->height - doorTrim*2.5f };
-        englishDoor( sg, child, doorSize, { gapBetweenDoorEdgeAndHinges, 0.0f, 0.0f }, mData->doorGeomThickness );
-        float openAngle = mData->isMainDoor ? 0.0f : M_PI_2;
+        float totalTrim = (doorTrim*2.0f + gapBetweenDoorEdgeAndHinges*2.0f);
+        // This 2.5f here is to leave space for the frame trim, the inner frame trim, and the 0.5 is a bit of air between it.
+        V2f doorSize{ mData->width - totalTrim, mData->height - doorTrim*2.5f };
+        englishDoor( sg, child, doorSize, { gapBetweenDoorEdgeAndHinges, 0.0f, depthGap }, mData->doorGeomThickness );
+        float openAngle = mData->isMainDoor ? 0.0f : maxOpeningAngle;
         Quaternion rot( openAngle, V3f::UP_AXIS );
         child->updateTransform( doorPivot, rot, V3f::ONE );
 
@@ -254,12 +255,16 @@ namespace DoorRender {
     }
 
     GeomSPContainer make3dGeometry( SceneGraph &sg, const DoorBSData *mData ) {
+
+        int dIndex = 1;
+
         auto mRootH = EF::create<Geom>( "Door" );
         std::vector<Vector2f> fverts;
         FollowerGap vGapsSkirting( 4 );
         FollowerGap vGapsCoving( 4 );
         std::vector<int32_t> findices;
-        Vector2f wp1 = mData->pivotIndex == DoorPivotIndex::W1 ? mData->us1.points[1] : mData->us2.points[2];
+//        Vector2f wp1 = mData->pivotIndex == DoorPivotIndex::W1 ? mData->us1.points[1] : mData->us2.points[2];
+        Vector2f wp1 = mData->us1.points[1];
         realDoorWidth = mData->width - doorTrim * 2.0f;
 
         DoorService::calculatePivots( mData, wp1, realDoorWidth, hingesPivot, frameHingesPivot, doorHandlePivotLeft, doorHandlePivotRight,
@@ -270,11 +275,12 @@ namespace DoorRender {
         addDoorArchitrave( sg, mRootH, mData, 1.0f );
 
         // This is the frame plus the bump bit to stop the door on close
-        addInnerDoorFrame( sg, mRootH, mData );
+        addInnerDoorFrame( sg, mRootH, mData, dIndex );
 
         // This is the actual door
+        if ( dIndex==1) doorGeomPivot*=-1.0f;
         V3f doorPivot = Vector3f( -mData->width * 0.5f + doorTrim, doorTrim, doorGeomPivot ); // * 0.5f f
-        auto actualDoor = addDoorGeom( sg, mRootH, mData, doorPivot );
+        auto actualDoor = addDoorGeom( sg, mRootH, mData, doorPivot, dIndex );
 
         // Add a bit of the missing floor between the rooms connecting this door
         sg.GB<GT::Extrude>( V2nff{ V2f{ mData->width, mData->depth }, V3f::UP_AXIS, 0.001f }, mRootH,
@@ -306,6 +312,11 @@ namespace DoorRender {
         // Door Handle
 //        float doorHandleOrientationAngle = ( mData->orientation == DoorOrientation::W2_CW ||
 //                                             mData->orientation == DoorOrientation::W2_CCW ) ? M_PI : 0.0f;
+
+        if ( dIndex == 1 ) {
+            doorHandlePivotLeft += V3f::Z_AXIS * mData->doorGeomThickness;
+            doorHandlePivotRight += V3f::Z_AXIS * mData->doorGeomThickness;
+        }
 
         sg.GB<GT::Asset>( "doorhandle,dx", actualDoor, doorHandlePivotLeft, GT::Rotate(Quaternion(M_PI, V3f::UP_AXIS)) );
         sg.GB<GT::Asset>( "doorhandle,sx", actualDoor, doorHandlePivotRight, GT::Rotate(Quaternion(M_PI, V3f::UP_AXIS)) );
