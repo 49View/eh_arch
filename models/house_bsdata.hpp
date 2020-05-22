@@ -172,19 +172,18 @@ JSONDATA(FittedFurniture, name, symbolRef, size, position3d, xyLocation, heightO
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
            asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
-           rooms, roomTypes, subType, isMainDoor, architraveProfile,
+           rooms, subType, isMainDoor, architraveProfile,
            dIndex, doorInnerBumpSize, doorGeomThickness, doorTrim, openingAngleMax, openingAngleMin,
            hingesPivot, doorHandlePivotLeft, doorHandlePivotRight, doorHandleAngle, frameHingesPivot,
            doorHandlePlateDoorSidePivot, doorHandlePlateFrameSidePivot, doorPivot, doorHandleRot, doorGeomPivot,
            doorSize)
     std::vector<int64_t> rooms;
-    std::vector<ASTypeT> roomTypes{};
     ArchSubTypeT subType = ArchSubType::DoorSingle;
     bool isMainDoor = false;
     std::string architraveProfile = "architrave,ovolo";
 
     // Internal door data
-    int dIndex = 3;
+    int dIndex = 1;
     Vector2f doorInnerBumpSize = Vector2f(0.020f, 0.03f);
     float doorGeomThickness = 0.045f;
     float doorTrim = 0.01f;
@@ -205,10 +204,9 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
            wallFlags, asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart,
-           mTriangles2d, rooms, roomTypes, numPanels, sillThickness, mainFrameWidth, minPanelWidth, baseOffset,
+           mTriangles2d, rooms, numPanels, sillThickness, mainFrameWidth, minPanelWidth, baseOffset,
            insideRoomPointingNormal, hasBlinds, hasCurtains, curtainGeom, curtainMaterial)
     std::vector<int64_t> rooms;
-    std::vector<ASTypeT> roomTypes{};
     int32_t numPanels = 0;
     float sillThickness = 0.02f;
     float mainFrameWidth = 0.06f;

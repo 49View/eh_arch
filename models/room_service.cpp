@@ -512,6 +512,10 @@ namespace RoomService {
         return ret;
     }
 
+    void addRoomType( RoomBSData *r, ASTypeT rt ) {
+        r->roomTypes.emplace_back(rt);
+    }
+
     bool isGeneric( const RoomBSData *r ) {
         return r->asType == ASType::GenericRoom && r->roomTypes.size() == 1 && r->roomTypes[0] == ASType::GenericRoom;
     }

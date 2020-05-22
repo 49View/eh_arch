@@ -487,7 +487,6 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
         auto rooms = FloorService::roomsIntersectingBBox( f, w->bbox.squared(), true );
         if ( !rooms.empty() ) {
             auto r = rooms[0];
-            w->roomTypes = r->roomTypes;
             w->rooms.emplace_back(r->hash);
             r->windows.emplace_back(w->hash);
             if ( RoomService::hasRoomType(r, ASType::Kitchen) ) {
@@ -515,15 +514,32 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
     // Guess hallways by checking if a room has no windows and more than 2 doors.
     for ( auto& r : f->rooms ) {
         if ( r->doors.size() > 2 && r->windows.empty() )  {
-            r->roomTypes.emplace_back(ASType::Hallway);
+            RoomService::addRoomType(r.get(), ASType::Hallway);
         }
     }
 
     // Go back to re-evaluate every door after all possible discoveries/guesses have been made
     for ( auto& d : f->doors ) {
         DoorService::calculatePivots(d.get());
-        if ( RS::hasRoomType(d.get(), ASType::Hallway) ) {
+        for ( auto &roomHash : d->rooms ) {
+            auto room = findRoomWithHash(f, roomHash);
+            if ( room ) {
+                if ( RS::hasRoomType(room, ASType::Hallway) ) {
+                    float vwangle = -atan2(-d->dirWidth.y(), d->dirWidth.x());
+                    V2f dn = V2f::X_AXIS;
+                    dn.rotate(vwangle + M_PI + M_PI_4);
+                    V2f checkPoint = d->center + dn;
 
+                    if ( !RS::isPointInsideRoom(room, checkPoint) ) {
+                        DoorService::setPivotPoint(d.get(), 0);
+                    }
+                }
+                // ### This is an hack, remove it asap. (22 May 2020) NDDado
+                // (I just did it to quickly place correctly the kitchen door on the demo property
+                if ( RS::hasRoomType(room, ASType::Kitchen) ) {
+                    DoorService::setPivotPoint(d.get(), 0);
+                }
+            }
         }
     }
 }
@@ -534,6 +550,17 @@ void FloorService::guessFittings( FloorBSData *f, FurnitureMapStorage& furns ) {
         RoomService::addSocketsAndSwitches( r.get());
         RoomService::furnish( f, r.get(), furns );
     }
+}
+
+const RoomBSData* FloorService::findRoomWithHash( FloorBSData *f, int64_t hash ) {
+
+    for ( const auto& r : f->rooms ) {
+        if ( r->hash == hash ) {
+            return r.get();
+        }
+    }
+
+    return nullptr;
 }
 
 bool FloorService::findRoom( FloorBSData *f, int _floorNumber, const ASTypeT _roomASTypeToFind,

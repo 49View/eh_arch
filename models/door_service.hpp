@@ -10,21 +10,21 @@
 
 #include "house_bsdata.hpp"
 
-class DoorService {
-public:
+namespace DoorService {
     // Create
-    static std::shared_ptr<DoorBSData>
+    std::shared_ptr<DoorBSData>
     createDoor( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2, float _architraveWidth,
                 ArchSubTypeT st = ArchSubType::NotApplicable );
 
     // Query
-    static std::string orientationToString( const DoorBSData *d );
-    static void getPlasterMiddlePoints( const DoorBSData *d, std::vector<Vector3f>& mpoints );
+    std::string orientationToString( const DoorBSData *d );
+    void getPlasterMiddlePoints( const DoorBSData *d, std::vector<Vector3f>& mpoints );
 
     // Update
-    static void calculatePivots( DoorBSData *d );
-    static void toggleOrientations( DoorBSData *d );
-    static void rescale( DoorBSData *d, float _scale );
+    void calculatePivots( DoorBSData *d );
+    void setPivotPoint( DoorBSData*d, int pivotPointIndex );
+    void toggleOrientations( DoorBSData *d );
+    void rescale( DoorBSData *d, float _scale );
 
     // Delete
 };

@@ -400,6 +400,8 @@ namespace RoomService {
     };
     bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurnitureRuleScript& fs );
 
+    void addRoomType( RoomBSData *r, ASTypeT rt );
+
     // Query
     template<typename T>
     bool hasRoomType( const T *r, ASTypeT roomType ) {

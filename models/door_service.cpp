@@ -37,6 +37,11 @@ void DoorService::toggleOrientations( DoorBSData *d ) {
     calculatePivots(d);
 }
 
+void DoorService::setPivotPoint( DoorBSData*d, int pivotPointIndex ) {
+    d->dIndex = pivotPointIndex;
+    calculatePivots(d);
+}
+
 std::string DoorService::orientationToString( const DoorBSData *d ) {
     switch ( d->dIndex ) {
         case 0:
@@ -106,7 +111,6 @@ void DoorService::calculatePivots( DoorBSData *d ) {
     // This 2.5f here is to leave space for the frame trim, the inner frame trim, and the 0.5 is a bit of air between it.
     d->doorSize = V2f{ d->width - totalTrim, d->height - d->doorTrim * 2.5f };
     d->doorGeomPivot = V3f{ xPivot, 0.0f, depthGap };
-
 }
 
 void DoorService::getPlasterMiddlePoints( const DoorBSData *d, std::vector<Vector3f>& mpoints ) {
