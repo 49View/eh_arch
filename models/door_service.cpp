@@ -144,9 +144,9 @@ void DoorService::setOrientationParameters( DoorBSData* d ) {
 	}
 }
 
-void DoorService::calculatePivots( const DoorBSData* d, const Vector2f& wp1, float realDoorWidth, Vector3f& hingesPivot, Vector3f& frameHingesPivot, Vector3f& doorHandlePivotLeft, Vector3f& doorHandlePivotRight, float& doorHandleAngle, float& doorGeomPivot, Vector3f& doorHandlePlateDoorSidePivot, Vector3f& doorHandlePlateFrameSidePivot ) {
+void DoorService::calculatePivots( const DoorBSData* d, int dIndex, float realDoorWidth, Vector3f& hingesPivot, Vector3f& frameHingesPivot, Vector3f& doorHandlePivotLeft, Vector3f& doorHandlePivotRight, float& doorHandleAngle, float& doorGeomPivot, Vector3f& doorHandlePlateDoorSidePivot, Vector3f& doorHandlePlateFrameSidePivot ) {
 	float frameGeomPivot = 0.0f;
-	float side = sideOfLine( wp1, d->center + d->dirDepth, d->center - d->dirDepth );
+	float side = dIndex < 2.0f ? -1.0f : 1.0f;//sideOfLine( wp1, d->center + d->dirDepth, d->center - d->dirDepth );
 	switch ( d->orientation ) {
 		case DoorOrientation::W1_CW:
 		case DoorOrientation::W2_CW:
