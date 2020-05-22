@@ -144,7 +144,7 @@ void DoorService::setOrientationParameters( DoorBSData* d ) {
 	}
 }
 
-void DoorService::calculatePivots( const DoorBSData* d, const Vector2f& wp1, float realDoorWidth, Vector3f& hingesPivot, Vector3f& frameHingesPivot, Vector3f& doorHandlePivot, float& doorHandleAngle, float& doorGeomPivot, Vector3f& doorHandlePlateDoorSidePivot, Vector3f& doorHandlePlateFrameSidePivot ) {
+void DoorService::calculatePivots( const DoorBSData* d, const Vector2f& wp1, float realDoorWidth, Vector3f& hingesPivot, Vector3f& frameHingesPivot, Vector3f& doorHandlePivotLeft, Vector3f& doorHandlePivotRight, float& doorHandleAngle, float& doorGeomPivot, Vector3f& doorHandlePlateDoorSidePivot, Vector3f& doorHandlePlateFrameSidePivot ) {
 	float frameGeomPivot = 0.0f;
 	float side = sideOfLine( wp1, d->center + d->dirDepth, d->center - d->dirDepth );
 	switch ( d->orientation ) {
@@ -165,7 +165,8 @@ void DoorService::calculatePivots( const DoorBSData* d, const Vector2f& wp1, flo
 		break;
 	}
 	frameHingesPivot = Vector3f( hingesPivot.x(), frameGeomPivot, 0.0f );
-	doorHandlePivot = Vector3f( -side * realDoorWidth + ( 0.055f*side ), 0.85f, side * d->doorGeomThickness*0.5f );
+	doorHandlePivotLeft = Vector3f( -side * realDoorWidth + ( 0.075f*side ), 0.85f, -d->doorGeomThickness );
+	doorHandlePivotRight = Vector3f( -side * realDoorWidth + ( 0.075f*side ), 0.85f, 0.0f );
 	doorHandlePlateDoorSidePivot = Vector3f( -side*realDoorWidth*0.5f, 0.0f, d->height*0.5f );
 	doorHandlePlateFrameSidePivot = Vector3f( -side * realDoorWidth*0.5f, doorGeomPivot, d->height*0.5f );
 	doorHandleAngle = ( side > 0.0f ? M_PI : 0.0f ) - M_PI_2;

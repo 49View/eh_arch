@@ -21,7 +21,7 @@ public:
 	static float signOfOrientationSwizzled( const DoorBSData* d );
 	static float signOfAnchorPoint( const DoorBSData* d );
 	static void getPlasterMiddlePoints( const DoorBSData* d, std::vector<Vector3f>& mpoints );
-	static void calculatePivots( const DoorBSData* d, const Vector2f& wp1, float realDoorWidth, Vector3f& hingesPivot, Vector3f& frameHingesPivot, Vector3f& doorHandlePivot, float& doorHandleAngle, float& doorGeomPivot, Vector3f& doorHandlePlateDoorSidePivot, Vector3f& doorHandlePlateFrameSidePivot );
+	static void calculatePivots( const DoorBSData* d, const Vector2f& wp1, float realDoorWidth, Vector3f& hingesPivot, Vector3f& frameHingesPivot, Vector3f& doorHandlePivotLeft, Vector3f& doorHandlePivotRight, float& doorHandleAngle, float& doorGeomPivot, Vector3f& doorHandlePlateDoorSidePivot, Vector3f& doorHandlePlateFrameSidePivot );
 	
 	// Update
 	static void toggleOrientations( DoorBSData* d );
