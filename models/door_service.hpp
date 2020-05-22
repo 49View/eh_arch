@@ -19,20 +19,12 @@ public:
 
     // Query
     static std::string orientationToString( const DoorBSData *d );
-    static float signOfOrientation( const DoorBSData *d );
-    static float signOfOrientationSwizzled( const DoorBSData *d );
-    static float signOfAnchorPoint( const DoorBSData *d );
     static void getPlasterMiddlePoints( const DoorBSData *d, std::vector<Vector3f>& mpoints );
-    static void
-    calculatePivots( const DoorBSData *d, int dIndex, float realDoorWidth, float doorTrim, Vector3f& hingesPivot,
-                     Vector3f& frameHingesPivot, Vector3f& doorHandlePivotLeft, Vector3f& doorHandlePivotRight,
-                     Quaternion& doorHandleRot, float& doorHandleAngle, float& doorGeomPivot, V3f& doorPivot,
-                     Vector3f& doorHandlePlateDoorSidePivot, Vector3f& doorHandlePlateFrameSidePivot );
 
     // Update
+    static void calculatePivots( DoorBSData *d );
     static void toggleOrientations( DoorBSData *d );
     static void rescale( DoorBSData *d, float _scale );
-    static void setOrientationParameters( DoorBSData *d );
 
     // Delete
 };

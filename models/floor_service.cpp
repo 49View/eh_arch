@@ -104,7 +104,6 @@ void FloorService::addDoorFromData( FloorBSData *f, float _doorHeight, const USh
                                                   WallLastPointWrap::No, _doorHeight, WallFlags::WF_HasCoving |
                                                                                       WallFlags::WF_IsDoorPart,
                                                   d1->hash ));
-
 }
 
 void
@@ -518,6 +517,11 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
         if ( r->doors.size() > 2 && r->windows.empty() )  {
             r->roomTypes.emplace_back(ASType::Hallway);
         }
+    }
+
+    // Go back to re-evaluate every door after all possible discoveries/guesses have been made
+    for ( auto& d : f->doors ) {
+        DoorService::calculatePivots(d.get());
     }
 }
 

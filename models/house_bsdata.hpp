@@ -172,20 +172,35 @@ JSONDATA(FittedFurniture, name, symbolRef, size, position3d, xyLocation, heightO
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
            asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
-           rooms, roomTypes, subType, pivotIndex, orientation, doorGeomThickness, architraveWidth, mDoorFrameProfile,
-           openingAngleMax, openingAngleMin, isMainDoor, architraveProfile)
+           rooms, roomTypes, subType, isMainDoor, architraveProfile,
+           dIndex, doorInnerBumpSize, doorGeomThickness, doorTrim, openingAngleMax, openingAngleMin,
+           hingesPivot, doorHandlePivotLeft, doorHandlePivotRight, doorHandleAngle, frameHingesPivot,
+           doorHandlePlateDoorSidePivot, doorHandlePlateFrameSidePivot, doorPivot, doorHandleRot, doorGeomPivot,
+           doorSize)
     std::vector<int64_t> rooms;
     std::vector<ASTypeT> roomTypes{};
     ArchSubTypeT subType = ArchSubType::DoorSingle;
-    DoorPivotIndexT pivotIndex = DoorPivotIndex::W1;
-    DoorOrientationT orientation = DoorOrientation::W1_CW;
-    float doorGeomThickness = 0.045f;
-    float architraveWidth = 0.1f;
-    std::string mDoorFrameProfile = ""; //Profile mDoorFrameProfile;
-    float openingAngleMax = M_PI;
-    float openingAngleMin = 0.0f;
     bool isMainDoor = false;
     std::string architraveProfile = "architrave,ovolo";
+
+    // Internal door data
+    int dIndex = 3;
+    Vector2f doorInnerBumpSize = Vector2f(0.020f, 0.03f);
+    float doorGeomThickness = 0.045f;
+    float doorTrim = 0.01f;
+    float openingAngleMax = M_PI;
+    float openingAngleMin = 0.0f;
+    Vector3f hingesPivot = Vector3f::ZERO;
+    Vector3f doorHandlePivotLeft = Vector3f::ZERO;
+    Vector3f doorHandlePivotRight = Vector3f::ZERO;
+    float doorHandleAngle = 0.0f;
+    Vector3f frameHingesPivot = Vector3f::ZERO;
+    Vector3f doorHandlePlateDoorSidePivot = Vector3f::ZERO;
+    Vector3f doorHandlePlateFrameSidePivot = Vector3f::ZERO;
+    V3f doorPivot = V3f::ZERO;
+    Quaternion doorHandleRot{};
+    V3f doorGeomPivot = V3f::ZERO;
+    V2f doorSize = V2f::ZERO;
 };
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,

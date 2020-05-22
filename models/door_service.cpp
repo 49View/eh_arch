@@ -25,7 +25,6 @@ DoorService::createDoor( float _doorHeight, float _ceilingHeight, const UShape& 
     d1->height = _doorHeight;
     d1->wallFlags = WallFlags::WF_HasCoving;
     d1->ceilingHeight = _ceilingHeight;
-    d1->architraveWidth = _architraveWidth;
 
     TwoUShapesBasedService::evalData(d1.get());
 
@@ -34,157 +33,80 @@ DoorService::createDoor( float _doorHeight, float _ceilingHeight, const UShape& 
 }
 
 void DoorService::toggleOrientations( DoorBSData *d ) {
-    switch ( d->orientation ) {
-        case DoorOrientation::W1_CW:
-            d->orientation = DoorOrientation::W1_CCW;
-            break;
-        case DoorOrientation::W1_CCW:
-            d->orientation = DoorOrientation::W2_CW;
-            break;
-        case DoorOrientation::W2_CW:
-            d->orientation = DoorOrientation::W2_CCW;
-            break;
-        case DoorOrientation::W2_CCW:
-            d->orientation = DoorOrientation::W1_CW;
-            break;
-        default:
-            break;
-    }
-    setOrientationParameters(d);
+    d->dIndex = (d->dIndex + 1) % 4;
+    calculatePivots(d);
 }
 
 std::string DoorService::orientationToString( const DoorBSData *d ) {
-    switch ( d->orientation ) {
-        case DoorOrientation::W1_CW:
-            return "DoorOrientation::W1_CW";
-        case DoorOrientation::W2_CW:
-            return "DoorOrientation::W2_CW";
-        case DoorOrientation::W1_CCW:
-            return "DoorOrientation::W1_CCW";
-        case DoorOrientation::W2_CCW:
-            return "DoorOrientation::W2_CCW";
+    switch ( d->dIndex ) {
+        case 0:
+            return "Right Top";
+        case 1:
+            return "Right Bottom";
+        case 2:
+            return "Left Top";
+        case 3:
+            return "left Bottom";
         default:
             break;
     }
     return "";
 }
 
-float DoorService::signOfOrientation( const DoorBSData *d ) {
-    switch ( d->orientation ) {
-        case DoorOrientation::W1_CW:
-        case DoorOrientation::W2_CW:
-            return 1.0f;
-        case DoorOrientation::W1_CCW:
-        case DoorOrientation::W2_CCW:
-            return -1.0f;
-        default:
-            break;
-    }
-    ASSERT(false);
-    return 1.0f;
-}
-
-float DoorService::signOfOrientationSwizzled( const DoorBSData *d ) {
-    switch ( d->orientation ) {
-        case DoorOrientation::W1_CW:
-        case DoorOrientation::W2_CCW:
-            return 1.0f;
-        case DoorOrientation::W1_CCW:
-        case DoorOrientation::W2_CW:
-            return -1.0f;
-        default:
-            break;
-    }
-    ASSERT(false);
-    return 1.0f;
-}
-
-float DoorService::signOfAnchorPoint( const DoorBSData *d ) {
-    switch ( d->orientation ) {
-        case DoorOrientation::W1_CW:
-        case DoorOrientation::W1_CCW:
-            return 1.0f;
-        case DoorOrientation::W2_CCW:
-        case DoorOrientation::W2_CW:
-            return -1.0f;
-        default:
-            break;
-    }
-    ASSERT(false);
-    return 1.0f;
-}
 
 void DoorService::rescale( DoorBSData *d, float _scale ) {
     TwoUShapesBasedService::rescale(d, _scale);
-}
-
-void DoorService::setOrientationParameters( DoorBSData *d ) {
-    switch ( d->orientation ) {
-        case DoorOrientation::W1_CCW:
-            d->pivotIndex = DoorPivotIndex::W1;
-            d->openingAngleMin = 0.0f;
-            d->openingAngleMax = -M_PI_2;
-            break;
-        case DoorOrientation::W2_CW:
-            d->pivotIndex = DoorPivotIndex::W2;
-            d->openingAngleMin = 0.0f;
-            d->openingAngleMax = -M_PI_2;
-            break;
-        case DoorOrientation::W2_CCW:
-            d->pivotIndex = DoorPivotIndex::W2;
-            d->openingAngleMin = 0.0f;
-            d->openingAngleMax = M_PI_2;
-            break;
-        case DoorOrientation::W1_CW:
-            d->pivotIndex = DoorPivotIndex::W1;
-            d->openingAngleMin = 0.0f;
-            d->openingAngleMax = M_PI_2;
-            break;
-
-        default:
-            break;
-    }
 }
 
 bool isLeft( int index ) {
     return index >= 2;
 }
 
-void DoorService::calculatePivots( const DoorBSData *d, int dIndex, float realDoorWidth, float doorTrim,
-                                   Vector3f& hingesPivot, Vector3f& frameHingesPivot, Vector3f& doorHandlePivotLeft,
-                                   Vector3f& doorHandlePivotRight, Quaternion& doorHandleRot, float& doorHandleAngle,
-                                   float& doorGeomPivot,
-                                   V3f& doorPivot, Vector3f& doorHandlePlateDoorSidePivot,
-                                   Vector3f& doorHandlePlateFrameSidePivot ) {
+void DoorService::calculatePivots( DoorBSData *d ) {
     float frameGeomPivot = 0.0f;
-    float side = dIndex < 2.0f ? -1.0f : 1.0f;//sideOfLine( wp1, d->center + d->dirDepth, d->center - d->dirDepth );
+    float realDoorWidth = d->width - d->doorTrim * 2.0f;
+    float doorGeomDepthPivot = d->depth * 0.5f;
 
-    hingesPivot = Vector3f(realDoorWidth * 0.5f * side, d->doorGeomThickness * 0.5f, 0.0f);
-    doorGeomPivot = d->depth * 0.5f;
+    float side = d->dIndex < 2.0f ? -1.0f : 1.0f;//sideOfLine( wp1, d->center + d->dirDepth, d->center - d->dirDepth );
 
-    if ( isOdd(dIndex) ) doorGeomPivot *= -1.0f;
-    float doorGeomPivotX = isLeft(dIndex) ? d->width * 0.5f - doorTrim : -d->width * 0.5f + doorTrim;
-    doorPivot = { doorGeomPivotX, doorTrim, doorGeomPivot };
+    d->hingesPivot = Vector3f(realDoorWidth * 0.5f * side, d->doorGeomThickness * 0.5f, 0.0f);
 
-    frameHingesPivot = Vector3f(hingesPivot.x(), frameGeomPivot, 0.0f);
-    doorHandlePivotLeft = Vector3f(-side * realDoorWidth + ( 0.075f * side ), 0.85f, -d->doorGeomThickness);
-    doorHandlePivotRight = Vector3f(-side * realDoorWidth + ( 0.075f * side ), 0.85f, 0.0f);
+    if ( isOdd(d->dIndex) ) doorGeomDepthPivot *= -1.0f;
+    float doorGeomPivotX = isLeft(d->dIndex) ? d->width * 0.5f - d->doorTrim : -d->width * 0.5f + d->doorTrim;
+    d->doorPivot = { doorGeomPivotX, d->doorTrim, doorGeomDepthPivot };
 
-    if ( isOdd(dIndex) ) {
-        doorHandlePivotLeft += V3f::Z_AXIS * d->doorGeomThickness;
-        doorHandlePivotRight += V3f::Z_AXIS * d->doorGeomThickness;
+    d->frameHingesPivot = Vector3f(d->hingesPivot.x(), frameGeomPivot, 0.0f);
+    d->doorHandlePivotLeft = Vector3f(-side * realDoorWidth + ( 0.075f * side ), 0.85f, -d->doorGeomThickness);
+    d->doorHandlePivotRight = Vector3f(-side * realDoorWidth + ( 0.075f * side ), 0.85f, 0.0f);
+
+    if ( isOdd(d->dIndex) ) {
+        d->doorHandlePivotLeft += V3f::Z_AXIS * d->doorGeomThickness;
+        d->doorHandlePivotRight += V3f::Z_AXIS * d->doorGeomThickness;
     }
-    doorHandleRot = Quaternion(M_PI, V3f::UP_AXIS);
-    if ( isLeft(dIndex) ) {
-        doorHandlePivotLeft += V3f::Z_AXIS * d->doorGeomThickness;
-        doorHandlePivotRight -= V3f::Z_AXIS * d->doorGeomThickness;
-        doorHandleRot = Quaternion(M_PI, V3f::Z_AXIS) * Quaternion(M_PI, V3f::UP_AXIS) * Quaternion(M_PI, V3f::X_AXIS);
+    d->doorHandleRot = Quaternion(M_PI, V3f::UP_AXIS);
+    if ( isLeft(d->dIndex) ) {
+        d->doorHandlePivotLeft += V3f::Z_AXIS * d->doorGeomThickness;
+        d->doorHandlePivotRight -= V3f::Z_AXIS * d->doorGeomThickness;
+        d->doorHandleRot = Quaternion(M_PI, V3f::Z_AXIS) * Quaternion(M_PI, V3f::UP_AXIS) * Quaternion(M_PI, V3f::X_AXIS);
     }
 
 
-    doorHandlePlateDoorSidePivot = Vector3f(-side * realDoorWidth * 0.5f, 0.0f, d->height * 0.5f);
-    doorHandlePlateFrameSidePivot = Vector3f(-side * realDoorWidth * 0.5f, doorGeomPivot, d->height * 0.5f);
-    doorHandleAngle = ( side > 0.0f ? M_PI : 0.0f ) - M_PI_2;
+    d->doorHandlePlateDoorSidePivot = Vector3f(-side * realDoorWidth * 0.5f, 0.0f, d->height * 0.5f);
+    d->doorHandlePlateFrameSidePivot = Vector3f(-side * realDoorWidth * 0.5f, doorGeomDepthPivot, d->height * 0.5f);
+    d->doorHandleAngle = ( side > 0.0f ? M_PI : 0.0f ) - M_PI_2;
+
+    d->openingAngleMax = isOdd(d->dIndex) ? -M_PI_2 : M_PI_2;
+    d->openingAngleMax *= isLeft(d->dIndex) ? -1.0f : 1.0f;
+
+    float depthGap = isOdd(d->dIndex) ? d->doorGeomThickness : 0.0f;
+    float gapBetweenDoorEdgeAndHinges = 0.003f;
+    float totalTrim = ( d->doorTrim * 2.0f + gapBetweenDoorEdgeAndHinges * 2.0f );
+    float xPivot = isLeft(d->dIndex) ? -d->width + d->doorTrim * 2.0f + gapBetweenDoorEdgeAndHinges
+                                     : gapBetweenDoorEdgeAndHinges;
+    // This 2.5f here is to leave space for the frame trim, the inner frame trim, and the 0.5 is a bit of air between it.
+    d->doorSize = V2f{ d->width - totalTrim, d->height - d->doorTrim * 2.5f };
+    d->doorGeomPivot = V3f{ xPivot, 0.0f, depthGap };
+
 }
 
 void DoorService::getPlasterMiddlePoints( const DoorBSData *d, std::vector<Vector3f>& mpoints ) {
