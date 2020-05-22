@@ -22,7 +22,7 @@ namespace RoomService {
         auto w = ServiceFactory::create<RoomBSData>();
         w->type = ArchType::RoomT;
         w->roomTypes = _preData.rtypes;
-        w->mHasCoving = !RS::hasType(w.get(), ASType::Kitchen);
+        w->mHasCoving = !RS::hasRoomType(w.get(), ASType::Kitchen);
         w->height = _floorHeight;
         w->width = _preData.bboxInternal.calcWidth();
         w->depth = _preData.bboxInternal.calcHeight();
@@ -368,9 +368,9 @@ namespace RoomService {
     }
 
     bool roomNeedsCoving( const RoomBSData *r ) {
-        return !( RS::hasType(r, ASType::Bathroom) || RS::hasType(r, ASType::ToiletRoom) ||
-                  RS::hasType(r, ASType::ShowerRoom) ||
-                  RS::hasType(r, ASType::Ensuite) );
+        return !( RS::hasRoomType(r, ASType::Bathroom) || RS::hasRoomType(r, ASType::ToiletRoom) ||
+                  RS::hasRoomType(r, ASType::ShowerRoom) ||
+                  RS::hasRoomType(r, ASType::Ensuite) );
     }
 
     float area( const RoomBSData *r ) {
@@ -510,13 +510,6 @@ namespace RoomService {
             ret += " / " + roomTypeToName(r->roomTypes[i]);
         }
         return ret;
-    }
-
-    bool hasType( const RoomBSData *r, ASTypeT roomType ) {
-        for ( const auto rt : r->roomTypes ) {
-            if ( rt == roomType ) return true;
-        }
-        return false;
     }
 
     bool isGeneric( const RoomBSData *r ) {

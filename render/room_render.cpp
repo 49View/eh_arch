@@ -124,7 +124,7 @@ namespace RoomRender {
             auto furn = sg.GB<GT::Asset>( fur.name, fur.position3d, GT::Rotate( fur.rotation ));
             ret.furnituresGB.emplace_back( furn );
         }
-        if ( RoomService::hasType(w, ASType::Kitchen) ) {
+        if ( RoomService::hasRoomType(w, ASType::Kitchen) ) {
             KitchenRender::render(sg, w, ret);
         }
     }

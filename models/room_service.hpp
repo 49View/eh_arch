@@ -401,11 +401,18 @@ namespace RoomService {
     bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurnitureRuleScript& fs );
 
     // Query
+    template<typename T>
+    bool hasRoomType( const T *r, ASTypeT roomType ) {
+        for ( const auto rt : r->roomTypes ) {
+            if ( rt == roomType ) return true;
+        }
+        return false;
+    }
+
     Vector2f maxEnclsingBoundingBoxCenter( const RoomBSData *r );
     size_t numTotalSegments( const RoomBSData *r );
     std::string roomName( const RoomBSData *r );
     std::string roomNames( const RoomBSData *r );
-    bool hasType( const RoomBSData *r, ASTypeT roomType );
     Vector4f roomColor( const RoomBSData *r );
     std::string roomTypeToName( ASTypeT ast );
     bool isGeneric( const RoomBSData *r );

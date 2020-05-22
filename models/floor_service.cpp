@@ -490,7 +490,7 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
             w->roomTypes = r->roomTypes;
             w->rooms.emplace_back(r->hash);
             r->windows.emplace_back(w->hash);
-            if ( RoomService::hasType(r, ASType::Kitchen) ) {
+            if ( RoomService::hasRoomType(r, ASType::Kitchen) ) {
                 w->hasCurtains = false;
                 w->hasBlinds = true;
             }
@@ -522,6 +522,9 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
     // Go back to re-evaluate every door after all possible discoveries/guesses have been made
     for ( auto& d : f->doors ) {
         DoorService::calculatePivots(d.get());
+        if ( RS::hasRoomType(d.get(), ASType::Hallway) ) {
+
+        }
     }
 }
 
