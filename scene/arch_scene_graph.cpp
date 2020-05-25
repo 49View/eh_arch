@@ -116,8 +116,6 @@ void ArchSceneGraph::loadHouse( const std::string& _pid ) {
         houseJson = std::make_shared<HouseBSData>( params.bufferString );
         callbackStream = std::make_pair(houseJson, true);
     } );
-
-//    B<HB>( _names ).load( std::move(_ccf) );
 }
 
 void ArchSceneGraph::consumeCallbacks() {
@@ -134,7 +132,3 @@ void ArchSceneGraph::update() {
         rsg.drawCameraLocator( *floorplanNavigationMatrix.get() );
     }
 }
-
-//void ArchSceneGraph::publishHouse( std::shared_ptr<HouseBSData> _house, const std::string& _name ) {
-//    asg.HM().publish( _house, _name );
-//}

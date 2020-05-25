@@ -8,7 +8,6 @@
 #include "../models/room_service_furniture.hpp"
 #include <core/resources/resource_utils.hpp>
 #include <core/resources/resource_manager.hpp>
-#include <eh_arch/scene/arch_service.hpp>
 
 class SceneGraph;
 class RenderOrchestrator;
