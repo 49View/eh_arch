@@ -437,7 +437,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo
     std::vector<ArchSegment> perimeterArchSegments;
     std::string defaultCeilingMaterial = "plaster_ultra_fine_spray";
     C4f defaultCeilingColor = C4f::WHITE;
-    std::string externalWallsMaterial = "bricks";
+    std::string externalWallsMaterial = "plaster_ultra_fine_spray";
     C4f externalWallsColor = C4f::WHITE;
 
     JMATH::Rect2fFeatureT anchorPoint = Rect2fFeature::bottomRight;

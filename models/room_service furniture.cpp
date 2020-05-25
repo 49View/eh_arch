@@ -677,7 +677,7 @@ namespace RoomService {
     void furnishBathroom( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
         FurnitureRuleScript ruleScript;
         r->floorMaterial = "pavonazzo,tiles";
-        r->wallMaterial = "yule,tiles";
+        r->wallMaterial = "yule,weave,tiles";
         r->wallColor = C4f::WHITE;
         ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::FRFirstAvailableCorner),
                                                    FurnitureRefs{ { FTH::FT_Shower } }

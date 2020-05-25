@@ -100,12 +100,12 @@ void ArchSceneGraph::showHouse(std::shared_ptr<HouseBSData> _houseJson) {
         HouseRender::make2dGeometry( rsg.RR(), sg, houseJson.get(), RDSPreMult(*floorplanNavigationMatrix.get()), Use2dDebugRendering::False );
         HouseRender::make3dGeometry( sg, houseJson.get() );
 
-        V2f cobr = HouseService::centerOfBiggestRoom( houseJson.get() );
-        V3f lngp = V3f{ cobr.x(), 1.6f, cobr.y() };
+//        V2f cobr = HouseService::centerOfBiggestRoom( houseJson.get() );
+//        V3f lngp = V3f{ cobr.x(), 1.6f, cobr.y() };
+        V3f lngp = V3f{ 6.08f, 1.39f, 7.83f };
         sg.setLastKnownGoodPosition(lngp);
-
         rsg.setRigCameraController<CameraControlWalk>();
-        rsg.DC()->setQuatAngles(V3f{ 0.0f, M_PI_4, 0.0f });
+        rsg.DC()->setQuatAngles(V3f{ 0.08f, -0.70f, 0.0f });
         rsg.DC()->setPosition(lngp);
     } );
 
