@@ -357,13 +357,15 @@ namespace HouseMakerBitmap {
         // OCR for rooms
         for ( auto &r : rws ) {
             auto cs = RoomService::calcCovingSegments( r.wallSegmentsInternal );
-            JMATH::Rect2f csBBox = getContainingBBox( cs );
-            cv::Mat origMasked;
-            auto maskedRoom = maskedRoomMat( si, bsdata, cs, csBBox, 1, OCRThresholdMask::False, origMasked );
-            assignRoomTypeFromOcrString( bsdata, maskedRoom, csBBox, r.rtypes );
-            assignRoomTypeFromBeingClever(r);
+            if ( !cs.empty() && !cs[0].empty() ) {
+                JMATH::Rect2f csBBox = getContainingBBox( cs );
+                cv::Mat origMasked;
+                auto maskedRoom = maskedRoomMat( si, bsdata, cs, csBBox, 1, OCRThresholdMask::False, origMasked );
+                assignRoomTypeFromOcrString( bsdata, maskedRoom, csBBox, r.rtypes );
+                assignRoomTypeFromBeingClever(r);
 //            cv::imwrite(std::to_string(random()) + ".png", maskedRoom);
-            //guessHuMomentsOfRoom( origMasked, r );
+                //guessHuMomentsOfRoom( origMasked, r );
+            }
         }
 
         // Check if we have to scale the floorplan

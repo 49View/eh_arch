@@ -337,7 +337,7 @@ namespace RoomService {
             for ( int q = 0; q < csize; q++ ) {
                 points.push_back(rws[q].p2);
             }
-            removeCollinear(points, 0.001f);
+            removeCollinear(points, 0.0001f);
             lCovingSegments.push_back(points);
         }
 
