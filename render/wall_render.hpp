@@ -16,11 +16,11 @@ struct WallBSData;
 class SceneGraph;
 class Renderer;
 struct RDSPreMult;
-enum class Use2dDebugRendering;
+enum class FloorPlanRenderMode;
 struct ArchSegment;
 
 namespace WallRender  {
-    void make2dGeometry( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, Use2dDebugRendering bDrawDebug, const RDSPreMult& pm );
+    void make2dGeometry( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, FloorPlanRenderMode fpRenderMode, const RDSPreMult& pm );
     GeomSPContainer make3dGeometry( SceneGraph& sg, const WallBSData* mWall,
                                     const V3fVectorOfVector& ceilingContours );
 

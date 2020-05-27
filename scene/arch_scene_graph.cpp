@@ -14,6 +14,7 @@
 #include <core/resources/resource_builder.hpp>
 #include <core/math/vector_util.hpp>
 #include <core/lightmap_exchange_format.h>
+#include <graphics/renderer.h>
 #include <graphics/lightmap_manager.hpp>
 #include <graphics/render_light_manager.h>
 #include <graphics/shader_manager.h>
@@ -96,17 +97,17 @@ void ArchSceneGraph::showHouse(std::shared_ptr<HouseBSData> _houseJson) {
     houseJson = _houseJson;
     HOD::resolver<HouseBSData>( sg, houseJson.get(), [&]() {
         calcFloorplanNavigationTransform(houseJson);
-        sg.loadCollisionMesh( HouseService::createCollisionMesh( houseJson.get() ) );
-        HouseRender::make2dGeometry( rsg.RR(), sg, houseJson.get(), RDSPreMult(*floorplanNavigationMatrix.get()), Use2dDebugRendering::False );
-        HouseRender::make3dGeometry( sg, houseJson.get() );
+        HouseRender::make2dGeometry(rsg.RR(), sg, houseJson.get(), RDSPreMult(*floorplanNavigationMatrix.get()), FloorPlanRenderMode::Normal2d );
+        HouseRender::make3dFloorplan( rsg.RR(), sg, houseJson.get(), FloorPlanRenderMode::Normal3d );
+//        sg.loadCollisionMesh( HouseService::createCollisionMesh( houseJson.get() ) );
+//        HouseRender::make3dGeometry( sg, houseJson.get() );
 
 //        V2f cobr = HouseService::centerOfBiggestRoom( houseJson.get() );
 //        V3f lngp = V3f{ cobr.x(), 1.6f, cobr.y() };
-        V3f lngp = V3f{ 6.08f, 1.39f, 7.83f };
-        sg.setLastKnownGoodPosition(lngp);
-        rsg.setRigCameraController<CameraControlWalk>();
-        rsg.DC()->setQuatAngles(V3f{ 0.08f, -0.70f, 0.0f });
-        rsg.DC()->setPosition(lngp);
+//        sg.setLastKnownGoodPosition(lngp);
+//        rsg.setRigCameraController(CameraControlType::Walk);
+//        rsg.DC()->setQuatAngles(V3f{ 0.08f, -0.70f, 0.0f });
+//        rsg.DC()->setPosition(lngp);
     } );
 
 }
@@ -128,7 +129,7 @@ void ArchSceneGraph::update() {
 
     consumeCallbacks();
 
-    if ( floorplanNavigationMatrix ) {
+    if ( floorplanNavigationMatrix && rsg.getRigCameraController() == CameraControlType::Walk ) {
         rsg.drawCameraLocator( *floorplanNavigationMatrix.get() );
     }
 }

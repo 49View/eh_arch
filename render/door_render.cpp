@@ -61,9 +61,9 @@ namespace DoorRender {
 
     void drawDoubleDoor2d();
 
-    void make2dGeometry( Renderer& rr, SceneGraph& sg, const DoorBSData *data, Use2dDebugRendering bDrawDebug,
+    void make2dGeometry( Renderer& rr, SceneGraph& sg, const DoorBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult& _pm ) {
-        auto color = bDrawDebug == Use2dDebugRendering::True ? C4f::PASTEL_GREEN : C4f::BLACK;
+        auto color = isFloorPlanRenderModeDebug(fpRenderMode) ? C4f::PASTEL_GREEN : C4f::BLACK;
         drawSingleDoor2d(rr, data->us1.middle, data->us2.middle, data->us2.width, color, _pm);
     }
 

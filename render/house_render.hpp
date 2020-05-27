@@ -5,12 +5,10 @@
 #pragma once
 
 #include <core/resources/resource_types.hpp>
-#include <graphics/ghtypes.hpp>
+#include <eh_arch/models/htypes.hpp>
 
 class SceneGraph;
-
 class Renderer;
-
 struct HouseBSData;
 struct RDSPreMult;
 
@@ -28,7 +26,10 @@ public:
 
 namespace HouseRender {
     void make2dGeometry( Renderer &rr, SceneGraph &sg, const HouseBSData *mData, const RDSPreMult &_pm,
-                         Use2dDebugRendering bDrawDebug = Use2dDebugRendering::False );
+                         FloorPlanRenderMode fpRenderMode = FloorPlanRenderMode::Normal3d );
+
+    void make3dFloorplan( Renderer &rr, SceneGraph &sg, const HouseBSData *mData,
+                          FloorPlanRenderMode fpRenderMode = FloorPlanRenderMode::Normal3d );
 
     HouseRenderContainer make3dGeometry( SceneGraph &sg, const HouseBSData *mData );
 }

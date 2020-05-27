@@ -22,9 +22,9 @@
 
 namespace RoomRender {
 
-    void make2dGeometry( Renderer &rr, SceneGraph &sg, const RoomBSData *data, Use2dDebugRendering bDrawDebug,
+    void make2dGeometry( Renderer &rr, SceneGraph &sg, const RoomBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult &_pm ) {
-//        bool drawDebug = bDrawDebug == Use2dDebugRendering::True;
+//        bool drawDebug = fpRenderMode == Use2dDebugRendering::True;
 //        auto color = drawDebug ? Color4f::RANDA1().A(0.5f) : C4f::WHITE.A(0.5f);
 
 //        rr.draw<DPoly>( data->mPerimeterSegments, 0.025f, color, true );

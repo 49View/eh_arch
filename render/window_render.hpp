@@ -15,10 +15,10 @@ struct WindowBSData;
 class SceneGraph;
 class Renderer;
 struct RDSPreMult;
-enum class Use2dDebugRendering;
+enum class FloorPlanRenderMode;
 
 namespace WindowRender {
-    void make2dGeometry( Renderer& rr, SceneGraph& sg, const WindowBSData *data, Use2dDebugRendering bDrawDebug,
+    void make2dGeometry( Renderer& rr, SceneGraph& sg, const WindowBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult &_pm );
     GeomSPContainer make3dGeometry( SceneGraph& sg, WindowBSData* mData );
 };

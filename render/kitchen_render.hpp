@@ -12,7 +12,7 @@ class Renderer;
 struct RoomBSData;
 struct RDSPreMult;
 class HouseRenderContainer;
-enum class Use2dDebugRendering;
+enum class FloorPlanRenderMode;
 
 namespace KitchenRender {
     void render( SceneGraph& sg, RoomBSData* r, HouseRenderContainer& ret );

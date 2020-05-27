@@ -37,9 +37,9 @@ namespace WindowRender {
         rr.draw<DLine2d>( p3, p4, _color, lineWidth, false, _pm );
     }
 
-    void make2dGeometry( Renderer& rr, SceneGraph& sg, const WindowBSData *data, Use2dDebugRendering bDrawDebug,
+    void make2dGeometry( Renderer& rr, SceneGraph& sg, const WindowBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult &_pm ) {
-        auto color = bDrawDebug == Use2dDebugRendering::True ? C4f::PASTEL_GREEN : C4f::BLACK;
+        auto color = isFloorPlanRenderModeDebug(fpRenderMode) ? C4f::PASTEL_GREEN : C4f::BLACK;
         drawWindow( rr, data->us2.middle, data->us1.middle, data->us2.width, color, _pm );
     }
 

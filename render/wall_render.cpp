@@ -16,13 +16,10 @@
 
 namespace WallRender {
 
-    void drawWalls2d( Renderer &rr, const WallBSData *wall, float width, Use2dDebugRendering bDrawDebug,
-                      const RDSPreMult &_pm ) {
-        if ( !checkBitWiseFlag( wall->wallFlags, WallFlags::WF_IsDoorPart ) &&
-             !checkBitWiseFlag( wall->wallFlags, WallFlags::WF_IsWindowPart )) {
-            auto wc = bDrawDebug == Use2dDebugRendering::True ? Color4f::RANDA1() : C4f::BLACK;
-            rr.draw<DLine2d>( wall->epoints, width, wc, true, _pm );
-        }
+    void drawWalls2d( Renderer &rr, const WallBSData *wall, FloorPlanRenderMode fpRenderMode, const RDSPreMult &_pm ) {
+        auto wc = isFloorPlanRenderModeDebug(fpRenderMode) ? Color4f::RANDA1() : C4f::BLACK;
+        auto rm = isFloorPlanRenderMode2d(fpRenderMode) ? DShaderMatrix{DShaderMatrixValue2dColor} : DShaderMatrix{DShaderMatrixValue3dColor};
+        rr.draw<DPoly>( rm, wall->mTriangles2d, wc, _pm );
     }
 
     void drawIncrementalAlphaWalls2d( Renderer &rr, const WallBSData *wall, float width,
@@ -64,12 +61,11 @@ namespace WallRender {
         }
     }
 
-    void make2dGeometry( Renderer &rr, SceneGraph &sg, const WallBSData *wall, Use2dDebugRendering bDrawDebug,
+    void make2dGeometry( Renderer &rr, SceneGraph &sg, const WallBSData *wall, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult &_pm ) {
         float width = 0.015f;
-        float lineWidth = 0.0015f;
-        drawWalls2d( rr, wall, lineWidth, bDrawDebug, _pm );
-        bool drawDebug = bDrawDebug == Use2dDebugRendering::True;
+        drawWalls2d( rr, wall, fpRenderMode, _pm );
+        bool drawDebug = isFloorPlanRenderModeDebug(fpRenderMode);
         if ( drawDebug ) {
             drawWallNormals2d( rr, wall, width, _pm );
             drawUShapes2d( rr, wall, width, _pm );

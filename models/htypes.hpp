@@ -204,3 +204,20 @@ namespace GHType {
 	const static uint64_t LightSwitch = 1 << 25;
 	const static uint64_t Room = 1 << 26;
 };
+
+enum class FloorPlanRenderMode {
+    Normal2d,
+    Normal3d,
+    Debug2d,
+    Debug3d
+};
+
+template<typename T>
+bool isFloorPlanRenderModeDebug( T _flag ) {
+    return _flag == T::Debug2d || _flag == T::Debug3d;
+}
+
+template<typename T>
+bool isFloorPlanRenderMode2d( T _flag ) {
+    return _flag == T::Debug2d || _flag == T::Normal2d;
+}
