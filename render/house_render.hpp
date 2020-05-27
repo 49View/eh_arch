@@ -9,6 +9,10 @@
 
 class SceneGraph;
 class Renderer;
+class DShaderMatrix;
+class Vector4f;
+class Matrix4f;
+
 struct HouseBSData;
 struct RDSPreMult;
 
@@ -25,13 +29,16 @@ public:
 };
 
 namespace HouseRender {
-    void make2dGeometry( Renderer &rr, SceneGraph &sg, const HouseBSData *mData, const RDSPreMult &_pm,
-                         FloorPlanRenderMode fpRenderMode = FloorPlanRenderMode::Normal3d );
 
-    void make3dFloorplan( Renderer &rr, SceneGraph &sg, const HouseBSData *mData,
-                          FloorPlanRenderMode fpRenderMode = FloorPlanRenderMode::Normal3d );
+    DShaderMatrix floorPlanShader( FloorPlanRenderMode fpRenderMode );
+    Vector4f floorPlanElemColor( FloorPlanRenderMode fpRenderMode, const Vector4f& nominalColor );
+    Vector4f floorPlanElemColor( FloorPlanRenderMode fpRenderMode );
+    float floorPlanScaler( FloorPlanRenderMode fpRenderMode, float value, const Matrix4f& pm );
 
-    HouseRenderContainer make3dGeometry( SceneGraph &sg, const HouseBSData *mData );
+    void make2dGeometry( Renderer& rr, SceneGraph& sg, const HouseBSData *mData, const RDSPreMult& _pm,
+                         FloorPlanRenderMode fpRenderMode = FloorPlanRenderMode::Normal2d );
+
+    HouseRenderContainer make3dGeometry( SceneGraph& sg, const HouseBSData *mData );
 }
 
 

@@ -20,6 +20,7 @@
 
 #include "../models/house_bsdata.hpp"
 #include "../models/door_service.hpp"
+#include "house_render.hpp"
 
 namespace DoorRender {
 
@@ -27,13 +28,16 @@ namespace DoorRender {
         return index >= 2;
     }
 
-    void drawSingleDoor2d( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, const C4f& _color,
-                           const RDSPreMult& _pm ) {
+    void drawSingleDoor2d( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, DShaderMatrix sm,
+                           FloorPlanRenderMode fpRenderMode, const RDSPreMult& pm ) {
+
+        auto color = HouseRender::floorPlanElemColor(fpRenderMode, C4f::PASTEL_GREEN);
         float windowLineWidth = _lineWidth * 0.2f;
         float halfWindowLineWidth = windowLineWidth * 0.5f;
         float halfLineWidth = _lineWidth * 0.5f;
         float windowLineWidthOffset = halfLineWidth - halfWindowLineWidth;
-        float lineWidth = 0.0025f;
+
+        auto lineWidth = HouseRender::floorPlanScaler( fpRenderMode, 0.03f, pm());
 
         float dist = distance(_p1, _p2) + windowLineWidth;
         V2f vn = normalize(_p1 - _p2);
@@ -56,15 +60,15 @@ namespace DoorRender {
         }
 
         vLists.emplace_back(p1);
-        rr.draw<DLine2d>(vLists, _color, lineWidth, false, _pm);
+        rr.draw<DLine>(vLists, color, lineWidth, false, sm, pm);
     }
 
     void drawDoubleDoor2d();
 
     void make2dGeometry( Renderer& rr, SceneGraph& sg, const DoorBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult& _pm ) {
-        auto color = isFloorPlanRenderModeDebug(fpRenderMode) ? C4f::PASTEL_GREEN : C4f::BLACK;
-        drawSingleDoor2d(rr, data->us1.middle, data->us2.middle, data->us2.width, color, _pm);
+        auto rm = HouseRender::floorPlanShader(fpRenderMode);
+        drawSingleDoor2d(rr, data->us1.middle, data->us2.middle, data->us2.width, rm, fpRenderMode, _pm);
     }
 
     std::shared_ptr<Profile> makeEnglishDoorProfile( const Vector2f& vv2fs ) {
@@ -167,7 +171,9 @@ namespace DoorRender {
 //
 //// Custom profiles
 //
-    std::shared_ptr<Profile> makeInnerDoorFrameProfile( float _depth, float doorGeomThickness, float doorTrim, const V2f& doorInnerBumpSize, int dIndex ) {
+    std::shared_ptr<Profile>
+    makeInnerDoorFrameProfile( float _depth, float doorGeomThickness, float doorTrim, const V2f& doorInnerBumpSize,
+                               int dIndex ) {
 
         float thickness = _depth;
         float th = thickness * 0.5f;
@@ -210,7 +216,8 @@ namespace DoorRender {
 
 
     void addInnerDoorFrame( SceneGraph& sg, GeomSP mRootH, const DoorBSData *d ) {
-        auto doorProfile = makeInnerDoorFrameProfile(d->depth, d->doorGeomThickness, d->doorTrim, d->doorInnerBumpSize, d->dIndex);
+        auto doorProfile = makeInnerDoorFrameProfile(d->depth, d->doorGeomThickness, d->doorTrim, d->doorInnerBumpSize,
+                                                     d->dIndex);
         sg.addProfileIM(doorProfile->Name(), *doorProfile);
 
         // Add inner frame
@@ -243,7 +250,7 @@ namespace DoorRender {
 //    flatUglyDoor( sg, mRootH, d, doorPivot );
     }
 
-    void addFloorUnderDoor( SceneGraph& sg, const DoorBSData* d, GeomSP root ) {
+    void addFloorUnderDoor( SceneGraph& sg, const DoorBSData *d, GeomSP root ) {
         sg.GB<GT::Extrude>(V2nff{ V2f{ d->width, d->depth }, V3f::UP_AXIS, 0.001f }, root,
                            V3f::UP_AXIS * -0.001f);
     }
@@ -262,7 +269,7 @@ namespace DoorRender {
         addDoorGeom(sg, rootH, data);
 
         // Add a bit of the missing floor between the rooms connecting this door
-        addFloorUnderDoor( sg, data, rootH);
+        addFloorUnderDoor(sg, data, rootH);
 
         float vwangle = -atan2(-data->dirWidth.y(), data->dirWidth.x());
         Quaternion rot(vwangle + M_PI, V3f::UP_AXIS);

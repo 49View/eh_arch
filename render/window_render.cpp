@@ -8,39 +8,39 @@
 
 #include "window_render.hpp"
 #include <core/math/path_util.h>
-#include <core/resources/profile.hpp>
-#include <core/v_data.hpp>
 #include <core/resources/resource_builder.hpp>
 #include <poly/scene_graph.h>
 #include <graphics/renderer.h>
 
-#include "../models/house_bsdata.hpp"
+#include "house_render.hpp"
 
 namespace WindowRender {
 
-    void drawWindow( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, const C4f& _color,
-                     const RDSPreMult &_pm ) {
+    void drawWindow( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, FloorPlanRenderMode fpRenderMode,
+                     const RDSPreMult &pm ) {
+        auto rm = HouseRender::floorPlanShader(fpRenderMode);
+        auto color = HouseRender::floorPlanElemColor(fpRenderMode, C4f::PASTEL_GREEN);
         float windowLineWidth = _lineWidth * 0.2f;
         float halfWindowLineWidth = windowLineWidth * 0.5f;
         float halfLineWidth = _lineWidth * 0.5f;
         float windowLineWidthOffset = halfLineWidth - halfWindowLineWidth;
-        float lineWidth = 0.001f;
-        rr.draw<DLine2d>( _p1, _p2, _color, lineWidth, false, _pm );
 
+        auto lineWidth = HouseRender::floorPlanScaler( fpRenderMode, _lineWidth*0.05f, pm());
+
+        rr.draw<DLine>( rm, _p1, _p2, color, lineWidth, false, pm );
         V2f vn = normalize( _p1 - _p2);
         auto slope = rotate90( vn );
         auto p1 = _p1 + ( slope * windowLineWidthOffset );
         auto p2 = _p2 + ( slope * windowLineWidthOffset );
-        rr.draw<DLine2d>( p1, p2, _color, lineWidth, false, _pm );
+        rr.draw<DLine>( rm, p1, p2, color, lineWidth, false, pm );
         auto p3 = _p1 + ( slope * -windowLineWidthOffset );
         auto p4 = _p2 + ( slope * -windowLineWidthOffset );
-        rr.draw<DLine2d>( p3, p4, _color, lineWidth, false, _pm );
+        rr.draw<DLine>( rm, p3, p4, color, lineWidth, false, pm );
     }
 
     void make2dGeometry( Renderer& rr, SceneGraph& sg, const WindowBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult &_pm ) {
-        auto color = isFloorPlanRenderModeDebug(fpRenderMode) ? C4f::PASTEL_GREEN : C4f::BLACK;
-        drawWindow( rr, data->us2.middle, data->us1.middle, data->us2.width, color, _pm );
+        drawWindow( rr, data->us2.middle, data->us1.middle, data->us2.width, fpRenderMode, _pm );
     }
 
     // [END] 2D

@@ -83,7 +83,7 @@ void ArchSceneGraph::calcFloorplanNavigationTransform( std::shared_ptr<HouseBSDa
     auto m = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
     float vmax = max(houseJson->bbox.bottomRight().x(), houseJson->bbox.bottomRight().y());
 //    float padding = vmax*0.03f;
-    float screenFloorplanRatio = (1.0f/4.0f);
+    float screenFloorplanRatio = (1.0f/1.0f);
     float screenPadding = 0.03f;
     float vmaxScale = vmax / screenFloorplanRatio;
     auto vr = 1.0f/ vmaxScale;
@@ -97,8 +97,8 @@ void ArchSceneGraph::showHouse(std::shared_ptr<HouseBSData> _houseJson) {
     houseJson = _houseJson;
     HOD::resolver<HouseBSData>( sg, houseJson.get(), [&]() {
         calcFloorplanNavigationTransform(houseJson);
-        HouseRender::make2dGeometry(rsg.RR(), sg, houseJson.get(), RDSPreMult(*floorplanNavigationMatrix.get()), FloorPlanRenderMode::Normal2d );
-        HouseRender::make3dFloorplan( rsg.RR(), sg, houseJson.get(), FloorPlanRenderMode::Normal3d );
+        HouseRender::make2dGeometry(rsg.RR(), sg, houseJson.get(), RDSPreMult(*floorplanNavigationMatrix.get()), FloorPlanRenderMode::Debug2d );
+        HouseRender::make2dGeometry(rsg.RR(), sg, houseJson.get(), RDSPreMult(Matrix4f::IDENTITY), FloorPlanRenderMode::Debug3d );
 //        sg.loadCollisionMesh( HouseService::createCollisionMesh( houseJson.get() ) );
 //        HouseRender::make3dGeometry( sg, houseJson.get() );
 
