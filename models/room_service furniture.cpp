@@ -830,6 +830,7 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     std::string coffeeTableIcon = "fia,coffee,table";
     std::string toiletIcon = "fia,toilet";
     std::string bathroomSinkIcon = "fia,double,sink";
+    std::string neutralSquareIcon = "neutral,ff,square";
 
     FurnitureSetContainer furnitureSet{};
     furnitureSet.name = _name;
@@ -839,27 +840,27 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     furnitureSet.set.emplace_back(FTH::FT_Wardrobe, hemnes_drawer, V3f::ZERO, wardrobeIcon);
     furnitureSet.set.emplace_back(FTH::FT_Drawer, hemnes_drawer, V3f::ZERO, wardrobeIcon);
     furnitureSet.set.emplace_back(FTH::FT_Sofa, soderhamn, V3f::ZERO, sofaIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Picture, pictures_set_3, V3f::ZERO, S::SQUARE);
-    furnitureSet.set.emplace_back(FTH::FT_Carpet, carpet_flottebo, V3f::ZERO, S::SQUARE);
+    furnitureSet.set.emplace_back(FTH::FT_Picture, pictures_set_3, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Carpet, carpet_flottebo, V3f::ZERO, neutralSquareIcon);
     furnitureSet.set.emplace_back(FTH::FT_Armchair, Strandmon, V3f::ZERO, armchairIcon);
     furnitureSet.set.emplace_back(FTH::FT_CoffeeTable, coffeeTable, V3f::ZERO, coffeeTableIcon);
     furnitureSet.set.emplace_back(FTH::FT_DiningTable, diningTable, V3f::ZERO, coffeeTableIcon);
-    furnitureSet.set.emplace_back(FTH::FT_SideBoard, sideBoard, V3f::ZERO, S::SQUARE);
-    furnitureSet.set.emplace_back(FTH::FT_TVWithStand, tv, V3f::ZERO, S::SQUARE);
-    furnitureSet.set.emplace_back(FTH::FT_Plant, plant1, V3f::ZERO, S::SQUARE);
+    furnitureSet.set.emplace_back(FTH::FT_SideBoard, sideBoard, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_TVWithStand, tv, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Plant, plant1, V3f::ZERO, neutralSquareIcon);
     furnitureSet.set.emplace_back(FTH::FT_Toilet, toilet, V3f::ZERO, toiletIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Shower, shower, V3f::ZERO, S::SQUARE);
+    furnitureSet.set.emplace_back(FTH::FT_Shower, shower, V3f::ZERO, neutralSquareIcon);
     furnitureSet.set.emplace_back(FTH::FT_BathroomSink, bathroomSink, V3f::ZERO, bathroomSinkIcon);
-    furnitureSet.set.emplace_back(FTH::FT_BathroomTowerRadiator, bathroomTowerRadiator, V3f::ZERO, S::SQUARE);
+    furnitureSet.set.emplace_back(FTH::FT_BathroomTowerRadiator, bathroomTowerRadiator, V3f::ZERO, neutralSquareIcon);
 
 
-    furnitureSet.set.emplace_back(FTH::FT_Sink, sinkModel, V3f::ZERO, S::SQUARE);
-    furnitureSet.set.emplace_back(FTH::FT_OvenPanel, ovenPanelModel, V3f::ZERO, S::SQUARE);
-    furnitureSet.set.emplace_back(FTH::FT_Microwave, microwaveModel, V3f::ZERO, S::SQUARE);
-    furnitureSet.set.emplace_back(FTH::FT_Cooktop, cooktopModel, V3f::ZERO, S::SQUARE);
-    furnitureSet.set.emplace_back(FTH::FT_Fridge, fridgeModel, V3f::ZERO, S::SQUARE);
-    furnitureSet.set.emplace_back(FTH::FT_ExtractorHood, extractorHoodModel, V3f::ZERO, S::SQUARE);
-    furnitureSet.set.emplace_back(FTH::FT_DrawersHandle, drawersHandleModel, V3f::ZERO, S::SQUARE);
+    furnitureSet.set.emplace_back(FTH::FT_Sink, sinkModel, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_OvenPanel, ovenPanelModel, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Microwave, microwaveModel, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Cooktop, cooktopModel, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Fridge, fridgeModel, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_ExtractorHood, extractorHoodModel, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_DrawersHandle, drawersHandleModel, V3f::ZERO, neutralSquareIcon);
 
     Http::post(Url{ "/furnitureset" }, furnitureSet.serialize(), []( HttpResponeParams& res ) {
         LOGRS(res.bufferString);

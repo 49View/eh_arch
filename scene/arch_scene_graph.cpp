@@ -96,12 +96,13 @@ void ArchSceneGraph::showHouse(std::shared_ptr<HouseBSData> _houseJson) {
 
     houseJson = _houseJson;
     HOD::resolver<HouseBSData>( sg, houseJson.get(), [&]() {
-        calcFloorplanNavigationTransform(houseJson);
-        HouseRender::make2dGeometry(rsg.RR(), sg, houseJson.get(), RDSPreMult(*floorplanNavigationMatrix.get()), FloorPlanRenderMode::Debug2d );
+//        calcFloorplanNavigationTransform(houseJson);
+//        HouseRender::make2dGeometry(rsg.RR(), sg, houseJson.get(), RDSPreMult(*floorplanNavigationMatrix.get()), FloorPlanRenderMode::Debug2d );
         HouseRender::make2dGeometry(rsg.RR(), sg, houseJson.get(), RDSPreMult(Matrix4f::IDENTITY), FloorPlanRenderMode::Debug3d );
+
 //        sg.loadCollisionMesh( HouseService::createCollisionMesh( houseJson.get() ) );
 //        HouseRender::make3dGeometry( sg, houseJson.get() );
-
+//
 //        V2f cobr = HouseService::centerOfBiggestRoom( houseJson.get() );
 //        V3f lngp = V3f{ cobr.x(), 1.6f, cobr.y() };
 //        sg.setLastKnownGoodPosition(lngp);

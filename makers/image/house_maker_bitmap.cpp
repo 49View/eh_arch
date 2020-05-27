@@ -756,12 +756,11 @@ namespace HouseMakerBitmap {
         return bestScoringHouse( houses, bsscores );
     }
 
-    std::shared_ptr<HouseBSData>
-    make( const RawImage &_data, HMBBSData &bsdata, const std::string &_name ) {
+    std::shared_ptr<HouseBSData> make( HMBBSData &bsdata ) {
         PROFILE_BLOCK( "House service elaborate" );
 
         SourceImages sourceImages;
-        generateSourceFileBC( _data, sourceImages, bsdata );
+        generateSourceFileBC( bsdata.image, sourceImages, bsdata );
 
         auto house = runWallStrategies( sourceImages );
 
@@ -774,7 +773,7 @@ namespace HouseMakerBitmap {
 //        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
         rescaleIfNecessary( house.get(), sourceImages, bsdata );
 
-        house->name = getFileNameOnly( _name );
+        house->name = bsdata.filename;
         house->sourceData.floorPlanSourceName = house->name;
 
         return house;

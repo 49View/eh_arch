@@ -12,6 +12,7 @@
 #include <memory>
 #include <thread>
 #include <core/observable.h>
+#include <core/raw_image.h>
 
 #include "../wall_calculus.hpp"
 #include "../../models/house_bsdata.hpp"
@@ -21,8 +22,6 @@
 
 namespace cv { class Mat; };
 namespace JMATH { class Rect2f; };
-
-class RawImage;
 
 enum OCRThresholdMask {
     True, False
@@ -36,9 +35,11 @@ struct HMBScores {
     int   mainWallStrategyIndex = 1;
 };
 
-JSONDATA( HMBBSData, sourceGuassian, sourceContrast, sourceBrightness, sourceSharpen, pixelCM, pixel1CM, medianPCM,
+JSONDATA( HMBBSData, filename, sourceGuassian, sourceContrast, sourceBrightness, sourceSharpen, pixelCM, pixel1CM, medianPCM,
           maxUShapeLengthRatio, minPerimeterLength, pixelCMFromOCR )
 
+    std::string filename{};
+    RawImage image = RawImage::WHITE4x4();
     float sourceGuassian = 1.75f;
     float sourceContrast = 1.8f;
     float sourceBrightness = 30.0f;
@@ -49,6 +50,8 @@ JSONDATA( HMBBSData, sourceGuassian, sourceContrast, sourceBrightness, sourceSha
     float maxUShapeLengthRatio = 1.75f;
     float minPerimeterLength = 1.2f;
     std::vector<float> pixelCMFromOCR;
+
+    HMBBSData( const std::string& filename, const RawImage& image ) : filename(filename), image(image) {}
 
     static constexpr float defaultPixelCMValue = 0.01f;
 
@@ -103,5 +106,5 @@ struct WallsEvaluation {
 };
 
 namespace HouseMakerBitmap {
-    std::shared_ptr<HouseBSData> make( const RawImage& _image, HMBBSData& mHMBBSData, const std::string& _name );
+    std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData );
 };

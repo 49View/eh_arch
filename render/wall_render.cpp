@@ -45,7 +45,7 @@ namespace WallRender {
             for ( int t = 0; t < 3; t++ ) {
                 rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], width * 1.2f, sm, _pm);
             }
-            rr.draw<DCircleFilled>(us.middle, Color4f::ORANGE_SCHEME1_1, 0.2f, sm, _pm);
+            rr.draw<DCircleFilled>(us.middle, Color4f::ORANGE_SCHEME1_1, 0.1f, sm, _pm);
         }
     }
 
