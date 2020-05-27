@@ -22,18 +22,24 @@ namespace HouseRender {
         bool drawDebug = isFloorPlanRenderModeDebug(fpRenderMode);
         auto rm = HouseRender::floorPlanShader(fpRenderMode);
 
-//        float padding=0.01f;
-//        auto houseRect = Rect2f{ 0.0f, 0.0f, data->bbox.bottomRight().x()+padding, data->bbox.bottomRight().y()+padding };
-
-//        rr.draw<DPoly>( rm, houseRect.pointscw(), C4f::WHITE.A( .9f ), _pm);
-
-//        rr.draw<DRect>( data->bbox, C4f::WHITE.A( .3f ), RDSImage("floorplan_img"), RDSRectAxis::XZ);
-
-        if ( data->sourceData.floorPlanSize != V2f::ZERO ) {
+        // We have 3 combinations here:
+        // 1) It's a 3d floorPlan with a source image, render the source image as a background
+        // 2) it's a 2d floorPlan so no images allowed, render a flat poly
+        // 3) it's a 3d floorPlan but it hasn't got a source image, (IE not HouseMakerBitmap), renders a flat poly
+        if ( data->sourceData.floorPlanSize != V2f::ZERO && !isFloorPlanRenderMode2d(fpRenderMode) ) {
+            // 1)
             auto floorPlanRect = Rect2f{ 0.0f, 0.0f, data->sourceData.floorPlanSize.x(),
                                          data->sourceData.floorPlanSize.y() };
-            rr.draw<DRect>( floorPlanRect, C4f::WHITE.A( .3f ), RDSImage("floorplan_img"), RDSRectAxis::XZ);
-//            rr.draw<DPoly2d>( floorPlanRect.pointscw(), C4f::WHITE.A( 0.25f ), pm);
+            rr.draw<DRect>( floorPlanRect, C4f::WHITE.A( .3f ), RDSImage(data->sourceData.floorPlanSourceName), RDSRectAxis::XZ);
+        } else if ( isFloorPlanRenderMode2d(fpRenderMode) ) {
+            // 2)
+            float padding = 0.01f;
+            auto houseRect = Rect2f{ 0.0f, 0.0f, data->bbox.bottomRight().x() + padding,
+                                     data->bbox.bottomRight().y() + padding };
+            rr.draw<DPoly>(rm, houseRect.pointscw(), C4f::WHITE.A(.5f), _pm);
+        } else {
+            // 3)
+            rr.draw<DRect>( data->bbox, C4f::WHITE.A( .3f ), RDSRectAxis::XZ);
         }
 
         for ( const auto& f : data->mFloors ) {
@@ -83,7 +89,7 @@ namespace HouseRender {
 
     float floorPlanScaler(FloorPlanRenderMode fpRenderMode, float value, const Matrix4f& pm) {
         if ( isFloorPlanRenderMode2d(fpRenderMode) ) {
-            return V3f{pm * (V3f::X_AXIS)}.x()*(1.0f/getScreenSizef.x());
+            return pm[0]*value;
         }
         return value;
     }

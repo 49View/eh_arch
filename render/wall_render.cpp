@@ -34,7 +34,7 @@ namespace WallRender {
             auto pm = lerp(0.5f, p1, p2);
             rr.draw<DLine>(p1, p2, wc * wca, width, sm, _pm);
             rr.draw<DLine>(pm, pm + wall->enormals[t] * width * 3.0f, Color4f::PASTEL_CYAN, width * 0.05f,
-                             true, sm, _pm);
+                           true, sm, _pm);
         }
     }
 
@@ -45,7 +45,7 @@ namespace WallRender {
             for ( int t = 0; t < 3; t++ ) {
                 rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], width * 1.2f, sm, _pm);
             }
-            rr.draw<DCircleFilled>(us.middle, Color4f::ORANGE_SCHEME1_1, width * 5.0f, sm, _pm);
+            rr.draw<DCircleFilled>(us.middle, Color4f::ORANGE_SCHEME1_1, 0.2f, sm, _pm);
         }
     }
 
@@ -56,8 +56,7 @@ namespace WallRender {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t + 1, wps)];
             auto pm = lerp(0.5f, p1, p2);
-            rr.draw<DLine>(pm, pm + wall->enormals[t] * width * 3.0f, Color4f::PASTEL_CYAN, width * 0.1f, sm, true,
-                             _pm);
+            rr.draw<DLine>(pm, pm + wall->enormals[t] * 0.15f, Color4f::PASTEL_CYAN, width, sm, true, _pm);
         }
     }
 
@@ -68,7 +67,8 @@ namespace WallRender {
         drawWalls2d(rr, wall, fpRenderMode, sm, pm);
         bool drawDebug = isFloorPlanRenderModeDebug(fpRenderMode);
         if ( drawDebug ) {
-            drawWallNormals2d(rr, wall, width, sm, pm);
+            auto lineWidth = HouseRender::floorPlanScaler(fpRenderMode, 0.01f, pm());
+            drawWallNormals2d(rr, wall, lineWidth, sm, pm);
             drawUShapes2d(rr, wall, width, sm, pm);
         }
     }

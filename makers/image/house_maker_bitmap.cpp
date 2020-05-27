@@ -775,6 +775,7 @@ namespace HouseMakerBitmap {
         rescaleIfNecessary( house.get(), sourceImages, bsdata );
 
         house->name = getFileNameOnly( _name );
+        house->sourceData.floorPlanSourceName = house->name;
 
         return house;
     }

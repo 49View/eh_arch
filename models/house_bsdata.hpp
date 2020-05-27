@@ -26,8 +26,9 @@ static const float defaltToBeOverwritten = 7543859749023.0f;
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
 
-JSONDATA(HouseSourceData, floorPlanSize)
-    Vector2f floorPlanSize = Vector2f::ZERO;
+JSONDATA(HouseSourceData, floorPlanSize, floorPlanSourceName)
+    Vector2f        floorPlanSize = Vector2f::ZERO;
+    std::string     floorPlanSourceName{};
 };
 
 #define BASE_ELEMENT ArchBase hash, type
