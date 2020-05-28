@@ -44,7 +44,7 @@ constexpr size_t NumStrategies = 3;
 
 namespace HouseMakerBitmap {
 
-    void generateSourceFileBC( const RawImage &_ri, SourceImages &si, HMBBSData &bsdata ) {
+    void generateSourceFileBC( const RawImage &_ri, SourceImages &si, const HMBBSData &bsdata ) {
         cv::Mat inputSourcePngImage;
 
         inputSourcePngImage = decodeRawImageIntoMat( _ri );
@@ -59,7 +59,7 @@ namespace HouseMakerBitmap {
         // Right we re-do this cv::Mat because we need a grayscale of the original source, not the one with the modified brightness/contrast.
         // Otherwise the floor area calculation on the mat will be unstable.
         toGrayScale( si.sourceFileImage, si.sourceFileImageOriginalGray );
-        threshold( si.sourceFileImageOriginalGray, si.sourceFileImageOriginalGray, 154.0, 255.0, cv::THRESH_BINARY );
+        threshold( si.sourceFileImageOriginalGray, si.sourceFileImageOriginalGray, 154.0f, 255.0f, cv::THRESH_BINARY );
 //    cv::flip( sourceFileImageOriginalGray, sourceFileImageOriginalGray, 0 );
 
         float contrast = bsdata.sourceContrast;
@@ -70,11 +70,11 @@ namespace HouseMakerBitmap {
 
         toGrayScale( sourceFileImageBC, sourceFileImageGraySharpened );
 
-        cv::GaussianBlur( sourceFileImageGraySharpened, lSourceFileImageGray, cv::Size( 0, 0 ), 3 );
-        cv::addWeighted( sourceFileImageGraySharpened, bsdata.sourceGuassian, lSourceFileImageGray, -0.75, 0,
+        cv::GaussianBlur( sourceFileImageGraySharpened, lSourceFileImageGray, cv::Size( 0, 0 ), bsdata.sourceGuassianSigma );
+        cv::addWeighted( sourceFileImageGraySharpened, bsdata.sourceGuassian, lSourceFileImageGray, bsdata.sourceGuassianBeta, 0,
                          lSourceFileImageGray );
 
-        threshold( lSourceFileImageGray, si.sourceFileImageBin, 254.0, 255.0, cv::THRESH_BINARY );
+        threshold( lSourceFileImageGray, si.sourceFileImageBin, bsdata.minBinThreshold, bsdata.maxBinThreshold, cv::THRESH_BINARY );
     }
 
     float calcMaxScore( const std::vector<WallEvalData> &wed, int64_t &wt ) {
@@ -668,6 +668,11 @@ namespace HouseMakerBitmap {
         }
     }
 
+    void guessDoorsWindowsRooms( FloorBSData *f, HouseBSData *house, const SourceImages &si, bool &allRoomsAreFullyClosed ) {
+        guessDoorsAndWindowsWithMachineLearning( f, house, si );
+        guessRooms( f, allRoomsAreFullyClosed );
+    }
+
     void rollbackStage1TyringToCloseRooms( std::array<std::shared_ptr<HouseBSData>, NumStrategies> &houses,
                                            const SourceImages &si ) {
         for ( auto t = 0u; t < NumStrategies; t++ ) {
@@ -699,8 +704,7 @@ namespace HouseMakerBitmap {
                     }
                 }
                 FloorService::rollbackToCalculatedWalls( f.get());
-                guessDoorsAndWindowsWithMachineLearning( f.get(), house, si );
-                guessRooms( f.get(), allRoomsAreFullyClosed );
+                guessDoorsWindowsRooms( f.get(), house, si, allRoomsAreFullyClosed );
             }
         }
     }
@@ -710,8 +714,7 @@ namespace HouseMakerBitmap {
         guessWallsByIncrementalSearch( house, si, bsscores );
         bsscores.allRoomsAreFullyClosed = true;
         for ( auto &f : house->mFloors ) {
-            guessDoorsAndWindowsWithMachineLearning( f.get(), house, si );
-            guessRooms( f.get(), bsscores.allRoomsAreFullyClosed );
+            guessDoorsWindowsRooms( f.get(), house, si, bsscores.allRoomsAreFullyClosed );
         }
         calculateScores( house, bsscores );
     }
@@ -756,11 +759,16 @@ namespace HouseMakerBitmap {
         return bestScoringHouse( houses, bsscores );
     }
 
+    SourceImages prepareImages( const HMBBSData &bsdata ) {
+        SourceImages sourceImages;
+        generateSourceFileBC( bsdata.image, sourceImages, bsdata );
+        return sourceImages;
+    }
+
     std::shared_ptr<HouseBSData> make( HMBBSData &bsdata ) {
         PROFILE_BLOCK( "House service elaborate" );
 
-        SourceImages sourceImages;
-        generateSourceFileBC( bsdata.image, sourceImages, bsdata );
+        SourceImages sourceImages = prepareImages( bsdata );
 
         auto house = runWallStrategies( sourceImages );
 
@@ -778,4 +786,25 @@ namespace HouseMakerBitmap {
 
         return house;
     }
+
+    std::shared_ptr<HouseBSData> make( HMBBSData &bsdata, const SourceImages& sourceImages ) {
+        PROFILE_BLOCK( "House service elaborate" );
+
+        auto house = runWallStrategies( sourceImages );
+
+        for ( auto &f : house->mFloors ) {
+            roomOCRScan( sourceImages, bsdata, f->rds );
+            FloorService::addRoomsFromData(f.get());
+            FloorService::calcWhichRoomDoorsAndWindowsBelong(f.get());
+        }
+
+//        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
+        rescaleIfNecessary( house.get(), sourceImages, bsdata );
+
+        house->name = bsdata.filename;
+        house->sourceData.floorPlanSourceName = house->name;
+
+        return house;
+    }
+
 }

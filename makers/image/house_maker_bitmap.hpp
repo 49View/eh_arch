@@ -31,17 +31,22 @@ struct HMBScores {
     uint64_t minWallPixelWidth = 5;
     uint64_t maxWallPixelWidth = 15;
     float roomScore = 0.0f;
-    bool  allRoomsAreFullyClosed = true;
-    int   mainWallStrategyIndex = 1;
+    bool allRoomsAreFullyClosed = true;
+    int mainWallStrategyIndex = 1;
 };
 
-JSONDATA( HMBBSData, filename, sourceGuassian, sourceContrast, sourceBrightness, sourceSharpen, pixelCM, pixel1CM, medianPCM,
-          maxUShapeLengthRatio, minPerimeterLength, pixelCMFromOCR )
+JSONDATA(HMBBSData, filename, sourceGuassianSigma, sourceGuassianBeta, sourceGuassian, sourceContrast, sourceBrightness,
+         minBinThreshold, maxBinThreshold, sourceSharpen, pixelCM, pixel1CM, medianPCM, maxUShapeLengthRatio,
+         minPerimeterLength, pixelCMFromOCR)
 
     std::string filename{};
     RawImage image = RawImage::WHITE4x4();
+    int sourceGuassianSigma = 3; // Must be odd? I think so
+    float sourceGuassianBeta = -0.75f;
     float sourceGuassian = 1.75f;
     float sourceContrast = 1.8f;
+    float minBinThreshold = 254.0f;
+    float maxBinThreshold = 255.0f;
     float sourceBrightness = 30.0f;
     float sourceSharpen = 0.0f;
     float pixelCM = 0.01f;
@@ -106,5 +111,7 @@ struct WallsEvaluation {
 };
 
 namespace HouseMakerBitmap {
+    SourceImages prepareImages( const HMBBSData& bsdata );
     std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData );
+    std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData, const SourceImages& sourceImages );
 };
