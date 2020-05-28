@@ -96,7 +96,7 @@ namespace RoomService {
         r->mvSkirtingSegments.clear();
         for ( auto& rws : r->mWallSegments ) {
             int csize = static_cast<int>( rws.size());
-            Vector2f p1 = Vector2f::HUGE_VALUE_POS;
+            Vector2f p1 = V2fc::HUGE_VALUE_POS;
             std::vector<Vector2f> points;
             int startIndex = 0;
             for ( int q = 0; q < csize; q++ ) {
@@ -161,7 +161,7 @@ namespace RoomService {
                 auto mnr = rotate90(mpn) * 1000.0f;
                 if ( intersection(qp, qp1, mpmiddle + mnr, mpmiddle - mnr, i) ) {
                     float d = distance(mpmiddle, i);
-                    if ( ncheck.x() != Vector2f::HUGE_VALUE_POS.x() ) {
+                    if ( ncheck.x() != V2fc::HUGE_VALUE_POS.x() ) {
                         float dn = fabs(dot(ncheck, normalize(mpmiddle - i)));
                         if ( dn > 0.95f ) continue;
                     }
@@ -200,7 +200,7 @@ namespace RoomService {
 
         // Find max room span points
         Vector2f ep1, ep2;
-        Vector2f ncheck = Vector2f::HUGE_VALUE_POS;
+        Vector2f ncheck = V2fc::HUGE_VALUE_POS;
         bool bEncloseFound = checkMaxSizeEnclosure(r, ep1, ep2, ncheck);
         if ( bEncloseFound ) {
             r->maxSizeEnclosedHP1 = ep1;
@@ -492,7 +492,7 @@ namespace RoomService {
     }
 
     Vector2f maxEnclsingBoundingBoxCenter( const RoomBSData *r ) {
-        Vector2f lcenter = Vector2f::ZERO;
+        Vector2f lcenter = V2fc::ZERO;
         for ( auto& v : r->mMaxEnclsingBoundingBox ) {
             lcenter += v;
         }

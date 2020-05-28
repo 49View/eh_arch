@@ -128,7 +128,7 @@ namespace RoomService {
         }
 
         const ArchSegment *ls = longestSegment(r);
-        Vector2f i{ V2f::ZERO };
+        Vector2f i{ V2fc::ZERO };
         r->mLongestWallOpposite = -1;
         // Find wall opposite
         for ( auto t = 0u; t < r->mWallSegmentsSorted.size(); t++ ) {
@@ -384,8 +384,8 @@ namespace RoomService {
 
         _ff.xyLocation = _center;
         _ff.rotation = Quaternion{ 0.0f, V3f::UP_AXIS };
-        _ff.widthNormal = V2f::X_AXIS;
-        _ff.depthNormal = V2f::Y_AXIS;
+        _ff.widthNormal = V2fc::X_AXIS;
+        _ff.depthNormal = V2fc::Y_AXIS;
 
         return addFurniture(f, r, _ff);
     }
@@ -410,7 +410,7 @@ namespace RoomService {
                 completed &= h1 >= 0.0f;
                 if ( h1 >= 0.0f ) {
                     float h = mainF.size.y() + h1;
-                    completed &= RS::placeAround(f, r, decF, mainF, PPP::TopCenter, V2f::ZERO, h);
+                    completed &= RS::placeAround(f, r, decF, mainF, PPP::TopCenter, V2fc::ZERO, h);
                 }
             }
         }

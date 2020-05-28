@@ -152,7 +152,7 @@ struct WallSegmentCrossingData {
 
 bool addVertexFromWall( const std::vector<Vector3f>& vv, const Vector3f& v1, Vector3f& v3 ) {
     float minDist = std::numeric_limits<float>::max();
-    Vector2f pi = Vector2f::ZERO;
+    Vector2f pi = V2fc::ZERO;
     float dfl = 0.0f;
     bool bFoundHit = false;
     for ( size_t q = 0; q < vv.size(); q++ ) {
@@ -340,7 +340,7 @@ void WallService::makeTriangles2d( WallBSData *w ) {
     w->mTriangles2d.clear();
     // Check they are not self-intersecting
     size_t csize = w->epoints.size();
-    Vector2f pi = Vector2f::ZERO;
+    Vector2f pi = V2fc::ZERO;
     bool bNonPolyLine = false;
     for ( size_t t = 0; t < csize; t++ ) {
         Vector2f p1 = w->epoints[getCircularArrayIndexUnsigned( t, csize )];
@@ -487,10 +487,10 @@ void WallService::getArchSegments( const WallBSData *w, const int32_t floorNumbe
 //	bool madness = true;
 //	if ( !madness && checkBitWiseFlag( w->wallFlags, WallFlags::WF_IsDoorPart ) && w->mUShapes.size() == 2 ) {
 //		// First half
-//		Vector2f us1 = Vector2f::ZERO;
-//		Vector2f us2 = Vector2f::ZERO;
-//		Vector2f usm = Vector2f::ZERO;
-//		Vector2f usn = Vector2f::ZERO;
+//		Vector2f us1 = V2fc::ZERO;
+//		Vector2f us2 = V2fc::ZERO;
+//		Vector2f usm = V2fc::ZERO;
+//		Vector2f usn = V2fc::ZERO;
 //
 //		for ( auto t = 0; t < 6; t++ ) {
 //			getSegmentUShapePoint( w, t, us1, us2, usm, usn );
@@ -520,7 +520,7 @@ bool WallService::intersectLine2d( const WallBSData *w, Vector2f const& p0, Vect
 void
 WallService::intersectLine2dMin( WallBSData *w, Vector2f const& p0, Vector2f const& p1, Vector2f& i, float& minDist,
                                  ArchIntersection& ret, uint32_t filterFlags ) {
-    V2f li{ V2f::ZERO };
+    V2f li{ V2fc::ZERO };
 //	if ( w->bbox.lineIntersection( p0, p1 ) ) {
     int csize = static_cast<int>( w->epoints.size());
     for ( auto t = 0; t < csize - ( w->wrapLastPoint == WallLastPointWrap::No ); t++ ) {

@@ -26,7 +26,7 @@ namespace HouseRender {
         // 1) It's a 3d floorPlan with a source image, render the source image as a background
         // 2) it's a 2d floorPlan so no images allowed, render a flat poly
         // 3) it's a 3d floorPlan but it hasn't got a source image, (IE not HouseMakerBitmap), renders a flat poly
-        if ( data->sourceData.floorPlanSize != V2f::ZERO && !isFloorPlanRenderMode2d(fpRenderMode) ) {
+        if ( data->sourceData.floorPlanSize != V2fc::ZERO && !isFloorPlanRenderMode2d(fpRenderMode) ) {
             // 1)
             auto floorPlanRect = Rect2f{ 0.0f, 0.0f, data->sourceData.floorPlanSize.x(),
                                          data->sourceData.floorPlanSize.y() };
@@ -89,7 +89,7 @@ namespace HouseRender {
 
     float floorPlanScaler(FloorPlanRenderMode fpRenderMode, float value, const Matrix4f& pm) {
         if ( isFloorPlanRenderMode2d(fpRenderMode) ) {
-            return pm[0]*value;
+            return max( pm[0]*value, 1.0f/getScreenSizef.y());
         }
         return value;
     }

@@ -124,7 +124,7 @@ namespace HouseMakerBitmap {
         ArchType matchedType;
 
         // Create bounding box that fits the shape (rect) between w1, w2
-        JMATH::Rect2f sbox( Vector2f::HUGE_VALUE_POS, Vector2f::HUGE_VALUE_NEG );
+        JMATH::Rect2f sbox( V2fc::HUGE_VALUE_POS, V2fc::HUGE_VALUE_NEG );
         sbox.expand( w1->points[1] );
         sbox.expand( w1->points[2] );
         sbox.expand( w2->points[1] );
@@ -269,7 +269,7 @@ namespace HouseMakerBitmap {
         regv.emplace_back(
                 R"(([0-9]+\.*[0-9]*?)\s*(?:meters|meter|m)?\s*x\s*([0-9]+\.*[0-9]*)?\s*(?:meters|meter|m)?\s*)" );
         regv.emplace_back( R"(\(([0-9]+\.*[0-9]*)?\)\s*max?[^\(]+\(([0-9]+\.*[0-9]*)?\)\s*max?)" );
-        Vector2f lOcrSize = Vector2f::ZERO;
+        Vector2f lOcrSize = V2fc::ZERO;
 
         std::istringstream iss( text );
         std::vector<std::string> allWords(( std::istream_iterator<std::string>( iss )),
@@ -681,7 +681,7 @@ namespace HouseMakerBitmap {
             for ( auto &f : house->mFloors ) {
                 // Querying potentially missing ushapes that closes rooms
                 for ( auto &seg : f->orphanedUShapes ) {
-                    V2f i{ V2f::ZERO };
+                    V2f i{ V2fc::ZERO };
                     V2f p1 = seg.middle + seg.crossNormals[0] * 0.01f;
                     V2f p2 = seg.middle + seg.crossNormals[0] * 10000.0f;
                     auto archHit = FloorService::intersectLine2dMin( f.get(), p1, p2, i,

@@ -27,7 +27,7 @@ static const float defaltToBeOverwritten = 7543859749023.0f;
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
 
 JSONDATA(HouseSourceData, floorPlanSize, floorPlanSourceName)
-    Vector2f        floorPlanSize = Vector2f::ZERO;
+    Vector2f        floorPlanSize = V2fc::ZERO;
     std::string     floorPlanSourceName{};
 };
 
@@ -51,7 +51,7 @@ struct ArchStructural : public ArchBase {
     float height = defaltToBeOverwritten;
     float width = defaltToBeOverwritten;
     float depth = defaltToBeOverwritten;
-    Vector2f center = Vector2f::ZERO;
+    Vector2f center = V2fc::ZERO;
     int64_t linkedHash = 0;
     SequencePart sequencePart = 0;
     std::vector<Triangle2d> mTriangles2d;
@@ -74,7 +74,7 @@ JSONDATA_H(UShape, ArchBase, hash, type, indices, points, edges, middle, inwardN
     std::array<Vector2f, 3> edges;
     std::array<Vector2f, 2> inwardNormals;
     std::array<Vector2f, 2> crossNormals;
-    Vector2f middle = Vector2f::ZERO;
+    Vector2f middle = V2fc::ZERO;
     float width = -1.0f;
     bool mIsDetached = false;
     bool mIsPaired = false;
@@ -86,8 +86,8 @@ struct TwoUShapesBased : public ArchStructural {
     UShape us1;
     UShape us2;
     float thickness = defaltToBeOverwritten;
-    Vector2f dirWidth = Vector2f::ZERO; // Those are the 2 directions of the element, we know the other one is always up
-    Vector2f dirDepth = Vector2f::ZERO; // Those are the 2 directions of the element, we know the other one is always up
+    Vector2f dirWidth = V2fc::ZERO; // Those are the 2 directions of the element, we know the other one is always up
+    Vector2f dirDepth = V2fc::ZERO; // Those are the 2 directions of the element, we know the other one is always up
     float ceilingHeight = 2.75f;
     uint32_t wallFlags = WallFlags::WF_None;
 };
@@ -99,12 +99,12 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     int32_t iIndex = 0;
     int64_t wallHash = 0;
 
-    Vector2f p1 = Vector2f::ZERO;
-    Vector2f p2 = Vector2f::ZERO;
-    Vector2f middle = Vector2f::ZERO;
+    Vector2f p1 = V2fc::ZERO;
+    Vector2f p2 = V2fc::ZERO;
+    Vector2f middle = V2fc::ZERO;
 
-    Vector2f normal = Vector2f::ZERO;
-    Vector2f crossNormal = Vector2f::ZERO;
+    Vector2f normal = V2fc::ZERO;
+    Vector2f crossNormal = V2fc::ZERO;
     uint64_t tag = 0;
     SequencePart sequencePart = 0;
     std::vector<V2f> zHeights;
@@ -153,11 +153,11 @@ JSONDATA(FittedFurniture, name, symbolRef, size, position3d, xyLocation, heightO
     std::string symbolRef = S::SQUARE;
     Vector3f size = Vector3f::ONE;
     Vector3f position3d = V3f::ZERO;
-    Vector2f xyLocation = V2f::ZERO;
+    Vector2f xyLocation = V2fc::ZERO;
     float heightOffset = 0.0f;
     Quaternion rotation{ V3f::ZERO, 1.0f };
-    V2f widthNormal = V2f::ZERO;
-    V2f depthNormal = V2f::ZERO;
+    V2f widthNormal = V2fc::ZERO;
+    V2f depthNormal = V2fc::ZERO;
     JMATH::AABB bbox3d = JMATH::AABB::INVALID;
     int flags = 0;
     explicit FittedFurniture( const std::tuple<std::string, V3f>& args, std::string _symbolRef ) :
@@ -200,7 +200,7 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     V3f doorPivot = V3f::ZERO;
     Quaternion doorHandleRot{};
     V3f doorGeomPivot = V3f::ZERO;
-    V2f doorSize = V2f::ZERO;
+    V2f doorSize = V2fc::ZERO;
 };
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
@@ -213,7 +213,7 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
     float mainFrameWidth = 0.06f;
     float minPanelWidth = 0.06f;
     float baseOffset = 0.2f;
-    V2f insideRoomPointingNormal = V2f::ZERO;
+    V2f insideRoomPointingNormal = V2fc::ZERO;
     bool hasBlinds = false;
     bool hasCurtains = true;
     std::string curtainGeom = "curtain";
@@ -255,10 +255,10 @@ JSONDATA(KitchenPath, p1, p2, normal, crossNormal, depth, cookerPos, cookerPosDe
     V2f normal;
     V2f crossNormal;
     float depth = 0.0f;
-    V2f cookerPos = V2f::ZERO;
+    V2f cookerPos = V2fc::ZERO;
     float cookerPosDelta = 0.0f;
-    V2f sinkPos = V2f::ZERO;
-    V2f fridgePos = V2f::ZERO;
+    V2f sinkPos = V2fc::ZERO;
+    V2f fridgePos = V2fc::ZERO;
     KitchenPathFlags flags{};
     KitchenPath( const V2f& p1, const V2f& p2, const V2f& normal, const V2f& crossNormal, float depth ) : p1(p1),
                                                                                                           p2(p2),
@@ -297,12 +297,12 @@ JSONDATA(KitchenDrawerShape, type, customShapeGrid)
 };
 
 JSONDATA(KitchenDrawer, p1, p2, z, unitHeight, depth, normal, shape, color)
-    V2f p1 = V2f::ZERO;
-    V2f p2 = V2f::ZERO;
+    V2f p1 = V2fc::ZERO;
+    V2f p2 = V2fc::ZERO;
     float z = 0.0f;
     float unitHeight = 0.7f;
     float depth = 0.3f;
-    V2f normal = V2f::ZERO;
+    V2f normal = V2fc::ZERO;
     KitchenDrawerShape shape{ KitchenDrawerType::FlatBasic };
     Color4f color = C4f::WHITE;
     KitchenDrawer( const V2f& p1, const V2f& p2, float z, float unitHeight, float depth, const V2f& normal,
@@ -332,7 +332,7 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     float kitchenSkirtingRecess = 0.065f;
     float kitchenUnitsRecess = 0.04f;
     float kitchenTopUnitsRecess = 0.30f;
-    Vector2f drawersPadding = V2f::ONE * .004f;
+    Vector2f drawersPadding = V2fc::ONE * .004f;
     float drawersThickness = 0.02f;
     float skirtingThickness = 0.02f;
     float topUnitsCeilingGap = 0.05f;
@@ -377,14 +377,14 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     std::vector<Vector3f> mSocketLocators; // z on this holds the rotating z-angle
     std::vector<Vector3f> mSwichesLocators; // z on this holds the rotating z-angle
 
-    Vector2f maxSizeEnclosedHP1 = Vector2f::ZERO;
-    Vector2f maxSizeEnclosedHP2 = Vector2f::ZERO;
-    Vector2f maxSizeEnclosedWP1 = Vector2f::ZERO;
-    Vector2f maxSizeEnclosedWP2 = Vector2f::ZERO;
+    Vector2f maxSizeEnclosedHP1 = V2fc::ZERO;
+    Vector2f maxSizeEnclosedHP2 = V2fc::ZERO;
+    Vector2f maxSizeEnclosedWP1 = V2fc::ZERO;
+    Vector2f maxSizeEnclosedWP2 = V2fc::ZERO;
 
     int32_t mLongestWall = -1;
     int32_t mLongestWallOpposite = -1;
-    Vector2f mLongestWallOppositePoint = Vector2f::ZERO;
+    Vector2f mLongestWallOppositePoint = V2fc::ZERO;
     float mPerimeter = 0.0f;
     float area = 0.0f;
     float mCovingPerimeter = 0.0f;
@@ -431,8 +431,8 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo
     float doorHeight = 1.97f;
     float windowHeight = 1.2f;
     float windowBaseOffset = 0.6f;
-    Vector2f offsetFromFloorAnchor = Vector2f::ZERO;
-    Vector3f offsetFromFloorAnchor3d = Vector2f::ZERO;
+    Vector2f offsetFromFloorAnchor = V2fc::ZERO;
+    Vector3f offsetFromFloorAnchor3d = V2fc::ZERO;
     V3fVectorOfVector ceilingContours;
     std::vector<Vector2f> mPerimeterSegments;
     std::vector<ArchSegment> perimeterArchSegments;

@@ -349,19 +349,19 @@ namespace RoomService {
                                          WSLO wslo, float extraSlack = 0.0f, uint32_t _exactIndex = 0 );
     [[nodiscard]] bool placeWallCorner( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff,
                                         const ArchSegment *ls,
-                                        const V2f& slack = V2f::ZERO,
+                                        const V2f& slack = V2fc::ZERO,
                                         WallSegmentCorner wsc = WSC_P1,
                                         float _height = 0.0f );
     [[nodiscard]] bool placeAround( FloorBSData *f, RoomBSData *r, FittedFurniture& dest, const FittedFurniture& source,
                                     PivotPointPosition where,
-                                    const V2f& slack = V2f::ZERO, float _height = 0.0f );
+                                    const V2f& slack = V2fc::ZERO, float _height = 0.0f );
     [[nodiscard]] bool
     placeWallAlong( FloorBSData *f, RoomBSData *r, FittedFurniture& dest, const FittedFurniture& source,
-                    const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f& slack = V2f::ZERO,
+                    const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f& slack = V2fc::ZERO,
                     float _height = 0.0f );
     [[nodiscard]] bool
     placeInBetween( FloorBSData *f, RoomBSData *r, const std::vector<FittedFurniture>& fset, PivotPointPosition where,
-                    const V2f& slack = V2f::ZERO, float _height = 0.0f );
+                    const V2f& slack = V2fc::ZERO, float _height = 0.0f );
 
     // Composite furnitures
     [[nodiscard]] bool cplaceMainWith2Sides( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns,

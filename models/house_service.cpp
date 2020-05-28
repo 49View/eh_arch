@@ -240,7 +240,7 @@ bool HouseService::areThereStairsAtFloorNumber( std::shared_ptr<HouseBSData> _ho
 }
 
 Vector2f HouseService::maxSingleFloorSize( std::shared_ptr<HouseBSData> _house ) {
-	Vector2f maxSingleFloorSize = Vector2f::ZERO;
+	Vector2f maxSingleFloorSize = V2fc::ZERO;
 	for ( auto& floor : _house->mFloors ) {
 		maxSingleFloorSize = max( floor->bbox.size(), maxSingleFloorSize );
 	}
@@ -278,7 +278,7 @@ void HouseService::removeArch( std::shared_ptr<HouseBSData> _house, int64_t hash
 
 Vector2f HouseService::centrePointOfBiggestRoom( std::shared_ptr<HouseBSData> _house ) {
     float currMaxArea = 0.0f;
-    Vector2f currCenter = Vector2f::ZERO;
+    Vector2f currCenter = V2fc::ZERO;
 
     for ( const auto& f : _house->mFloors ) {
         FloorService::centrePointOfBiggestRoom( f.get(), currMaxArea, currCenter );

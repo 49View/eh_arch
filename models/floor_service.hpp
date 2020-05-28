@@ -24,7 +24,7 @@ class FurnitureMapStorage;
 struct DebugUShapeIntersection {
     UShape *s1 = nullptr;
     UShape *s2 = nullptr;
-    V2f p = V2f::ZERO;
+    V2f p = V2fc::ZERO;
     int i = 0;
 
     DebugUShapeIntersection( UShape *s1, UShape *s2, const V2f& p, int i ) : s1( s1 ), s2( s2 ), p( p ), i( i ) {}
@@ -63,8 +63,8 @@ struct FSRays {
 using FSRayVector = std::vector<FSRays>;
 
 struct ArchSegmentBucket {
-    Vector2f lineOrigin = V2f::ZERO;
-    Vector2f lineEnd = V2f::ZERO;
+    Vector2f lineOrigin = V2fc::ZERO;
+    Vector2f lineEnd = V2fc::ZERO;
     int sourceIndex = -1;
     int destIndex = -1;
 

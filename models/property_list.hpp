@@ -25,7 +25,7 @@ JSONDATA_R ( PropertyListing, name, addressLine1, addressLine2, postCode, city, 
 	std::string city = "";
 	std::string region = "";
 	std::string country = "";
-	Vector2f latlon = Vector2f::ZERO;
+	Vector2f latlon = V2fc::ZERO;
 	uint64_t price = 0;
 	std::string type = "";
 	uint64_t numBedroom = 0;

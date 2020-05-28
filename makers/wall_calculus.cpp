@@ -104,7 +104,7 @@ std::vector<JMATH::Rect2f> getFloorplanRects( const cv::Mat& frame, const float 
 
     // If empty cols is empty  (well less than 2 lines gap) it means the floorplan has only 1 floor and it's completely full of pixels on every row
     if ( emptyCols.size() < 2 ) {
-        rects.push_back( JMATH::Rect2f( Vector2f::ZERO, Vector2f( frame.cols, frame.rows )) * scale );
+        rects.push_back( JMATH::Rect2f( V2fc::ZERO, Vector2f( frame.cols, frame.rows )) * scale );
         return rects;
     }
 
@@ -231,7 +231,7 @@ void approxDadoP( std::vector<std::vector<Vector2f> >& contoursSmooth ) {
             if ( fabs( dot( slope1, slope2 )) < 0.15f || fabs( dot( slope1, slope2 )) > 0.85f ||
                  fabs( dot( slopePrev, slope2 )) < 0.05f ) {
                 for ( auto d = startI + 1; d < startI + numPieces; d++ )
-                    c[getCircularArrayIndex( d, csize )] = Vector2f::HUGE_VALUE_POS;
+                    c[getCircularArrayIndex( d, csize )] = V2fc::HUGE_VALUE_POS;
                 slope1 = slope2;
                 startI = i2;
                 numPieces = 0;
@@ -241,7 +241,7 @@ void approxDadoP( std::vector<std::vector<Vector2f> >& contoursSmooth ) {
             slopePrev = slope2;
         }
         c.erase( remove_if( c.begin(), c.end(),
-                            []( Vector2f const& sc ) -> bool { return sc == Vector2f::HUGE_VALUE_POS; } ), c.end());
+                            []( Vector2f const& sc ) -> bool { return sc == V2fc::HUGE_VALUE_POS; } ), c.end());
     }
 }
 
@@ -253,7 +253,7 @@ void removeDeltaCorners( std::vector<std::vector<Vector2f> >& contoursSmooth ) {
     //     |
     //
 
-    Vector2f pi = Vector2f::ZERO;
+    Vector2f pi = V2fc::ZERO;
     for ( auto& c : contoursSmooth ) {
         int csize = static_cast<int>( c.size());
         if ( csize < 4 ) continue;
@@ -319,9 +319,9 @@ void removeDeltaCornersAlmostRight( std::vector<std::vector<Vector2f> >& contour
 
                 float internalSlopesDot = fabs( dot( slope2, slope3 ));
                 if ( isbetween( internalSlopesDot, lowThreshold, hiThreshold )) {
-                    Vector2f pi1 = Vector2f::ZERO;
-                    Vector2f pi2 = Vector2f::ZERO;
-                    Vector2f slope90 = Vector2f::ZERO;
+                    Vector2f pi1 = V2fc::ZERO;
+                    Vector2f pi2 = V2fc::ZERO;
+                    Vector2f slope90 = V2fc::ZERO;
 
                     bool selfIntersecting = false;
                     if ( hasParallelSlope ) {
@@ -336,7 +336,7 @@ void removeDeltaCornersAlmostRight( std::vector<std::vector<Vector2f> >& contour
                                       c[im3] - slope4 * 10000.0f, pi1 );
                         intersection( c[i2] - slope4 * 10000.0f, c[i2] + slope4 * 100000.0f, c[im3] + slope * 10000.0f,
                                       c[im3] - slope * 10000.0f, pi2 );
-                        Vector2f pisi = Vector2f::ZERO;
+                        Vector2f pisi = V2fc::ZERO;
                         selfIntersecting |= intersection( c[i1], c[i2], c[im3] + slope4 * 10000.0f,
                                                           c[im3] - slope4 * 10000.0f, pisi );
                         if ( !selfIntersecting )
@@ -351,7 +351,7 @@ void removeDeltaCornersAlmostRight( std::vector<std::vector<Vector2f> >& contour
                             c[im2] = pi1;
                         } else {
                             c[i2] = pi1;
-                            c[im2] = Vector2f::HUGE_VALUE_POS;
+                            c[im2] = V2fc::HUGE_VALUE_POS;
                         }
                         i += 3;
                     } else if ( dist2 < dist1 && dist2 < aaDelta ) {
@@ -359,7 +359,7 @@ void removeDeltaCornersAlmostRight( std::vector<std::vector<Vector2f> >& contour
                             c[im2] = pi2;
                         } else {
                             c[im3] = pi2;
-                            c[im2] = Vector2f::HUGE_VALUE_POS;
+                            c[im2] = V2fc::HUGE_VALUE_POS;
                         }
                         i += 3;
                     }
@@ -368,7 +368,7 @@ void removeDeltaCornersAlmostRight( std::vector<std::vector<Vector2f> >& contour
             //if (  )
         }
         c.erase( remove_if( c.begin(), c.end(),
-                            []( Vector2f const& sc ) -> bool { return sc == Vector2f::HUGE_VALUE_POS; } ), c.end());
+                            []( Vector2f const& sc ) -> bool { return sc == V2fc::HUGE_VALUE_POS; } ), c.end());
     }
     //removeCollinear( contoursSmooth );
 }
@@ -628,11 +628,11 @@ void removeConsecutivePoints( std::vector<std::vector<Vector2f> >& contoursSmoot
             Vector2f currPoint1 = cs[t];
             Vector2f currPoint2 = cs[getCircularArrayIndex( t + 1, csize )];
             if ( distance( currPoint1, currPoint2 ) < 1.0f ) {
-                cs[t] = Vector2f::HUGE_VALUE_POS;
+                cs[t] = V2fc::HUGE_VALUE_POS;
             }
         }
         cs.erase( remove_if( cs.begin(), cs.end(),
-                             [toBeDeleted]( Vector2f const& sc ) -> bool { return sc == Vector2f::HUGE_VALUE_POS; } ),
+                             [toBeDeleted]( Vector2f const& sc ) -> bool { return sc == V2fc::HUGE_VALUE_POS; } ),
                   cs.end());
     }
     // ******************************************************************
@@ -663,7 +663,7 @@ void removeZigZag( std::vector<std::vector<Vector2f> >& contoursSmooth, const fl
             Vector2f longE2 = normalize( p4 - p3 );
             if ( isVerySimilar( longE1, longE2 ) &&
                  ( distance( p2, p3 ) * _pixelCM < maxDiagonalWallLengthToBeOptimizedOut )) {
-                Vector2f newPoint = Vector2f::ZERO;
+                Vector2f newPoint = V2fc::ZERO;
                 Vector2f perpNormal = rotate90( longE2 );
                 if ( intersection( p3 + perpNormal * 10000.0f, p3 - perpNormal * 10000.0f, p2 + longE1 * 10000.0f,
                                    p2 - longE1 * 10000.0f, newPoint )) {
@@ -895,7 +895,7 @@ int Wall::triangulate( const std::vector<Vector2f>& points ) {
                 if ( isScalarEqual( dot( ve1, ve2 ), 0.0f ) || isScalarEqual( dot( ve1, ve3 ), 0.0f ) ||
                      isScalarEqual( dot( ve3, ve2 ), 0.0f )) {
                     auto sum = e1 + ve1 + e2 + ve2 + e3 + ve3;
-                    if ( isVerySimilar( sum, Vector2f::ZERO )) {
+                    if ( isVerySimilar( sum, V2fc::ZERO )) {
                         ++numQuads;
                     }
                 }

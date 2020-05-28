@@ -77,7 +77,7 @@ namespace WindowRender {
         points.emplace_back( -sizeh.x() + ( slope * 2.f ), size.y());
         points.emplace_back( -sizeh.x() + ( slope * 2.f ), size.y() - glassgap );
 
-        appendMirror( points, Vector2f::X_INV );
+        appendMirror( points, V2fc::X_INV );
         flipAxis( points );
 
         return Profile::fromPoints( _name, points );
@@ -101,7 +101,7 @@ namespace WindowRender {
         points.emplace_back( -stem * 0.5f, 0.0f );
         points.emplace_back( -stem * 0.5f, stemlength );
 
-        appendMirror( points, Vector2f::X_INV );
+        appendMirror( points, V2fc::X_INV );
 
         return Profile::fromPoints( _name, points );
     }
@@ -192,7 +192,7 @@ namespace WindowRender {
                                              WindingOrder::CCW,
                                              PivotPointPosition::BottomCenter );
         for ( auto& v : fverts2 ) {
-            v += V2f::Y_AXIS * currBaseOffset;
+            v += V2fc::Y_AXIS * currBaseOffset;
         }
 
         for ( int t = 0; t < 2; t++ ) {
@@ -255,7 +255,7 @@ namespace WindowRender {
         auto pf = makeBottomWindowFrameProfile( "WindowFrameProfile", stemTrunk );
 
         sg.GB<GT::Follower>( centralStemProfile, _windowRect.pointscw(), depthOffset( mData, wppSize.x()),
-                             FollowerFlags::WrapPath, GT::Flip( Vector2f::X_AXIS ), mRootH );
+                             FollowerFlags::WrapPath, GT::Flip( V2fc::X_AXIS ), mRootH );
 
         float panelsWidth = ( mData->width - stemTrunk );
         int numPanels = static_cast<int>( ceil( panelsWidth / 0.60f ));
@@ -294,7 +294,7 @@ namespace WindowRender {
 //        bool bLast = (numHandles > 1 && t == numPanels-1);
 //        if ( bFirst || bLast ) {
 //            auto whoff = bLast ? panelRect.centreRight() : panelRect.centreLeft();
-//            whoff += Vector2f::X_AXIS * ((bLast ? -wppSize.y()+ wppSlope : wppSize.y() - wppSlope ) );
+//            whoff += V2fc::X_AXIS * ((bLast ? -wppSize.y()+ wppSlope : wppSize.y() - wppSlope ) );
 //            GeomBuilder{mPrefs.sg, GeomBuilderType::file, "window,handle,plastic" }.
 //                         at( whoff ).r( Vector3f::UP_AXIS*M_PI).
 //                         bboff( Vector3f{ bLast ? 0.5f : -0.5f, 0.0f, -0.5f }).

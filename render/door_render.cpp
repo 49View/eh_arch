@@ -152,7 +152,7 @@ namespace DoorRender {
         sg.GB<GT::Poly>(silhouette, door, ReverseFlag::True, doorPivot);
         sg.GB<GT::Poly>(Triangulator::setZTriangles(silhouette, hf1), door, doorPivot);
 
-        auto lineProfile = std::make_shared<Profile>(Vector2f::Y_AXIS * hf, Vector2f::Y_AXIS * hf1);
+        auto lineProfile = std::make_shared<Profile>(V2fc::Y_AXIS * hf, V2fc::Y_AXIS * hf1);
         sg.GB<GT::Follower>(lineProfile, quad.points(), FollowerFlags::WrapPath, door, doorPivot);
 
         auto pb = makeEnglishDoorProfile(V2f{ -doorThinkness, doorThinkness * 0.4f });
@@ -194,7 +194,7 @@ namespace DoorRender {
         doorFrame_profile->Name(pname);
         doorFrame_profile->createArbitrary(points);
         if ( isOdd(dIndex) ) {
-            doorFrame_profile->flip(V2f::Y_AXIS);
+            doorFrame_profile->flip(V2fc::Y_AXIS);
         }
 
         return doorFrame_profile;

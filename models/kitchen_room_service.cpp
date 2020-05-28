@@ -23,7 +23,7 @@ namespace KitchenRoomService {
                            float offset, std::vector<Vector3f>& path ) {
         Vector2f p1s = ( p1 + ( Vector3f(n1, 0.0f) * ( depth - offset ) ) ).xy();
         Vector2f p3s = ( p3 + ( Vector3f(n2, 0.0f) * ( depth - offset ) ) ).xy();
-        Vector2f p2s = Vector2f::ZERO;
+        Vector2f p2s = V2fc::ZERO;
         if ( !intersection(p1s, p1s + normalize(p2.xy() - p1.xy()) * 10000.0f, p3s,
                            p3s + normalize(p2.xy() - p3.xy()) * 10000.0f, p2s) ) {
             ASSERT(0);
@@ -51,13 +51,13 @@ namespace KitchenRoomService {
         V2f lp2Dir = normalize(middle - p2);
 
         V2f inW1 = isMain ? ( lp1Dir * ( skirtingOffset + sho ) ) : lp1Dir * -( kd.kitchenSkirtingRecess );
-        V2f inW2 = isMain ? ( lp2Dir * ( skirtingOffset + sho ) ) : V2f::ZERO;
+        V2f inW2 = isMain ? ( lp2Dir * ( skirtingOffset + sho ) ) : V2fc::ZERO;
 
         kd.kitchenSkirtingPath.emplace_back(p1 + inwardSkirting + inW1, p2 + inwardSkirting + inW2, normal,
                                             crossNormal, skirtingOffset);
 
         inW1 = isMain ? ( lp1Dir * ( unitOffset + dho ) ) : lp1Dir * -kd.kitchenUnitsRecess;
-        inW2 = isMain ? ( lp2Dir * ( unitOffset + dho ) ) : V2f::ZERO;
+        inW2 = isMain ? ( lp2Dir * ( unitOffset + dho ) ) : V2fc::ZERO;
 
         kd.kitchenUnitsPath.emplace_back(p1 + inwardUnits + inW1, p2 + inwardUnits + inW2, normal, crossNormal,
                                          unitOffset);
@@ -77,7 +77,7 @@ namespace KitchenRoomService {
         V2f lp2Dir = normalize(middle - p2);
 
         V2f inW1 = isMain ? ( lp1Dir * ( topUnitOffset + dho ) ) : lp1Dir * -( kd.kitchenTopUnitsRecess );
-        V2f inW2 = isMain ? ( lp2Dir * ( topUnitOffset + dho ) ) : V2f::ZERO;
+        V2f inW2 = isMain ? ( lp2Dir * ( topUnitOffset + dho ) ) : V2fc::ZERO;
 
         kd.kitchenTopUnitsPath.emplace_back(p1 + inwardTopUnits + inW1, p2 + inwardTopUnits + inW2, normal,
                                             crossNormal, topUnitOffset);
@@ -97,10 +97,10 @@ namespace KitchenRoomService {
     V2f oppositePointOnWallFor( RoomBSData *w, const V2f& input, const V2f& direction ) {
         V2f ln1 = direction;
         V2f ln2 = -ln1;
-        V2f ln = V2f::ZERO;
+        V2f ln = V2fc::ZERO;
         std::pair<size_t, size_t> targetWall[2];
         V2f hittingPoint[2];
-        V2f ret = V2f::ZERO;
+        V2f ret = V2fc::ZERO;
         bool fo1 = RoomService::findOppositeWallFromPoint(w, input, ln1, targetWall[0],
                                                           hittingPoint[0], IncludeWindowsOrDoors::WindowsOnly);
         bool fo2 = RoomService::findOppositeWallFromPoint(w, input, ln2, targetWall[1],

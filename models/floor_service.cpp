@@ -212,8 +212,8 @@ std::vector<std::pair<UShape *, UShape *>> FloorService::alignSuitableUShapesFro
                                     UShape *sourceUSRay = s1->width < s3->width ? s1 : s3;
                                     UShape *destUSRay = s1->width < s3->width ? s3 : s1;
 
-                                    Vector2f ri1 = Vector2f::ZERO;
-                                    Vector2f ri2 = Vector2f::ZERO;
+                                    Vector2f ri1 = V2fc::ZERO;
+                                    Vector2f ri2 = V2fc::ZERO;
                                     intersection( sourceUSRay->points[1] + sourceUSRay->crossNormals[0] * 1000.0f,
                                                   sourceUSRay->points[1] + sourceUSRay->crossNormals[1] * 1000.0f,
                                                   destUSRay->points[1] + destUSRay->inwardNormals[0] * 1000.0f,
@@ -277,7 +277,7 @@ FloorService::externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& w
     }
     FloorServiceIntermediateData::RCUnconnectedSegments() = wp;
 
-    Vector2f i = V2f::ZERO;
+    Vector2f i = V2fc::ZERO;
     int vn = 0;
     for ( auto& w : f->walls ) {
         for ( size_t t = 0; t < w->epoints.size() - ( w->wrapLastPoint != 0 ? 0 : 1 ); t++ ) {
@@ -526,7 +526,7 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
             if ( room ) {
                 if ( RS::hasRoomType(room, ASType::Hallway) ) {
                     float vwangle = -atan2(-d->dirWidth.y(), d->dirWidth.x());
-                    V2f dn = V2f::X_AXIS;
+                    V2f dn = V2fc::X_AXIS;
                     dn.rotate(vwangle + M_PI + M_PI_4);
                     V2f checkPoint = d->center + dn;
 
