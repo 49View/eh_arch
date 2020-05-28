@@ -102,6 +102,8 @@ void ArchSceneGraph::showHouse( std::shared_ptr<HouseBSData> _houseJson, ShowHou
             auto mode = checkBitWiseFlag(shm.getFlags(), ShowHouseMatrixFlags::UseDebugMode) ? FloorPlanRenderMode::Debug3d
                                                                              : FloorPlanRenderMode::Normal3d;
             HouseRender::make2dGeometry(rsg.RR(), sg, houseJson.get(), RDSPreMult(Matrix4f::IDENTITY), mode);
+//            rsg.DC()->setPosition(XZY::C(houseJson->bbox.centre(), 5.0f));
+            rsg.DC()->setPosition( rsg.DC()->center( houseJson->bbox, 0.0f) );
         }
 
         if ( checkBitWiseFlag(shm.getFlags(), ShowHouseMatrixFlags::Show2dFloorPlan) ) {

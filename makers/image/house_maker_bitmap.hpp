@@ -112,6 +112,7 @@ struct WallsEvaluation {
 
 namespace HouseMakerBitmap {
     SourceImages prepareImages( const HMBBSData& bsdata );
+    std::shared_ptr<HouseBSData> makeEmpty( HMBBSData &bsdata );
     std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData );
     std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData, const SourceImages& sourceImages );
 };

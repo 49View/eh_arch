@@ -807,4 +807,13 @@ namespace HouseMakerBitmap {
         return house;
     }
 
+    std::shared_ptr<HouseBSData> makeEmpty( HMBBSData &bsdata ) {
+        auto house = std::make_shared<HouseBSData>();
+        house->sourceData.floorPlanSize = V2f{bsdata.image.width, bsdata.image.height} * 0.01f;
+        house->bbox = Rect2f{V2fc::ZERO, house->sourceData.floorPlanSize};
+        house->name = bsdata.filename;
+        house->sourceData.floorPlanSourceName = house->name;
+        return house;
+    }
+
 }
