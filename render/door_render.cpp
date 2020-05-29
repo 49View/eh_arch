@@ -65,7 +65,7 @@ namespace DoorRender {
 
     void drawDoubleDoor2d();
 
-    void make2dGeometry( Renderer& rr, SceneGraph& sg, const DoorBSData *data, FloorPlanRenderMode fpRenderMode,
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult& _pm ) {
         auto rm = HouseRender::floorPlanShader(fpRenderMode);
         drawSingleDoor2d(rr, data->us1.middle, data->us2.middle, data->us2.width, rm, fpRenderMode, _pm);

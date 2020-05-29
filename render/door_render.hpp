@@ -17,7 +17,7 @@ struct RDSPreMult;
 enum class FloorPlanRenderMode;
 
 namespace DoorRender {
-    void make2dGeometry( Renderer& rr, SceneGraph& sg, const DoorBSData *data, FloorPlanRenderMode fpRenderMode,
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult &_pm );
     GeomSPContainer make3dGeometry( SceneGraph& sg, const DoorBSData* mData );
 }

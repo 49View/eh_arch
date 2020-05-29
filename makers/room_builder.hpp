@@ -22,10 +22,8 @@ struct ArchHouseBespokeData;
 class RoomBuilder {
 public:
     RoomBuilder( SceneGraph& sg, RenderOrchestrator& rsg,
-                 std::shared_ptr<HouseBSData>& _house,
-                 std::array<RoomBuilderSegmentPoints, 3>& _preBakedRooms,
-                 RoomBuilderSegmentPoints& _segments,
-                 FurnitureMapStorage& _furnitureMap );
+                 std::shared_ptr<HouseBSData> _house,
+                 RoomBuilderSegmentPoints& _segments );
 
     void activate();
     void activateDebug();
@@ -37,7 +35,6 @@ public:
     void onEntry();
     void onExit();
 
-    void loadFavRoom( const UICallbackHandle& _ch = {} );
     void clear( const UICallbackHandle& _ch = {} );
     void undo( const UICallbackHandle& _ch = {} );
     void saveSegments( const UICallbackHandle& _ch = {} );
@@ -76,11 +73,9 @@ private:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
 
-    std::shared_ptr<HouseBSData>& house;
-    std::array<RoomBuilderSegmentPoints, 3>& preBakedRooms;
+    std::shared_ptr<HouseBSData> house;
     RoomBuilderSegmentPoints& segments;
     SerializableContainer cachedSegments;
-    FurnitureMapStorage& furns;
     V3f currentPoint = V3f::ZERO;
     V3f inputPoint = V3f::ZERO;
     V3f mBestStartingPoint = V3f::ZERO;

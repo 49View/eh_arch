@@ -20,7 +20,7 @@ enum class FloorPlanRenderMode;
 struct ArchSegment;
 
 namespace WallRender  {
-    void make2dGeometry( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, FloorPlanRenderMode fpRenderMode, const RDSPreMult& pm );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, FloorPlanRenderMode fpRenderMode, const RDSPreMult& pm );
     GeomSPContainer make3dGeometry( SceneGraph& sg, const WallBSData* mWall,
                                     const V3fVectorOfVector& ceilingContours );
 

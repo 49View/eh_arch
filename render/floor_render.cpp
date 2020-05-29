@@ -22,7 +22,7 @@
 
 namespace FloorRender {
 
-    void make2dGeometry( Renderer &rr, SceneGraph &sg, const FloorBSData *data, FloorPlanRenderMode fpRenderMode,
+    void IMHouseRender( Renderer &rr, SceneGraph &sg, const FloorBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult &_pm ) {
     }
 

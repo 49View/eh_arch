@@ -22,7 +22,7 @@
 
 namespace RoomRender {
 
-    void make2dGeometry( Renderer &rr, SceneGraph &sg, const RoomBSData *data, FloorPlanRenderMode fpRenderMode,
+    void IMHouseRender( Renderer &rr, SceneGraph &sg, const RoomBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult &pm ) {
 //        bool drawDebug = fpRenderMode == Use2dDebugRendering::True;
 //        auto color = drawDebug ? Color4f::RANDA1().A(0.5f) : C4f::WHITE.A(0.5f);

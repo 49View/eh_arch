@@ -19,7 +19,7 @@ class HouseRenderContainer;
 enum class FloorPlanRenderMode;
 
 namespace RoomRender {
-    void make2dGeometry( Renderer& rr, SceneGraph& sg, const RoomBSData *data, FloorPlanRenderMode fpRenderMode,
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult &_pm );
     void make3dGeometry( SceneGraph& sg, RoomBSData* r, HouseRenderContainer& ret );
 }

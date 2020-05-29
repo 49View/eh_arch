@@ -81,71 +81,36 @@ namespace HOD { // HighOrderDependency
     }
 }
 
-void ArchSceneGraph::calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> _houseJson, float screenRatio, float screenPadding ) {
-    auto m = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
+Matrix4f ArchSceneGraph::calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> _houseJson, float screenRatio, float screenPadding ) {
+    auto m = Matrix4f{Matrix4f::IDENTITY};
     float vmax = max(_houseJson->bbox.bottomRight().x(), _houseJson->bbox.bottomRight().y());
     float screenFloorplanRatio = ( 1.0f / screenRatio );
     float vmaxScale = vmax / screenFloorplanRatio;
     auto vr = 1.0f / vmaxScale;
-    m->scale(V3f{ vr, -vr, -vr });
-    m->translate(V3f{ getScreenAspectRatio - screenFloorplanRatio - screenPadding, screenFloorplanRatio,
+    m.scale(V3f{ vr, -vr, -vr });
+    m.translate(V3f{ getScreenAspectRatio - screenFloorplanRatio - screenPadding, screenFloorplanRatio,
                       screenFloorplanRatio });
-    floorplanNavigationMatrix = m;
+    return m;
 }
 
-void ArchSceneGraph::showHouse( std::shared_ptr<HouseBSData> _houseJson, ShowHouseMatrix shm ) {
+void ArchSceneGraph::showIMHouse( std::shared_ptr<HouseBSData> _houseJson, const IMHouseRenderSettings& ims  ) {
+    HouseRender::IMHouseRender(rsg.RR(), sg, _houseJson.get(), ims);
+}
 
+void ArchSceneGraph::showHouse( std::shared_ptr<HouseBSData> _houseJson, const PostHouseLoadCallback& ccf ) {
     houseJson = _houseJson;
-    HOD::resolver<HouseBSData>(sg, houseJson.get(), [&, shm]() {
-
-        if ( checkBitWiseFlag(shm.getFlags(), ShowHouseMatrixFlags::Show3dFloorPlan) ) {
-            auto mode = checkBitWiseFlag(shm.getFlags(), ShowHouseMatrixFlags::UseDebugMode) ? FloorPlanRenderMode::Debug3d
-                                                                             : FloorPlanRenderMode::Normal3d;
-            HouseRender::make2dGeometry(rsg.RR(), sg, houseJson.get(), RDSPreMult(Matrix4f::IDENTITY), mode);
-//            rsg.DC()->setPosition(XZY::C(houseJson->bbox.centre(), 5.0f));
-            rsg.DC()->setPosition( rsg.DC()->center( houseJson->bbox, 0.0f) );
-        }
-
-        if ( checkBitWiseFlag(shm.getFlags(), ShowHouseMatrixFlags::Show2dFloorPlan) ) {
-            auto mode = checkBitWiseFlag(shm.getFlags(), ShowHouseMatrixFlags::UseDebugMode) ? FloorPlanRenderMode::Debug2d
-                                                                             : FloorPlanRenderMode::Normal2d;
-            calcFloorplanNavigationTransform(houseJson, shm.getFp2DScreenRatio(), shm.getFp2DScreenPadding());
-            HouseRender::make2dGeometry(rsg.RR(), sg, houseJson.get(), RDSPreMult(*floorplanNavigationMatrix.get()),
-                                        mode);
-        }
-
-        if ( checkBitWiseFlag(shm.getFlags(), ShowHouseMatrixFlags::Show3dHouse) ) {
-            sg.loadCollisionMesh(HouseService::createCollisionMesh(houseJson.get()));
-            HouseRender::make3dGeometry(sg, houseJson.get());
-
-            V2f cobr = HouseService::centerOfBiggestRoom(houseJson.get());
-            V3f lngp = V3f{ cobr.x(), 1.6f, cobr.y() };
-            sg.setLastKnownGoodPosition(lngp);
-            rsg.setRigCameraController(CameraControlType::Walk);
-            rsg.DC()->setQuatAngles(V3f{ 0.08f, -0.70f, 0.0f });
-            rsg.DC()->setPosition(lngp);
-        }
+    HOD::resolver<HouseBSData>(sg, houseJson.get(), [&, ccf]() {
+        sg.loadCollisionMesh(HouseService::createCollisionMesh(houseJson.get()));
+        HouseRender::make3dGeometry(sg, houseJson.get());
+        if ( ccf ) ccf(houseJson);
     });
 }
 
-void ArchSceneGraph::loadHouse( const std::string& _pid, ShowHouseMatrix shm ) {
-    Http::get(Url{ "/propertybim/" + _pid }, [this, shm]( HttpResponeParams params ) {
+void ArchSceneGraph::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf ) {
+    Http::get(Url{ "/propertybim/" + _pid }, [this, ccf]( HttpResponeParams params ) {
         houseJson = std::make_shared<HouseBSData>(params.bufferString);
-        callbackStream = std::make_pair(houseJson, shm);
+        sg.addGenericCallback([&, ccf]() {
+            showHouse(houseJson, ccf);
+        } );
     });
-}
-
-void ArchSceneGraph::consumeCallbacks() {
-    if ( callbackStream.second.getFlags() != ShowHouseMatrixFlags::None ) {
-        showHouse(callbackStream.first, callbackStream.second);
-        callbackStream.second.setFlags(ShowHouseMatrixFlags::None);
-    }
-}
-void ArchSceneGraph::update() {
-
-    consumeCallbacks();
-
-    if ( floorplanNavigationMatrix && rsg.getRigCameraController() == CameraControlType::Walk ) {
-        rsg.drawCameraLocator(*floorplanNavigationMatrix.get());
-    }
 }

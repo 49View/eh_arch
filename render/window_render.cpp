@@ -38,7 +38,7 @@ namespace WindowRender {
         rr.draw<DLine>( rm, p3, p4, color, lineWidth, false, pm );
     }
 
-    void make2dGeometry( Renderer& rr, SceneGraph& sg, const WindowBSData *data, FloorPlanRenderMode fpRenderMode,
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WindowBSData *data, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult &_pm ) {
         drawWindow( rr, data->us2.middle, data->us1.middle, data->us2.width, fpRenderMode, _pm );
     }

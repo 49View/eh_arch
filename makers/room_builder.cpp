@@ -36,21 +36,6 @@ void RoomBuilder::activateDebug() {
     sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS );
 }
 
-void RoomBuilder::loadFavRoom( const UICallbackHandle& _ch ) {
-    if ( _ch.index == -1 ) return;
-    int index = _ch.index;
-    segments.clear();
-    rsg.RR().clearBucket( furnitureBucket );
-    segments = preBakedRooms[index];
-    segments.optimize();
-    segments.bboxUpdate();
-    Timeline::play( rsg.DC()->PosAnim(), 0, KeyFramePair{ 1.25f, segments.centerForCamera() } );
-    mBestStartingPoint = V3f{ 3.9f, 1.2f, -2.8f};
-    segments.finalise();
-    finalise();
-    refresh();
-}
-
 void RoomBuilder::clear( const UICallbackHandle& _ch ) {
     segments.clear();
     finalised = false;
@@ -127,9 +112,13 @@ void RoomBuilder::addPointToRoom() {
 }
 
 bool RoomBuilder::validateAddPoint( const V2f& _p ) {
-    if ( finalised ) return false;
+    if ( finalised || segments.empty() ) return false;
     setInputPoint( _p );
-    return checkSegmentLongEnough() && !checkPointIntersect( inputPoint );
+    if ( checkSegmentLongEnough() && !checkPointIntersect( inputPoint ) ) {
+        addPointToRoom();
+        return true;
+    }
+    return false;
 }
 
 bool RoomBuilder::checkSegmentLongEnough() const {
@@ -598,15 +587,11 @@ void RoomBuilder::onExit() {
     rsg.UI()("sidebar")->slideRightOut( 1.0f );
 }
 
-RoomBuilder::RoomBuilder( SceneGraph& sg, RenderOrchestrator& rsg, std::shared_ptr<HouseBSData>& _house,
-                          std::array<RoomBuilderSegmentPoints, 3>& _preBakedRooms,
-                          RoomBuilderSegmentPoints& _segments, FurnitureMapStorage& _furnitureMap ) :
+RoomBuilder::RoomBuilder( SceneGraph& sg, RenderOrchestrator& rsg, std::shared_ptr<HouseBSData> _house,
+                          RoomBuilderSegmentPoints& _segments ) :
         sg( sg ), rsg( rsg ),
         house(_house),
-        preBakedRooms(_preBakedRooms),
-        segments(_segments),
-        furns(_furnitureMap) {
+        segments(_segments) {
     roomEditBucket = CommandBufferLimits::UnsortedStart + 2;
-    furnitureBucket = CommandBufferLimits::UnsortedStart + 3;
 }
 

@@ -43,9 +43,9 @@ namespace WallRender {
         std::array<Color4f, 3> usc = { Color4f::PASTEL_YELLOW, Color4f::PASTEL_CYAN, Color4f::PASTEL_GREEN };
         for ( const auto& us : wall->mUShapes ) {
             for ( int t = 0; t < 3; t++ ) {
-                rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], width * 1.2f, sm, _pm);
+                rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], width * 0.2f, sm, _pm);
             }
-            rr.draw<DCircleFilled>(us.middle, Color4f::ORANGE_SCHEME1_1, 0.1f, sm, _pm);
+            rr.draw<DCircleFilled>(us.middle, Color4f::ORANGE_SCHEME1_1, 0.025f, sm, _pm);
         }
     }
 
@@ -60,7 +60,14 @@ namespace WallRender {
         }
     }
 
-    void make2dGeometry( Renderer& rr, SceneGraph& sg, const WallBSData *wall, FloorPlanRenderMode fpRenderMode,
+    void drawWallPoints2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
+                            const RDSPreMult& _pm ) {
+        for ( const auto & p1 : wall->epoints ) {
+            rr.draw<DCircleFilled>(p1, C4f::DARK_YELLOW, 0.025f, sm, _pm);
+        }
+    }
+
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *wall, FloorPlanRenderMode fpRenderMode,
                          const RDSPreMult& pm ) {
         auto sm = HouseRender::floorPlanShader(fpRenderMode);
         auto width = HouseRender::floorPlanScaler(fpRenderMode, 0.05f, pm());
@@ -70,6 +77,7 @@ namespace WallRender {
             auto lineWidth = HouseRender::floorPlanScaler(fpRenderMode, 0.01f, pm());
             drawWallNormals2d(rr, wall, lineWidth, sm, pm);
             drawUShapes2d(rr, wall, width, sm, pm);
+            drawWallPoints2d(rr, wall, width, sm, pm);
         }
     }
 

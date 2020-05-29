@@ -230,6 +230,21 @@ std::shared_ptr<ArchStructural> HouseService::rayIntersect( std::shared_ptr<Hous
 	return found;
 }
 
+std::shared_ptr<WallBSData> HouseService::isPointInsideWalls( std::shared_ptr<HouseBSData> _house, const Vector3f& point ) {
+    std::shared_ptr<WallBSData> found;
+
+    for ( const auto& f : _house->mFloors ) {
+        if ( ArchStructuralService::isPointInside(f.get(), point)) {
+            for ( const auto& w : f->walls ) {
+                if ( ArchStructuralService::isPointInside(w.get(), point) ) {
+                    return w;
+                }
+            }
+        }
+    }
+    return found;
+}
+
 bool HouseService::isLastFloor( std::shared_ptr<HouseBSData> _house, int floorNumber ) {
 	return ( static_cast<size_t>(floorNumber) == _house->mFloors.size() - 1 );
 }
