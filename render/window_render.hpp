@@ -11,14 +11,13 @@
 #include "../models/house_bsdata.hpp"
 #include <core/resources/resource_types.hpp>
 
-struct WindowBSData;
 class SceneGraph;
 class Renderer;
+class IMHouseRenderSettings;
+struct WindowBSData;
 struct RDSPreMult;
-enum class FloorPlanRenderMode;
 
 namespace WindowRender {
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WindowBSData *data, FloorPlanRenderMode fpRenderMode,
-                         const RDSPreMult &_pm );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WindowBSData *data, const IMHouseRenderSettings& ims );
     GeomSPContainer make3dGeometry( SceneGraph& sg, WindowBSData* mData );
 };

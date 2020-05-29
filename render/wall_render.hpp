@@ -8,19 +8,18 @@
 
 #pragma once
 
-#include <core/math/vector3f.h>
 #include <core/resources/resource_types.hpp>
 #include <core/math/vector4f.h>
 
-struct WallBSData;
 class SceneGraph;
 class Renderer;
 struct RDSPreMult;
-enum class FloorPlanRenderMode;
+class IMHouseRenderSettings;
+struct WallBSData;
 struct ArchSegment;
 
 namespace WallRender  {
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, FloorPlanRenderMode fpRenderMode, const RDSPreMult& pm );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, const IMHouseRenderSettings& ims );
     GeomSPContainer make3dGeometry( SceneGraph& sg, const WallBSData* mWall,
                                     const V3fVectorOfVector& ceilingContours );
 

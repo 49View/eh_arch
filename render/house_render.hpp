@@ -77,9 +77,24 @@ public:
     IMHouseRenderSettings( const RDSPreMult& pm, FloorPlanRenderMode renderMode );
     IMHouseRenderSettings( FloorPlanRenderMode renderMode );
 
-    RDSPreMult pm{Matrix4f::MIDENTITY()};
-    ShowHouseMatrix shwoHouseMatrix;
-    FloorPlanRenderMode renderMode = FloorPlanRenderMode::Normal2d;
+    [[nodiscard]] FloorPlanRenderMode renderMode() const;
+    void renderMode(FloorPlanRenderMode rm);
+    [[nodiscard]]const RDSPreMult& pm() const;
+    void pm( const RDSPreMult& pm );
+
+    DShaderMatrix floorPlanShader() const;
+    float floorPlanScaler( float value ) const;
+    Color4f floorPlanElemColor( const C4f& nominalColor ) const;
+    Color4f floorPlanElemColor() const;
+    bool isFloorPlanRenderModeDebug() const;
+    bool isFloorPlanRenderMode2d() const;
+
+    void addToSelectionList( int64_t hash );
+
+private:
+    std::unordered_set<int64_t> selection;
+    RDSPreMult mPm{Matrix4f::MIDENTITY()};
+    FloorPlanRenderMode mRenderMode = FloorPlanRenderMode::Normal2d;
 };
 
 namespace HouseRender {
@@ -93,5 +108,3 @@ namespace HouseRender {
 
     HouseRenderContainer make3dGeometry( SceneGraph& sg, const HouseBSData *mData );
 }
-
-

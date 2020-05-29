@@ -588,3 +588,10 @@ void WallService::perimeterFromSegments( const std::vector<std::vector<ArchSegme
     }
     perimeterLength = lPerimeter;
 }
+
+void WallService::translatePoint( WallBSData *w, uint64_t pointIndex, const V2f& offset ) {
+    if ( w->epoints.size() <= pointIndex ) return;
+
+    w->epoints[pointIndex] += offset;
+    WallService::update(w);
+}

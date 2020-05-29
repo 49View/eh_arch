@@ -16,31 +16,29 @@
 
 namespace WindowRender {
 
-    void drawWindow( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, FloorPlanRenderMode fpRenderMode,
-                     const RDSPreMult &pm ) {
-        auto rm = HouseRender::floorPlanShader(fpRenderMode);
-        auto color = HouseRender::floorPlanElemColor(fpRenderMode, C4f::PASTEL_GREEN);
+    void drawWindow( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, const IMHouseRenderSettings& ims ) {
+        auto rm = ims.floorPlanShader();
+        auto color = ims.floorPlanElemColor( C4f::PASTEL_GREEN);
         float windowLineWidth = _lineWidth * 0.2f;
         float halfWindowLineWidth = windowLineWidth * 0.5f;
         float halfLineWidth = _lineWidth * 0.5f;
         float windowLineWidthOffset = halfLineWidth - halfWindowLineWidth;
 
-        auto lineWidth = HouseRender::floorPlanScaler( fpRenderMode, _lineWidth*0.05f, pm());
+        auto lineWidth = ims.floorPlanScaler(_lineWidth*0.05f);
 
-        rr.draw<DLine>( rm, _p1, _p2, color, lineWidth, false, pm );
+        rr.draw<DLine>( rm, _p1, _p2, color, lineWidth, false, ims.pm() );
         V2f vn = normalize( _p1 - _p2);
         auto slope = rotate90( vn );
         auto p1 = _p1 + ( slope * windowLineWidthOffset );
         auto p2 = _p2 + ( slope * windowLineWidthOffset );
-        rr.draw<DLine>( rm, p1, p2, color, lineWidth, false, pm );
+        rr.draw<DLine>( rm, p1, p2, color, lineWidth, false, ims.pm() );
         auto p3 = _p1 + ( slope * -windowLineWidthOffset );
         auto p4 = _p2 + ( slope * -windowLineWidthOffset );
-        rr.draw<DLine>( rm, p3, p4, color, lineWidth, false, pm );
+        rr.draw<DLine>( rm, p3, p4, color, lineWidth, false, ims.pm() );
     }
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WindowBSData *data, FloorPlanRenderMode fpRenderMode,
-                         const RDSPreMult &_pm ) {
-        drawWindow( rr, data->us2.middle, data->us1.middle, data->us2.width, fpRenderMode, _pm );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WindowBSData *data, const IMHouseRenderSettings& ims ) {
+        drawWindow( rr, data->us2.middle, data->us1.middle, data->us2.width, ims );
     }
 
     // [END] 2D

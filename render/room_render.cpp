@@ -22,8 +22,7 @@
 
 namespace RoomRender {
 
-    void IMHouseRender( Renderer &rr, SceneGraph &sg, const RoomBSData *data, FloorPlanRenderMode fpRenderMode,
-                         const RDSPreMult &pm ) {
+    void IMHouseRender( Renderer &rr, SceneGraph &sg, const RoomBSData *data, const IMHouseRenderSettings& ims ) {
 //        bool drawDebug = fpRenderMode == Use2dDebugRendering::True;
 //        auto color = drawDebug ? Color4f::RANDA1().A(0.5f) : C4f::WHITE.A(0.5f);
 
@@ -31,18 +30,18 @@ namespace RoomRender {
 //        if ( drawDebug) {
 //            rr.draw<DLine>( data->mPerimeterSegments, 0.03f, C4f::RED, false );
 //        }
-        auto rm = HouseRender::floorPlanShader(fpRenderMode);
-        auto lineWidth = HouseRender::floorPlanScaler( fpRenderMode, 0.0075f, pm());
+        auto rm = ims.floorPlanShader();
+        auto lineWidth = ims.floorPlanScaler(0.0075f);
 
         if ( !RoomService::isGeneric( data )) {
             rr.draw<DText2d>(
                     FDS{ RoomService::roomNames( data ), sg.FM().get( S::DEFAULT_FONT ).get(), data->bbox.centreLeft(),
-                         .4f }, C4f::BLACK, pm );
+                         .4f }, C4f::BLACK, ims.pm() );
         }
 
         for ( const auto &ff : data->mFittedFurniture ) {
             Matrix4f mt{ ff.position3d * V3f::MASK_Y_OUT, ff.rotation, ff.size };
-            mt.mult( pm() );
+            mt.mult( ims.pm()() );
             rr.draw<DLine>( sg.PL( ff.symbolRef ), C4f::BLACK, RDSPreMult( mt ), rm, lineWidth );
 
         }

@@ -29,15 +29,15 @@ namespace DoorRender {
     }
 
     void drawSingleDoor2d( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, DShaderMatrix sm,
-                           FloorPlanRenderMode fpRenderMode, const RDSPreMult& pm ) {
+                           const IMHouseRenderSettings& ims ) {
 
-        auto color = HouseRender::floorPlanElemColor(fpRenderMode, C4f::PASTEL_GREEN);
+        auto color = ims.floorPlanElemColor( C4f::PASTEL_GREEN);
         float windowLineWidth = _lineWidth * 0.2f;
         float halfWindowLineWidth = windowLineWidth * 0.5f;
         float halfLineWidth = _lineWidth * 0.5f;
         float windowLineWidthOffset = halfLineWidth - halfWindowLineWidth;
 
-        auto lineWidth = HouseRender::floorPlanScaler( fpRenderMode, 0.03f, pm());
+        auto lineWidth = ims.floorPlanScaler( 0.03f );
 
         float dist = distance(_p1, _p2) + windowLineWidth;
         V2f vn = normalize(_p1 - _p2);
@@ -60,15 +60,14 @@ namespace DoorRender {
         }
 
         vLists.emplace_back(p1);
-        rr.draw<DLine>(vLists, color, lineWidth, false, sm, pm);
+        rr.draw<DLine>(vLists, color, lineWidth, false, sm, ims.pm());
     }
 
     void drawDoubleDoor2d();
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, FloorPlanRenderMode fpRenderMode,
-                         const RDSPreMult& _pm ) {
-        auto rm = HouseRender::floorPlanShader(fpRenderMode);
-        drawSingleDoor2d(rr, data->us1.middle, data->us2.middle, data->us2.width, rm, fpRenderMode, _pm);
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, const IMHouseRenderSettings& ims ) {
+        auto rm = ims.floorPlanShader();
+        drawSingleDoor2d(rr, data->us1.middle, data->us2.middle, data->us2.width, rm, ims);
     }
 
     std::shared_ptr<Profile> makeEnglishDoorProfile( const Vector2f& vv2fs ) {

@@ -16,68 +16,66 @@
 
 namespace WallRender {
 
-    void drawWalls2d( Renderer& rr, const WallBSData *wall, FloorPlanRenderMode fpRenderMode, DShaderMatrix sm,
-                      const RDSPreMult& _pm ) {
-        auto wc = isFloorPlanRenderModeDebug(fpRenderMode) ? Color4f::RANDA1() : C4f::BLACK;
-        rr.draw<DPoly>(sm, wall->mTriangles2d, wc, _pm);
+    void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const IMHouseRenderSettings& ims ) {
+        auto wc = ims.isFloorPlanRenderModeDebug() ? Color4f::RANDA1() : C4f::BLACK;
+        rr.draw<DPoly>(sm, wall->mTriangles2d, wc, ims.pm());
     }
 
-    void drawIncrementalAlphaWalls2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
-                                      const RDSPreMult& _pm ) {
-        auto wc = Color4f::RANDA1();
-        auto wps = wall->epoints.size();
-        for ( size_t t = 0; t < wps - 1 * !wall->wrapLastPoint; t++ ) {
-            float incRatio = float(t) / float(wps);
-            auto wca = Color4f::WHITE * V4f{ V3f::ONE, 0.5f + ( incRatio * 0.5f ) };
-            auto p1 = wall->epoints[t];
-            auto p2 = wall->epoints[cai(t + 1, wps)];
-            auto pm = lerp(0.5f, p1, p2);
-            rr.draw<DLine>(p1, p2, wc * wca, width, sm, _pm);
-            rr.draw<DLine>(pm, pm + wall->enormals[t] * width * 3.0f, Color4f::PASTEL_CYAN, width * 0.05f,
-                           true, sm, _pm);
-        }
-    }
+//    void drawIncrementalAlphaWalls2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
+//                                      const RDSPreMult& _pm ) {
+//        auto wc = Color4f::RANDA1();
+//        auto wps = wall->epoints.size();
+//        for ( size_t t = 0; t < wps - 1 * !wall->wrapLastPoint; t++ ) {
+//            float incRatio = float(t) / float(wps);
+//            auto wca = Color4f::WHITE * V4f{ V3f::ONE, 0.5f + ( incRatio * 0.5f ) };
+//            auto p1 = wall->epoints[t];
+//            auto p2 = wall->epoints[cai(t + 1, wps)];
+//            auto pm = lerp(0.5f, p1, p2);
+//            rr.draw<DLine>(p1, p2, wc * wca, width, sm, _pm);
+//            rr.draw<DLine>(pm, pm + wall->enormals[t] * width * 3.0f, Color4f::PASTEL_CYAN, width * 0.05f,
+//                           true, sm, _pm);
+//        }
+//    }
 
     void drawUShapes2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
-                        const RDSPreMult& _pm ) {
+                        const IMHouseRenderSettings& ims ) {
         std::array<Color4f, 3> usc = { Color4f::PASTEL_YELLOW, Color4f::PASTEL_CYAN, Color4f::PASTEL_GREEN };
         for ( const auto& us : wall->mUShapes ) {
             for ( int t = 0; t < 3; t++ ) {
-                rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], width * 0.2f, sm, _pm);
+                rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], width * 0.2f, sm, ims.pm());
             }
-            rr.draw<DCircleFilled>(us.middle, Color4f::ORANGE_SCHEME1_1, 0.025f, sm, _pm);
+            rr.draw<DCircleFilled>(us.middle, Color4f::ORANGE_SCHEME1_1, 0.025f, sm, ims.pm());
         }
     }
 
     void drawWallNormals2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
-                            const RDSPreMult& _pm ) {
+                            const IMHouseRenderSettings& ims ) {
         auto wps = wall->epoints.size();
         for ( size_t t = 0; t < wps - 1 * !wall->wrapLastPoint; t++ ) {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t + 1, wps)];
             auto pm = lerp(0.5f, p1, p2);
-            rr.draw<DLine>(pm, pm + wall->enormals[t] * 0.15f, Color4f::PASTEL_CYAN, width, sm, true, _pm);
+            rr.draw<DLine>(pm, pm + wall->enormals[t] * 0.15f, Color4f::PASTEL_CYAN, width, sm, true, ims.pm());
         }
     }
 
     void drawWallPoints2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
-                            const RDSPreMult& _pm ) {
-        for ( const auto & p1 : wall->epoints ) {
-            rr.draw<DCircleFilled>(p1, C4f::DARK_YELLOW, 0.025f, sm, _pm);
+                           const IMHouseRenderSettings& ims ) {
+        for ( const auto& p1 : wall->epoints ) {
+            rr.draw<DCircleFilled>(p1, C4f::DARK_YELLOW, 0.025f, sm, ims.pm());
         }
     }
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *wall, FloorPlanRenderMode fpRenderMode,
-                         const RDSPreMult& pm ) {
-        auto sm = HouseRender::floorPlanShader(fpRenderMode);
-        auto width = HouseRender::floorPlanScaler(fpRenderMode, 0.05f, pm());
-        drawWalls2d(rr, wall, fpRenderMode, sm, pm);
-        bool drawDebug = isFloorPlanRenderModeDebug(fpRenderMode);
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *wall, const IMHouseRenderSettings& ims ) {
+        auto sm = ims.floorPlanShader();
+        auto width = ims.floorPlanScaler(0.05f);
+        drawWalls2d(rr, wall, sm, ims);
+        bool drawDebug = ims.isFloorPlanRenderModeDebug();
         if ( drawDebug ) {
-            auto lineWidth = HouseRender::floorPlanScaler(fpRenderMode, 0.01f, pm());
-            drawWallNormals2d(rr, wall, lineWidth, sm, pm);
-            drawUShapes2d(rr, wall, width, sm, pm);
-            drawWallPoints2d(rr, wall, width, sm, pm);
+            auto lineWidth = ims.floorPlanScaler(0.01f);
+            drawWallNormals2d(rr, wall, lineWidth, sm, ims);
+            drawUShapes2d(rr, wall, width, sm, ims);
+            drawWallPoints2d(rr, wall, width, sm, ims);
         }
     }
 

@@ -16,11 +16,10 @@ class Renderer;
 struct RoomBSData;
 struct RDSPreMult;
 class HouseRenderContainer;
-enum class FloorPlanRenderMode;
+class IMHouseRenderSettings;
 
 namespace RoomRender {
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *data, FloorPlanRenderMode fpRenderMode,
-                         const RDSPreMult &_pm );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *data, const IMHouseRenderSettings& ims );
     void make3dGeometry( SceneGraph& sg, RoomBSData* r, HouseRenderContainer& ret );
 }
 
