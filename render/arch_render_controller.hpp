@@ -19,38 +19,6 @@ namespace ShowHouseMatrixFlags {
 
 using ShowHouseMatrixFlagsT = uint64_t;
 
-class ShowHouseMatrix {
-public:
-    ShowHouseMatrix() = default;
-    ShowHouseMatrix( ShowHouseMatrixFlagsT flags ) : flags(flags) {}
-    ShowHouseMatrix( ShowHouseMatrixFlagsT flags, float fp2DScreenRatio, float fp2DScreenPadding ) : flags(flags),
-                                                                                                     fp2dScreenRatio(
-                                                                                                             fp2DScreenRatio),
-                                                                                                     fp2dScreenPadding(
-                                                                                                             fp2DScreenPadding) {}
-    [[nodiscard]] float getFp2DScreenRatio() const {
-        return fp2dScreenRatio;
-    }
-    void setFp2DScreenRatio( float fp2DScreenRatio ) {
-        fp2dScreenRatio = fp2DScreenRatio;
-    }
-    [[nodiscard]] float getFp2DScreenPadding() const {
-        return fp2dScreenPadding;
-    }
-    void setFp2DScreenPadding( float fp2DScreenPadding ) {
-        fp2dScreenPadding = fp2DScreenPadding;
-    }
-    [[nodiscard]] ShowHouseMatrixFlagsT getFlags() const {
-        return flags;
-    }
-    void setFlags( ShowHouseMatrixFlagsT _flags ) {
-        flags = _flags;
-    }
-private:
-    ShowHouseMatrixFlagsT flags = ShowHouseMatrixFlags::None;
-    float fp2dScreenRatio = 4.0f;
-    float fp2dScreenPadding = 0.02f;
-};
 
 class IMHouseRenderSettings {
 public:
