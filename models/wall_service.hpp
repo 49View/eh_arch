@@ -44,6 +44,8 @@ namespace WallService {
     void addToArchSegmentInternal( const WallBSData *w, int32_t floorNumber, int32_t wallNumber,
                                    std::vector<ArchSegment>& ws );
 
+    ArchStructuralFeatureIndex getNearestFeatureToPoint( const WallBSData *w, const V2f& point, float nearFactor );
+
     // update
     void update( WallBSData *w );
     void update( WallBSData *w, const std::vector<Vector2f>& epts );

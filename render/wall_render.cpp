@@ -7,9 +7,13 @@
 //
 
 #include "wall_render.hpp"
-#include <poly/scene_graph.h>
+
 #include <core/resources/resource_builder.hpp>
+#include <poly/scene_graph.h>
 #include <graphics/renderer.h>
+
+#include <eh_arch/render/arch_render_controller.hpp>
+
 #include "house_render.hpp"
 #include "../models/house_bsdata.hpp"
 #include "../models/wall_service.hpp"
@@ -17,8 +21,8 @@
 namespace WallRender {
 
     void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const IMHouseRenderSettings& ims ) {
-        auto wc = ims.isFloorPlanRenderModeDebug() ? Color4f::RANDA1() : C4f::BLACK;
-        rr.draw<DPoly>(sm, wall->mTriangles2d, wc, ims.pm());
+        auto color = ims.getFillColor(wall->hash, C4f::BLACK);
+        rr.draw<DPoly>(sm, wall->mTriangles2d, color, ims.pm());
     }
 
 //    void drawIncrementalAlphaWalls2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
@@ -44,7 +48,7 @@ namespace WallRender {
             for ( int t = 0; t < 3; t++ ) {
                 rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], width * 0.2f, sm, ims.pm());
             }
-            rr.draw<DCircleFilled>(us.middle, Color4f::ORANGE_SCHEME1_1, 0.025f, sm, ims.pm());
+            rr.draw<DCircleFilled>(us.middle, Color4f::DARK_BLUE, 0.025f, sm, ims.pm());
         }
     }
 
@@ -61,8 +65,15 @@ namespace WallRender {
 
     void drawWallPoints2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
                            const IMHouseRenderSettings& ims ) {
-        for ( const auto& p1 : wall->epoints ) {
-            rr.draw<DCircleFilled>(p1, C4f::DARK_YELLOW, 0.025f, sm, ims.pm());
+        for ( auto t = 0u; t < wall->epoints.size(); t++ ) {
+            auto p1 = wall->epoints[t];
+            ArchStructuralFeatureIndex asf{ ArchStructuralFeature::ASF_Point, t, wall->hash };
+            auto color = ims.getFillColor(asf, C4f::RED);
+            float radius = 0.03f;
+            if ( color != C4f::RED ) {
+                radius *= 2.0f;
+            }
+            rr.draw<DCircleFilled>(p1, color, radius, sm, ims.pm());
         }
     }
 

@@ -16,6 +16,8 @@
 #include <graphics/renderer.h>
 #include "../models/house_bsdata.hpp"
 #include "../models/room_service.hpp"
+#include <eh_arch/render/arch_render_controller.hpp>
+
 #include "house_render.hpp"
 #include "wall_render.hpp"
 #include "kitchen_render.hpp"

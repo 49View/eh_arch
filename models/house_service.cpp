@@ -230,13 +230,28 @@ std::shared_ptr<ArchStructural> HouseService::rayIntersect( std::shared_ptr<Hous
 	return found;
 }
 
-std::shared_ptr<WallBSData> HouseService::isPointInsideWalls( std::shared_ptr<HouseBSData> _house, const Vector3f& point ) {
+std::shared_ptr<WallBSData> HouseService::isPointInsideWall( std::shared_ptr<HouseBSData> _house, const Vector3f& point ) {
     std::shared_ptr<WallBSData> found;
 
     for ( const auto& f : _house->mFloors ) {
         if ( ArchStructuralService::isPointInside(f.get(), point)) {
             for ( const auto& w : f->walls ) {
                 if ( ArchStructuralService::isPointInside(w.get(), point) ) {
+                    return w;
+                }
+            }
+        }
+    }
+    return found;
+}
+
+std::shared_ptr<WallBSData> HouseService::isPointNearWall( std::shared_ptr<HouseBSData> _house, const Vector3f& point, float radius ) {
+    std::shared_ptr<WallBSData> found;
+
+    for ( const auto& f : _house->mFloors ) {
+        if ( ArchStructuralService::isPointNear(f.get(), point, radius)) {
+            for ( const auto& w : f->walls ) {
+                if ( ArchStructuralService::isPointNear(w.get(), point, radius) ) {
                     return w;
                 }
             }

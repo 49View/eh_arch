@@ -21,6 +21,7 @@
 #include "../models/house_bsdata.hpp"
 #include "../models/door_service.hpp"
 #include "house_render.hpp"
+#include <eh_arch/render/arch_render_controller.hpp>
 
 namespace DoorRender {
 
@@ -31,13 +32,13 @@ namespace DoorRender {
     void drawSingleDoor2d( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, DShaderMatrix sm,
                            const IMHouseRenderSettings& ims ) {
 
-        auto color = ims.floorPlanElemColor( C4f::PASTEL_GREEN);
+        auto color = ims.floorPlanElemColor(C4f::BLACK);
         float windowLineWidth = _lineWidth * 0.2f;
         float halfWindowLineWidth = windowLineWidth * 0.5f;
         float halfLineWidth = _lineWidth * 0.5f;
         float windowLineWidthOffset = halfLineWidth - halfWindowLineWidth;
 
-        auto lineWidth = ims.floorPlanScaler( 0.03f );
+        auto lineWidth = ims.floorPlanScaler(0.03f);
 
         float dist = distance(_p1, _p2) + windowLineWidth;
         V2f vn = normalize(_p1 - _p2);

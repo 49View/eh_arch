@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <tuple>
 
 const static float inch = 2.54f;
 const static float inch1o = 1.0f / 2.54f;
@@ -36,6 +37,42 @@ enum WallFlags {
 	WF_HasCoving = 1 << 1,
 	WF_IsDoorPart = 1 << 2,
 	WF_IsWindowPart = 1 << 3,
+};
+
+enum class ArchStructuralFeature {
+    ASF_None,
+    ASF_Point,
+    ASF_Edge,
+    ASF_Poly,
+    ASF_Box
+};
+
+struct ArchStructuralFeatureIndex {
+    ArchStructuralFeatureIndex() = default;
+    ArchStructuralFeatureIndex( ArchStructuralFeature feature, int64_t index, int64_t hash ) : feature(feature),
+                                                                                               index(index),
+                                                                                               hash(hash) {}
+
+    bool operator==( const ArchStructuralFeatureIndex& rhs ) const {
+        return std::tie(feature, index, hash) == std::tie(rhs.feature, rhs.index, rhs.hash);
+    }
+    bool operator!=( const ArchStructuralFeatureIndex& rhs ) const {
+        return !( rhs == *this );
+    }
+
+    ArchStructuralFeature feature = ArchStructuralFeature::ASF_None;
+    int64_t index = -1;
+    int64_t hash = 0;
+};
+
+class ArchStructuralFeatureIndexHashFunctor {
+public:
+    // id is returned as hash function
+    size_t operator()(const ArchStructuralFeatureIndex& asf) const
+    {
+        return std::hash<std::string>{}(std::to_string(asf.hash)+std::to_string(asf.index)+std::to_string(
+                static_cast<int>(asf.feature)));
+    }
 };
 
 struct FloorMatType {

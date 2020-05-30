@@ -16,26 +16,12 @@ public:
 		return a->type == ArchType::WallT;
 	}
 
-	int pnpoly( const std::vector<Vector2f>& points, const Vector2f& test ) {
-		size_t i = 0;
-		size_t j = 0;
-		size_t c = 0;
-		for ( i = 0, j = points.size() - 1; i < points.size(); j = i++ ) {
-			if ( ( ( points[i].y() > test.y() ) != ( points[j].y() > test.y() ) ) &&
-				( test.x() < ( points[j].x() - points[i].x() ) * ( test.y() - points[i].y() ) / ( points[j].y() - points[i].y() ) + points[i].x() ) )
-				c = !c;
-		}
-		return static_cast<int>( c );
-	}
-
 	static bool isPointInside( const ArchStructural* a, const Vector2f& _pos ) {
 		if ( !a->bbox.contains( _pos ) ) return false;
 
 		if ( a->mTriangles2d.size() == 0 ) {
 			return true;
 		} else {
-			//		pnpoly( mPerimeterSegments, _pos ) == 1;
-
 			for ( auto& t : a->mTriangles2d ) {
 				if ( isInsideTriangle( _pos, std::get<0>( t ), std::get<1>( t ), std::get<2>( t ) ) ) {
 					return true;
@@ -46,7 +32,30 @@ public:
 		return false;
 	}
 
-	static Vector3f posForSDV( const ArchStructural* a, bool doomMode ) {
+    static bool isPointNear( const ArchStructural* a, const Vector2f& _pos, float radius ) {
+	    // We squared the circle here because it's faster to compute bbox interesection of 2 boses rather than a sphere and a box
+	    Rect2f squaredCircle = Rect2f{};
+	    squaredCircle.setCenterAndSize(_pos, V2f{radius});
+
+        if ( !a->bbox.contains( _pos ) && !a->bbox.intersect(squaredCircle)) return false;
+
+        if ( a->mTriangles2d.size() == 0 ) {
+            return true;
+        } else {
+            for ( auto& t : a->mTriangles2d ) {
+                if ( isInsideTriangle( _pos, std::get<0>( t ), std::get<1>( t ), std::get<2>( t ) ) ) {
+                    return true;
+                }
+                if ( isNearTriangle( _pos, radius, std::get<0>( t ), std::get<1>( t ), std::get<2>( t ) ) ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    static Vector3f posForSDV( const ArchStructural* a, bool doomMode ) {
 		if ( doomMode ) {
 			Vector3f bc = a->bbox3d.centre();
 			bc.swizzle( 2, 1 );

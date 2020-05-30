@@ -595,3 +595,24 @@ void WallService::translatePoint( WallBSData *w, uint64_t pointIndex, const V2f&
     w->epoints[pointIndex] += offset;
     WallService::update(w);
 }
+
+ArchStructuralFeatureIndex WallService::getNearestFeatureToPoint( const WallBSData *w, const V2f& point, float nearFactor ) {
+    ArchStructuralFeatureIndex ret{};
+
+    for ( auto i = 0u; i < w->epoints.size(); i++ ) {
+        auto ep = w->epoints[i];
+        if ( distance( ep, point ) < nearFactor ) {
+            return {ArchStructuralFeature::ASF_Point, i, w->hash};
+        }
+    }
+
+    for ( auto i = 0u; i < w->epoints.size(); i++ ) {
+        auto ep = w->epoints[i];
+        auto ep1 = w->epoints[cai(i+1, w->epoints.size())];
+        if ( distanceFromLine( point, ep, ep1 ) < nearFactor ) {
+            return {ArchStructuralFeature::ASF_Edge, i, w->hash};
+        }
+    }
+
+    return ret;
+}
