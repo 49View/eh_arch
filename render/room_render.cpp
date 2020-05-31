@@ -24,7 +24,7 @@
 
 namespace RoomRender {
 
-    void IMHouseRender( Renderer &rr, SceneGraph &sg, const RoomBSData *data, const IMHouseRenderSettings& ims ) {
+    void IMHouseRender( Renderer &rr, SceneGraph &sg, const RoomBSData *data, const ArchRenderController& ims ) {
 //        bool drawDebug = fpRenderMode == Use2dDebugRendering::True;
 //        auto color = drawDebug ? Color4f::RANDA1().A(0.5f) : C4f::WHITE.A(0.5f);
 

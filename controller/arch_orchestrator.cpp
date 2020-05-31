@@ -91,7 +91,7 @@ Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( std::shared_ptr<Hou
     return m;
 }
 
-void ArchOrchestrator::showIMHouse( std::shared_ptr<HouseBSData> _houseJson, const IMHouseRenderSettings& ims  ) {
+void ArchOrchestrator::showIMHouse( std::shared_ptr<HouseBSData> _houseJson, const ArchRenderController& ims  ) {
     HouseRender::IMHouseRender(rsg.RR(), sg, _houseJson.get(), ims);
 }
 

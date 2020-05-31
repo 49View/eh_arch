@@ -12,11 +12,11 @@
 
 class SceneGraph;
 class Renderer;
-class IMHouseRenderSettings;
+class ArchRenderController;
 struct DoorBSData;
 struct RDSPreMult;
 
 namespace DoorRender {
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, const IMHouseRenderSettings& ims );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, const ArchRenderController& ims );
     GeomSPContainer make3dGeometry( SceneGraph& sg, const DoorBSData* mData );
 }

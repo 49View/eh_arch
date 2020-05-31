@@ -19,7 +19,7 @@
 
 namespace HouseRender {
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const HouseBSData *data, const IMHouseRenderSettings& ims ) {
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const HouseBSData *data, const ArchRenderController& ims ) {
 
         rr.clearBucket(CommandBufferLimits::UI2dStart);
 

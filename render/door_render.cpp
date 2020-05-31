@@ -30,7 +30,7 @@ namespace DoorRender {
     }
 
     void drawSingleDoor2d( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, DShaderMatrix sm,
-                           const IMHouseRenderSettings& ims ) {
+                           const ArchRenderController& ims ) {
 
         auto color = ims.floorPlanElemColor(C4f::BLACK);
         float windowLineWidth = _lineWidth * 0.2f;
@@ -66,7 +66,7 @@ namespace DoorRender {
 
     void drawDoubleDoor2d();
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, const IMHouseRenderSettings& ims ) {
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, const ArchRenderController& ims ) {
         auto rm = ims.floorPlanShader();
         drawSingleDoor2d(rr, data->us1.middle, data->us2.middle, data->us2.width, rm, ims);
     }

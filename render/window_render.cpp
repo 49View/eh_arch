@@ -18,7 +18,7 @@
 namespace WindowRender {
 
     void
-    drawWindow( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, const IMHouseRenderSettings& ims ) {
+    drawWindow( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, const ArchRenderController& ims ) {
         auto rm = ims.floorPlanShader();
         auto color = ims.floorPlanElemColor(C4f::BLACK);
         float windowLineWidth = _lineWidth * 0.2f;
@@ -39,7 +39,7 @@ namespace WindowRender {
         rr.draw<DLine>(rm, p3, p4, color, lineWidth, false, ims.pm());
     }
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WindowBSData *data, const IMHouseRenderSettings& ims ) {
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WindowBSData *data, const ArchRenderController& ims ) {
         drawWindow(rr, data->us2.middle, data->us1.middle, data->us2.width, ims);
     }
 

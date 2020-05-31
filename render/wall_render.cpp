@@ -20,7 +20,7 @@
 
 namespace WallRender {
 
-    void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const IMHouseRenderSettings& ims ) {
+    void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const ArchRenderController& ims ) {
         auto color = ims.getFillColor(wall->hash, C4f::BLACK);
         rr.draw<DPoly>(sm, wall->mTriangles2d, color, ims.pm());
     }
@@ -42,7 +42,7 @@ namespace WallRender {
 //    }
 
     void drawUShapes2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
-                        const IMHouseRenderSettings& ims ) {
+                        const ArchRenderController& ims ) {
         std::array<Color4f, 3> usc = { Color4f::PASTEL_YELLOW, Color4f::PASTEL_CYAN, Color4f::PASTEL_GREEN };
         for ( const auto& us : wall->mUShapes ) {
             for ( int t = 0; t < 3; t++ ) {
@@ -53,7 +53,7 @@ namespace WallRender {
     }
 
     void drawWallNormals2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
-                            const IMHouseRenderSettings& ims ) {
+                            const ArchRenderController& ims ) {
         auto wps = wall->epoints.size();
         for ( size_t t = 0; t < wps - 1 * !wall->wrapLastPoint; t++ ) {
             auto p1 = wall->epoints[t];
@@ -64,7 +64,7 @@ namespace WallRender {
     }
 
     void drawWallPoints2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
-                           const IMHouseRenderSettings& ims ) {
+                           const ArchRenderController& ims ) {
         for ( auto t = 0u; t < wall->epoints.size(); t++ ) {
             auto p1 = wall->epoints[t];
             ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Point, t, wall->hash };
@@ -77,13 +77,24 @@ namespace WallRender {
         }
     }
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *wall, const IMHouseRenderSettings& ims ) {
+    void drawWallContours2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
+                             const ArchRenderController& ims ) {
+        V2fVector vlist{};
+        for ( const auto& p : wall->epoints ) {
+            vlist.emplace_back(p);
+        }
+        if ( wall->wrapLastPoint ) vlist.emplace_back(wall->epoints[0]);
+        rr.draw<DLine>(vlist, Color4f::PURPLE, width*1.25f, sm, ims.pm());
+    }
+
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *wall, const ArchRenderController& ims ) {
         auto sm = ims.floorPlanShader();
         auto width = ims.floorPlanScaler(0.05f);
         drawWalls2d(rr, wall, sm, ims);
         bool drawDebug = ims.isFloorPlanRenderModeDebug();
         if ( drawDebug ) {
             auto lineWidth = ims.floorPlanScaler(0.01f);
+            drawWallContours2d(rr, wall, lineWidth, sm, ims);
             drawWallNormals2d(rr, wall, lineWidth, sm, ims);
             drawUShapes2d(rr, wall, width, sm, ims);
             drawWallPoints2d(rr, wall, width, sm, ims);

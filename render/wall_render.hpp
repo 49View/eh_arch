@@ -14,12 +14,12 @@
 class SceneGraph;
 class Renderer;
 struct RDSPreMult;
-class IMHouseRenderSettings;
+class ArchRenderController;
 struct WallBSData;
 struct ArchSegment;
 
 namespace WallRender  {
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, const IMHouseRenderSettings& ims );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, const ArchRenderController& ims );
     GeomSPContainer make3dGeometry( SceneGraph& sg, const WallBSData* mWall,
                                     const V3fVectorOfVector& ceilingContours );
 

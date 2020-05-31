@@ -7,7 +7,7 @@
 #include <core/resources/resource_types.hpp>
 #include <eh_arch/models/htypes.hpp>
 
-class IMHouseRenderSettings;
+class ArchRenderController;
 class SceneGraph;
 class Renderer;
 class DShaderMatrix;
@@ -35,7 +35,7 @@ namespace HouseRender {
     Vector4f floorPlanElemColor( FloorPlanRenderMode fpRenderMode );
     float floorPlanScaler( FloorPlanRenderMode fpRenderMode, float value, const Matrix4f& pm );
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const HouseBSData *mData, const IMHouseRenderSettings& ims );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const HouseBSData *mData, const ArchRenderController& ims );
 
     HouseRenderContainer make3dGeometry( SceneGraph& sg, const HouseBSData *mData );
 }

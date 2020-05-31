@@ -10,10 +10,10 @@
 
 struct HouseBSData;
 
-class IMHouseRenderSettings {
+class ArchRenderController {
 public:
-    IMHouseRenderSettings( const RDSPreMult& pm, FloorPlanRenderMode renderMode );
-    IMHouseRenderSettings( FloorPlanRenderMode renderMode );
+    ArchRenderController( const RDSPreMult& pm, FloorPlanRenderMode renderMode );
+    ArchRenderController( FloorPlanRenderMode renderMode );
 
     [[nodiscard]] FloorPlanRenderMode renderMode() const;
     void renderMode( FloorPlanRenderMode rm );
@@ -52,6 +52,7 @@ public:
     }
 
     void moveSelectionList(const V2f& _point, moveSelectionCallback ccf);
+    void resetSelection();
 
 private:
     ArchSelection selection;

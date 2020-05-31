@@ -43,6 +43,8 @@ public:
 
 class ArchSelection {
 public:
+    void clear();
+
     void addToSelectionList( const ArchSelectionElement& _elem ) {
         selection.emplace(_elem);
     }
