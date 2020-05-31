@@ -2,7 +2,7 @@
 // Created by Dado on 20/10/2019.
 //
 
-#include "arch_scene_graph.hpp"
+#include "arch_orchestrator.hpp"
 #include <core/resources/resource_builder.hpp>
 #include <core/math/plane3f.h>
 #include <core/raw_image.h>
@@ -24,7 +24,7 @@
 #include <eh_arch/render/house_render.hpp>
 #include <eh_arch/models/house_service.hpp>
 
-ArchSceneGraph::ArchSceneGraph( SceneGraph& _sg, RenderOrchestrator& _rsg ) : sg(_sg), rsg(_rsg) {
+ArchOrchestrator::ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg ) : sg(_sg), rsg(_rsg) {
 }
 
 namespace HOD { // HighOrderDependency
@@ -79,7 +79,7 @@ namespace HOD { // HighOrderDependency
     }
 }
 
-Matrix4f ArchSceneGraph::calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> _houseJson, float screenRatio, float screenPadding ) {
+Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> _houseJson, float screenRatio, float screenPadding ) {
     auto m = Matrix4f{Matrix4f::IDENTITY};
     float vmax = max(_houseJson->bbox.bottomRight().x(), _houseJson->bbox.bottomRight().y());
     float screenFloorplanRatio = ( 1.0f / screenRatio );
@@ -91,11 +91,11 @@ Matrix4f ArchSceneGraph::calcFloorplanNavigationTransform( std::shared_ptr<House
     return m;
 }
 
-void ArchSceneGraph::showIMHouse( std::shared_ptr<HouseBSData> _houseJson, const IMHouseRenderSettings& ims  ) {
+void ArchOrchestrator::showIMHouse( std::shared_ptr<HouseBSData> _houseJson, const IMHouseRenderSettings& ims  ) {
     HouseRender::IMHouseRender(rsg.RR(), sg, _houseJson.get(), ims);
 }
 
-void ArchSceneGraph::showHouse( std::shared_ptr<HouseBSData> _houseJson, const PostHouseLoadCallback& ccf ) {
+void ArchOrchestrator::show3dHouse( std::shared_ptr<HouseBSData> _houseJson, const PostHouseLoadCallback& ccf ) {
     HOD::resolver<HouseBSData>(sg, _houseJson.get(), [&, ccf, _houseJson]() {
         sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson.get()));
         HouseRender::make3dGeometry(sg, _houseJson.get());
@@ -103,11 +103,11 @@ void ArchSceneGraph::showHouse( std::shared_ptr<HouseBSData> _houseJson, const P
     });
 }
 
-void ArchSceneGraph::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf ) {
+void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf ) {
     Http::get(Url{ "/propertybim/" + _pid }, [this, ccf]( HttpResponeParams params ) {
         auto houseJson = std::make_shared<HouseBSData>(params.bufferString);
         sg.addGenericCallback([&, ccf, houseJson]() {
-            showHouse(houseJson, ccf);
+            show3dHouse(houseJson, ccf);
         } );
     });
 }

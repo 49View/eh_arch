@@ -21,7 +21,7 @@
 #include "../models/house_bsdata.hpp"
 #include "../models/door_service.hpp"
 #include "house_render.hpp"
-#include <eh_arch/render/arch_render_controller.hpp>
+#include <eh_arch/controller/arch_render_controller.hpp>
 
 namespace DoorRender {
 

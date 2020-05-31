@@ -12,7 +12,7 @@
 #include <poly/scene_graph.h>
 #include <graphics/renderer.h>
 
-#include <eh_arch/render/arch_render_controller.hpp>
+#include <eh_arch/controller/arch_render_controller.hpp>
 
 #include "house_render.hpp"
 #include "../models/house_bsdata.hpp"

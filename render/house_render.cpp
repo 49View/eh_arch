@@ -9,7 +9,7 @@
 #include <graphics/ghtypes.hpp>
 #include <graphics/renderer.h>
 
-#include <eh_arch/render/arch_render_controller.hpp>
+#include <eh_arch/controller/arch_render_controller.hpp>
 #include <eh_arch/models/floor_service.hpp>
 #include "wall_render.hpp"
 #include "room_render.hpp"

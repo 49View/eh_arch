@@ -15,11 +15,11 @@ class RenderOrchestrator;
 
 using PostHouseLoadCallback = std::function<void(std::shared_ptr<HouseBSData> houseJson)>;
 
-class ArchSceneGraph {
+class ArchOrchestrator {
 public:
-    explicit ArchSceneGraph( SceneGraph& _sg, RenderOrchestrator& _rsg );
+    explicit ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg );
 
-    void showHouse( std::shared_ptr<HouseBSData>, const PostHouseLoadCallback& ccf = nullptr );
+    void show3dHouse( std::shared_ptr<HouseBSData>, const PostHouseLoadCallback& ccf = nullptr );
     void showIMHouse( std::shared_ptr<HouseBSData>, const IMHouseRenderSettings& ims );
     void loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf = nullptr );
     Matrix4f
