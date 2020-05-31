@@ -589,10 +589,14 @@ void WallService::perimeterFromSegments( const std::vector<std::vector<ArchSegme
     perimeterLength = lPerimeter;
 }
 
-void WallService::translatePoint( WallBSData *w, uint64_t pointIndex, const V2f& offset ) {
+void WallService::movePoint( WallBSData *w, uint64_t pointIndex, const V2f& offset, bool incremental ) {
     if ( w->epoints.size() <= pointIndex ) return;
 
-    w->epoints[pointIndex] += offset;
+    if ( incremental ) {
+        w->epoints[pointIndex] += offset;
+    } else {
+        w->epoints[pointIndex] = offset;
+    }
     WallService::update(w);
 }
 
@@ -608,7 +612,7 @@ ArchStructuralFeatureDescriptor WallService::getNearestFeatureToPoint( const Hou
         for ( auto i = 0u; i < w->epoints.size(); i++ ) {
             auto ep = w->epoints[i];
             if ( distance( ep, point ) < nearFactor ) {
-                return {ArchStructuralFeature::ASF_Point, i, w->hash};
+                return {ArchStructuralFeature::ASF_Point, i, w->hash, {ep}};
             }
         }
 
@@ -616,7 +620,7 @@ ArchStructuralFeatureDescriptor WallService::getNearestFeatureToPoint( const Hou
             auto ep = w->epoints[i];
             auto ep1 = w->epoints[cai(i+1, w->epoints.size())];
             if ( distanceFromLine( point, ep, ep1 ) < nearFactor ) {
-                return {ArchStructuralFeature::ASF_Edge, i, w->hash};
+                return {ArchStructuralFeature::ASF_Edge, i, w->hash, {ep, ep1} };
             }
         }
     }

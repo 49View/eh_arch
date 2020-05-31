@@ -55,10 +55,3 @@ void IMHouseRenderSettings::pm( const RDSPreMult& pm ) {
 void IMHouseRenderSettings::moveSelectionList( const V2f& _point, moveSelectionCallback ccf ) {
     selection.moveSelectionList( _point, ccf );
 }
-
-void ArchSelection::moveSelectionList( const V2f& _point, moveSelectionCallback ccf ) {
-    for ( const auto& s1 : selection ) {
-        auto offset = s1.initialSelectedPoint - _point;
-        ccf( s1.asf, offset );
-    }
-}

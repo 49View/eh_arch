@@ -54,7 +54,7 @@ namespace WallService {
     void updateUShapes( WallBSData *w );
     void ushapesReconciliation( WallBSData *w );
     void removeUnPairedUShapes( WallBSData *w );
-    void translatePoint( WallBSData *w, uint64_t pointIndex, const V2f& offset );
+    void movePoint( WallBSData *w, uint64_t pointIndex, const V2f& offset, bool incremental );
     void makeTriangles2d( WallBSData *w );
 
     // Calcs

@@ -31,6 +31,9 @@ struct ArchStructuralFeatureDescriptor {
                                                                                                    index(index),
                                                                                                    hash(hash) {}
 
+    ArchStructuralFeatureDescriptor( ArchStructuralFeature feature, int64_t index, HashEH hash,
+                                     const V2fVector& pointOfInterests ) : feature(feature), index(index), hash(hash),
+                                                                           pointOfInterests(pointOfInterests) {}
     bool operator==( const ArchStructuralFeatureDescriptor& rhs ) const {
         return std::tie(feature, index, hash) == std::tie(rhs.feature, rhs.index, rhs.hash);
     }
@@ -41,6 +44,7 @@ struct ArchStructuralFeatureDescriptor {
     ArchStructuralFeature feature = ArchStructuralFeature::ASF_None;
     int64_t index = -1;
     HashEH hash = 0;
+    V2fVector pointOfInterests{};
 };
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
