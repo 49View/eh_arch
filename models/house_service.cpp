@@ -245,7 +245,7 @@ std::shared_ptr<WallBSData> HouseService::isPointInsideWall( std::shared_ptr<Hou
     return found;
 }
 
-std::shared_ptr<WallBSData> HouseService::isPointNearWall( std::shared_ptr<HouseBSData> _house, const Vector3f& point, float radius ) {
+std::shared_ptr<WallBSData> HouseService::isPointNearWall( const HouseBSData* _house, const Vector3f& point, float radius ) {
     std::shared_ptr<WallBSData> found;
 
     for ( const auto& f : _house->mFloors ) {
@@ -326,4 +326,15 @@ void HouseService::guessFittings( HouseBSData *house, FurnitureMapStorage &furns
     for ( auto &f : house->mFloors ) {
         FloorService::guessFittings( f.get(), furns );
     }
+}
+
+WallBSData* HouseService::findWall( HouseBSData *house, HashEH hash ) {
+    for ( auto &f : house->mFloors ) {
+        for ( auto &w : f->walls ) {
+            if ( w->hash == hash ) {
+                return w.get();
+            }
+        }
+    }
+    return nullptr;
 }

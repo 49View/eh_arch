@@ -24,6 +24,25 @@
 static const uint64_t SHouseJSONVersion = 1020;
 static const float defaltToBeOverwritten = 7543859749023.0f;
 
+struct ArchStructuralFeatureDescriptor {
+    ArchStructuralFeatureDescriptor() = default;
+    explicit ArchStructuralFeatureDescriptor( HashEH hash ) : hash(hash) {}
+    ArchStructuralFeatureDescriptor( ArchStructuralFeature feature, int64_t index, HashEH hash ) : feature(feature),
+                                                                                                   index(index),
+                                                                                                   hash(hash) {}
+
+    bool operator==( const ArchStructuralFeatureDescriptor& rhs ) const {
+        return std::tie(feature, index, hash) == std::tie(rhs.feature, rhs.index, rhs.hash);
+    }
+    bool operator!=( const ArchStructuralFeatureDescriptor& rhs ) const {
+        return !( rhs == *this );
+    }
+
+    ArchStructuralFeature feature = ArchStructuralFeature::ASF_None;
+    int64_t index = -1;
+    HashEH hash = 0;
+};
+
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
 
 JSONDATA(HouseSourceData, floorPlanSize, floorPlanSourceName)
@@ -35,7 +54,7 @@ JSONDATA(HouseSourceData, floorPlanSize, floorPlanSourceName)
 
 struct ArchBase {
     MAKE_POLYMORPHIC
-    int64_t hash = ++globalHash;
+    HashEH hash = HashInc();
     uint64_t type = ArchType::GenericT; // ArchType type;
 };
 

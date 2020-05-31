@@ -24,9 +24,7 @@
 #include <eh_arch/render/house_render.hpp>
 #include <eh_arch/models/house_service.hpp>
 
-ArchSceneGraph::ArchSceneGraph( SceneGraph& _sg, RenderOrchestrator& _rsg, FurnitureMapStorage& _furns ) : sg(_sg),
-                                                                                                           rsg(_rsg),
-                                                                                                           furns(_furns) {
+ArchSceneGraph::ArchSceneGraph( SceneGraph& _sg, RenderOrchestrator& _rsg ) : sg(_sg), rsg(_rsg) {
 }
 
 namespace HOD { // HighOrderDependency
@@ -98,18 +96,17 @@ void ArchSceneGraph::showIMHouse( std::shared_ptr<HouseBSData> _houseJson, const
 }
 
 void ArchSceneGraph::showHouse( std::shared_ptr<HouseBSData> _houseJson, const PostHouseLoadCallback& ccf ) {
-    houseJson = _houseJson;
-    HOD::resolver<HouseBSData>(sg, houseJson.get(), [&, ccf]() {
-        sg.loadCollisionMesh(HouseService::createCollisionMesh(houseJson.get()));
-        HouseRender::make3dGeometry(sg, houseJson.get());
-        if ( ccf ) ccf(houseJson);
+    HOD::resolver<HouseBSData>(sg, _houseJson.get(), [&, ccf, _houseJson]() {
+        sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson.get()));
+        HouseRender::make3dGeometry(sg, _houseJson.get());
+        if ( ccf ) ccf(_houseJson);
     });
 }
 
 void ArchSceneGraph::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf ) {
     Http::get(Url{ "/propertybim/" + _pid }, [this, ccf]( HttpResponeParams params ) {
-        houseJson = std::make_shared<HouseBSData>(params.bufferString);
-        sg.addGenericCallback([&, ccf]() {
+        auto houseJson = std::make_shared<HouseBSData>(params.bufferString);
+        sg.addGenericCallback([&, ccf, houseJson]() {
             showHouse(houseJson, ccf);
         } );
     });

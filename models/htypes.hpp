@@ -47,34 +47,6 @@ enum class ArchStructuralFeature {
     ASF_Box
 };
 
-struct ArchStructuralFeatureIndex {
-    ArchStructuralFeatureIndex() = default;
-    ArchStructuralFeatureIndex( ArchStructuralFeature feature, int64_t index, int64_t hash ) : feature(feature),
-                                                                                               index(index),
-                                                                                               hash(hash) {}
-
-    bool operator==( const ArchStructuralFeatureIndex& rhs ) const {
-        return std::tie(feature, index, hash) == std::tie(rhs.feature, rhs.index, rhs.hash);
-    }
-    bool operator!=( const ArchStructuralFeatureIndex& rhs ) const {
-        return !( rhs == *this );
-    }
-
-    ArchStructuralFeature feature = ArchStructuralFeature::ASF_None;
-    int64_t index = -1;
-    int64_t hash = 0;
-};
-
-class ArchStructuralFeatureIndexHashFunctor {
-public:
-    // id is returned as hash function
-    size_t operator()(const ArchStructuralFeatureIndex& asf) const
-    {
-        return std::hash<std::string>{}(std::to_string(asf.hash)+std::to_string(asf.index)+std::to_string(
-                static_cast<int>(asf.feature)));
-    }
-};
-
 struct FloorMatType {
 	static const uint64_t Wood = 0;
 	static const uint64_t Tiles = 1;

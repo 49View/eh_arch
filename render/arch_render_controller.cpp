@@ -52,10 +52,13 @@ void IMHouseRenderSettings::pm( const RDSPreMult& pm ) {
     mPm = pm;
 }
 
-void IMHouseRenderSettings::addToSelectionList( int64_t hash ) {
-    selection.emplace(hash);
+void IMHouseRenderSettings::moveSelectionList( const V2f& _point, moveSelectionCallback ccf ) {
+    selection.moveSelectionList( _point, ccf );
 }
 
-void IMHouseRenderSettings::addToFeatureSelectionList( const ArchStructuralFeatureIndex& asfi ) {
-    featuresSelection.emplace( asfi );
+void ArchSelection::moveSelectionList( const V2f& _point, moveSelectionCallback ccf ) {
+    for ( const auto& s1 : selection ) {
+        auto offset = s1.initialSelectedPoint - _point;
+        ccf( s1.asf, offset );
+    }
 }

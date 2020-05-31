@@ -17,7 +17,7 @@ using PostHouseLoadCallback = std::function<void(std::shared_ptr<HouseBSData> ho
 
 class ArchSceneGraph {
 public:
-    explicit ArchSceneGraph( SceneGraph& _sg, RenderOrchestrator& _rsg, FurnitureMapStorage& _furns );
+    explicit ArchSceneGraph( SceneGraph& _sg, RenderOrchestrator& _rsg );
 
     void showHouse( std::shared_ptr<HouseBSData>, const PostHouseLoadCallback& ccf = nullptr );
     void showIMHouse( std::shared_ptr<HouseBSData>, const IMHouseRenderSettings& ims );
@@ -25,12 +25,7 @@ public:
     Matrix4f
     calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> houseJson, float screenRatio, float screenPadding );
 
-    FurnitureMapStorage& Furns() { return furns; }
-
 protected:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
-    FurnitureMapStorage& furns;
-
-    std::shared_ptr<HouseBSData> houseJson;
 };

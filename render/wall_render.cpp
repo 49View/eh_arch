@@ -67,7 +67,7 @@ namespace WallRender {
                            const IMHouseRenderSettings& ims ) {
         for ( auto t = 0u; t < wall->epoints.size(); t++ ) {
             auto p1 = wall->epoints[t];
-            ArchStructuralFeatureIndex asf{ ArchStructuralFeature::ASF_Point, t, wall->hash };
+            ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Point, t, wall->hash };
             auto color = ims.getFillColor(asf, C4f::RED);
             float radius = 0.03f;
             if ( color != C4f::RED ) {
