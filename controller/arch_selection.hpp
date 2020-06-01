@@ -10,6 +10,7 @@
 
 using moveSelectionCallback = std::function<void( const ArchStructuralFeatureDescriptor&, const V2f& )>;
 using splitSelectionCallback = std::function<void( const ArchStructuralFeatureDescriptor&, const V2f& )>;
+using deleteSelectionCallback = std::function<void( const ArchStructuralFeatureDescriptor& )>;
 
 struct ArchSelectionElement {
     explicit ArchSelectionElement( HashEH elemHash ) {
@@ -73,6 +74,7 @@ public:
 
     void moveSelectionList( const V2f& _point, moveSelectionCallback ccf );
     void splitFirstEdgeOnSelectionList( splitSelectionCallback ccf );
+    void deleteElementsOnSelectionList( deleteSelectionCallback ccf );
 
 private:
     std::unordered_set<ArchSelectionElement, ArchStructuralFeatureDescriptorHashFunctor> selection;

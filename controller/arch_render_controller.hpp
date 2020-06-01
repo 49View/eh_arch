@@ -54,6 +54,7 @@ public:
     [[nodiscard]] ArchStructuralFeature singleSelectedFeature() const;
     void moveSelectionList(const V2f& _point, moveSelectionCallback ccf);
     void splitFirstEdgeOnSelectionList( splitSelectionCallback ccf );
+    void deleteElementsOnSelectionList( deleteSelectionCallback ccf );
     void resetSelection();
     size_t selectionCount() const;
 

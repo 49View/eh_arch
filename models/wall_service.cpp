@@ -600,6 +600,25 @@ void WallService::movePoint( WallBSData *w, uint64_t pointIndex, const V2f& offs
     WallService::update(w);
 }
 
+void WallService::deletePoint( WallBSData *w, uint64_t pointIndex ) {
+    if ( w->epoints.size() <= pointIndex ) return;
+    w->epoints.erase(w->epoints.begin() + pointIndex);
+    WallService::update(w);
+}
+
+void WallService::deleteEdge( WallBSData *w, uint64_t pointIndex ) {
+    auto epsize = w->epoints.size();
+    if ( pointIndex+1 <= epsize && epsize < 5 ) return;
+
+    if ( pointIndex+1 == epsize ) {
+        w->epoints.erase(w->epoints.begin() + pointIndex);
+        w->epoints.erase(w->epoints.begin());
+    } else {
+        w->epoints.erase(w->epoints.begin() + pointIndex, w->epoints.begin() + pointIndex + 1);
+    }
+    WallService::update(w);
+}
+
 void WallService::addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const V2f& point ) {
     if ( w->epoints.size() <= pointIndex ) return;
 
@@ -614,7 +633,7 @@ void WallService::addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const 
     WallService::update(w);
 }
 
-void WallService::movePoint( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& offset,
+void WallService::moveFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& offset,
                              bool incremental ) {
     WallBSData *w = HouseService::findWall(houseJson, asf.hash);
     if ( asf.feature == ArchStructuralFeature::ASF_Point ) {
@@ -624,6 +643,16 @@ void WallService::movePoint( HouseBSData *houseJson, const ArchStructuralFeature
         for ( auto t = 0u; t < asf.pointOfInterests.size(); t++ ) {
             WallService::movePoint(w, asf.index + t, asf.pointOfInterests[t] + offset, incremental);
         }
+    }
+}
+
+void WallService::deleteFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf ) {
+    WallBSData *w = HouseService::findWall(houseJson, asf.hash);
+    if ( asf.feature == ArchStructuralFeature::ASF_Point ) {
+        WallService::deletePoint(w, asf.index);
+    }
+    if ( asf.feature == ArchStructuralFeature::ASF_Edge ) {
+        WallService::deleteEdge(w, asf.index);
     }
 }
 

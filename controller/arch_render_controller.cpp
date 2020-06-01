@@ -60,6 +60,10 @@ void ArchRenderController::splitFirstEdgeOnSelectionList( splitSelectionCallback
     selection.splitFirstEdgeOnSelectionList( ccf );
 }
 
+void ArchRenderController::deleteElementsOnSelectionList( deleteSelectionCallback ccf ) {
+    selection.deleteElementsOnSelectionList( ccf );
+}
+
 void ArchRenderController::resetSelection() {
     selection.clear();
 }
