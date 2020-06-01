@@ -659,6 +659,9 @@ void FloorService::rescale( FloorBSData *f, float _scale ) {
     for ( auto& v : f->mPerimeterSegments ) {
         v *= _scale;
     }
+    for ( auto& v : f->perimeterArchSegments ) {
+        v.scale(_scale);
+    }
 
     for ( auto& i : f->windows ) WindowService::rescale( i.get(), _scale );
     for ( auto& i : f->doors ) DoorService::rescale( i.get(), _scale );

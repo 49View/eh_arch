@@ -140,6 +140,12 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
         return !( rhs == *this );
     }
 
+    void scale( float _factor ) {
+        p1 *= _factor;
+        p2 *= _factor;
+        middle = lerp(0.5f, p1, p2);
+    }
+
     [[nodiscard]] float length() const {
         return distance(p1, p2);
     }
