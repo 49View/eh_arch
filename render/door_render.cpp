@@ -29,8 +29,11 @@ namespace DoorRender {
         return index >= 2;
     }
 
-    void drawSingleDoor2d( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, DShaderMatrix sm,
-                           const ArchRenderController& ims ) {
+    void drawSingleDoor2d( Renderer& rr, const DoorBSData *door, DShaderMatrix sm, const ArchRenderController& ims ) {
+
+        const V2f& _p1 = door->us1.middle;
+        const V2f& _p2 = door->us2.middle;
+        float _lineWidth = door->us2.width;
 
         auto color = ims.floorPlanElemColor(C4f::BLACK);
         float windowLineWidth = _lineWidth * 0.2f;
@@ -61,14 +64,14 @@ namespace DoorRender {
         }
 
         vLists.emplace_back(p1);
-        rr.draw<DLine>(vLists, color, lineWidth, false, sm, ims.pm());
+        rr.draw<DLine>(vLists, color, lineWidth, false, sm, ims.pm(), door->hashFeature("singleDoor2d", 0));
     }
 
     void drawDoubleDoor2d();
 
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, const ArchRenderController& ims ) {
         auto rm = ims.floorPlanShader();
-        drawSingleDoor2d(rr, data->us1.middle, data->us2.middle, data->us2.width, rm, ims);
+        drawSingleDoor2d(rr, data, rm, ims);
     }
 
     std::shared_ptr<Profile> makeEnglishDoorProfile( const Vector2f& vv2fs ) {

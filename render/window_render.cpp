@@ -17,8 +17,10 @@
 
 namespace WindowRender {
 
-    void
-    drawWindow( Renderer& rr, const V2f& _p1, const V2f& _p2, float _lineWidth, const ArchRenderController& ims ) {
+    void drawDefaultWindow( Renderer& rr, const WindowBSData *data, const ArchRenderController& ims ) {
+        const V2f& _p1 = data->us2.middle;
+        const V2f& _p2 = data->us1.middle;
+        float _lineWidth = data->us2.width;
         auto rm = ims.floorPlanShader();
         auto color = ims.floorPlanElemColor(C4f::BLACK);
         float windowLineWidth = _lineWidth * 0.2f;
@@ -28,19 +30,19 @@ namespace WindowRender {
 
         auto lineWidth = ims.floorPlanScaler(_lineWidth * 0.05f);
 
-        rr.draw<DLine>(rm, _p1, _p2, color, lineWidth, false, ims.pm());
+        rr.draw<DLine>(rm, _p1, _p2, color, lineWidth, false, ims.pm(), data->hashFeature("line", 0));
         V2f vn = normalize(_p1 - _p2);
         auto slope = rotate90(vn);
         auto p1 = _p1 + ( slope * windowLineWidthOffset );
         auto p2 = _p2 + ( slope * windowLineWidthOffset );
-        rr.draw<DLine>(rm, p1, p2, color, lineWidth, false, ims.pm());
+        rr.draw<DLine>(rm, p1, p2, color, lineWidth, false, ims.pm(), data->hashFeature("line", 1));
         auto p3 = _p1 + ( slope * -windowLineWidthOffset );
         auto p4 = _p2 + ( slope * -windowLineWidthOffset );
-        rr.draw<DLine>(rm, p3, p4, color, lineWidth, false, ims.pm());
+        rr.draw<DLine>(rm, p3, p4, color, lineWidth, false, ims.pm(), data->hashFeature("line", 2));
     }
 
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const WindowBSData *data, const ArchRenderController& ims ) {
-        drawWindow(rr, data->us2.middle, data->us1.middle, data->us2.width, ims);
+        drawDefaultWindow(rr, data, ims);
     }
 
     // [END] 2D

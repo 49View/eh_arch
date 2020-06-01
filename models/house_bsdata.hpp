@@ -37,6 +37,11 @@ struct ArchBase {
     MAKE_POLYMORPHIC
     HashEH hash = HashInc();
     uint64_t type = ArchType::GenericT; // ArchType type;
+
+    template <typename T>
+    [[nodiscard]] std::string hashFeature( const std::string& _base, T _sf ) const {
+        return std::to_string(hash) + _base + std::to_string(_sf);
+    }
 };
 
 using SequencePart = int64_t;

@@ -41,16 +41,17 @@ namespace HouseRender {
             float padding = 0.01f;
             auto houseRect = Rect2f{ 0.0f, 0.0f, data->bbox.bottomRight().x() + padding,
                                      data->bbox.bottomRight().y() + padding };
-            rr.draw<DPoly>(rm, houseRect.pointscw(), C4f::WHITE.A(.5f), ims.pm());
+            rr.draw<DPoly>(rm, houseRect.pointscw(), C4f::WHITE.A(.5f), ims.pm(), "floorplanFlatPoly");
         } else {
             // 3)
-            rr.draw<DRect>(data->bbox, C4f::WHITE.A(.3f), RDSRectAxis::XZ);
+            rr.draw<DRect>(data->bbox, C4f::WHITE.A(.3f), RDSRectAxis::XZ, "floorplanImageFlat");
         }
 
         for ( const auto& f : data->mFloors ) {
             if ( drawDebug ) {
+                int ousc = 0;
                 for ( const auto& seg : f->orphanedUShapes ) {
-                    rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, rm, 0.1f, ims.pm());
+                    rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, rm, 0.075f, ims.pm(), seg.hashFeature("orphanedUshape", ousc++));
                 }
             }
 

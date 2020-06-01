@@ -36,15 +36,17 @@ namespace RoomRender {
         auto lineWidth = ims.floorPlanScaler(0.0075f);
 
         if ( !RoomService::isGeneric( data )) {
+            auto roomName = RoomService::roomNames( data );
             rr.draw<DText2d>(
-                    FDS{ RoomService::roomNames( data ), sg.FM().get( S::DEFAULT_FONT ).get(), data->bbox.centreLeft(),
-                         .4f }, C4f::BLACK, ims.pm() );
+                    FDS{ roomName, sg.FM().get( S::DEFAULT_FONT ).get(), data->bbox.centreLeft(),
+                         .4f }, C4f::BLACK, ims.pm(), data->hashFeature(roomName, 0) );
         }
 
+        int ffc = 0;
         for ( const auto &ff : data->mFittedFurniture ) {
             Matrix4f mt{ ff.position3d * V3f::MASK_Y_OUT, ff.rotation, ff.size };
             mt.mult( ims.pm()() );
-            rr.draw<DLine>( sg.PL( ff.symbolRef ), C4f::BLACK, RDSPreMult( mt ), rm, lineWidth );
+            rr.draw<DLine>( sg.PL( ff.symbolRef ), C4f::BLACK, RDSPreMult( mt ), rm, lineWidth, data->hashFeature(ff.symbolRef, ffc++) );
 
         }
     }
