@@ -10,6 +10,8 @@
 
 #include "house_bsdata.hpp"
 
+class ArchStructuralFeatureDescriptor;
+
 namespace WallService {
     std::shared_ptr<WallBSData> createWall( const std::vector<Vector2f>& epts, float _height,
                                             WallLastPointWrapT wlpw = WallLastPointWrap::Yes,
@@ -54,7 +56,10 @@ namespace WallService {
     void updateUShapes( WallBSData *w );
     void ushapesReconciliation( WallBSData *w );
     void removeUnPairedUShapes( WallBSData *w );
+    void addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const V2f& point );
     void movePoint( WallBSData *w, uint64_t pointIndex, const V2f& offset, bool incremental );
+    void movePoint( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& offset, bool incremental );
+    void splitEdgeAndAddPointInTheMiddle( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& newPoint );
     void makeTriangles2d( WallBSData *w );
 
     // Calcs

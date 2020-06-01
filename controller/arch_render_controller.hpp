@@ -51,8 +51,11 @@ public:
         return getFillColor(elem, c1, c1);
     }
 
+    [[nodiscard]] ArchStructuralFeature singleSelectedFeature() const;
     void moveSelectionList(const V2f& _point, moveSelectionCallback ccf);
+    void splitFirstEdgeOnSelectionList( splitSelectionCallback ccf );
     void resetSelection();
+    size_t selectionCount() const;
 
 private:
     ArchSelection selection;

@@ -41,14 +41,14 @@ namespace WallRender {
 //        }
 //    }
 
-    void drawUShapes2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
+    void drawUShapes2d( Renderer& rr, const WallBSData *wall, float lineWidth, DShaderMatrix sm,
                         const ArchRenderController& ims ) {
-        std::array<Color4f, 3> usc = { Color4f::PASTEL_YELLOW, Color4f::PASTEL_CYAN, Color4f::PASTEL_GREEN };
+//        std::array<Color4f, 3> usc = { Color4f::PASTEL_YELLOW, Color4f::PASTEL_CYAN, Color4f::PASTEL_GREEN };
         for ( const auto& us : wall->mUShapes ) {
-            for ( int t = 0; t < 3; t++ ) {
-                rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], width * 0.2f, sm, ims.pm());
-            }
-            rr.draw<DCircleFilled>(us.middle, Color4f::DARK_BLUE, 0.025f, sm, ims.pm());
+//            for ( int t = 0; t < 3; t++ ) {
+//                rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], lineWidth, sm, ims.pm());
+//            }
+            rr.draw<DCircleFilled>(us.middle, Color4f::DARK_BLUE, 0.035f, sm, ims.pm());
         }
     }
 
@@ -69,22 +69,20 @@ namespace WallRender {
             auto p1 = wall->epoints[t];
             ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Point, t, wall->hash };
             auto color = ims.getFillColor(asf, C4f::RED);
-            float radius = 0.03f;
-            if ( color != C4f::RED ) {
-                radius *= 2.0f;
-            }
-            rr.draw<DCircleFilled>(p1, color, radius, sm, ims.pm());
+            rr.draw<DCircleFilled>(p1, color, width, sm, ims.pm());
         }
     }
 
     void drawWallContours2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
                              const ArchRenderController& ims ) {
-        V2fVector vlist{};
-        for ( const auto& p : wall->epoints ) {
-            vlist.emplace_back(p);
+        for ( auto t = 0u; t < wall->epoints.size(); t++ ) {
+            auto p1 = wall->epoints[t];
+            auto p2 = wall->epoints[cai(t+1, wall->epoints.size())];
+            ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Edge, t, wall->hash };
+            auto color = ims.getFillColor(asf, Color4f::PURPLE);
+            rr.draw<DLine>(p1, p2, color, width*3.f, sm, ims.pm());
         }
-        if ( wall->wrapLastPoint ) vlist.emplace_back(wall->epoints[0]);
-        rr.draw<DLine>(vlist, Color4f::PURPLE, width*1.25f, sm, ims.pm());
+//        if ( wall->wrapLastPoint ) vlist.emplace_back(wall->epoints[0]);
     }
 
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *wall, const ArchRenderController& ims ) {
@@ -96,8 +94,8 @@ namespace WallRender {
             auto lineWidth = ims.floorPlanScaler(0.01f);
             drawWallContours2d(rr, wall, lineWidth, sm, ims);
             drawWallNormals2d(rr, wall, lineWidth, sm, ims);
-            drawUShapes2d(rr, wall, width, sm, ims);
-            drawWallPoints2d(rr, wall, width, sm, ims);
+            drawUShapes2d(rr, wall, lineWidth*0.5f, sm, ims);
+            drawWallPoints2d(rr, wall, width*0.5f, sm, ims);
         }
     }
 

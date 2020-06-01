@@ -2,6 +2,41 @@
 
 #include "house_bsdata.hpp"
 
+struct ArchStructuralFeatureDescriptor {
+    ArchStructuralFeatureDescriptor() = default;
+    explicit ArchStructuralFeatureDescriptor( HashEH hash ) : hash(hash) {}
+    ArchStructuralFeatureDescriptor( ArchStructuralFeature feature, int64_t index, HashEH hash ) : feature(feature),
+                                                                                                   index(index),
+                                                                                                   hash(hash) {}
+
+    ArchStructuralFeatureDescriptor( ArchStructuralFeature feature, int64_t index, HashEH hash,
+                                     const V2fVector& pointOfInterests ) : feature(feature), index(index), hash(hash),
+                                                                           pointOfInterests(pointOfInterests) {}
+
+    ArchStructuralFeatureDescriptor( ArchStructuralFeature feature, int64_t index, HashEH hash,
+                                     const V2fVector& pois, const V2f& nd ) : feature(feature),
+                                                                              index(index),
+                                                                              hash(hash),
+                                                                              pointOfInterests(pois),
+                                                                              normalDirection(nd) {}
+
+    bool operator==( const ArchStructuralFeatureDescriptor& rhs ) const {
+        return std::tie(feature, index, hash) == std::tie(rhs.feature, rhs.index, rhs.hash);
+    }
+    bool operator!=( const ArchStructuralFeatureDescriptor& rhs ) const {
+        return !( rhs == *this );
+    }
+
+    ArchStructuralFeature feature = ArchStructuralFeature::ASF_None;
+    int64_t index = -1;
+    HashEH hash = 0;
+    float distanceToNearestFeature = 0.0f;
+    V2fVector pointOfInterests{};
+    V2f normalDirection{ V2fc::ZERO };
+};
+
+using ASFD = ArchStructuralFeatureDescriptor;
+
 class ArchStructuralService {
 public:
 	static bool typeIsiPoint( const ArchStructural* a ) {

@@ -6,9 +6,10 @@
 
 #include <functional>
 #include <core/util.h>
-#include <eh_arch/models/house_bsdata.hpp>
+#include <eh_arch/models/arch_structural_service.hpp>
 
 using moveSelectionCallback = std::function<void( const ArchStructuralFeatureDescriptor&, const V2f& )>;
+using splitSelectionCallback = std::function<void( const ArchStructuralFeatureDescriptor&, const V2f& )>;
 
 struct ArchSelectionElement {
     explicit ArchSelectionElement( HashEH elemHash ) {
@@ -44,6 +45,8 @@ public:
 class ArchSelection {
 public:
     void clear();
+    [[nodiscard]] size_t count() const;
+    [[nodiscard]] ArchStructuralFeature singleSelectedFeature() const;
 
     void addToSelectionList( const ArchSelectionElement& _elem ) {
         selection.emplace(_elem);
@@ -69,6 +72,7 @@ public:
     }
 
     void moveSelectionList( const V2f& _point, moveSelectionCallback ccf );
+    void splitFirstEdgeOnSelectionList( splitSelectionCallback ccf );
 
 private:
     std::unordered_set<ArchSelectionElement, ArchStructuralFeatureDescriptorHashFunctor> selection;

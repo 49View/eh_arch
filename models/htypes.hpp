@@ -47,6 +47,8 @@ enum class ArchStructuralFeature {
     ASF_Box
 };
 
+using ASF = ArchStructuralFeature;
+
 struct FloorMatType {
 	static const uint64_t Wood = 0;
 	static const uint64_t Tiles = 1;

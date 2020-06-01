@@ -56,6 +56,18 @@ void ArchRenderController::moveSelectionList( const V2f& _point, moveSelectionCa
     selection.moveSelectionList( _point, ccf );
 }
 
+void ArchRenderController::splitFirstEdgeOnSelectionList( splitSelectionCallback ccf ) {
+    selection.splitFirstEdgeOnSelectionList( ccf );
+}
+
 void ArchRenderController::resetSelection() {
     selection.clear();
+}
+
+size_t ArchRenderController::selectionCount() const {
+    return selection.count();
+}
+
+ArchStructuralFeature ArchRenderController::singleSelectedFeature() const {
+    return selection.singleSelectedFeature();
 }
