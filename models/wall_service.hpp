@@ -42,6 +42,7 @@ namespace WallService {
     QuadVector3fList vertsForWallAt( const WallBSData *w, int t, const std::vector<std::vector<Vector3f>>& cd );
     bool checkUShapeIndexStartIsDoorOrWindow( const WallBSData *w, size_t index );
 
+    bool isWindowOrDoorPart( const WallBSData* w );
     void addToArchSegment( const WallBSData *w, int32_t floorNumber, int32_t wallNumber, std::vector<ArchSegment>& ws );
     void addToArchSegmentInternal( const WallBSData *w, int32_t floorNumber, int32_t wallNumber,
                                    std::vector<ArchSegment>& ws );

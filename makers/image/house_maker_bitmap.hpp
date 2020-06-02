@@ -36,7 +36,7 @@ struct HMBScores {
 };
 
 JSONDATA(HMBBSData, filename, sourceGuassianSigma, sourceGuassianBeta, sourceGuassian, sourceContrast, sourceBrightness,
-         minBinThreshold, maxBinThreshold, sourceSharpen, pixelCM, pixel1CM, medianPCM, maxUShapeLengthRatio,
+         minBinThreshold, maxBinThreshold, sourceSharpen, rescaleFactor, maxUShapeLengthRatio,
          minPerimeterLength, pixelCMFromOCR)
 
     std::string filename{};
@@ -49,44 +49,12 @@ JSONDATA(HMBBSData, filename, sourceGuassianSigma, sourceGuassianBeta, sourceGua
     float maxBinThreshold = 255.0f;
     float sourceBrightness = 30.0f;
     float sourceSharpen = 0.0f;
-    float pixelCM = 0.01f;
-    float pixel1CM = 100.0f;
-    float medianPCM = 0.0f;
+    float rescaleFactor = 0.01f; // This is the default value for a "normal" floorplan of 1000x1000px in which 1px = 1cm
     float maxUShapeLengthRatio = 1.75f;
     float minPerimeterLength = 1.2f;
     std::vector<float> pixelCMFromOCR;
 
     HMBBSData( const std::string& filename, const RawImage& image ) : filename(filename), image(image) {}
-
-    static constexpr float defaultPixelCMValue = 0.01f;
-
-    void resetPCM() {
-        pixelCM = defaultPixelCMValue;
-        pixel1CM = 1.0f / defaultPixelCMValue;
-        medianPCM = 0.0f;
-    }
-
-    void PixelCM( float val ) {
-        pixelCM = val;
-        pixel1CM = 1.0f / pixelCM;
-    }
-
-    [[nodiscard]] float PixelCM() const {
-        return pixelCM;
-    }
-
-    [[nodiscard]] float Pixel1CM() const {
-        return pixel1CM;
-    }
-
-    static constexpr float defaultPixelCM() {
-        return defaultPixelCMValue;
-    }
-
-    static constexpr float defaultPixel1CM() {
-        return 1.0f / defaultPixelCMValue;
-    }
-
 };
 
 struct RoomOCR {
@@ -115,4 +83,5 @@ namespace HouseMakerBitmap {
     std::shared_ptr<HouseBSData> makeEmpty( HMBBSData &bsdata );
     std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData );
     std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData, const SourceImages& sourceImages );
+    std::shared_ptr<HouseBSData> makeFromWalls( const V2fVectorOfVector& wallPoints, HMBBSData &bsdata, const SourceImages& sourceImages );
 };

@@ -2,6 +2,8 @@
 
 #include "house_bsdata.hpp"
 
+float metersToCentimeters(float valueInMeter);
+
 struct ArchStructuralFeatureDescriptor {
     ArchStructuralFeatureDescriptor() = default;
     explicit ArchStructuralFeatureDescriptor( HashEH hash ) : hash(hash) {}

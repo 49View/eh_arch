@@ -195,7 +195,8 @@ namespace RoomService {
     }
 
     float middleHeightFromObject( RoomBSData *r, FittedFurniture& base, FittedFurniture& dec ) {
-        return ( ( r->height - r->mBBoxCoving.height() * 0.01f - base.size.y() - dec.size.y() ) / 2.0f );
+        constexpr float sensibleMaxCovingHeight = 0.15f;
+        return ( ( r->height - sensibleMaxCovingHeight - base.size.y() - dec.size.y() ) / 2.0f );
     }
 
     const ArchSegment *getWallSegmentFor( RoomBSData *r, const WSLO wslo, uint32_t _exactIndex ) {

@@ -59,3 +59,7 @@
 //    }
 //    return false;
 //}
+
+float metersToCentimeters(float valueInMeter) {
+    return valueInMeter*0.01f;
+}

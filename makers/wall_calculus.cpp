@@ -89,7 +89,7 @@ void addFloorRectIfBigEnough( const JMATH::Rect2f& candidate, float fullscreenAr
     }
 }
 
-std::vector<JMATH::Rect2f> getFloorplanRects( const cv::Mat& frame, const float scale ) {
+std::vector<JMATH::Rect2f> getFloorplanRects( const cv::Mat& frame ) {
     std::vector<JMATH::Rect2f> rects;
     std::vector<int> emptyCols;
     std::vector<int> emptyRows;
@@ -104,7 +104,7 @@ std::vector<JMATH::Rect2f> getFloorplanRects( const cv::Mat& frame, const float 
 
     // If empty cols is empty  (well less than 2 lines gap) it means the floorplan has only 1 floor and it's completely full of pixels on every row
     if ( emptyCols.size() < 2 ) {
-        rects.push_back( JMATH::Rect2f( V2fc::ZERO, Vector2f( frame.cols, frame.rows )) * scale );
+        rects.push_back( JMATH::Rect2f( V2fc::ZERO, Vector2f( frame.cols, frame.rows )) );
         return rects;
     }
 
@@ -132,7 +132,6 @@ std::vector<JMATH::Rect2f> getFloorplanRects( const cv::Mat& frame, const float 
     }
 
     // converts in meters/pixel rather than cm/pixel
-    for ( auto& r : rects ) r *= scale;
     return rects;
 }
 

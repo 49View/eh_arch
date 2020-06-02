@@ -24,10 +24,12 @@ namespace HouseService {
 
     // Update
     WallBSData* findWall( HouseBSData *house, HashEH hash );
+    void rescale( HouseBSData *house, float scale );
 
     // Delete
     void removeArch( std::shared_ptr<HouseBSData> _house, int64_t hashToRemove );
     void clearFurniture( std::shared_ptr<HouseBSData> _house );
+    void clearHouseExcludingFloorsAndWalls( HouseBSData *house );
 
     // Query
     float area( HouseBSData *_house );

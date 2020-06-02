@@ -10,8 +10,7 @@
 #include "twoushapes_service.hpp"
 
 std::shared_ptr<DoorBSData>
-DoorService::createDoor( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
-                         const float _architraveWidth, ArchSubTypeT st ) {
+DoorService::createDoor( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2, ArchSubTypeT st ) {
     std::shared_ptr<DoorBSData> d1 = std::make_shared<DoorBSData>();
 
     d1->asType = ASType::Door;
@@ -61,6 +60,7 @@ std::string DoorService::orientationToString( const DoorBSData *d ) {
 
 void DoorService::rescale( DoorBSData *d, float _scale ) {
     TwoUShapesBasedService::rescale(d, _scale);
+    calculatePivots( d );
 }
 
 bool isLeft( int index ) {
@@ -94,7 +94,6 @@ void DoorService::calculatePivots( DoorBSData *d ) {
         d->doorHandlePivotRight -= V3f::Z_AXIS * d->doorGeomThickness;
         d->doorHandleRot = Quaternion(M_PI, V3f::Z_AXIS) * Quaternion(M_PI, V3f::UP_AXIS) * Quaternion(M_PI, V3f::X_AXIS);
     }
-
 
     d->doorHandlePlateDoorSidePivot = Vector3f(-side * realDoorWidth * 0.5f, 0.0f, d->height * 0.5f);
     d->doorHandlePlateFrameSidePivot = Vector3f(-side * realDoorWidth * 0.5f, doorGeomDepthPivot, d->height * 0.5f);

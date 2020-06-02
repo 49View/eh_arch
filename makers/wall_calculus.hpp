@@ -42,7 +42,7 @@ public:
 	std::vector<std::pair<Vector3f, Vector3f>> linesVector;
 };
 
-std::vector<JMATH::Rect2f> getFloorplanRects( const cv::Mat& frame, const float scale );
+std::vector<JMATH::Rect2f> getFloorplanRects( const cv::Mat& frame );
 
 class Wall {
 public:

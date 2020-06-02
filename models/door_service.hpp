@@ -13,7 +13,7 @@
 namespace DoorService {
     // Create
     std::shared_ptr<DoorBSData>
-    createDoor( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2, float _architraveWidth,
+    createDoor( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
                 ArchSubTypeT st = ArchSubType::NotApplicable );
 
     // Query

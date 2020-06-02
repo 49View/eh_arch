@@ -217,10 +217,9 @@ namespace RoomService {
         r->mvCovingSegments = calcCovingSegments(r->mWallSegments);
         r->mCovingPerimeter = calculatePerimeterOf(r->mvCovingSegments);
 
-        calcSkirtingSegments(r);
-
         // Max bounding box
-        // ### This has to be done AFTER coving calculations are it uses the coving segment to determine a "sane" max bbox
+        // *** This has to be done AFTER coving calculations
+        // as it uses the coving segment to determine a "sane" max bbox ***
         r->mBBoxCoving = getContainingBBox(r->mvCovingSegments);
         calclMaxBoundingBox(r);
         makeTriangles2d(r);
@@ -463,6 +462,8 @@ namespace RoomService {
                 s *= _scale;
             }
         }
+        r->mBBoxCoving *= _scale;
+
         r->mLongestWallOppositePoint *= _scale;
 
         r->maxSizeEnclosedHP1 *= _scale;

@@ -201,15 +201,16 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     float doorTrim = 0.01f;
     float openingAngleMax = M_PI;
     float openingAngleMin = 0.0f;
+    float doorHandleAngle = 0.0f;
+    Quaternion doorHandleRot{};
+
     Vector3f hingesPivot = Vector3f::ZERO;
     Vector3f doorHandlePivotLeft = Vector3f::ZERO;
     Vector3f doorHandlePivotRight = Vector3f::ZERO;
-    float doorHandleAngle = 0.0f;
     Vector3f frameHingesPivot = Vector3f::ZERO;
     Vector3f doorHandlePlateDoorSidePivot = Vector3f::ZERO;
     Vector3f doorHandlePlateFrameSidePivot = Vector3f::ZERO;
     V3f doorPivot = V3f::ZERO;
-    Quaternion doorHandleRot{};
     V3f doorGeomPivot = V3f::ZERO;
     V2f doorSize = V2fc::ZERO;
 };
@@ -487,7 +488,6 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albe
     float bathRoomSinkHeight = 0.9f;
     Color4f defaultWallColor = Color4f::WHITE;
     subdivisionAccuray accuracy = accuracyNone;
-
     std::vector<std::shared_ptr<FloorBSData>> mFloors;
     inline constexpr static uint64_t Version() { return SHouseJSONVersion; }
 };

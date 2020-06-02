@@ -526,11 +526,12 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
             if ( room ) {
                 if ( RS::hasRoomType(room, ASType::Hallway) ) {
                     float vwangle = -atan2(-d->dirWidth.y(), d->dirWidth.x());
-                    V2f dn = V2fc::X_AXIS;
-                    dn.rotate(vwangle + M_PI + M_PI_4);
+                    V2f dn = V2fc::X_AXIS * -35.0f;
+                    dn.rotate(vwangle + M_PI*0.8f);
                     V2f checkPoint = d->center + dn;
 
-                    if ( !RS::isPointInsideRoom(room, checkPoint) ) {
+                    bool isInsideRoom = RS::isPointInsideRoom(room, checkPoint);
+                    if ( !isInsideRoom || ( d->isMainDoor && isInsideRoom ) ) {
                         DoorService::setPivotPoint(d.get(), 0);
                     }
                 }

@@ -338,3 +338,29 @@ WallBSData* HouseService::findWall( HouseBSData *house, HashEH hash ) {
     }
     return nullptr;
 }
+
+void HouseService::clearHouseExcludingFloorsAndWalls( HouseBSData *house ) {
+    for ( auto &f : house->mFloors ) {
+        f->rooms.clear();
+        f->windows.clear();
+        f->doors.clear();
+        f->stairs.clear();
+    }
+}
+
+void HouseService::rescale( HouseBSData *house, float scale ) {
+    for ( auto &floor : house->mFloors ) {
+        FloorService::rescale( floor.get(), scale );
+    }
+
+    house->bbox = Rect2f::INVALID;
+    for ( const auto &floor : house->mFloors ) {
+        house->bbox.merge( floor->bbox );
+        house->bbox3d.merge( floor->bbox3d );
+    }
+
+    house->center = house->bbox.centre();
+    house->width = house->bbox3d.calcWidth();
+    house->height = house->bbox3d.calcHeight();
+    house->depth = house->bbox3d.calcDepth();
+}

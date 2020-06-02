@@ -718,3 +718,7 @@ WallService::getNearestFeatureToPoint( const HouseBSData *houseJson, const V2f& 
 
     return ret;
 }
+
+bool WallService::isWindowOrDoorPart( const WallBSData *w ) {
+    return checkBitWiseFlag(w->wallFlags, WallFlags::WF_IsDoorPart | WallFlags::WF_IsWindowPart);
+}
