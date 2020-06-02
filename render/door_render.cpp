@@ -31,24 +31,25 @@ namespace DoorRender {
 
     void drawSingleDoor2d( Renderer& rr, const DoorBSData *door, DShaderMatrix sm, const ArchRenderController& ims ) {
 
-        const V2f& _p1 = door->us1.middle;
-        const V2f& _p2 = door->us2.middle;
-        float _lineWidth = door->us2.width;
+        float vwangle = -atan2(-door->dirWidth.y(), door->dirWidth.x());
 
-        auto color = ims.floorPlanElemColor(C4f::BLACK);
-        float windowLineWidth = _lineWidth * 0.2f;
-        float halfWindowLineWidth = windowLineWidth * 0.5f;
-        float halfLineWidth = _lineWidth * 0.5f;
-        float windowLineWidthOffset = halfLineWidth - halfWindowLineWidth;
+        V2f dp = XZY::C2(door->doorPivot);
+        dp.rotate(vwangle + M_PI);
+
+        auto p1 = door->center + dp;
+
+        V2f dn = V2fc::X_AXIS * door->width;
+        dn.rotate(vwangle + M_PI + door->openingAngleMax);
+        V2f p3 = p1 + dn;
+
+        V2f dn2 = V2fc::X_AXIS * door->width;
+        dn2.rotate(vwangle + M_PI);
+        V2f p2 = p1 + dn2;
 
         auto lineWidth = ims.floorPlanScaler(0.03f);
+        auto color = ims.floorPlanElemColor(C4f::BLACK);
 
-        float dist = distance(_p1, _p2) + windowLineWidth;
-        V2f vn = normalize(_p1 - _p2);
-        auto slope = rotate90(vn);
-        auto p1 = _p1 + ( slope * windowLineWidthOffset ) + vn * halfWindowLineWidth;
-        auto p2 = _p2 + ( slope * windowLineWidthOffset ) + vn * -halfWindowLineWidth;
-        auto p3 = p1 + ( slope * dist );
+        float dist = distance(p1, p2) + lineWidth*0.5f;
 
         std::vector<V2f> vLists;
         vLists.emplace_back(p2);
