@@ -13,6 +13,7 @@
 #include <poly/poly_services.hpp>
 #include <graphics/renderer.h>
 
+#include <eh_arch/controller/arch_render_controller.hpp>
 #include "../models/house_bsdata.hpp"
 #include "house_render.hpp"
 #include "wall_render.hpp"
@@ -22,8 +23,29 @@
 
 namespace FloorRender {
 
-    void IMHouseRender( Renderer &rr, SceneGraph &sg, const FloorBSData *data, FloorPlanRenderMode fpRenderMode,
-                         const RDSPreMult &_pm ) {
+    void IMHouseRender( Renderer &rr, SceneGraph &sg, const FloorBSData *f, const ArchRenderController& ims ) {
+        bool drawDebug = isFloorPlanRenderModeDebug(ims.renderMode());
+        auto rm = ims.floorPlanShader();
+
+        if ( drawDebug ) {
+            int ousc = 0;
+            for ( const auto& seg : f->orphanedUShapes ) {
+                rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, rm, 0.075f, ims.pm(), seg.hashFeature("orphanedUshape", ousc++));
+            }
+        }
+
+        for ( const auto& w : f->walls ) {
+            WallRender::IMHouseRender(rr, sg, w.get(), ims);
+        }
+        for ( const auto& w : f->rooms ) {
+            RoomRender::IMHouseRender(rr, sg, w.get(), ims);
+        }
+        for ( const auto& w : f->windows ) {
+            WindowRender::IMHouseRender(rr, sg, w.get(), ims);
+        }
+        for ( const auto& w : f->doors ) {
+            DoorRender::IMHouseRender(rr, sg, w.get(), ims);
+        }
     }
 
     void make3dGeometry( SceneGraph &sg, const FloorBSData *f, HouseRenderContainer &ret ) {

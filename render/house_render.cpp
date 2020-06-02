@@ -23,7 +23,6 @@ namespace HouseRender {
 
         rr.clearBucket(CommandBufferLimits::UI2dStart);
 
-        bool drawDebug = isFloorPlanRenderModeDebug(ims.renderMode());
         auto rm = ims.floorPlanShader();
 
         // We have 3 combinations here:
@@ -48,36 +47,8 @@ namespace HouseRender {
         }
 
         for ( const auto& f : data->mFloors ) {
-            if ( drawDebug ) {
-                int ousc = 0;
-                for ( const auto& seg : f->orphanedUShapes ) {
-                    rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, rm, 0.075f, ims.pm(), seg.hashFeature("orphanedUshape", ousc++));
-                }
-            }
-
-            for ( const auto& w : f->walls ) {
-                WallRender::IMHouseRender(rr, sg, w.get(), ims);
-            }
-            for ( const auto& w : f->rooms ) {
-                RoomRender::IMHouseRender(rr, sg, w.get(), ims);
-            }
-            for ( const auto& w : f->windows ) {
-                WindowRender::IMHouseRender(rr, sg, w.get(), ims);
-            }
-            for ( const auto& w : f->doors ) {
-                DoorRender::IMHouseRender(rr, sg, w.get(), ims);
-            }
+            FloorRender::IMHouseRender( rr, sg, f.get(), ims );
         }
-
-//        int q = 0;
-//        for ( const auto& seg : FloorService::getUSI() ) {
-//            if ( q == 0 ) {
-//                rr.draw<DLine>( XZY::C(seg.s1->points[1]), XZY::C(seg.s1->points[2]), Color4f::WHITE, 0.1f );
-//                rr.draw<DLine>( XZY::C(seg.s2->points[1]), XZY::C(seg.s2->points[2]), Color4f::BLACK, 0.1f );
-//                rr.draw<DCircle>( XZY::C(seg.p), Color4f::WHITE, 0.05f );
-//            }
-//            ++q;
-//        }
     }
 
     HouseRenderContainer make3dGeometry( SceneGraph& sg, const HouseBSData *data ) {

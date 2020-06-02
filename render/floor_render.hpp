@@ -9,12 +9,10 @@
 class SceneGraph;
 class Renderer;
 struct FloorBSData;
-struct RDSPreMult;
 class HouseRenderContainer;
-enum class FloorPlanRenderMode;
+class ArchRenderController;
 
 namespace FloorRender {
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const FloorBSData *data, FloorPlanRenderMode fpRenderMode,
-                         const RDSPreMult &_pm );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const FloorBSData *data, const ArchRenderController& ims );
     void make3dGeometry( SceneGraph& sg, const FloorBSData* f, HouseRenderContainer& ret );
 }
