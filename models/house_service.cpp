@@ -14,6 +14,7 @@
 
 #include "core/file_manager.h"
 #include "poly/collision_mesh.hpp"
+#include "wall_service.hpp"
 
 
 std::shared_ptr<FloorBSData> HouseService::addFloorFromData( HouseBSData* _house, const JMATH::Rect2f& _rect ) {
@@ -346,6 +347,23 @@ void HouseService::clearHouseExcludingFloorsAndWalls( HouseBSData *house ) {
         f->doors.clear();
         f->stairs.clear();
     }
+}
+
+V2fVectorOfVector HouseService::rescaleWallInverse( const HouseBSData* house, float scaleFactor ) {
+    V2fVectorOfVector wallsPoints;
+    float scale = 1.0f / scaleFactor;
+    for ( const auto& f : house->mFloors ) {
+        for ( const auto& w : f->walls ) {
+            if ( !WallService::isWindowOrDoorPart(w.get()) ) {
+                V2fVector ePointScaled{};
+                for ( const auto& ep : w->epoints ) {
+                    ePointScaled.emplace_back(ep * scale);
+                }
+                wallsPoints.emplace_back(ePointScaled);
+            }
+        }
+    }
+    return wallsPoints;
 }
 
 void HouseService::rescale( HouseBSData *house, float scale ) {

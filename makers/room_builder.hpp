@@ -44,10 +44,13 @@ public:
     void setCurrentPointerPos( const V2f& _p );
     void setInputPoint( const V2f& _p );
 
-    void finalise();
-    void finaliseWithClose();
+    std::shared_ptr<HouseBSData> finalise();
+    std::shared_ptr<HouseBSData> finaliseWithClose();
     [[nodiscard]] V3f   bestStartingPoint() const;
     [[nodiscard]] float WallWidth() const;
+
+    V2fVectorOfVector bespokeriseWalls( float scaleFactor );
+
 private:
     void setUIStatusAfterChange( bool wasFinalised = false );
     void fade2dScene( float _time, float value );

@@ -482,10 +482,44 @@ ArchHouseBespokeData RoomBuilder::bespokerise() {
     return bespoker;
 }
 
+V2fVectorOfVector RoomBuilder::bespokeriseWalls( float scaleFactor ) {
+    ArchHouseBespokeData bespoker;
+    bespoker.wallWidthHint = wallWidth;
+    SegmentStripVector2d ewp;
+    V2fVectorOfVector pwallLine;
+
+    auto optSegments = segments;
+    optSegments.optimize();
+//    optSegments.finalise();
+
+    int numc = 0;
+    for ( const auto& pwall : optSegments.pointsOf(ArchType::WallT) ) {
+        auto epts = extrudePointsWithWidth<ExtrudeComtour>( pwall.strip, wallWidth, false );
+        LOGRS( "Count " << numc );
+        for ( auto& np : epts ) {
+            np *= scaleFactor;
+            LOGRS( np );
+        }
+        numc++;
+
+//        V3fVector v1{ epts.begin(), epts.begin() + (epts.size() / 2 ) };
+//        V3fVector v2{ epts.begin() + (epts.size() / 2 ), epts.begin() + epts.size()  };
+
+//        V3fVector v1{ epts.begin(), epts.begin() + (epts.size() / 2 ) };
+//        V3fVector v2{ epts.begin() + (epts.size() / 2 ), epts.begin() + epts.size()  };
+
+        pwallLine.emplace_back( XZY::C2(epts) );
+//        pwallLine.emplace_back( XZY::C2(v1) );
+//        pwallLine.emplace_back( XZY::C2(v2) );
+    }
+
+    return pwallLine;
+}
+
 void RoomBuilder::roomPreBakedFurnitureSetup( FurnitureRuleScript& ruleScript ) {
 }
 
-void RoomBuilder::finalise() {
+std::shared_ptr<HouseBSData> RoomBuilder::finalise() {
     rsg.RR().removeFromCL( "RoomBuilderLastTailCircle" );
     rsg.RR().removeFromCL( "SnapLongLines1" );
     rsg.RR().removeFromCL( "SnapLongLines2" );
@@ -494,17 +528,19 @@ void RoomBuilder::finalise() {
     saveCachedSegments();
     setSegmentType(ArchType::WallT);
 
-//    HouseMakerBespokeData maker_bespoke;
-//    house = maker_bespoke.make(bespokerise() );
+    HouseMakerBespokeData maker_bespoke;
+    house = maker_bespoke.make(bespokerise() );
 
     setUIStatusAfterChange();
+
+    return house;
 }
 
-void RoomBuilder::finaliseWithClose() {
+std::shared_ptr<HouseBSData> RoomBuilder::finaliseWithClose() {
     inputPoint = segments.front();
     currentPoint = inputPoint;
 //    addPointToRoom();
-    finalise();
+    return finalise();
 }
 
 bool RoomBuilder::isPerimeterClosed() const {

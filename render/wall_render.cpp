@@ -80,24 +80,31 @@ namespace WallRender {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t+1, wall->epoints.size())];
             ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Edge, t, wall->hash };
-            auto color = ims.getFillColor(asf, Color4f::PURPLE);
+            auto color = ims.getFillColor(asf, Color4f::PASTEL_GREEN);
             rr.draw<DLine>(p1, p2, color, width*3.f, sm, ims.pm(), wall->hashFeature("w2dEdge"+color.toString(),t));
         }
 //        if ( wall->wrapLastPoint ) vlist.emplace_back(wall->epoints[0]);
     }
 
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *wall, const ArchRenderController& ims ) {
-        auto sm = ims.floorPlanShader();
-        auto width = ims.floorPlanScaler(0.05f);
-        drawWalls2d(rr, wall, sm, ims);
-        bool drawDebug = ims.isFloorPlanRenderModeDebug();
-        if ( drawDebug ) {
-            auto lineWidth = ims.floorPlanScaler(0.01f);
-            drawWallContours2d(rr, wall, lineWidth, sm, ims);
-            drawWallNormals2d(rr, wall, lineWidth, sm, ims);
-            drawUShapes2d(rr, wall, lineWidth*0.5f, sm, ims);
-            drawWallPoints2d(rr, wall, width*0.5f, sm, ims);
+
+        // If a wall is part of a door or windows I think it's best to not to render it in IM 2d/3d as it will overlap
+        // with the door/window render and also have extra duplicate vertices in common with the adjacent wall, hard
+        // to select correctly
+        if ( !WallService::isWindowOrDoorPart(wall) ) {
+            auto sm = ims.floorPlanShader();
+            auto width = ims.floorPlanScaler(0.05f);
+            drawWalls2d(rr, wall, sm, ims);
+            bool drawDebug = ims.isFloorPlanRenderModeDebug();
+            if ( drawDebug ) {
+                auto lineWidth = ims.floorPlanScaler(0.01f);
+                drawWallContours2d(rr, wall, lineWidth*0.3f, sm, ims);
+                drawWallNormals2d(rr, wall, lineWidth*0.5f, sm, ims);
+                drawUShapes2d(rr, wall, lineWidth*0.5f, sm, ims);
+                drawWallPoints2d(rr, wall, width*0.5f, sm, ims);
+            }
         }
+
     }
 
     GeomSPContainer make3dGeometry( SceneGraph& sg, const WallBSData *mWall,

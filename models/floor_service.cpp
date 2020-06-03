@@ -86,7 +86,7 @@ void FloorService::updateFromNewDoorOrWindow( FloorBSData *f ) {
 void FloorService::addDoorFromData( FloorBSData *f, float _doorHeight, const UShape& w1, const UShape& w2,
                                     ArchSubTypeT /*st*/ /*= ArchSubType::NotApplicable */ ) {
 
-    std::shared_ptr<DoorBSData> d1 = DoorService::createDoor( _doorHeight, f->height, w1, w2, 0.1f );
+    std::shared_ptr<DoorBSData> d1 = DoorService::createDoor( _doorHeight, f->height, w1, w2 );
     f->doors.push_back( d1 );
 
 //	auto wd = WallService::createWall( TwoUShapesBasedService::createWallVertices( d1.get() ), f->height - _doorHeight,

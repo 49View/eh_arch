@@ -31,7 +31,6 @@ std::shared_ptr<HouseBSData> HouseMakerBespokeData::make( ArchHouseBespokeData&&
         }
     }
     guessRooms();
-    guessFittings();
 
     return mHouse;
 }
@@ -42,10 +41,4 @@ void HouseMakerBespokeData::guessRooms() {
         FloorService::roomRecognition( f.get() );
         FloorService::addRoomsFromData( f.get() );
     }
-}
-
-void HouseMakerBespokeData::guessFittings() {
-//    for ( auto& f : mHouse->mFloors ) {
-//        FloorService::guessFittings( f.get() );
-//    }
 }

@@ -55,5 +55,6 @@ namespace HouseService {
     bool
     whichRoomAmI( std::shared_ptr<HouseBSData> _house, const Vector2f& _pos, std::shared_ptr<RoomBSData>& outRoom );
     Vector2f centrePointOfBiggestRoom( std::shared_ptr<HouseBSData> _house );
+    V2fVectorOfVector rescaleWallInverse( const HouseBSData* house, float scaleFactor );
     void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );
 };

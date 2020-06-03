@@ -148,10 +148,11 @@ V3f RoomBuilderSegmentPoints::centerForCamera() const {
 
 void RoomBuilderSegmentPoints::optimize() {
     if ( plist.size() < 3 ) return;
-    for ( size_t t = 0; t < plist.size(); t++ ) {
-        size_t tp1 = getCircularArrayIndexUnsigned(t+1, plist.size());
+    int wrappedIndexOffset = 2;
+    for ( size_t t = 0; t < plist.size()-wrappedIndexOffset; t++ ) {
+        size_t tp1 = cai(t+1, plist.size());
         if ( ptypes[t] == ptypes[tp1] ) {
-            size_t tp2 = getCircularArrayIndexUnsigned(t+2, plist.size());
+            size_t tp2 = cai(t+2, plist.size());
             if ( isCollinear( plist[t], plist[tp1], plist[tp2]) ) {
                 ptypes.erase( ptypes.begin() + tp1 );
                 plist.erase( plist.begin() + tp1 );
