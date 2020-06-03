@@ -31,9 +31,7 @@ namespace HouseRender {
         // 3) it's a 3d floorPlan but it hasn't got a source image, (IE not HouseMakerBitmap), renders a flat poly
         if ( data->sourceData.floorPlanSize != V2fc::ZERO && !isFloorPlanRenderMode2d(ims.renderMode()) ) {
             // 1)
-            auto floorPlanRect = Rect2f{ 0.0f, 0.0f, data->sourceData.floorPlanSize.x(),
-                                         data->sourceData.floorPlanSize.y() };
-            rr.draw<DRect>(floorPlanRect, C4f::WHITE.A(.5f), RDSImage(data->sourceData.floorPlanSourceName),
+            rr.draw<DRect>(data->sourceData.floorPlanBBox, C4f::WHITE.A(.5f), RDSImage(data->sourceData.floorPlanSourceName),
                            RDSRectAxis::XZ, "floorplanImage");
         } else if ( isFloorPlanRenderMode2d(ims.renderMode()) ) {
             // 2)

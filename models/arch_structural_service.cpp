@@ -63,3 +63,7 @@
 float metersToCentimeters(float valueInMeter) {
     return valueInMeter*0.01f;
 }
+
+float centimetersToMeters(float valueInCM) {
+    return valueInCM*100.0f;
+}

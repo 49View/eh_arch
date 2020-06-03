@@ -80,8 +80,10 @@ struct WallsEvaluation {
 
 namespace HouseMakerBitmap {
     SourceImages prepareImages( const HMBBSData& bsdata );
-    std::shared_ptr<HouseBSData> makeEmpty( HMBBSData &bsdata );
+    void rescale( HouseBSData *house, float rescaleFactor, float floorPlanRescaleFactor );
+    std::shared_ptr<HouseBSData> makeEmpty( HMBBSData& bsdata );
     std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData );
     std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData, const SourceImages& sourceImages );
-    std::shared_ptr<HouseBSData> makeFromWalls( const V2fVectorOfVector& wallPoints, HMBBSData &bsdata, const SourceImages& sourceImages );
+    void makeFromWalls( std::shared_ptr<HouseBSData> house, const V2fVectorOfVector& wallPoints, HMBBSData& bsdata,
+                        const SourceImages& sourceImages );
 };

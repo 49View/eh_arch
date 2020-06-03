@@ -33,6 +33,7 @@ public:
     [[nodiscard]] V3f centerForCamera() const;
     void optimize();
     float area() const;
+    void scale( float scaleFactor );
 
     V3f operator[]( size_t _index ) const;
 

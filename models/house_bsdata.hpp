@@ -28,6 +28,7 @@ static const float defaltToBeOverwritten = 7543859749023.0f;
 
 JSONDATA(HouseSourceData, floorPlanSize, floorPlanSourceName)
     Vector2f floorPlanSize = V2fc::ZERO;
+    Rect2f floorPlanBBox = Rect2f::ZERO;
     std::string floorPlanSourceName{};
 };
 

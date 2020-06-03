@@ -86,6 +86,8 @@ void RoomBuilder::saveSegments( const UICallbackHandle& _ch ) {
 
 void RoomBuilder::saveCachedSegments() {
     cachedSegments = segments.serialize();
+    auto shash = std::hash<std::string>{}(segments.serializeString());
+    FM::writeLocalFile("./bespoke_segments"+std::to_string(shash), cachedSegments);
 }
 
 void RoomBuilder::addPointToRoom() {
@@ -319,12 +321,13 @@ void RoomBuilder::drawFloorplanSegments() {
     Renderer& rr = rsg.RR();
     auto wallColor = C4f::WHITE;
 
+    int segC = 0;
     for ( const auto& pwall : segments.pointsOf(ArchType::WallT) ) {
         auto pext = pwall;
         if ( pext.strip.size() == 1 ) {
 //            rr.drawCircle( roomEditBucket, segments.back(), wallWidth*0.5f, currLineColor, 12, "RoomBuilderLastTailCircle" );
         } else {
-            rr.draw<DLine>( roomEditBucket, pext.strip, wallColor, wallWidth, false );
+            rr.draw<DLine>( roomEditBucket, pext.strip, wallColor, wallWidth, false, std::to_string(segC++) );
         }
     }
     for ( const auto& elemList : segments.pointsOf(ArchType::WindowT) ) {
@@ -351,10 +354,11 @@ void RoomBuilder::drawFloorplanSegments() {
         auto op2 = segments.points()[t+1];
         for ( int i = 0; i < 2; i ++ ) {
             auto afx = clampToFloorplanOuterSizes( i, op1, op2, bb, tierLayers, tierGap);
+            auto name = afx.p1.toString() + afx.p2.toString();
             rr.drawMeasurementArrow2( roomEditBucket, afx.p1, afx.p2, afx.normal, op1, op2,
                                       C4f::WHITE.A(0.65f), wallWidth*0.1f,
                                       M_PI_4*0.5f, 0.08f, wallWidth*2.0f, font.get(),
-                                      wallWidth*1.5f, C4f::WHITE, C4f::BLACK );
+                                      wallWidth*1.5f, C4f::WHITE, C4f::BLACK, name );
         }
     }
 
@@ -388,9 +392,9 @@ void RoomBuilder::refresh() {
 
         switch (activeSegmentType) {
             case ArchType::WallT:
-                rr.draw<DLine>( roomEditBucket, currentPoint, segments.back(), currLineColor, wallWidth );
-                rr.drawCircle( roomEditBucket, segments.back(), wallWidth*0.5f, currLineColor, 12, "RoomBuilderLastTailCircle" );
-                rr.drawCircle( roomEditBucket, currentPoint, wallWidth*0.5f, currLineColor, 12, "RoomBuilderLastTailCircle" );
+                rr.draw<DLine>( roomEditBucket, currentPoint, segments.back(), currLineColor, wallWidth, "LineSegment" );
+                rr.draw<DCircleFilled>( roomEditBucket, segments.back(), wallWidth*0.5f, currLineColor, "RoomBuilderLastTailCircle" );
+                rr.draw<DCircleFilled>( roomEditBucket, currentPoint, wallWidth*0.5f, currLineColor, "RoomBuilderLastTailCircle" );
                 break;
             case ArchType::WindowT:
                 drawWindow( roomEditBucket, segments.back(), currentPoint, wallWidth, currLineColor );
@@ -403,7 +407,7 @@ void RoomBuilder::refresh() {
         C4f bgText = V4f{V4f::WHITE-textColor};
         rr.drawMeasurementArrow1( roomEditBucket, currentPoint, segments.back(), textColor, wallWidth*0.1f,
                                   M_PI_4, 0.1f, wallWidth*2.0f, font.get(),
-                                  wallWidth*1.5f, C4f::XTORGBA("#00FEFF"), bgText );
+                                  wallWidth*1.5f, C4f::XTORGBA("#00FEFF"), bgText, "currentMeasurementArrow" );
     }
 
     if ( hasBeenSnapped ) {
@@ -488,6 +492,7 @@ V2fVectorOfVector RoomBuilder::bespokeriseWalls( float scaleFactor ) {
     SegmentStripVector2d ewp;
     V2fVectorOfVector pwallLine;
 
+    saveCachedSegments();
     auto optSegments = segments;
     optSegments.optimize();
 //    optSegments.finalise();
@@ -520,20 +525,21 @@ void RoomBuilder::roomPreBakedFurnitureSetup( FurnitureRuleScript& ruleScript ) 
 }
 
 std::shared_ptr<HouseBSData> RoomBuilder::finalise() {
-    rsg.RR().removeFromCL( "RoomBuilderLastTailCircle" );
-    rsg.RR().removeFromCL( "SnapLongLines1" );
-    rsg.RR().removeFromCL( "SnapLongLines2" );
-    finalised = true;
-    currentPointValid = false;
-    saveCachedSegments();
-    setSegmentType(ArchType::WallT);
-
-    HouseMakerBespokeData maker_bespoke;
-    house = maker_bespoke.make(bespokerise() );
-
-    setUIStatusAfterChange();
-
-    return house;
+//    rsg.RR().removeFromCL( "RoomBuilderLastTailCircle" );
+//    rsg.RR().removeFromCL( "SnapLongLines1" );
+//    rsg.RR().removeFromCL( "SnapLongLines2" );
+//    finalised = true;
+//    currentPointValid = false;
+//    saveCachedSegments();
+//    setSegmentType(ArchType::WallT);
+//
+//    HouseMakerBespokeData maker_bespoke;
+//    house = maker_bespoke.make(bespokerise() );
+//
+//    setUIStatusAfterChange();
+//
+//    return house;
+    return nullptr;
 }
 
 std::shared_ptr<HouseBSData> RoomBuilder::finaliseWithClose() {

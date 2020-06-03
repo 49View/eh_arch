@@ -349,6 +349,10 @@ void HouseService::clearHouseExcludingFloorsAndWalls( HouseBSData *house ) {
     }
 }
 
+void HouseService::clearHouse( HouseBSData *house ) {
+    house->mFloors.clear();
+}
+
 V2fVectorOfVector HouseService::rescaleWallInverse( const HouseBSData* house, float scaleFactor ) {
     V2fVectorOfVector wallsPoints;
     float scale = 1.0f / scaleFactor;

@@ -174,3 +174,9 @@ float RoomBuilderSegmentPoints::area() const {
 
     return getAreaOf(tri.get2dTrianglesTuple());
 }
+
+void RoomBuilderSegmentPoints::scale( float scaleFactor ) {
+    for ( auto& v : plist ) {
+        v*=scaleFactor;
+    }
+}

@@ -3,6 +3,7 @@
 #include "house_bsdata.hpp"
 
 float metersToCentimeters(float valueInMeter);
+float centimetersToMeters(float valueInCM);
 
 struct ArchStructuralFeatureDescriptor {
     ArchStructuralFeatureDescriptor() = default;

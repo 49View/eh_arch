@@ -28,6 +28,7 @@ namespace HouseService {
 
     // Delete
     void removeArch( std::shared_ptr<HouseBSData> _house, int64_t hashToRemove );
+    void clearHouse( HouseBSData *house );
     void clearFurniture( std::shared_ptr<HouseBSData> _house );
     void clearHouseExcludingFloorsAndWalls( HouseBSData *house );
 
