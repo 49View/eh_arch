@@ -47,7 +47,7 @@ namespace DoorRender {
         V2f p2 = p1 + dn2;
 
         auto lineWidth = ims.floorPlanScaler(0.03f);
-        auto color = ims.floorPlanElemColor(C4f::BLACK);
+        auto color = ims.getFillColor(door->hash, C4f::BLACK);
 
         float dist = distance(p1, p2) + lineWidth*0.5f;
 
@@ -65,7 +65,7 @@ namespace DoorRender {
         }
 
         vLists.emplace_back(p1);
-        rr.draw<DLine>(vLists, color, lineWidth, false, sm, ims.pm(), door->hashFeature("singleDoor2d", 0));
+        rr.draw<DLine>(vLists, color, lineWidth, false, sm, ims.pm(), door->hashFeature("singleDoor2d"+color.toString(), 0));
     }
 
     void drawDoubleDoor2d();

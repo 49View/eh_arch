@@ -15,8 +15,10 @@
 #include "arch_structural_service.hpp"
 
 class FurnitureMapStorage;
-
 class CollisionMesh;
+
+struct IsNear {};
+struct IsInside {};
 
 namespace HouseService {
     // Create
@@ -60,15 +62,54 @@ namespace HouseService {
 
     // Templates
 
-    template<typename T>
-    std::shared_ptr<T> isPointNear( const HouseBSData *_house, const Vector3f& point, float radius ) {
+    template<typename T, typename NI>
+    std::shared_ptr<T> point( const HouseBSData *_house, const Vector3f& point, float radius = 0.01f ) {
         std::shared_ptr<T> found;
 
+        auto checkNearOrInside = [&]( auto* w) {
+            bool isNearInside1 = false;
+            if constexpr ( std::is_same_v<NI,IsNear> ) {
+                isNearInside1 = ArchStructuralService::isPointNear(w, point, radius);
+            }
+            if constexpr ( std::is_same_v<NI,IsInside> ) {
+                isNearInside1 = ArchStructuralService::isPointInside(w, point);
+            }
+            return isNearInside1;
+        };
+
         for ( const auto& f : _house->mFloors ) {
-            if ( ArchStructuralService::isPointNear(f.get(), point, radius) ) {
+            if ( checkNearOrInside(f.get()) ) {
                 if constexpr ( std::is_same_v<T, WallBSData> ) {
                     for ( const auto& w : f->walls ) {
-                        if ( ArchStructuralService::isPointNear(w.get(), point, radius) ) {
+                        if ( checkNearOrInside(w.get()) ) {
+                            return w;
+                        }
+                    }
+                }
+                if constexpr ( std::is_same_v<T, DoorBSData> ) {
+                    for ( const auto& w : f->doors ) {
+                        if ( checkNearOrInside(w.get()) ) {
+                            return w;
+                        }
+                    }
+                }
+                if constexpr ( std::is_same_v<T, WindowBSData> ) {
+                    for ( const auto& w : f->windows ) {
+                        if ( checkNearOrInside(w.get()) ) {
+                            return w;
+                        }
+                    }
+                }
+                if constexpr ( std::is_same_v<T, RoomBSData> ) {
+                    for ( const auto& w : f->rooms ) {
+                        if ( checkNearOrInside(w.get()) ) {
+                            return w;
+                        }
+                    }
+                }
+                if constexpr ( std::is_same_v<T, StairsBSData> ) {
+                    for ( const auto& w : f->stairs ) {
+                        if ( checkNearOrInside(w.get()) ) {
                             return w;
                         }
                     }
