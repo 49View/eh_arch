@@ -96,6 +96,7 @@ void ArchOrchestrator::showIMHouse( std::shared_ptr<HouseBSData> _houseJson, con
 }
 
 void ArchOrchestrator::show3dHouse( std::shared_ptr<HouseBSData> _houseJson, const PostHouseLoadCallback& ccf ) {
+    sg.clearGMNodes();
     HOD::resolver<HouseBSData>(sg, _houseJson.get(), [&, ccf, _houseJson]() {
         sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson.get()));
         HouseRender::make3dGeometry(sg, _houseJson.get());
