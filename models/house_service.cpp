@@ -246,21 +246,6 @@ std::shared_ptr<WallBSData> HouseService::isPointInsideWall( std::shared_ptr<Hou
     return found;
 }
 
-std::shared_ptr<WallBSData> HouseService::isPointNearWall( const HouseBSData* _house, const Vector3f& point, float radius ) {
-    std::shared_ptr<WallBSData> found;
-
-    for ( const auto& f : _house->mFloors ) {
-        if ( ArchStructuralService::isPointNear(f.get(), point, radius)) {
-            for ( const auto& w : f->walls ) {
-                if ( ArchStructuralService::isPointNear(w.get(), point, radius) ) {
-                    return w;
-                }
-            }
-        }
-    }
-    return found;
-}
-
 bool HouseService::isLastFloor( std::shared_ptr<HouseBSData> _house, int floorNumber ) {
 	return ( static_cast<size_t>(floorNumber) == _house->mFloors.size() - 1 );
 }

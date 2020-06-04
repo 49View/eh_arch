@@ -22,8 +22,7 @@ struct ArchHouseBespokeData;
 class RoomBuilder {
 public:
     RoomBuilder( SceneGraph& sg, RenderOrchestrator& rsg,
-                 std::shared_ptr<HouseBSData> _house,
-                 RoomBuilderSegmentPoints& _segments );
+                 std::shared_ptr<HouseBSData> _house );
 
     void activate();
     void activateDebug();
@@ -38,6 +37,7 @@ public:
     void clear( const UICallbackHandle& _ch = {} );
     void undo( const UICallbackHandle& _ch = {} );
     void saveSegments( const UICallbackHandle& _ch = {} );
+    void loadSegments( const SerializableContainer& _segs );
     void replaceFurniture( const UICallbackHandle& _ch = {} );
 
     void setSegmentTypeFromIndex( const UICallbackHandle& _ch = {} );
@@ -77,7 +77,7 @@ private:
     RenderOrchestrator& rsg;
 
     std::shared_ptr<HouseBSData> house;
-    RoomBuilderSegmentPoints& segments;
+    RoomBuilderSegmentPoints segments;
     SerializableContainer cachedSegments;
     V3f currentPoint = V3f::ZERO;
     V3f inputPoint = V3f::ZERO;

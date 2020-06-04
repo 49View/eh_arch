@@ -38,9 +38,14 @@ void RoomBuilder::activateDebug() {
 
 void RoomBuilder::clear( const UICallbackHandle& _ch ) {
     segments.clear();
+    cachedSegments.clear();
     finalised = false;
     currentPointValid = false;
-    rsg.RR().clearBucket( furnitureBucket );
+
+    inputPoint = V3f::ZERO;
+    hasBeenSnapped = false;
+    activeSegmentType = ArchType::WallT;
+
     setUIStatusAfterChange();
     refresh();
 }
@@ -77,6 +82,10 @@ void RoomBuilder::setSegmentTypeFromIndex( const UICallbackHandle& _ch ) {
         default:
             setSegmentType( ArchType::WallT );
     }
+}
+
+void RoomBuilder::loadSegments( const SerializableContainer& _segs ) {
+    segments = RoomBuilderSegmentPoints{_segs};
 }
 
 void RoomBuilder::saveSegments( const UICallbackHandle& _ch ) {
@@ -629,11 +638,10 @@ void RoomBuilder::onExit() {
     rsg.UI()("sidebar")->slideRightOut( 1.0f );
 }
 
-RoomBuilder::RoomBuilder( SceneGraph& sg, RenderOrchestrator& rsg, std::shared_ptr<HouseBSData> _house,
-                          RoomBuilderSegmentPoints& _segments ) :
+RoomBuilder::RoomBuilder( SceneGraph& sg, RenderOrchestrator& rsg, std::shared_ptr<HouseBSData> _house ) :
         sg( sg ), rsg( rsg ),
-        house(_house),
-        segments(_segments) {
+        house(_house) {
     roomEditBucket = CommandBufferLimits::UnsortedStart + 2;
 }
+
 

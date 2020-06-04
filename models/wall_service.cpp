@@ -666,7 +666,7 @@ ArchStructuralFeatureDescriptor
 WallService::getNearestFeatureToPoint( const HouseBSData *houseJson, const V2f& point, float nearFactor ) {
     ArchStructuralFeatureDescriptor ret{};
 
-    auto w = HouseService::isPointNearWall(houseJson, point, nearFactor);
+    auto w = HouseService::isPointNear<WallBSData>(houseJson, point, nearFactor);
 
     if ( w ) {
         std::vector<ArchStructuralFeatureDescriptor> candidates;

@@ -774,12 +774,16 @@ namespace HouseMakerBitmap {
         }
     }
 
-    std::shared_ptr<HouseBSData> newHouseFromHMB( HMBBSData &bsdata ) {
-        std::shared_ptr<HouseBSData> newHouse = std::make_shared<HouseBSData>();
+    void setHouseSourceDataSection( HouseBSData* newHouse, const HMBBSData &bsdata ) {
         newHouse->name = bsdata.filename;
         newHouse->sourceData.floorPlanSourceName = newHouse->name;
         newHouse->sourceData.floorPlanSize = V2f{bsdata.image.width, bsdata.image.height};
         newHouse->sourceData.floorPlanBBox = Rect2f{V2fc::ZERO, newHouse->sourceData.floorPlanSize} * bsdata.rescaleFactor;
+    }
+
+    std::shared_ptr<HouseBSData> newHouseFromHMB( HMBBSData &bsdata ) {
+        std::shared_ptr<HouseBSData> newHouse = std::make_shared<HouseBSData>();
+        setHouseSourceDataSection(newHouse.get(), bsdata );
         newHouse->bbox = newHouse->sourceData.floorPlanBBox;
         return newHouse;
     }
@@ -795,8 +799,7 @@ namespace HouseMakerBitmap {
 //        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
         rescale( house.get(), bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
 
-        house->name = bsdata.filename;
-        house->sourceData.floorPlanSourceName = house->name;
+        setHouseSourceDataSection(house.get(), bsdata );
 
         return house;
     }
@@ -810,8 +813,7 @@ namespace HouseMakerBitmap {
 //        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
         rescale( house.get(), bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
 
-        house->name = bsdata.filename;
-        house->sourceData.floorPlanSourceName = house->name;
+        setHouseSourceDataSection(house.get(), bsdata );
 
         return house;
     }

@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "house_bsdata.hpp"
+#include "arch_structural_service.hpp"
 
 class FurnitureMapStorage;
 
@@ -23,7 +24,7 @@ namespace HouseService {
     std::shared_ptr<CollisionMesh> createCollisionMesh( const HouseBSData *_house );
 
     // Update
-    WallBSData* findWall( HouseBSData *house, HashEH hash );
+    WallBSData *findWall( HouseBSData *house, HashEH hash );
     void rescale( HouseBSData *house, float scale );
 
     // Delete
@@ -43,8 +44,6 @@ namespace HouseService {
     std::shared_ptr<ArchStructural>
     rayIntersect( std::shared_ptr<HouseBSData> _house, const Vector3f& origin, const Vector3f& dir );
     std::shared_ptr<WallBSData> isPointInsideWall( std::shared_ptr<HouseBSData> _house, const Vector3f& point );
-    std::shared_ptr<WallBSData>
-    isPointNearWall( const HouseBSData* _house, const Vector3f& point, float radius );
     bool findFloorOrRoomAt( std::shared_ptr<HouseBSData> _house, const Vector2f& pos, int& floorIndex );
     std::shared_ptr<FloorBSData> findFloorOf( std::shared_ptr<HouseBSData> _house, const int64_t _hash );
     bool areThereStairsAtFloorNumber( std::shared_ptr<HouseBSData> _house, int floorNumber );
@@ -56,6 +55,27 @@ namespace HouseService {
     bool
     whichRoomAmI( std::shared_ptr<HouseBSData> _house, const Vector2f& _pos, std::shared_ptr<RoomBSData>& outRoom );
     Vector2f centrePointOfBiggestRoom( std::shared_ptr<HouseBSData> _house );
-    V2fVectorOfVector rescaleWallInverse( const HouseBSData* house, float scaleFactor );
+    V2fVectorOfVector rescaleWallInverse( const HouseBSData *house, float scaleFactor );
     void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );
+
+    // Templates
+
+    template<typename T>
+    std::shared_ptr<T> isPointNear( const HouseBSData *_house, const Vector3f& point, float radius ) {
+        std::shared_ptr<T> found;
+
+        for ( const auto& f : _house->mFloors ) {
+            if ( ArchStructuralService::isPointNear(f.get(), point, radius) ) {
+                if constexpr ( std::is_same_v<T, WallBSData> ) {
+                    for ( const auto& w : f->walls ) {
+                        if ( ArchStructuralService::isPointNear(w.get(), point, radius) ) {
+                            return w;
+                        }
+                    }
+                }
+            }
+        }
+        return found;
+    }
+
 };
