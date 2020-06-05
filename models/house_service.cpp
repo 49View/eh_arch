@@ -312,6 +312,12 @@ void HouseService::clearHouse( HouseBSData *house ) {
     house->mFloors.clear();
 }
 
+void HouseService::clearHouseRooms( HouseBSData *house ) {
+    for ( auto &f : house->mFloors ) {
+        f->rooms.clear();
+    }
+}
+
 V2fVectorOfVector HouseService::rescaleWallInverse( const HouseBSData* house, float scaleFactor ) {
     V2fVectorOfVector wallsPoints;
     float scale = 1.0f / scaleFactor;
@@ -348,4 +354,11 @@ void HouseService::recalculateBBox( HouseBSData *house ) {
     house->width = house->bbox3d.calcWidth();
     house->height = house->bbox3d.calcHeight();
     house->depth = house->bbox3d.calcDepth();
+}
+
+void HouseService::swapWindowOrDoor( HouseBSData *house, int64_t hashOfTwoShape ) {
+    for ( auto &floor : house->mFloors ) {
+        FloorService::swapWindowOrDoor( floor.get(), house, hashOfTwoShape );
+    }
+
 }

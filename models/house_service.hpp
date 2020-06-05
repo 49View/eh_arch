@@ -31,10 +31,12 @@ namespace HouseService {
     // Update
     void rescale( HouseBSData *house, float scale );
     void recalculateBBox( HouseBSData *house );
+    void swapWindowOrDoor( HouseBSData *house, int64_t hashOfTwoShape );
 
     // Delete
     void removeArch( std::shared_ptr<HouseBSData> _house, int64_t hashToRemove );
     void clearHouse( HouseBSData *house );
+    void clearHouseRooms( HouseBSData *house );
     void clearFurniture( std::shared_ptr<HouseBSData> _house );
     void clearHouseExcludingFloorsAndWalls( HouseBSData *house );
 

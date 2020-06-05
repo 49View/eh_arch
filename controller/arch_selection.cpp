@@ -38,7 +38,9 @@ void ArchSelection::deleteElementsOnSelectionList( deleteSelectionCallback ccf )
 }
 
 void ArchSelection::toggleElementsOnSelectionList( toggleSelectionCallback ccf ) {
-
+    for ( auto s1 : selection ) {
+        ccf(s1.asf);
+    }
 }
 
 void ArchSelection::clear() {

@@ -86,4 +86,6 @@ namespace HouseMakerBitmap {
     std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData, const SourceImages& sourceImages );
     void makeFromWalls( std::shared_ptr<HouseBSData> house, const V2fVectorOfVector& wallPoints, HMBBSData& bsdata,
                         const SourceImages& sourceImages );
+    void
+    makeFromSwapDoorOrWindow( HouseBSData* house, HMBBSData& bsdata, const SourceImages& sourceImages, HashEH hash );
 };

@@ -32,7 +32,7 @@ namespace HouseRender {
         if ( data->sourceData.floorPlanSize != V2fc::ZERO && !isFloorPlanRenderMode2d(ims.renderMode()) ) {
             // 1)
             rr.draw<DRect>(data->sourceData.floorPlanBBox, C4f::WHITE.A(.5f), RDSImage(data->sourceData.floorPlanSourceName),
-                           RDSRectAxis::XZ, data->sourceData.floorPlanSourceName);
+                           RDSRectAxis::XZ, data->sourceData.floorPlanSourceName+data->sourceData.floorPlanBBox.size().toString());
         } else if ( isFloorPlanRenderMode2d(ims.renderMode()) ) {
             // 2)
             float padding = 0.01f;

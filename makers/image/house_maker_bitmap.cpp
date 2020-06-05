@@ -491,6 +491,14 @@ namespace HouseMakerBitmap {
         allRoomsAreFullyClosed &= FloorService::roomRecognition( f );
     }
 
+    bool guessRooms( HouseBSData *house ) {
+        bool allRoomsAreFullyClosed = true;
+        for ( auto &f : house->mFloors ) {
+            guessRooms(f.get(), allRoomsAreFullyClosed);
+        }
+        return allRoomsAreFullyClosed;
+    }
+
     bool findApproxAreaStrings( const std::string &_val ) {
 
         std::vector<std::string> singleWords = split( _val, ' ' );
@@ -819,7 +827,7 @@ namespace HouseMakerBitmap {
     }
 
     void makeFromWalls( std::shared_ptr<HouseBSData> house, const V2fVectorOfVector& wallPoints, HMBBSData &bsdata, const SourceImages& sourceImages ) {
-        PROFILE_BLOCK( "House from wall service elaborate" );
+        PROFILE_BLOCK( "House from wall service elaborate from walls" );
 
         HouseService::clearHouse( house.get() );
         guessNumberOfFloors( house.get(), sourceImages );
@@ -833,6 +841,16 @@ namespace HouseMakerBitmap {
 
         addAndFinaliseRooms( house.get(), bsdata, sourceImages );
         rescale( house.get(), 1.0f, 1.0f );
+    }
+
+    void makeFromSwapDoorOrWindow( HouseBSData* house, HMBBSData &bsdata, const SourceImages& sourceImages, HashEH hash ) {
+        PROFILE_BLOCK( "House from wall service elaborate from swap doors and windows" );
+        HouseService::swapWindowOrDoor( house, hash );
+        HouseService::clearHouseRooms( house );
+        rescale( house, 1.0f/bsdata.rescaleFactor, metersToCentimeters(1.0f/bsdata.rescaleFactor) );
+        guessRooms( house );
+        addAndFinaliseRooms( house, bsdata, sourceImages );
+        rescale( house, bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
     }
 
     std::shared_ptr<HouseBSData> makeEmpty( HMBBSData &bsdata ) {
