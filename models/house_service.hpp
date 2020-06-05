@@ -15,10 +15,13 @@
 #include "arch_structural_service.hpp"
 
 class FurnitureMapStorage;
+
 class CollisionMesh;
 
-struct IsNear {};
-struct IsInside {};
+struct IsNear {
+};
+struct IsInside {
+};
 
 namespace HouseService {
     // Create
@@ -26,7 +29,6 @@ namespace HouseService {
     std::shared_ptr<CollisionMesh> createCollisionMesh( const HouseBSData *_house );
 
     // Update
-    WallBSData *findWall( HouseBSData *house, HashEH hash );
     void rescale( HouseBSData *house, float scale );
     void recalculateBBox( HouseBSData *house );
 
@@ -61,17 +63,58 @@ namespace HouseService {
     void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );
 
     // Templates
+    template<typename T>
+    T* find( HouseBSData *_house, HashEH hash ) {
+        for ( auto& f : _house->mFloors ) {
+            if constexpr ( std::is_same_v<T, WallBSData> ) {
+                for ( auto& w : f->walls ) {
+                    if ( w->hash == hash ) {
+                        return w.get();
+                    }
+                }
+            }
+            if constexpr ( std::is_same_v<T, DoorBSData> ) {
+                for ( auto& w : f->doors ) {
+                    if ( w->hash == hash ) {
+                        return w.get();
+                    }
+                }
+            }
+            if constexpr ( std::is_same_v<T, WindowBSData> ) {
+                for ( auto& w : f->windows ) {
+                    if ( w->hash == hash ) {
+                        return w.get();
+                    }
+                }
+            }
+            if constexpr ( std::is_same_v<T, RoomBSData> ) {
+                for ( auto& w : f->rooms ) {
+                    if ( w->hash == hash ) {
+                        return w.get();
+                    }
+                }
+            }
+            if constexpr ( std::is_same_v<T, StairsBSData> ) {
+                for ( auto& w : f->stairs ) {
+                    if ( w->hash == hash ) {
+                        return w.get();
+                    }
+                }
+            }
+        }
+        return nullptr;;
+    }
 
     template<typename T, typename NI>
     std::shared_ptr<T> point( const HouseBSData *_house, const Vector3f& point, float radius = 0.01f ) {
         std::shared_ptr<T> found;
 
-        auto checkNearOrInside = [&]( auto* w) {
+        auto checkNearOrInside = [&]( auto *w ) {
             bool isNearInside1 = false;
-            if constexpr ( std::is_same_v<NI,IsNear> ) {
+            if constexpr ( std::is_same_v<NI, IsNear> ) {
                 isNearInside1 = ArchStructuralService::isPointNear(w, point, radius);
             }
-            if constexpr ( std::is_same_v<NI,IsInside> ) {
+            if constexpr ( std::is_same_v<NI, IsInside> ) {
                 isNearInside1 = ArchStructuralService::isPointInside(w, point);
             }
             return isNearInside1;

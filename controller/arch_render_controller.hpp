@@ -54,6 +54,7 @@ public:
     void moveSelectionList(const V2f& _point, moveSelectionCallback ccf);
     void splitFirstEdgeOnSelectionList( splitSelectionCallback ccf );
     void deleteElementsOnSelectionList( deleteSelectionCallback ccf );
+    void toggleElementsOnSelectionList( toggleSelectionCallback ccf );
     void resetSelection();
     size_t selectionCount() const;
 

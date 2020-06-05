@@ -635,7 +635,7 @@ void WallService::addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const 
 
 void WallService::moveFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& offset,
                              bool incremental ) {
-    WallBSData *w = HouseService::findWall(houseJson, asf.hash);
+    WallBSData *w = HouseService::find<WallBSData>(houseJson, asf.hash);
     if ( asf.feature == ArchStructuralFeature::ASF_Point ) {
         WallService::movePoint(w, asf.index, offset, incremental);
     }
@@ -647,7 +647,7 @@ void WallService::moveFeature( HouseBSData *houseJson, const ArchStructuralFeatu
 }
 
 void WallService::deleteFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf ) {
-    WallBSData *w = HouseService::findWall(houseJson, asf.hash);
+    WallBSData *w = HouseService::find<WallBSData>(houseJson, asf.hash);
     if ( asf.feature == ArchStructuralFeature::ASF_Point ) {
         WallService::deletePoint(w, asf.index);
     }
@@ -658,7 +658,7 @@ void WallService::deleteFeature( HouseBSData *houseJson, const ArchStructuralFea
 
 void WallService::splitEdgeAndAddPointInTheMiddle( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf,
                                                    const V2f& newPoint ) {
-    WallBSData *w = HouseService::findWall(houseJson, asf.hash);
+    WallBSData *w = HouseService::find<WallBSData>(houseJson, asf.hash);
     WallService::addPointAfterIndex( w, asf.index, newPoint );
 }
 

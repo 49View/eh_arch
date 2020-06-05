@@ -31,25 +31,26 @@ namespace DoorRender {
 
     void drawSingleDoor2d( Renderer& rr, const DoorBSData *door, DShaderMatrix sm, const ArchRenderController& ims ) {
 
+        auto lineWidth = ims.floorPlanScaler(0.03f);
+        auto color = ims.getFillColor(door->hash, C4f::BLACK);
+
         float vwangle = -atan2(-door->dirWidth.y(), door->dirWidth.x());
+        float dIndexSign = (isLeft(door->dIndex) ? -1.0f : 1.0f);
 
         V2f dp = XZY::C2(door->doorPivot);
         dp.rotate(vwangle + M_PI);
 
         auto p1 = door->center + dp;
 
-        V2f dn = V2fc::X_AXIS * door->width;
-        dn.rotate(vwangle + M_PI + door->openingAngleMax);
+        V2f dn = V2fc::X_AXIS * (door->width);
+        dn.rotate(vwangle + M_PI + door->openingAngleMax * dIndexSign);
         V2f p3 = p1 + dn;
 
-        V2f dn2 = V2fc::X_AXIS * door->width;
+        V2f dn2 = V2fc::X_AXIS * (door->width);
         dn2.rotate(vwangle + M_PI);
-        V2f p2 = p1 + dn2;
+        V2f p2 = p1 + dn2 * dIndexSign;
 
-        auto lineWidth = ims.floorPlanScaler(0.03f);
-        auto color = ims.getFillColor(door->hash, C4f::BLACK);
-
-        float dist = distance(p1, p2) + lineWidth*0.5f;
+        float dist = distance(p1, p2);
 
         std::vector<V2f> vLists;
         vLists.emplace_back(p2);

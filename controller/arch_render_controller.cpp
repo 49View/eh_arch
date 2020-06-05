@@ -59,6 +59,10 @@ void ArchRenderController::deleteElementsOnSelectionList( deleteSelectionCallbac
     selection.deleteElementsOnSelectionList( ccf );
 }
 
+void ArchRenderController::toggleElementsOnSelectionList( toggleSelectionCallback ccf ) {
+    selection.toggleElementsOnSelectionList( ccf );
+}
+
 void ArchRenderController::resetSelection() {
     selection.clear();
 }

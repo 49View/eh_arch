@@ -299,17 +299,6 @@ void HouseService::guessFittings( HouseBSData *house, FurnitureMapStorage &furns
     }
 }
 
-WallBSData* HouseService::findWall( HouseBSData *house, HashEH hash ) {
-    for ( auto &f : house->mFloors ) {
-        for ( auto &w : f->walls ) {
-            if ( w->hash == hash ) {
-                return w.get();
-            }
-        }
-    }
-    return nullptr;
-}
-
 void HouseService::clearHouseExcludingFloorsAndWalls( HouseBSData *house ) {
     for ( auto &f : house->mFloors ) {
         f->rooms.clear();

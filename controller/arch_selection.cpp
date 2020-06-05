@@ -37,6 +37,10 @@ void ArchSelection::deleteElementsOnSelectionList( deleteSelectionCallback ccf )
     }
 }
 
+void ArchSelection::toggleElementsOnSelectionList( toggleSelectionCallback ccf ) {
+
+}
+
 void ArchSelection::clear() {
     selection.clear();
 }
@@ -48,3 +52,4 @@ size_t ArchSelection::count() const {
 ArchStructuralFeature ArchSelection::singleSelectedFeature() const {
     return selection.empty() ? ArchStructuralFeature::ASF_None : selection.begin()->asf.feature;
 }
+
