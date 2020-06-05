@@ -28,6 +28,7 @@ namespace HouseService {
     // Update
     WallBSData *findWall( HouseBSData *house, HashEH hash );
     void rescale( HouseBSData *house, float scale );
+    void recalculateBBox( HouseBSData *house );
 
     // Delete
     void removeArch( std::shared_ptr<HouseBSData> _house, int64_t hashToRemove );
@@ -45,7 +46,6 @@ namespace HouseService {
     std::pair<uint64_t, uint64_t> getFloorWallPairFor( std::shared_ptr<HouseBSData> _house, const int64_t _hash );
     std::shared_ptr<ArchStructural>
     rayIntersect( std::shared_ptr<HouseBSData> _house, const Vector3f& origin, const Vector3f& dir );
-    std::shared_ptr<WallBSData> isPointInsideWall( std::shared_ptr<HouseBSData> _house, const Vector3f& point );
     bool findFloorOrRoomAt( std::shared_ptr<HouseBSData> _house, const Vector2f& pos, int& floorIndex );
     std::shared_ptr<FloorBSData> findFloorOf( std::shared_ptr<HouseBSData> _house, const int64_t _hash );
     bool areThereStairsAtFloorNumber( std::shared_ptr<HouseBSData> _house, int floorNumber );

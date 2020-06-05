@@ -24,11 +24,6 @@ Color4f ArchRenderController::floorPlanElemColor() const {
     return isFloorPlanRenderModeDebug() ? Color4f::RANDA1() : C4f::BLACK;
 }
 
-ArchRenderController::ArchRenderController( const RDSPreMult& pm, FloorPlanRenderMode renderMode ) : mPm(pm),
-                                                                                                     mRenderMode(
-                                                                                                               renderMode) {}
-ArchRenderController::ArchRenderController( FloorPlanRenderMode renderMode ) : mRenderMode(renderMode) {}
-
 FloorPlanRenderMode ArchRenderController::renderMode() const {
     return mRenderMode;
 }
