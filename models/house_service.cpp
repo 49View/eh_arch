@@ -349,7 +349,8 @@ void HouseService::rescale( HouseBSData *house, float scale ) {
 
 void HouseService::recalculateBBox( HouseBSData *house ) {
     house->bbox = Rect2f::INVALID;
-    for ( const auto &floor : house->mFloors ) {
+    for ( auto &floor : house->mFloors ) {
+        FloorService::calcBBox(floor.get());
         house->bbox.merge( floor->bbox );
         house->bbox3d.merge( floor->bbox3d );
     }
