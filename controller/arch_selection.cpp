@@ -48,5 +48,3 @@ size_t ArchSelection::count() const {
 ArchStructuralFeature ArchSelection::singleSelectedFeature() const {
     return selection.empty() ? ArchStructuralFeature::ASF_None : selection.begin()->asf.feature;
 }
-
-

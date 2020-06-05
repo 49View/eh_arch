@@ -748,7 +748,6 @@ namespace RoomService {
             }
         }
     }
-
 }
 
 FittedFurniture& FurnitureMapStorage::spawn( FT _ft ) {

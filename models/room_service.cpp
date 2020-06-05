@@ -580,13 +580,13 @@ namespace RoomService {
     }
 
     Vector4f roomColor( const RoomBSData *r ) {
-        switch ( r->asType ) {
+        switch ( r->roomTypes[0] ) {
             case ASType::GenericRoom:
-                return Color4f::SAND.A(0.25f);
+                return Color4f::SAND;
 
             case ASType::LivingRoom:
             case ASType::Studio:
-                return Color4f::ALMOND.A(0.25f);
+                return Color4f::ALMOND;
 
             case ASType::Kitchen:
                 return Color4f::PASTEL_GREEN;
@@ -632,6 +632,13 @@ namespace RoomService {
         }
 
         return Color4f::WHITE;
+    }
+
+    std::string roomSizeToString( const RoomBSData *r ) {
+        if ( r->bbox.width() > r->bbox.height() ) {
+            return sizeToStringMeters(r->bbox.width(), r->bbox.height());
+        }
+        return sizeToStringMeters(r->bbox.height(), r->bbox.width());
     }
 
 }
