@@ -17,9 +17,6 @@ void ArchSelection::moveSelectionList( const V2f& _point, moveSelectionCallback 
             auto l2 = s1.initialSelectedPoint - cn;
             float sol = -sideOfLine(_point, l1, l2);
             auto offset = s1.asf.normalDirection * offsetDistance * sol;
-            LOGRS("Distance of point: " << offset);
-            LOGRS("point: " << _point);
-            LOGRS("original: " << s1.initialSelectedPoint);
             ccf(s1.asf, offset);
         }
     }
