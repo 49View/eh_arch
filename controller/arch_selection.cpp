@@ -10,12 +10,16 @@ void ArchSelection::moveSelectionList( const V2f& _point, moveSelectionCallback 
             auto offset = s1.asf.pointOfInterests[0] + ( _point - s1.initialSelectedPoint );
             ccf(s1.asf, offset);
         } else if ( s1.asf.feature == ArchStructuralFeature::ASF_Edge ) {
-            float offsetDistance = distance(_point, s1.initialSelectedPoint);
+            auto dom = s1.asf.normalDirection.dominantElement();
+            float offsetDistance = distance(_point[dom], s1.initialSelectedPoint[dom]);
             auto cn = rotate90(s1.asf.normalDirection);
             auto l1 = s1.initialSelectedPoint + cn;
             auto l2 = s1.initialSelectedPoint - cn;
             float sol = -sideOfLine(_point, l1, l2);
             auto offset = s1.asf.normalDirection * offsetDistance * sol;
+            LOGRS("Distance of point: " << offset);
+            LOGRS("point: " << _point);
+            LOGRS("original: " << s1.initialSelectedPoint);
             ccf(s1.asf, offset);
         }
     }
