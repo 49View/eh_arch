@@ -10,7 +10,7 @@
 class ArchRenderController;
 class SceneGraph;
 class Renderer;
-class DShaderMatrix;
+struct DShaderMatrix;
 class Vector4f;
 class Matrix4f;
 

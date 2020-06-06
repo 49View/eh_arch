@@ -97,10 +97,16 @@ void ArchOrchestrator::showIMHouse( std::shared_ptr<HouseBSData> _houseJson, con
 
 void ArchOrchestrator::show3dHouse( std::shared_ptr<HouseBSData> _houseJson, const PostHouseLoadCallback& ccf ) {
     sg.clearGMNodes();
+    rsg.RR().setLoadingFlag( true );
     HOD::resolver<HouseBSData>(sg, _houseJson.get(), [&, ccf, _houseJson]() {
         sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson.get()));
         HouseRender::make3dGeometry(sg, _houseJson.get());
+        // Infinite plane
+        sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,
+                         GT::Scale(500.0f, 0.1f, 500.0f));
         if ( ccf ) ccf(_houseJson);
+        rsg.RR().setLoadingFlag( false );
+        rsg.useSkybox(true);
     });
 }
 

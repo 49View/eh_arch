@@ -401,9 +401,9 @@ void RoomBuilder::refresh() {
 
         switch (activeSegmentType) {
             case ArchType::WallT:
-                rr.draw<DLine>( roomEditBucket, currentPoint, segments.back(), currLineColor, wallWidth, "LineSegment" );
-                rr.draw<DCircleFilled>( roomEditBucket, segments.back(), wallWidth*0.5f, currLineColor, "RoomBuilderLastTailCircle" );
-                rr.draw<DCircleFilled>( roomEditBucket, currentPoint, wallWidth*0.5f, currLineColor, "RoomBuilderLastTailCircle" );
+                rr.draw<DLine>( roomEditBucket, currentPoint, segments.back(), currLineColor, wallWidth, "LineSegment"+currLineColor.toString() );
+                rr.draw<DCircleFilled>( roomEditBucket, segments.back(), wallWidth*0.5f, currLineColor, "RoomBuilderLastTailCircle"+currLineColor.toString() );
+                rr.draw<DCircleFilled>( roomEditBucket, currentPoint, wallWidth*0.5f, currLineColor, "RoomBuilderLastTailCircle"+currLineColor.toString() );
                 break;
             case ArchType::WindowT:
                 drawWindow( roomEditBucket, segments.back(), currentPoint, wallWidth, currLineColor );

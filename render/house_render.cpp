@@ -23,8 +23,6 @@ namespace HouseRender {
 
         rr.clearBucket(CommandBufferLimits::UI2dStart);
 
-        auto rm = ims.floorPlanShader();
-
         // We have 3 combinations here:
         // 1) It's a 3d floorPlan with a source image, render the source image as a background
         // 2) it's a 2d floorPlan so no images allowed, render a flat poly
@@ -35,10 +33,11 @@ namespace HouseRender {
                            RDSRectAxis::XZ, data->sourceData.floorPlanSourceName+data->sourceData.floorPlanBBox.size().toString());
         } else if ( isFloorPlanRenderMode2d(ims.renderMode()) ) {
             // 2)
+            auto rm = ims.floorPlanShader();
             float padding = 0.01f;
             auto houseRect = Rect2f{ 0.0f, 0.0f, data->bbox.bottomRight().x() + padding,
                                      data->bbox.bottomRight().y() + padding };
-            rr.draw<DPoly>(rm, houseRect.pointscw(), C4f::WHITE.A(.5f), ims.pm(), "floorplanFlatPoly");
+            rr.draw<DPoly>(rm, houseRect.pointscw(), C4f::WHITE.A(0.05f), ims.pm(), "floorplanFlatPoly");
         } else {
             // 3)
             rr.draw<DRect>(data->bbox, C4f::WHITE.A(.3f), RDSRectAxis::XZ, "floorplanImageFlat");

@@ -74,3 +74,7 @@ size_t ArchRenderController::selectionCount() const {
 ArchStructuralFeature ArchRenderController::singleSelectedFeature() const {
     return selection.singleSelectedFeature();
 }
+
+ArchRenderController::ArchRenderController( const RDSPreMult& mPm, FloorPlanRenderMode mRenderMode ) : mPm(mPm),
+                                                                                                       mRenderMode(
+                                                                                                               mRenderMode) {}

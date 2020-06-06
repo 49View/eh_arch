@@ -10,7 +10,7 @@
 
 #include "house_bsdata.hpp"
 
-class ArchStructuralFeatureDescriptor;
+struct ArchStructuralFeatureDescriptor;
 
 namespace WallService {
     std::shared_ptr<WallBSData> createWall( const std::vector<Vector2f>& epts, float _height,
