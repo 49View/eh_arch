@@ -842,6 +842,18 @@ namespace HouseMakerBitmap {
         rescale( house.get(), 1.0f, 1.0f );
     }
 
+    void makeAddDoor( HouseBSData* house, HMBBSData &bsdata, const SourceImages& sourceImages, const FloorUShapesPair& fus ) {
+        PROFILE_BLOCK( "House from wall service elaborate house make door" );
+
+        FloorService::addDoorFromData( fus.f, house->doorHeight, *fus.us1, *fus.us2 );
+        HouseService::clearHouseRooms( house );
+        rescale( house, 1.0f/bsdata.rescaleFactor, metersToCentimeters(1.0f/bsdata.rescaleFactor) );
+
+        guessRooms( house );
+        addAndFinaliseRooms( house, bsdata, sourceImages );
+        rescale( house, bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
+    }
+
     void makeFromSwapDoorOrWindow( HouseBSData* house, HMBBSData &bsdata, const SourceImages& sourceImages, HashEH hash ) {
         PROFILE_BLOCK( "House from wall service elaborate from swap doors and windows" );
         HouseService::swapWindowOrDoor( house, hash );

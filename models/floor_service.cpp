@@ -254,7 +254,7 @@ bool FloorService::isIndexInUShape( size_t t, WallBSData *w ) {
     auto p1 = w->epoints[t];
     auto p2 = w->epoints[cai( t + 1, csize )];
     for ( const auto& us : w->mUShapes ) {
-        if ( UShapeService::isMaineEdgeEspsilon( p1, p2, us, 0.07f )) {
+        if ( UShapeService::isMaineEdgeEspsilon( p1, p2, us, 0.005f )) {
             return true;
         }
     }
@@ -266,7 +266,7 @@ FloorService::externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& w
     float floorRadius = JMATH::max( f->bbox.width(), f->bbox.height());
 
     std::vector<std::pair<V2f, V2f>> wp{};
-    for ( auto& w : f->walls ) {
+    for ( const auto& w : f->walls ) {
         int csize = static_cast<int>( w->epoints.size());
         int wrapAmount = w->wrapLastPoint != 0 ? 0 : 1;
         for ( auto t = 0; t < csize - wrapAmount; t++ ) {
@@ -281,7 +281,7 @@ FloorService::externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& w
 
     Vector2f i = V2fc::ZERO;
     int vn = 0;
-    for ( auto& w : f->walls ) {
+    for ( const auto& w : f->walls ) {
         for ( size_t t = 0; t < w->epoints.size() - ( w->wrapLastPoint != 0 ? 0 : 1 ); t++ ) {
             if ( isIndexInUShape( t, w.get()) || w->sequencePart > 0 ) continue;
             int t1 = cai( t + 1, w->epoints.size());
@@ -517,6 +517,7 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
     for ( auto& r : f->rooms ) {
         if ( r->doors.size() > 2 && r->windows.empty() )  {
             RoomService::addRoomType(r.get(), ASType::Hallway);
+            RoomService::removeRoomType(r.get(), ASType::GenericRoom);
         }
     }
 
@@ -964,4 +965,8 @@ void FloorService::rollbackToCalculatedWalls( FloorBSData *f ) {
 
 bool FloorService::hasAnyWall( const FloorBSData *f ) {
     return !f->walls.empty();
+}
+
+bool FloorService::isFloorUShapeValid( const FloorUShapesPair& fus ) {
+    return fus.f && fus.us1 && fus.us2;
 }

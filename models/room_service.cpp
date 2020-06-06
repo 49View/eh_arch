@@ -516,6 +516,10 @@ namespace RoomService {
         r->roomTypes.emplace_back(rt);
     }
 
+    void removeRoomType( RoomBSData *r, ASTypeT rt ) {
+        erase_if(r->roomTypes, [rt](const auto& lrt) ->bool { return lrt==rt;} );
+    }
+
     bool isGeneric( const RoomBSData *r ) {
         return r->asType == ASType::GenericRoom && r->roomTypes.size() == 1 && r->roomTypes[0] == ASType::GenericRoom;
     }

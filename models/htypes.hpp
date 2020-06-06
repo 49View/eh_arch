@@ -18,6 +18,8 @@
 const static float inch = 2.54f;
 const static float inch1o = 1.0f / 2.54f;
 struct ArchStructural;
+struct FloorBSData;
+struct UShape;
 
 enum class MeasureUnitType {
 	Inch = 0,
@@ -154,9 +156,16 @@ typedef std::pair<int32_t, int32_t> roomTypeIndex;
 struct ArchIntersection {
     ArchStructural* arch = nullptr;
     bool hit = false;
+    V2f i;
     V2f p1;
     V2f p2;
     V2f pn;
+};
+
+struct FloorUShapesPair {
+    FloorBSData* f = nullptr;
+    UShape* us1 = nullptr;
+    UShape* us2 = nullptr;
 };
 
 enum ArchType : uint64_t {

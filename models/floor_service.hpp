@@ -147,6 +147,7 @@ namespace FloorService {
     void centrePointOfBiggestRoom( const FloorBSData *f, float& _currMaxArea,
                                           Vector2f& _currCenter );
     ClipperLib::Paths calcPlainPath( const FloorBSData *f );
+    bool isFloorUShapeValid( const FloorUShapesPair& fus );
 
     // Update
     void calcBBox( FloorBSData *f );

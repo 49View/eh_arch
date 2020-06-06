@@ -448,7 +448,7 @@ bool WallService::checkIndexAreInMiddleAnyUSHape( const WallBSData *w, int i1, i
 
 Vector3f WallService::middlePointAt( const WallBSData *w, size_t index ) {
     ASSERT(index < w->epoints.size());
-    return { lerp(0.5f, w->epoints[index], w->epoints[getCircularArrayIndexUnsigned(index + 1, w->epoints.size())]),
+    return { lerp(0.5f, w->epoints[index], w->epoints[cai(index + 1, w->epoints.size())]),
              w->height * 0.5f };
 }
 
@@ -484,6 +484,7 @@ WallService::intersectLine2dMin( WallBSData *w, Vector2f const& p0, Vector2f con
                 ret.hit = !checkBitWiseFlag(w->wallFlags, filterFlags);
                 if ( ret.hit ) {
                     ret.arch = w;
+                    ret.i = i;
                     ret.p1 = ps1;
                     ret.p2 = ps2;
                     ret.pn = w->enormals[t];
@@ -587,84 +588,72 @@ void WallService::addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const 
     WallService::update(w);
 }
 
-void WallService::addTwoShapeAfterIndex( WallBSData *w, uint64_t pointIndex, const V2f& point ) {
-//    if ( w->epoints.size() <= pointIndex ) return;
-//
-//    V2fVector newPoints{};
-//    for ( auto t = 0u; t < w->epoints.size(); t++ ) {
-//        auto currPoint = w->epoints[t];
-//        newPoints.emplace_back(currPoint);
-//        if ( t == pointIndex ) {
-//            V2f nextPoint = w->epoints[cai(t + 1, w->epoints.size())];
-//            V2f inters{};
-//            intersection(point + w->enormals[t] * 1000.0f, point - w->enormals[t] * 1000.0f, currPoint, nextPoint,
-//                         inters);
-//            V2f dir = normalize(nextPoint - currPoint);
-//            V2f p1 = inters - dir * 0.05f;
-//            V2f p2 = inters + dir * 0.05f;
-//            newPoints.emplace_back(p1);
-//            newPoints.emplace_back(p1 + w->enormals[t] * 0.05f);
-//            newPoints.emplace_back(p2 + w->enormals[t] * 0.05f);
-//            newPoints.emplace_back(p2);
-////
-////            auto newPoints = PolyServices::clipAgainst( w->epoints, ushapeBump,
-////                                                        PolyServices::ClipMode::Union );
-////            WallService::update( w, newPoints );
-////
-//        }
-//    }
-//
-//    w->epoints = newPoints;
-//    WallService::update(w);
+UShape* WallService::addTwoShapeAt( WallBSData *w, const ArchIntersection& archI ) {
 
+    V2f dir = normalize(archI.p2 - archI.p1);
+    V2f uShapeBumpSize{0.04f, 0.03f};
+    V2f p1 = archI.i - dir * uShapeBumpSize.x();
+    V2f p2 = archI.i + dir * uShapeBumpSize.x();
 
-//    if ( w->epoints.size() <= pointIndex ) return;
-//
-//    for ( auto t = 0u; t < w->epoints.size(); t++ ) {
-//        auto currPoint = w->epoints[t];
-//        if ( t == pointIndex ) {
-//            V2f nextPoint = w->epoints[cai(t + 1, w->epoints.size())];
-//            V2f inters{};
-//            intersection(point + w->enormals[t] * 1000.0f, point - w->enormals[t] * 1000.0f, currPoint, nextPoint,
-//                         inters);
-//            V2f dir = normalize(nextPoint - currPoint);
-//            V2f uShapeBumpSize{0.25f, 0.25f};
-//            V2f p1 = inters - dir * uShapeBumpSize.x();
-//            V2f p2 = inters + dir * uShapeBumpSize.x();
-//            V2fVector ushapeBump{};
-//            ushapeBump.emplace_back(p1);
-//            ushapeBump.emplace_back(p1 + w->enormals[t] * uShapeBumpSize.y());
-//            ushapeBump.emplace_back(p2 + w->enormals[t] * uShapeBumpSize.y());
-//            ushapeBump.emplace_back(p2);
-//
-//            auto newPoints = PolyServices::clipAgainst( w->epoints, ushapeBump,
-//                                                        PolyServices::ClipMode::Union );
-//            WallService::update( w, newPoints );
-//            return;
-//        }
-//    }
+    V2f pus1 = p1 + archI.pn * uShapeBumpSize.y();
+    V2f pus2 = p2 + archI.pn * uShapeBumpSize.y();
+    V2fVector ushapeBump{};
+    ushapeBump.emplace_back(p1);
+    ushapeBump.emplace_back(pus1);
+    ushapeBump.emplace_back(pus2);
+    ushapeBump.emplace_back(p2);
 
-    V2f i{};
-    float minDist = 381203812093812903128031.0f;
-    ArchIntersection ret{};
-    WallService::intersectLine2dMin(w, point+V2fc::Y_AXIS*1000.0f, point+V2fc::Y_AXIS*-1000.0f, i, minDist, ret, WallFlags::WF_IsDoorPart|WallFlags::WF_IsWindowPart );
+    auto newPoints = PolyServices::clipAgainst( w->epoints, ushapeBump,
+                                                PolyServices::ClipMode::Union );
+    auto oldUShapes = w->mUShapes;
+    WallService::update( w, newPoints );
 
-    if ( ret.hit ) {
-        V2f dir = normalize(ret.p2 - ret.p1);
-        V2f uShapeBumpSize{0.25f, 0.25f};
-        V2f p1 = i - dir * uShapeBumpSize.x();
-        V2f p2 = i + dir * uShapeBumpSize.x();
-        V2fVector ushapeBump{};
-        ushapeBump.emplace_back(p1);
-        ushapeBump.emplace_back(p1 + ret.pn * uShapeBumpSize.y());
-        ushapeBump.emplace_back(p2 + ret.pn * uShapeBumpSize.y());
-        ushapeBump.emplace_back(p2);
-
-        auto newPoints = PolyServices::clipAgainst( w->epoints, ushapeBump,
-                                                    PolyServices::ClipMode::Union );
-        WallService::update( w, newPoints );
+    UShape* ret = nullptr;
+    for ( auto it2 = w->mUShapes.begin(); it2 != w->mUShapes.end(); ) {
+        if ( UShapeService::isMaineEdgeEspsilon( pus1, pus2, *it2 ) ) {
+            ret = &*it2;
+            ++it2;
+        } else {
+            bool isOld = false;
+            for ( const auto& us : oldUShapes ) {
+                if ( UShapeService::doesShareMaineEdgeEpsilon(*it2, us) ) {
+                    isOld = true;
+                    break;
+                }
+            }
+            if ( !isOld ) {
+                w->mUShapes.erase(it2);
+            } else {
+                ++it2;
+            }
+        }
     }
 
+//    for ( auto& us : w->mUShapes ) {
+//        if ( UShapeService::isMaineEdgeEspsilon( pus1, pus2, us ) ) {
+//            ret = &us;
+//        }
+//    }
+//    if ( w->mUShapes.size() == 7 ) {
+//        w->mUShapes.erase(w->mUShapes.begin()+4);
+//        w->mUShapes.erase(w->mUShapes.begin()+5);
+//
+//    }
+//    for ( auto i = 0u; i < w->mUShapes.size(); i++ ) {
+//        auto us = w->mUShapes[i];
+//        if ( UShapeService::isMaineEdgeEspsilon( pus1, p1, us ) ) {
+//            w->mUShapes.erase(w->mUShapes.begin()+i);
+//            break;
+//        }
+//    }
+//    for ( auto i = 0u; i < w->mUShapes.size(); i++ ) {
+//        auto us = w->mUShapes[i];
+//        if ( UShapeService::isMaineEdgeEspsilon( pus2, p2, us ) ) {
+//            w->mUShapes.erase(w->mUShapes.begin()+i);
+//            break;
+//        }
+//    }
+    return ret;
 }
 
 void WallService::moveFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& offset,
@@ -696,29 +685,45 @@ void WallService::splitEdgeAndAddPointInTheMiddle( HouseBSData *houseJson, const
     WallService::addPointAfterIndex(w, asf.index, newPoint);
 }
 
-void WallService::createTwoShapeOnSelectedEdge( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf,
-                                                const V2f& newPoint ) {
-    auto *w1 = HouseService::find<WallBSData>(houseJson, asf.hash);
-    WallService::addTwoShapeAfterIndex(w1, asf.index, newPoint);
+FloorUShapesPair WallService::createTwoShapeAt( HouseBSData *house, const V2f& point ) {
 
-//    std::vector<std::pair<float, WallBSData*>> arcInters{};
-//    for ( auto& f : houseJson->mFloors ) {
-//        for ( auto& w : f->walls ) {
-//            V2f i{};
-//            float minDist = 381203812093812903128031.0f;
-//            ArchIntersection ret{};
-//            WallService::intersectLine2dMin(w.get(), newPoint+V2fc::Y_AXIS*1000.0f, newPoint+V2fc::Y_AXIS*-1000.0f, i, minDist, ret, WallFlags::WF_IsDoorPart|WallFlags::WF_IsWindowPart );
-//            if ( ret.hit && ret.arch->hash != w1->hash ) {
-//                auto wd = dynamic_cast<WallBSData*>(ret.arch);
-//                arcInters.emplace_back( minDist, wd );
-//                WallService::addTwoShapeAfterIndex(wd, asf.index, newPoint);
-//            }
-//        }
-//    }
-//    LOGRS("Source Hash: " << w1->hash );
-//    for ( auto& ww : arcInters ) {
-//        LOGRS("Wall colliders distance: " <<  ww.first << " hash: " << ww.second->hash );
-//    }
+//    auto *w1 = HouseService::find<WallBSData>(houseJson, asf.hash);
+    FloorUShapesPair fus{};
+
+    for ( auto& f : house->mFloors ) {
+        std::vector<std::pair<float, ArchIntersection>> arcInters{};
+        std::vector<std::pair<float, ArchIntersection>> arcInters2{};
+        for ( auto& w : f->walls ) {
+            V2f i{};
+            float minDist = 1000.0f;
+            ArchIntersection ai1{};
+            WallService::intersectLine2dMin(w.get(), point, point+V2fc::Y_AXIS*1000.0f, i, minDist, ai1, WallFlags::WF_IsDoorPart|WallFlags::WF_IsWindowPart );
+            if ( ai1.hit ) arcInters.emplace_back( minDist, ai1 );
+            ArchIntersection ai2{};
+            minDist = 1000.0f;
+            WallService::intersectLine2dMin(w.get(), point, point-V2fc::Y_AXIS*1000.0f, i, minDist, ai2, WallFlags::WF_IsDoorPart|WallFlags::WF_IsWindowPart );
+            if ( ai2.hit ) arcInters2.emplace_back( minDist, ai2 );
+        }
+        for ( auto& ww : arcInters ) {
+            LOGRS("1) Wall colliders distance: " <<  ww.first << " hash: " << ww.second.arch->hash << " p1: " << ww.second.p1 << " p2: " << ww.second.p2 << " pn: " << ww.second.pn );
+        }
+        for ( auto& ww : arcInters2 ) {
+            LOGRS("1) Wall colliders distance: " <<  ww.first << " hash: " << ww.second.arch->hash << " p1: " << ww.second.p1 << " p2: " << ww.second.p2 << " pn: " << ww.second.pn );
+        }
+
+        if ( !arcInters.empty() && !arcInters2.empty() ) {
+            auto wd = arcInters[0].second;
+            fus.us1 = WallService::addTwoShapeAt(dynamic_cast<WallBSData*>(wd.arch), wd);
+            auto wd2 = arcInters2[0].second;
+            fus.us2 = WallService::addTwoShapeAt(dynamic_cast<WallBSData*>(wd2.arch), wd2);
+            HouseService::recalculateBBox(house);
+            fus.f = f.get();
+            return fus;
+        }
+    }
+
+    return fus;
+    //
 }
 
 ArchStructuralFeatureDescriptor

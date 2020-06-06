@@ -56,7 +56,6 @@ void ArchRenderController::splitFirstEdgeOnSelectionList( splitSelectionCallback
 }
 
 void ArchRenderController::createTwoShapeOnSelectedEdge( const V2f& _point, splitSelectionCallback ccf ) {
-    selection.createTwoShapeOnSelectedEdge( _point, ccf );
 }
 
 void ArchRenderController::deleteElementsOnSelectionList( deleteSelectionCallback ccf ) {

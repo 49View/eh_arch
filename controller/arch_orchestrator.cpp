@@ -99,7 +99,7 @@ void ArchOrchestrator::show3dHouse( std::shared_ptr<HouseBSData> _houseJson, con
     sg.clearGMNodes();
     rsg.RR().setLoadingFlag( true );
     HOD::resolver<HouseBSData>(sg, _houseJson.get(), [&, ccf, _houseJson]() {
-        sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson.get()));
+//        sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson.get()));
         HouseRender::make3dGeometry(sg, _houseJson.get());
         // Infinite plane
         sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,

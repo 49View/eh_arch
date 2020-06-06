@@ -401,6 +401,7 @@ namespace RoomService {
     bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurnitureRuleScript& fs );
 
     void addRoomType( RoomBSData *r, ASTypeT rt );
+    void removeRoomType( RoomBSData *r, ASTypeT rt );
 
     // Query
     template<typename T>

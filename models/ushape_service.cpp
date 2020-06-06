@@ -61,6 +61,15 @@ bool UShapeService::doesShareMaineEdge( const UShape& us, const UShape& rhs ) {
 	return false;
 }
 
+bool UShapeService::doesShareMaineEdgeEpsilon( const UShape& us, const UShape& rhs, float epsilon ) {
+    if ( isVerySimilar(rhs.points[1], us.points[1], epsilon) || isVerySimilar(rhs.points[1], us.points[2], epsilon) ) {
+        if ( isVerySimilar(rhs.points[2], us.points[1], epsilon) || isVerySimilar(rhs.points[2], us.points[2], epsilon) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool UShapeService::isMaineEdge( const V2f& p1, const V2f& p2, const UShape& rhs ) {
     if ( rhs.points[1] ==p1 || rhs.points[1] == p2 ) {
         if ( rhs.points[2] ==p1 || rhs.points[2] == p2 ) {
