@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <tuple>
+#include <core/math/vector2f.h>
 
 const static float inch = 2.54f;
 const static float inch1o = 1.0f / 2.54f;
@@ -153,6 +154,9 @@ typedef std::pair<int32_t, int32_t> roomTypeIndex;
 struct ArchIntersection {
     ArchStructural* arch = nullptr;
     bool hit = false;
+    V2f p1;
+    V2f p2;
+    V2f pn;
 };
 
 enum ArchType : uint64_t {

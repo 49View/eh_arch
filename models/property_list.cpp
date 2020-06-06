@@ -1,4 +1,5 @@
 #include "property_list.hpp"
+#include <core/util.h>
 
 template <typename T>
 void mapkvArray( std::map< std::string, std::string >& kvmapping, const std::string _key, const std::vector<T>& _array, std::function<std::string(const int)> mf ) {

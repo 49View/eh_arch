@@ -5,6 +5,7 @@
 #include "kitchen_room_service.hpp"
 
 #include <core/math/path_util.h>
+#include <core/util.h>
 #include "../models/house_bsdata.hpp"
 #include "../models/room_service.hpp"
 #include "../models/room_service_furniture.hpp"

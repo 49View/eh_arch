@@ -8,12 +8,14 @@
 
 #include "house_service.hpp"
 
+#include <core/util.h>
+#include "core/file_manager.h"
+#include "poly/collision_mesh.hpp"
+
 #include "floor_service.hpp"
 #include "arch_structural_service.hpp"
 #include "room_service.hpp"
 
-#include "core/file_manager.h"
-#include "poly/collision_mesh.hpp"
 #include "wall_service.hpp"
 
 

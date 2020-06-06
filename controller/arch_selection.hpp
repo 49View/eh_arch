@@ -5,7 +5,6 @@
 #pragma once
 
 #include <functional>
-#include <core/util.h>
 #include <eh_arch/models/arch_structural_service.hpp>
 
 using moveSelectionCallback = std::function<void( const ArchStructuralFeatureDescriptor&, const V2f& )>;

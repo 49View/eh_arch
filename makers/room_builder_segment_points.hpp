@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <core/math/vector4f.h>
+#include <core/util.h>
 #include <eh_arch/models/htypes.hpp>
 #include <core/hashable.hpp>
 #include <eh_arch/makers/bespoke_data/house_maker_bespoke_data.hpp>

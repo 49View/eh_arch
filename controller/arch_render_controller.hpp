@@ -12,7 +12,6 @@ struct HouseBSData;
 
 class ArchRenderController {
 public:
-//    ArchRenderController( const RDSPreMult& mPm, FloorPlanRenderMode mRenderMode );
     ArchRenderController() = default;
 
     [[nodiscard]] FloorPlanRenderMode renderMode() const;

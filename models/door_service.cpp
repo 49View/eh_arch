@@ -7,6 +7,7 @@
 //
 
 #include "door_service.hpp"
+#include <core/util_follower.hpp>
 #include "twoushapes_service.hpp"
 
 std::shared_ptr<DoorBSData>

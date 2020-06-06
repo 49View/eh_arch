@@ -8,8 +8,10 @@
 
 #include "floor_service.hpp"
 #include <set>
-#include <core/math/poly_utils.hpp>
 #include <ostream>
+#include <core/util.h>
+#include <core/util_follower.hpp>
+#include <core/math/poly_utils.hpp>
 #include <core/math/triangulator.hpp>
 
 #include "room_service.hpp"

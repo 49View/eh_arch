@@ -7,7 +7,9 @@
 //
 
 #include "wall_service.hpp"
-#include "core/math/triangulator.hpp"
+#include <core/util.h>
+#include <core/math/triangulator.hpp>
+#include <poly/poly_services.hpp>
 
 #include "arch_structural_service.hpp"
 #include "ushape_service.hpp"
@@ -78,7 +80,7 @@ bool isInsideCeilingContour( const std::vector<std::vector<Vector3f>>& cd, const
         for ( auto& v : vv ) r.expand(v.xy());
         if ( r.contains(v1) ) {
             topZ1 = vv[0].z();
-            hitLevel1 = level + 1;
+            hitLevel1 = static_cast<int>( level + 1 );
             bFoundAtLeastOneContour = true;
         }
     }
@@ -153,10 +155,9 @@ struct WallSegmentCrossingData {
 bool addVertexFromWall( const std::vector<Vector3f>& vv, const Vector3f& v1, Vector3f& v3 ) {
     float minDist = std::numeric_limits<float>::max();
     Vector2f pi = V2fc::ZERO;
-    float dfl = 0.0f;
     bool bFoundHit = false;
     for ( size_t q = 0; q < vv.size(); q++ ) {
-        dfl = distanceFromLine(v1.xy(), vv[q].xy(), vv[getCircularArrayIndexUnsigned(q + 1, vv.size())].xy(), pi);
+        float dfl = distanceFromLine(v1.xy(), vv[q].xy(), vv[getCircularArrayIndexUnsigned(q + 1, vv.size())].xy(), pi);
         if ( dfl < minDist ) {
             minDist = dfl;
             v3 = { pi, vv[0].z() };
@@ -169,7 +170,7 @@ bool addVertexFromWall( const std::vector<Vector3f>& vv, const Vector3f& v1, Vec
 
 bool checkTraspassingSegments( const std::vector<std::vector<Vector3f>>& cd, const Vector3f& v1, Vector3f& v2,
                                WallSegmentCrossingData& wscd ) {
-    Vector2f pi;
+    Vector2f pi{};
     for ( auto level = 0u; level < cd.size(); level++ ) {
         auto vv = cd[level];
         for ( size_t x = 0; x < vv.size(); x++ ) {
@@ -451,65 +452,12 @@ Vector3f WallService::middlePointAt( const WallBSData *w, size_t index ) {
              w->height * 0.5f };
 }
 
-void WallService::addToArchSegment( const WallBSData *w, const int32_t floorNumber, const int32_t wallNumber,
-                                    std::vector<ArchSegment>& ws ) {
-//    int csize = static_cast<int>( w->epoints.size());
-//
-//    for ( auto t = 0; t < csize - ( w->wrapLastPoint == WallLastPointWrap::No ); t++ ) {
-//        int t1 = getCircularArrayIndex( t + 1, csize );
-//        if ( !checkIndexAreInMiddleAnyUSHape( w, t, t1 )) {
-//            ws.push_back( ArchSegmentService::createArchSegment( floorNumber, wallNumber, t, w->hash, w->epoints[t],
-//                                                                 w->epoints[t1], middlePointAt( w, t ).xy(),
-//                                                                 w->enormals[t], w->wallFlags, w->sequencePart, w->z, w->height ));
-//        }
-//    }
-}
-
-void WallService::addToArchSegmentInternal( const WallBSData *w, const int32_t floorNumber, const int32_t wallNumber,
-                                            std::vector<ArchSegment>& ws ) {
-//    int csize = static_cast<int>( w->epoints.size());
-//
-//    for ( auto t = 0; t < csize - ( w->wrapLastPoint == WallLastPointWrap::No ); t++ ) {
-//        int t1 = getCircularArrayIndex( t + 1, csize );
-//        if ( !checkBitWiseFlag( w->slinesGHType[t], GHType::WallPlasterExternal )) {
-//            ws.push_back( ArchSegmentService::createArchSegment( floorNumber, wallNumber, t, w->hash, w->epoints[t],
-//                                                                 w->epoints[t1], middlePointAt( w, t ).xy(),
-//                                                                 w->enormals[t], w->wallFlags, w->sequencePart, w->z, w->height ));
-//        }
-//    }
-}
-
-void WallService::getArchSegments( const WallBSData *w, const int32_t floorNumber, const int32_t wallNumber,
-                                   std::vector<ArchSegment>& ws ) {
-    // If it's a window or door we shall de-couple half of the ushape's volume and slip into two walls-segments in order to allow half space each side of the door/window.
-    addToArchSegmentInternal(w, floorNumber, wallNumber, ws);
-    return;
-//	bool madness = true;
-//	if ( !madness && checkBitWiseFlag( w->wallFlags, WallFlags::WF_IsDoorPart ) && w->mUShapes.size() == 2 ) {
-//		// First half
-//		Vector2f us1 = V2fc::ZERO;
-//		Vector2f us2 = V2fc::ZERO;
-//		Vector2f usm = V2fc::ZERO;
-//		Vector2f usn = V2fc::ZERO;
-//
-//		for ( auto t = 0; t < 6; t++ ) {
-//			getSegmentUShapePoint( w, t, us1, us2, usm, usn );
-//			ws.push_back( ArchSegmentService::createArchSegment( floorNumber, wallNumber, -1, w->hash, us1, us2, usm, usn, w->wallFlags ) );
-//		}
-//	} else if ( checkBitWiseFlag( w->wallFlags, WallFlags::WF_IsWindowPart ) ) {
-//		if ( checkBitWiseFlag( w->wallFlags, WallFlags::WF_HasSkirting ) ) {
-//			addToArchSegment( w, floorNumber, wallNumber, ws );
-//		}
-//	} else {
-//		addToArchSegment( w, floorNumber, wallNumber, ws );
-//	}
-}
-
 bool WallService::intersectLine2d( const WallBSData *w, Vector2f const& p0, Vector2f const& p1, Vector2f& i ) {
     bool ret = false;
 //	if ( w->bbox.lineIntersection( p0, p1 ) ) {
     int csize = static_cast<int>( w->epoints.size());
-    for ( auto t = 0; t < csize - ( w->wrapLastPoint == WallLastPointWrap::No ); t++ ) {
+    int wrap = w->wrapLastPoint ? 0 : 1;
+    for ( auto t = 0; t < csize - wrap; t++ ) {
         ret = intersection(w->epoints[t], w->epoints[getCircularArrayIndex(t + 1, csize)], p0, p1, i);
         if ( ret ) return ret;
     }
@@ -523,8 +471,11 @@ WallService::intersectLine2dMin( WallBSData *w, Vector2f const& p0, Vector2f con
     V2f li{ V2fc::ZERO };
 //	if ( w->bbox.lineIntersection( p0, p1 ) ) {
     int csize = static_cast<int>( w->epoints.size());
-    for ( auto t = 0; t < csize - ( w->wrapLastPoint == WallLastPointWrap::No ); t++ ) {
-        bool lret = intersection(w->epoints[t], w->epoints[getCircularArrayIndex(t + 1, csize)], p0, p1, li);
+    int wrap = w->wrapLastPoint ? 0 : 1;
+    for ( auto t = 0; t < csize - wrap; t++ ) {
+        auto ps1 = w->epoints[t];
+        auto ps2 = w->epoints[cai(t + 1, csize)];
+        bool lret = intersection(ps1, ps2, p0, p1, li);
         if ( lret ) {
             float dist = distance(li, p0);
             if ( dist < minDist ) {
@@ -533,6 +484,9 @@ WallService::intersectLine2dMin( WallBSData *w, Vector2f const& p0, Vector2f con
                 ret.hit = !checkBitWiseFlag(w->wallFlags, filterFlags);
                 if ( ret.hit ) {
                     ret.arch = w;
+                    ret.p1 = ps1;
+                    ret.p2 = ps2;
+                    ret.pn = w->enormals[t];
                 }
             }
         }
@@ -540,7 +494,7 @@ WallService::intersectLine2dMin( WallBSData *w, Vector2f const& p0, Vector2f con
 }
 
 void WallService::calcBBox( WallBSData *w ) {
-    if ( w->epoints.size() == 0 ) return;
+    if ( w->epoints.empty() ) return;
 
     w->bbox = Rect2f::INVALID;
     for ( auto& ep : w->epoints ) {
@@ -608,9 +562,9 @@ void WallService::deletePoint( WallBSData *w, uint64_t pointIndex ) {
 
 void WallService::deleteEdge( WallBSData *w, uint64_t pointIndex ) {
     auto epsize = w->epoints.size();
-    if ( pointIndex+1 <= epsize && epsize < 5 ) return;
+    if ( pointIndex + 1 <= epsize && epsize < 5 ) return;
 
-    if ( pointIndex+1 == epsize ) {
+    if ( pointIndex + 1 == epsize ) {
         w->epoints.erase(w->epoints.begin() + pointIndex);
         w->epoints.erase(w->epoints.begin());
     } else {
@@ -634,32 +588,88 @@ void WallService::addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const 
 }
 
 void WallService::addTwoShapeAfterIndex( WallBSData *w, uint64_t pointIndex, const V2f& point ) {
-    if ( w->epoints.size() <= pointIndex ) return;
+//    if ( w->epoints.size() <= pointIndex ) return;
+//
+//    V2fVector newPoints{};
+//    for ( auto t = 0u; t < w->epoints.size(); t++ ) {
+//        auto currPoint = w->epoints[t];
+//        newPoints.emplace_back(currPoint);
+//        if ( t == pointIndex ) {
+//            V2f nextPoint = w->epoints[cai(t + 1, w->epoints.size())];
+//            V2f inters{};
+//            intersection(point + w->enormals[t] * 1000.0f, point - w->enormals[t] * 1000.0f, currPoint, nextPoint,
+//                         inters);
+//            V2f dir = normalize(nextPoint - currPoint);
+//            V2f p1 = inters - dir * 0.05f;
+//            V2f p2 = inters + dir * 0.05f;
+//            newPoints.emplace_back(p1);
+//            newPoints.emplace_back(p1 + w->enormals[t] * 0.05f);
+//            newPoints.emplace_back(p2 + w->enormals[t] * 0.05f);
+//            newPoints.emplace_back(p2);
+////
+////            auto newPoints = PolyServices::clipAgainst( w->epoints, ushapeBump,
+////                                                        PolyServices::ClipMode::Union );
+////            WallService::update( w, newPoints );
+////
+//        }
+//    }
+//
+//    w->epoints = newPoints;
+//    WallService::update(w);
 
-    V2fVector newPoints{};
-    for ( auto t = 0u; t < w->epoints.size(); t++ ) {
-        auto currPoint = w->epoints[t];
-        newPoints.emplace_back(currPoint);
-        if ( t == pointIndex ) {
-            V2f nextPoint = w->epoints[cai(t+1, w->epoints.size())];
-            V2f inters{};
-            intersection(point + w->enormals[t]*1000.0f, point - w->enormals[t]*1000.0f, currPoint, nextPoint, inters);
-            V2f dir = normalize(nextPoint-currPoint);
-            V2f p1 = inters - dir*0.05f;
-            V2f p2 = inters + dir*0.05f;
-            newPoints.emplace_back(p1);
-            newPoints.emplace_back(p1 + w->enormals[t]*0.05f);
-            newPoints.emplace_back(p2 + w->enormals[t]*0.05f);
-            newPoints.emplace_back(p2);
-        }
+
+//    if ( w->epoints.size() <= pointIndex ) return;
+//
+//    for ( auto t = 0u; t < w->epoints.size(); t++ ) {
+//        auto currPoint = w->epoints[t];
+//        if ( t == pointIndex ) {
+//            V2f nextPoint = w->epoints[cai(t + 1, w->epoints.size())];
+//            V2f inters{};
+//            intersection(point + w->enormals[t] * 1000.0f, point - w->enormals[t] * 1000.0f, currPoint, nextPoint,
+//                         inters);
+//            V2f dir = normalize(nextPoint - currPoint);
+//            V2f uShapeBumpSize{0.25f, 0.25f};
+//            V2f p1 = inters - dir * uShapeBumpSize.x();
+//            V2f p2 = inters + dir * uShapeBumpSize.x();
+//            V2fVector ushapeBump{};
+//            ushapeBump.emplace_back(p1);
+//            ushapeBump.emplace_back(p1 + w->enormals[t] * uShapeBumpSize.y());
+//            ushapeBump.emplace_back(p2 + w->enormals[t] * uShapeBumpSize.y());
+//            ushapeBump.emplace_back(p2);
+//
+//            auto newPoints = PolyServices::clipAgainst( w->epoints, ushapeBump,
+//                                                        PolyServices::ClipMode::Union );
+//            WallService::update( w, newPoints );
+//            return;
+//        }
+//    }
+
+    V2f i{};
+    float minDist = 381203812093812903128031.0f;
+    ArchIntersection ret{};
+    WallService::intersectLine2dMin(w, point+V2fc::Y_AXIS*1000.0f, point+V2fc::Y_AXIS*-1000.0f, i, minDist, ret, WallFlags::WF_IsDoorPart|WallFlags::WF_IsWindowPart );
+
+    if ( ret.hit ) {
+        V2f dir = normalize(ret.p2 - ret.p1);
+        V2f uShapeBumpSize{0.25f, 0.25f};
+        V2f p1 = i - dir * uShapeBumpSize.x();
+        V2f p2 = i + dir * uShapeBumpSize.x();
+        V2fVector ushapeBump{};
+        ushapeBump.emplace_back(p1);
+        ushapeBump.emplace_back(p1 + ret.pn * uShapeBumpSize.y());
+        ushapeBump.emplace_back(p2 + ret.pn * uShapeBumpSize.y());
+        ushapeBump.emplace_back(p2);
+
+        auto newPoints = PolyServices::clipAgainst( w->epoints, ushapeBump,
+                                                    PolyServices::ClipMode::Union );
+        WallService::update( w, newPoints );
     }
-    w->epoints = newPoints;
-    WallService::update(w);
+
 }
 
 void WallService::moveFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& offset,
-                             bool incremental ) {
-    WallBSData *w = HouseService::find<WallBSData>(houseJson, asf.hash);
+                               bool incremental ) {
+    auto *w = HouseService::find<WallBSData>(houseJson, asf.hash);
     if ( asf.feature == ArchStructuralFeature::ASF_Point ) {
         WallService::movePoint(w, asf.index, offset, incremental);
     }
@@ -671,7 +681,7 @@ void WallService::moveFeature( HouseBSData *houseJson, const ArchStructuralFeatu
 }
 
 void WallService::deleteFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf ) {
-    WallBSData *w = HouseService::find<WallBSData>(houseJson, asf.hash);
+    auto *w = HouseService::find<WallBSData>(houseJson, asf.hash);
     if ( asf.feature == ArchStructuralFeature::ASF_Point ) {
         WallService::deletePoint(w, asf.index);
     }
@@ -682,14 +692,33 @@ void WallService::deleteFeature( HouseBSData *houseJson, const ArchStructuralFea
 
 void WallService::splitEdgeAndAddPointInTheMiddle( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf,
                                                    const V2f& newPoint ) {
-    WallBSData *w = HouseService::find<WallBSData>(houseJson, asf.hash);
-    WallService::addPointAfterIndex( w, asf.index, newPoint );
+    auto *w = HouseService::find<WallBSData>(houseJson, asf.hash);
+    WallService::addPointAfterIndex(w, asf.index, newPoint);
 }
 
 void WallService::createTwoShapeOnSelectedEdge( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf,
-                                                   const V2f& newPoint ) {
-    WallBSData *w = HouseService::find<WallBSData>(houseJson, asf.hash);
-    WallService::addTwoShapeAfterIndex( w, asf.index, newPoint );
+                                                const V2f& newPoint ) {
+    auto *w1 = HouseService::find<WallBSData>(houseJson, asf.hash);
+    WallService::addTwoShapeAfterIndex(w1, asf.index, newPoint);
+
+//    std::vector<std::pair<float, WallBSData*>> arcInters{};
+//    for ( auto& f : houseJson->mFloors ) {
+//        for ( auto& w : f->walls ) {
+//            V2f i{};
+//            float minDist = 381203812093812903128031.0f;
+//            ArchIntersection ret{};
+//            WallService::intersectLine2dMin(w.get(), newPoint+V2fc::Y_AXIS*1000.0f, newPoint+V2fc::Y_AXIS*-1000.0f, i, minDist, ret, WallFlags::WF_IsDoorPart|WallFlags::WF_IsWindowPart );
+//            if ( ret.hit && ret.arch->hash != w1->hash ) {
+//                auto wd = dynamic_cast<WallBSData*>(ret.arch);
+//                arcInters.emplace_back( minDist, wd );
+//                WallService::addTwoShapeAfterIndex(wd, asf.index, newPoint);
+//            }
+//        }
+//    }
+//    LOGRS("Source Hash: " << w1->hash );
+//    for ( auto& ww : arcInters ) {
+//        LOGRS("Wall colliders distance: " <<  ww.first << " hash: " << ww.second->hash );
+//    }
 }
 
 ArchStructuralFeatureDescriptor
@@ -716,21 +745,23 @@ WallService::getNearestFeatureToPoint( const HouseBSData *houseJson, const V2f& 
         for ( auto i = 0u; i < w->epoints.size(); i++ ) {
             auto ep = w->epoints[i];
             auto ep1 = w->epoints[cai(i + 1, w->epoints.size())];
-            V2f inters{V2fc::ZERO};
+            V2f inters{ V2fc::ZERO };
             float dist = distanceFromLine(point, ep, ep1, inters);
             if ( dist < nearFactor ) {
-                ArchStructuralFeatureDescriptor c1 = { ArchStructuralFeature::ASF_Edge, i, w->hash, { ep, ep1 }, w->enormals[i] };
+                ArchStructuralFeatureDescriptor c1 = { ArchStructuralFeature::ASF_Edge, i, w->hash, { ep, ep1 },
+                                                       w->enormals[i] };
                 c1.distanceToNearestFeature = dist;
                 candidates.emplace_back(c1);
             }
         }
 
         if ( !candidates.empty() ) {
-            std::sort( candidates.begin(), candidates.end(), [](const ArchStructuralFeatureDescriptor& a, const ArchStructuralFeatureDescriptor& b) -> bool {
-                return a.distanceToNearestFeature < b.distanceToNearestFeature;
-            });
-            const ASFD* cpoint = nullptr;
-            const ASFD* epoint = nullptr;
+            std::sort(candidates.begin(), candidates.end(),
+                      []( const ArchStructuralFeatureDescriptor& a, const ArchStructuralFeatureDescriptor& b ) -> bool {
+                          return a.distanceToNearestFeature < b.distanceToNearestFeature;
+                      });
+            const ASFD *cpoint = nullptr;
+            const ASFD *epoint = nullptr;
             for ( const auto& c1 :  candidates ) {
                 if ( c1.feature == ArchStructuralFeature::ASF_Point && !cpoint ) {
                     cpoint = &c1;
@@ -739,7 +770,7 @@ WallService::getNearestFeatureToPoint( const HouseBSData *houseJson, const V2f& 
                     epoint = &c1;
                 }
                 if ( cpoint && epoint ) {
-                    return cpoint->distanceToNearestFeature < nearFactor*0.5f ? *cpoint : *epoint;
+                    return cpoint->distanceToNearestFeature < nearFactor * 0.5f ? *cpoint : *epoint;
                 }
             }
             return *candidates.begin();

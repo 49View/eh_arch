@@ -9,12 +9,11 @@
 #include "house_maker_bitmap.hpp"
 
 #include <ocr/ocr.hpp>
+#include <core/util.h>
 #include <core/profiler.h>
 #include <core/string_util.h>
 #include <core/math/path_util.h>
-#include "../../models/arch_segment_service.hpp"
 #include "../../models/wall_service.hpp"
-#include "../../models/ushape_service.hpp"
 #include <event_horizon/native/poly/poly_services.hpp>
 #include <eh_arch/models/arch_structural_service.hpp>
 

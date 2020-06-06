@@ -7,7 +7,7 @@
 //
 
 #include "window_service.hpp"
-
+#include <core/util_follower.hpp>
 #include "twoushapes_service.hpp"
 
 std::shared_ptr<WindowBSData> WindowService::createWindow( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1, const UShape& w2, ArchSubTypeT /*st*/ /*= ArchSubType::NotApplicable */ ) {

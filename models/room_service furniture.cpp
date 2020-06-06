@@ -8,14 +8,20 @@
 
 #include "room_service.hpp"
 
-#include <poly/scene_graph.h>
+#include <core/util.h>
 #include <core/math/triangulator.hpp>
 #include <core/service_factory.h>
+#include <poly/scene_graph.h>
 
 #include "floor_service.hpp"
 #include "arch_segment_service.hpp"
 #include "room_service_furniture.hpp"
 #include "kitchen_room_service.hpp"
+
+[[nodiscard]] bool FittedFurniture::checkIf( FittedFurnitureFlags _flag ) const {
+    return checkBitWiseFlag(flags, _flag);
+}
+
 
 bool FurnitureRuleScript::execute( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns,
                                    const FurnitureRuleFunctionContainer& funcRules ) const {

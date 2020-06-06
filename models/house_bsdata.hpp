@@ -15,6 +15,7 @@
 #include <ostream>
 #include "core/math/vector4f.h"
 #include "core/math/quaternion.h"
+#include "core/hashing/incremental_hash.hpp"
 #include "core/htypes_shared.hpp"
 #include "core/serialization.hpp"
 #include "core/names.hpp"
@@ -175,12 +176,7 @@ JSONDATA(FittedFurniture, name, symbolRef, size, position3d, xyLocation, heightO
     explicit FittedFurniture( const std::tuple<std::string, V3f>& args, std::string _symbolRef ) :
             name(std::get<0>(args)), symbolRef(std::move(_symbolRef)), size(std::get<1>(args)) {}
     FittedFurniture( std::string _name, const Vector3f& _size ) : name(std::move(_name)), size(_size) {}
-    [[nodiscard]] bool checkIf( FittedFurnitureFlags _flag ) const {
-        return checkBitWiseFlag(flags, _flag);
-    }
-    void setFlag( FittedFurnitureFlags _flag ) {
-        orBitWiseFlag(flags, _flag);
-    }
+    [[nodiscard]] bool checkIf( FittedFurnitureFlags _flag ) const;
 };
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
