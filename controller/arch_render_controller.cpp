@@ -55,6 +55,10 @@ void ArchRenderController::splitFirstEdgeOnSelectionList( splitSelectionCallback
     selection.splitFirstEdgeOnSelectionList( ccf );
 }
 
+void ArchRenderController::createTwoShapeOnSelectedEdge( const V2f& _point, splitSelectionCallback ccf ) {
+    selection.createTwoShapeOnSelectedEdge( _point, ccf );
+}
+
 void ArchRenderController::deleteElementsOnSelectionList( deleteSelectionCallback ccf ) {
     selection.deleteElementsOnSelectionList( ccf );
 }
@@ -75,6 +79,6 @@ ArchStructuralFeature ArchRenderController::singleSelectedFeature() const {
     return selection.singleSelectedFeature();
 }
 
-ArchRenderController::ArchRenderController( const RDSPreMult& mPm, FloorPlanRenderMode mRenderMode ) : mPm(mPm),
-                                                                                                       mRenderMode(
-                                                                                                               mRenderMode) {}
+//ArchRenderController::ArchRenderController( const RDSPreMult& mPm, FloorPlanRenderMode mRenderMode ) : mPm(mPm),
+//                                                                                                       mRenderMode(
+//                                                                                                               mRenderMode) {}

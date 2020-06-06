@@ -633,6 +633,30 @@ void WallService::addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const 
     WallService::update(w);
 }
 
+void WallService::addTwoShapeAfterIndex( WallBSData *w, uint64_t pointIndex, const V2f& point ) {
+    if ( w->epoints.size() <= pointIndex ) return;
+
+    V2fVector newPoints{};
+    for ( auto t = 0u; t < w->epoints.size(); t++ ) {
+        auto currPoint = w->epoints[t];
+        newPoints.emplace_back(currPoint);
+        if ( t == pointIndex ) {
+            V2f nextPoint = w->epoints[cai(t+1, w->epoints.size())];
+            V2f inters{};
+            intersection(point + w->enormals[t]*1000.0f, point - w->enormals[t]*1000.0f, currPoint, nextPoint, inters);
+            V2f dir = normalize(nextPoint-currPoint);
+            V2f p1 = inters - dir*0.05f;
+            V2f p2 = inters + dir*0.05f;
+            newPoints.emplace_back(p1);
+            newPoints.emplace_back(p1 + w->enormals[t]*0.05f);
+            newPoints.emplace_back(p2 + w->enormals[t]*0.05f);
+            newPoints.emplace_back(p2);
+        }
+    }
+    w->epoints = newPoints;
+    WallService::update(w);
+}
+
 void WallService::moveFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& offset,
                              bool incremental ) {
     WallBSData *w = HouseService::find<WallBSData>(houseJson, asf.hash);
@@ -660,6 +684,12 @@ void WallService::splitEdgeAndAddPointInTheMiddle( HouseBSData *houseJson, const
                                                    const V2f& newPoint ) {
     WallBSData *w = HouseService::find<WallBSData>(houseJson, asf.hash);
     WallService::addPointAfterIndex( w, asf.index, newPoint );
+}
+
+void WallService::createTwoShapeOnSelectedEdge( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf,
+                                                   const V2f& newPoint ) {
+    WallBSData *w = HouseService::find<WallBSData>(houseJson, asf.hash);
+    WallService::addTwoShapeAfterIndex( w, asf.index, newPoint );
 }
 
 ArchStructuralFeatureDescriptor

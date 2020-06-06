@@ -58,12 +58,14 @@ namespace WallService {
     void ushapesReconciliation( WallBSData *w );
     void removeUnPairedUShapes( WallBSData *w );
     void addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const V2f& point );
+    void addTwoShapeAfterIndex( WallBSData *w, uint64_t pointIndex, const V2f& point );
     void movePoint( WallBSData *w, uint64_t pointIndex, const V2f& offset, bool incremental );
     void deletePoint( WallBSData *w, uint64_t pointIndex );
     void deleteEdge( WallBSData *w, uint64_t pointIndex );
     void moveFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& offset, bool incremental );
     void deleteFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf );
     void splitEdgeAndAddPointInTheMiddle( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& newPoint );
+    void createTwoShapeOnSelectedEdge( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& newPoint );
     void makeTriangles2d( WallBSData *w );
 
     // Calcs

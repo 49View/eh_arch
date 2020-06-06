@@ -12,7 +12,7 @@ struct HouseBSData;
 
 class ArchRenderController {
 public:
-    ArchRenderController( const RDSPreMult& mPm, FloorPlanRenderMode mRenderMode );
+//    ArchRenderController( const RDSPreMult& mPm, FloorPlanRenderMode mRenderMode );
     ArchRenderController() = default;
 
     [[nodiscard]] FloorPlanRenderMode renderMode() const;
@@ -54,6 +54,7 @@ public:
     [[nodiscard]] ArchStructuralFeature singleSelectedFeature() const;
     void moveSelectionList(const V2f& _point, moveSelectionCallback ccf);
     void splitFirstEdgeOnSelectionList( splitSelectionCallback ccf );
+    void createTwoShapeOnSelectedEdge( const V2f& _point, splitSelectionCallback ccf );
     void deleteElementsOnSelectionList( deleteSelectionCallback ccf );
     void toggleElementsOnSelectionList( toggleSelectionCallback ccf );
     void resetSelection();

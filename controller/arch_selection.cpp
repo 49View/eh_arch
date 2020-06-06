@@ -22,6 +22,15 @@ void ArchSelection::moveSelectionList( const V2f& _point, moveSelectionCallback 
     }
 }
 
+void ArchSelection::createTwoShapeOnSelectedEdge( const V2f& _point, splitSelectionCallback ccf ) {
+    auto s1 = *( selection.begin() );
+    if ( s1.asf.feature == ArchStructuralFeature::ASF_Edge ) {
+//        auto middle = lerp(0.5f, s1.asf.pointOfInterests[0], s1.asf.pointOfInterests[1]);
+//        middle += s1.asf.normalDirection * distance(s1.asf.pointOfInterests[0], s1.asf.pointOfInterests[1]) * 0.05f;
+        ccf(s1.asf, _point);
+    }
+}
+
 void ArchSelection::splitFirstEdgeOnSelectionList( splitSelectionCallback ccf ) {
     auto s1 = *( selection.begin() );
     if ( s1.asf.feature == ArchStructuralFeature::ASF_Edge ) {

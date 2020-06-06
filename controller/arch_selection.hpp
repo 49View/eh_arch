@@ -75,6 +75,7 @@ public:
 
     void moveSelectionList( const V2f& _point, moveSelectionCallback ccf );
     void splitFirstEdgeOnSelectionList( splitSelectionCallback ccf );
+    void createTwoShapeOnSelectedEdge( const V2f& _point, splitSelectionCallback ccf );
     void deleteElementsOnSelectionList( deleteSelectionCallback ccf );
     void toggleElementsOnSelectionList( toggleSelectionCallback ccf );
 
