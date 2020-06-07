@@ -303,12 +303,7 @@ void HouseService::guessFittings( HouseBSData *house, FurnitureMapStorage &furns
 
 void HouseService::clearHouseExcludingFloorsAndWalls( HouseBSData *house ) {
     for ( auto &f : house->mFloors ) {
-        f->rds.clear();
-        f->orphanedUShapes.clear();
-        f->rooms.clear();
-        f->windows.clear();
-        f->doors.clear();
-        f->stairs.clear();
+        FloorService::rollbackToCalculatedWalls(f.get());
     }
 }
 

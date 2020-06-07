@@ -152,7 +152,7 @@ namespace FloorService {
     // Update
     void calcBBox( FloorBSData *f );
     float updatePerimeter( FloorBSData *f, const std::vector<ArchSegment>& singleRoomSegmentsExternal );
-    void rollbackToCalculatedWalls( FloorBSData *f );
+    void rollbackToCalculatedWalls( FloorBSData *f);
 
     // Remove
     void removeLinkedArch( FloorBSData *f, int64_t hashToRemove );

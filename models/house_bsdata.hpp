@@ -431,7 +431,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo
            linkedHash, sequencePart, mTriangles2d, number, z, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
            perimeterArchSegments, anchorPoint, defaultCeilingMaterial, defaultCeilingColor, externalWallsColor, rds,
-           walls, windows, doors, stairs, rooms, orphanedUShapes)
+           walls, windows, doors, stairs, rooms, orphanedUShapes, orphanedWallSegments)
 
     int32_t number = -1; // As in floor number, ground floor = 1, etc...
     float z = 0.0f;
@@ -460,7 +460,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo
     std::vector<std::shared_ptr<StairsBSData>> stairs;
     std::vector<std::shared_ptr<RoomBSData>> rooms;
     std::vector<UShape> orphanedUShapes;
-
+    std::vector<ArchSegment> orphanedWallSegments;
 };
 
 JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,

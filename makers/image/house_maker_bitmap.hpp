@@ -37,7 +37,7 @@ struct HMBScores {
 
 JSONDATA(HMBBSData, filename, sourceGuassianSigma, sourceGuassianBeta, sourceGuassian, sourceContrast, sourceBrightness,
          minBinThreshold, maxBinThreshold, sourceSharpen, rescaleFactor, maxUShapeLengthRatio,
-         minPerimeterLength, pixelCMFromOCR)
+         minPerimeterLength, winningStrategy, winningMargin, pixelCMFromOCR)
 
     std::string filename{};
     RawImage image = RawImage::WHITE4x4();
@@ -52,6 +52,8 @@ JSONDATA(HMBBSData, filename, sourceGuassianSigma, sourceGuassianBeta, sourceGua
     float rescaleFactor = 0.01f; // This is the default value for a "normal" floorplan of 1000x1000px in which 1px = 1cm
     float maxUShapeLengthRatio = 1.75f;
     float minPerimeterLength = 1.2f;
+    int winningStrategy = -1;
+    float winningMargin = 0.0f;
     std::vector<float> pixelCMFromOCR;
 
     HMBBSData( const std::string& filename, const RawImage& image ) : filename(filename), image(image) {}
@@ -86,6 +88,7 @@ namespace HouseMakerBitmap {
     std::shared_ptr<HouseBSData> make( HMBBSData& mHMBBSData, const SourceImages& sourceImages );
     void makeFromWalls( std::shared_ptr<HouseBSData> house, const V2fVectorOfVector& wallPoints, HMBBSData& bsdata,
                         const SourceImages& sourceImages );
+    void makeFromWalls( HouseBSData* house, HMBBSData &bsdata, const SourceImages& sourceImages );
     void makeAddDoor( HouseBSData *house, HMBBSData& bsdata, const SourceImages& sourceImages, const FloorUShapesPair& fus );
     void
     makeFromSwapDoorOrWindow( HouseBSData *house, HMBBSData& bsdata, const SourceImages& sourceImages, HashEH hash );

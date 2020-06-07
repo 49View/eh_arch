@@ -690,10 +690,12 @@ namespace HouseMakerBitmap {
                         V2fVector ushapeBump{};
                         ushapeBump.resize( 4 );
                         float dist = distance( seg.middle, i );
-                        ushapeBump[2] = seg.points[1] + seg.crossNormals[0] * dist - seg.crossNormals[0] * 0.01f;
-                        ushapeBump[1] = seg.points[2] + seg.crossNormals[0] * dist - seg.crossNormals[0] * 0.01f;
-                        ushapeBump[3] = seg.points[1] + seg.crossNormals[0] * dist + seg.crossNormals[0] * 0.01f;
-                        ushapeBump[0] = seg.points[2] + seg.crossNormals[0] * dist + seg.crossNormals[0] * 0.01f;
+                        float sensibleUShapeBumpHeight = dist - (seg.width / 5.0f);
+                        float finalUShapeBump = sensibleUShapeBumpHeight <= 0.0f ? dist*0.99f : sensibleUShapeBumpHeight;
+                        ushapeBump[2] = seg.points[1] + seg.crossNormals[0] * finalUShapeBump;
+                        ushapeBump[1] = seg.points[2] + seg.crossNormals[0] * finalUShapeBump;
+                        ushapeBump[3] = seg.points[1] + seg.crossNormals[0] * (dist+1.0f);
+                        ushapeBump[0] = seg.points[2] + seg.crossNormals[0] * (dist+1.0f);
                         auto wallhit = dynamic_cast<WallBSData *>(archHit.arch);
                         if ( wallhit ) {
                             auto newPoints = PolyServices::clipAgainst( wallhit->epoints, ushapeBump,
@@ -702,7 +704,7 @@ namespace HouseMakerBitmap {
                         }
                     }
                 }
-                FloorService::rollbackToCalculatedWalls( f.get());
+                FloorService::rollbackToCalculatedWalls( f.get() );
                 guessDoorsWindowsRoomsOnFloor( f.get(), house, si, allRoomsAreFullyClosed );
             }
         }
@@ -727,14 +729,16 @@ namespace HouseMakerBitmap {
     }
 
     std::shared_ptr<HouseBSData> bestScoringHouse( std::array<std::shared_ptr<HouseBSData>, NumStrategies> &houses,
-                                                   std::array<HMBScores, NumStrategies> &bsscores ) {
+                                                   std::array<HMBScores, NumStrategies> &bsscores, HMBBSData &bsdata ) {
         std::shared_ptr<HouseBSData> house = nullptr;
         float maxScore = -1.0f;
         for ( auto si = 0u; si < NumStrategies; si++ ) {
             float score = bsscores[si].roomScore;
             if ( score > maxScore ) {
+                bsdata.winningMargin = score - maxScore;
                 maxScore = score;
                 house = houses[si];
+                bsdata.winningStrategy = si;
             }
         }
         return house;
@@ -748,7 +752,7 @@ namespace HouseMakerBitmap {
         return !isAtLeastARoomOk;
     }
 
-    std::shared_ptr<HouseBSData> runWallStrategies( const SourceImages &sourceImages ) {
+    std::shared_ptr<HouseBSData> runWallStrategies( const SourceImages &sourceImages, HMBBSData &bsdata ) {
         PROFILE_BLOCK( "Wall strategies" );
 
         std::array<std::shared_ptr<HouseBSData>, NumStrategies> houses{};
@@ -763,7 +767,7 @@ namespace HouseMakerBitmap {
             rollbackStage1TyringToCloseRooms( houses, sourceImages );
         }
 
-        return bestScoringHouse( houses, bsscores );
+        return bestScoringHouse( houses, bsscores, bsdata );
     }
 
     SourceImages prepareImages( const HMBBSData &bsdata ) {
@@ -800,7 +804,7 @@ namespace HouseMakerBitmap {
 
         SourceImages sourceImages = prepareImages( bsdata );
 
-        auto house = runWallStrategies( sourceImages );
+        auto house = runWallStrategies( sourceImages, bsdata );
         addAndFinaliseRooms( house.get(), bsdata, sourceImages );
 
 //        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
@@ -814,7 +818,7 @@ namespace HouseMakerBitmap {
     std::shared_ptr<HouseBSData> make( HMBBSData &bsdata, const SourceImages& sourceImages ) {
         PROFILE_BLOCK( "House service elaborate" );
 
-        auto house = runWallStrategies( sourceImages );
+        auto house = runWallStrategies( sourceImages, bsdata );
         addAndFinaliseRooms( house.get(), bsdata, sourceImages );
 
 //        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
@@ -840,6 +844,16 @@ namespace HouseMakerBitmap {
 
         addAndFinaliseRooms( house.get(), bsdata, sourceImages );
         rescale( house.get(), 1.0f, 1.0f );
+    }
+
+    void makeFromWalls( HouseBSData* house, HMBBSData &bsdata, const SourceImages& sourceImages ) {
+        PROFILE_BLOCK( "House from wall service elaborate walls housebsdata" );
+        HouseService::clearHouseExcludingFloorsAndWalls( house );
+        rescale( house, 1.0f/bsdata.rescaleFactor, metersToCentimeters(1.0f/bsdata.rescaleFactor) );
+        bool ac= true;
+        guessDoorsWindowsRooms( house, sourceImages, ac );
+        addAndFinaliseRooms( house, bsdata, sourceImages );
+        rescale( house, bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
     }
 
     void makeAddDoor( HouseBSData* house, HMBBSData &bsdata, const SourceImages& sourceImages, const FloorUShapesPair& fus ) {

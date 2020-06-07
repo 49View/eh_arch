@@ -270,8 +270,10 @@ namespace DoorRender {
         // This is the frame plus the bump bit to stop the door on close
         addInnerDoorFrame(sg, rootH, data);
 
-        // This is the actual door
-        addDoorGeom(sg, rootH, data);
+        // This is the actual door, if it's a decent size
+        if ( data->width > 0.45f ) {
+            addDoorGeom(sg, rootH, data);
+        }
 
         // Add a bit of the missing floor between the rooms connecting this door
         addFloorUnderDoor(sg, data, rootH);

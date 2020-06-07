@@ -392,6 +392,9 @@ bool addRDSRooms( FloorBSData *f, std::vector<ArchSegment>& ws ) {
         tooLong = ws.size();
         ++incCounter;
     }
+
+    f->orphanedWallSegments = ws;
+
     return ws.empty();
 }
 
@@ -674,6 +677,10 @@ void FloorService::rescale( FloorBSData *f, float _scale ) {
     for ( auto& usg : f->orphanedUShapes ) {
         usg.middle *= _scale;
     }
+    for ( auto& usg : f->orphanedWallSegments ) {
+        usg.p1 *= _scale;
+        usg.p2 *= _scale;
+    }
 
     //	for ( auto&& i : stairs ) i->rescale();
 
@@ -952,15 +959,20 @@ void FloorService::clearFurniture( FloorBSData *f ) {
 // Rollbacks
 
 void FloorService::rollbackToCalculatedWalls( FloorBSData *f ) {
+    // So we need to update the walls because we need to clear all possible UShape flags
     for ( auto& w : f->walls ) {
         WallService::update( w.get() );
     }
+    erase_if(f->walls, [](const auto& w) -> bool {
+       return WallService::isWindowOrDoorPart(w.get());
+    });
     f->rooms.clear();
     f->rds.clear();
     f->windows.clear();
     f->doors.clear();
     f->stairs.clear();
     f->orphanedUShapes.clear();
+    f->orphanedWallSegments.clear();
 }
 
 bool FloorService::hasAnyWall( const FloorBSData *f ) {

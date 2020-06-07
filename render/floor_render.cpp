@@ -32,6 +32,9 @@ namespace FloorRender {
             for ( const auto& seg : f->orphanedUShapes ) {
                 rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, rm, 0.075f, ims.pm(), seg.hashFeature("orphanedUshape", ousc++));
             }
+            for ( const auto& seg : f->orphanedWallSegments ) {
+                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), Color4f::RED, rm, 0.075f, ims.pm(), f->hashFeature("orphanedWallSegments", ousc++));
+            }
         }
 
         for ( const auto& w : f->walls ) {
