@@ -503,18 +503,24 @@ V2fVectorOfVector RoomBuilder::bespokeriseWalls( float scaleFactor ) {
 
     saveCachedSegments();
     auto optSegments = segments;
-    optSegments.optimize();
-//    optSegments.finalise();
+//    optSegments.optimize();
+    optSegments.finalise();
+//    optSegments.optimize();
 
-    int numc = 0;
-    for ( const auto& pwall : optSegments.pointsOf(ArchType::WallT) ) {
-        auto epts = extrudePointsWithWidth<ExtrudeComtour>( pwall.strip, wallWidth, false );
-        LOGRS( "Count " << numc );
-        for ( auto& np : epts ) {
-            np *= scaleFactor;
-            LOGRS( np );
-        }
-        numc++;
+//    int numc = 0;
+    auto wallSegments = optSegments.wallSegments();
+    for ( auto pwall : wallSegments ) {
+        removeCollinear(pwall, 0.001f, CollinearWrap::False);
+//        if ( pwall.strip.size() == 1 ) {
+//            pwall.strip.emplace_back(optSegments.front());
+//        }
+        auto epts = extrudePointsWithWidth<ExtrudeComtour>( XZY::C(pwall), wallWidth, false );
+//        LOGRS( "Count " << numc );
+//        for ( auto& np : epts ) {
+//            np *= scaleFactor;
+//            LOGRS( np );
+//        }
+//        numc++;
 
 //        V3fVector v1{ epts.begin(), epts.begin() + (epts.size() / 2 ) };
 //        V3fVector v2{ epts.begin() + (epts.size() / 2 ), epts.begin() + epts.size()  };

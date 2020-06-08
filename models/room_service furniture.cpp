@@ -540,7 +540,7 @@ namespace RoomService {
                 auto p1 = ls->p1;
                 auto p2 = ls->p2;
                 auto p3 = ls2->p2;
-                if ( detectWindingOrder(p1, p2, p3) == WindingOrder::CCW ) {
+                if ( !isCollinear(p1, p2, p3) && detectWindingOrder(p1, p2, p3) == WindingOrder::CCW ) {
                     auto prevFurn = furns.spawn(fset.front());
                     completed = RS::placeWallCorner(f, r, prevFurn, ls2, fpd.getSlack().xy(), WSC_P1);
                     if ( completed ) break;
@@ -713,6 +713,7 @@ namespace RoomService {
 
     void furnish( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
 
+        r->mFittedFurniture.clear();
         std::vector<ASTypeT> prioritySorted[2];
         for ( const auto rtype : r->roomTypes ) {
             switch ( rtype ) {

@@ -99,19 +99,19 @@ namespace RoomService {
             std::vector<Vector2f> points;
             int startIndex = 0;
             for ( int q = 0; q < csize; q++ ) {
-                if ( checkBitWiseFlag(rws[getCircularArrayIndex(q - 1, csize)].tag, WallFlags::WF_IsDoorPart) &&
+                if ( checkBitWiseFlag(rws[cai(q - 1, csize)].tag, WallFlags::WF_IsDoorPart) &&
                      !checkBitWiseFlag(rws[q].tag, WallFlags::WF_IsDoorPart) ) {
                     startIndex = q;
                     break;
                 }
             }
             for ( int q = startIndex; q < startIndex + csize; q++ ) {
-                int qc = getCircularArrayIndex(q, csize);
+                int qc = cai(q, csize);
                 if ( checkBitWiseFlag(rws[qc].tag, WallFlags::WF_IsDoorPart | WallFlags::WF_IsWindowPart) ) {
                     continue;
                 }
-                int qcm1 = getCircularArrayIndex(q - 1, csize);
-                int qcp1 = getCircularArrayIndex(q + 1, csize);
+                int qcm1 = cai(q - 1, csize);
+                int qcp1 = cai(q + 1, csize);
                 if ( ( rws[qcm1].tag & WallFlags::WF_IsDoorPart ) > 0 ) {
                     Vector2f p2mp1 = rws[qc].p2 - rws[qc].p1;
                     if ( length(p2mp1) > r->mArchiTravesWidth ) {
@@ -471,6 +471,8 @@ namespace RoomService {
         r->maxSizeEnclosedWP2 *= _scale;
 
         calcBBox(r);
+
+        r->area = RoomService::area(r);
     }
 
     bool intersectLine2d( const RoomBSData *r, Vector2f const& p0, Vector2f const& p1,

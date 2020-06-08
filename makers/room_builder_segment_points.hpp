@@ -40,6 +40,7 @@ public:
 
     const V3fVector& points() const;
     SegmentStripVector3d pointsOf( ArchTypeT pt ) const;
+    V2fVectorOfVector wallSegments() const;
     std::vector<RoomBuilderSegmentPoint> pointsPair() const;
 
     template <typename T>

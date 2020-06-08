@@ -7,6 +7,7 @@
 //
 
 #include "room_render.hpp"
+#include <core/util.h>
 #include <core/math/path_util.h>
 #include <core/resources/profile.hpp>
 #include <core/v_data.hpp>
@@ -64,17 +65,21 @@ namespace RoomRender {
         // and pre-compute the maximum common denominator of all font heights for all rooms.
 
         auto textPos = FontUtils::fitTextInBox(font, roomName, bestBBox, fontHeight);
-        textPos -= V2fc::Y_AXIS * fontHeight * 0.5f;
+        textPos -= V2fc::Y_AXIS * fontHeight;
 
         auto measureText = RoomService::roomSizeToString(room);
         auto measurePos = FontUtils::fitTextInBox(font, measureText, bestBBox, fontHeight);
-        measurePos += V2fc::Y_AXIS * fontHeight * 0.5f;
+
+        auto areaPos = measurePos + V2fc::Y_AXIS * fontHeight;
 
         rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, C4f::BLACK, ims.pm(),
                        room->hashFeature(roomName, 0));
 
         rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, C4f::BLACK, ims.pm(),
                        room->hashFeature(roomName, 1));
+
+        rr.draw<DText>(FDS{ sqmToString(room->area), font, areaPos, fontHeight }, C4f::BLACK, ims.pm(),
+                       room->hashFeature(roomName, 2));
 
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {
@@ -145,10 +150,10 @@ namespace RoomRender {
                                        GT::Tag(ArchType::FloorT));
 
         for ( const auto& lf : w->mLightFittingsLocators ) {
-            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, XZY::C(lf));
+            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, XZY::C(lf)+V3f::UP_AXIS*0.023f);
             auto lKey = ResourceGroup::Light + lf.toString();
             sg.add<Light>(lKey,
-                          Light{ LightType_Point, w->spotlightGeom, XZY::C(lf) + V3f::UP_AXIS_NEG * 0.8f,
+                          Light{ LightType_Point, w->spotlightGeom, XZY::C(lf) + V3f::UP_AXIS_NEG * 0.1f,
                                  8.0f, 1.0f, V3f::Y_AXIS * .5f });
         }
         for ( const auto& lf : w->mSwichesLocators ) {
