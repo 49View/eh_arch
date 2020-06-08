@@ -418,6 +418,7 @@ namespace RoomService {
     std::string roomNames( const RoomBSData *r );
     Vector4f roomColor( const RoomBSData *r );
     std::string roomTypeToName( ASTypeT ast );
+    std::string roomTypeToName1to1( ASTypeT ast );
     std::string roomSizeToString( const RoomBSData* r );
     bool isGeneric( const RoomBSData *r );
     bool checkMaxSizeEnclosure( const RoomBSData *r, Vector2f& ep1, Vector2f& ep2, const Vector2f& ncheck );

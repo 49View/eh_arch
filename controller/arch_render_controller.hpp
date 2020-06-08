@@ -27,8 +27,27 @@ public:
     bool isFloorPlanRenderMode2d() const;
 
     template<typename T>
-    void addToSelectionList( const T& _elem, const V2f& is ) {
-        selection.addToSelectionList({ _elem, is });
+    void addToSelectionList( const T& _elem, const V2f& is, SelectionFlagsT flags = SelectionFlags::None ) {
+        selection.addToSelectionList({ _elem, is, flags });
+    }
+
+    template<typename T>
+    void toggleSelection( const T& _elem, const V2f& is, SelectionFlagsT flags = SelectionFlags::None ) {
+        if ( selection.find(_elem) ) {
+            selection.removeFromSelectionList(_elem);
+        } else {
+            selection.addToSelectionList({ _elem, is, flags });
+        }
+    }
+
+    template<typename T>
+    void singleToggleSelection( const T& _elem, const V2f& is, SelectionFlagsT flags = SelectionFlags::None ) {
+        if ( selection.find(_elem) ) {
+            selection.clear();
+        } else {
+            selection.clear();
+            selection.addToSelectionList({ _elem, is, flags });
+        }
     }
 
     template<typename T>
@@ -57,6 +76,7 @@ public:
     void deleteElementsOnSelectionList( deleteSelectionCallback ccf );
     void toggleElementsOnSelectionList( toggleSelectionCallback ccf );
     void resetSelection();
+    std::optional<ArchStructuralFeatureDescriptor> selectionFront() const;
     size_t selectionCount() const;
 
 private:

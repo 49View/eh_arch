@@ -60,7 +60,20 @@ size_t ArchSelection::count() const {
     return selection.size();
 }
 
+std::optional<ArchStructuralFeatureDescriptor> ArchSelection::front() const {
+    if ( selection.empty() ) return std::nullopt;
+    return selection.begin()->asf;
+}
+
 ArchStructuralFeature ArchSelection::singleSelectedFeature() const {
     return selection.empty() ? ArchStructuralFeature::ASF_None : selection.begin()->asf.feature;
+}
+
+void ArchSelection::addToSelectionList( const ArchSelectionElement& _elem ) {
+    selection.emplace(_elem);
+}
+
+void ArchSelection::removeFromSelectionList( const ArchSelectionElement& _elem ) {
+    selection.erase(selection.find(_elem));
 }
 

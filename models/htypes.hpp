@@ -133,6 +133,7 @@ namespace ASType {
 	const static uint64_t Ensuite = 19;
 	const static uint64_t DiningRoom = 20;
 	const static uint64_t Studio = 21;
+	const static uint64_t LastRoom = 22; // if you add any room make sure LastRoom is last index + 1
 };
 
 using ASTypeT = uint64_t;

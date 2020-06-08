@@ -7,6 +7,13 @@
 #include <functional>
 #include <eh_arch/models/arch_structural_service.hpp>
 
+namespace SelectionFlags {
+    constexpr uint64_t None = 0;
+    constexpr uint64_t RemoveAtTouchUp = 1 << 0;
+}
+
+using SelectionFlagsT = uint64_t;
+
 using moveSelectionCallback = std::function<void( const ArchStructuralFeatureDescriptor&, const V2f& )>;
 using splitSelectionCallback = std::function<void( const ArchStructuralFeatureDescriptor&, const V2f& )>;
 using deleteSelectionCallback = std::function<void( const ArchStructuralFeatureDescriptor& )>;
@@ -22,6 +29,9 @@ struct ArchSelectionElement {
     ArchSelectionElement( const ArchStructuralFeatureDescriptor& asf ) : asf(asf) {}
     ArchSelectionElement( const ArchStructuralFeatureDescriptor& asf, const V2f& isp ) : asf(asf),
                                                                                          initialSelectedPoint(isp) {}
+    ArchSelectionElement( const ArchStructuralFeatureDescriptor& asf, const V2f& initialSelectedPoint,
+                          SelectionFlagsT flags ) : asf(asf), initialSelectedPoint(initialSelectedPoint),
+                                                    flags(flags) {}
 
     bool operator==( const ArchSelectionElement& rhs ) const {
         return asf == rhs.asf;
@@ -32,6 +42,7 @@ struct ArchSelectionElement {
 
     ArchStructuralFeatureDescriptor asf;
     V2f initialSelectedPoint = V2fc::HUGE_VALUE_NEG;
+    SelectionFlagsT flags = SelectionFlags::None;
 };
 
 class ArchStructuralFeatureDescriptorHashFunctor {
@@ -46,12 +57,13 @@ public:
 class ArchSelection {
 public:
     void clear();
+    [[nodiscard]] std::optional<ArchStructuralFeatureDescriptor> front() const;
     [[nodiscard]] size_t count() const;
     [[nodiscard]] ArchStructuralFeature singleSelectedFeature() const;
 
-    void addToSelectionList( const ArchSelectionElement& _elem ) {
-        selection.emplace(_elem);
-    }
+    void addToSelectionList( const ArchSelectionElement& _elem );
+
+    void removeFromSelectionList( const ArchSelectionElement& _elem );
 
     template<typename T>
     const ArchSelectionElement *find( const T& elem ) const {

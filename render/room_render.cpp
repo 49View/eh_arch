@@ -50,33 +50,31 @@ namespace RoomRender {
 
         bool drawDebug = ims.isFloorPlanRenderModeDebug();
         if ( drawDebug ) {
-            rr.draw<DPoly>(room->mPerimeterSegments, color, ims.pm(), room->hashFeature("perimeter", 0));
+            rr.draw<DPoly>(room->mPerimeterSegments, color, ims.pm(), room->hashFeature("perimeter"+color.toString(), 0));
         }
 
-        if ( !RoomService::isGeneric(room) ) {
-            auto roomName = RoomService::roomNames(room);
-            JMATH::Rect2f bestBBox(room->mMaxEnclsingBoundingBox);
-            auto font = sg.FM().get(S::DEFAULT_FONT).get();
-            float fontHeight = 0.32f;
+        auto roomName = RoomService::roomNames(room);
+        JMATH::Rect2f bestBBox(room->mMaxEnclsingBoundingBox);
+        auto font = sg.FM().get(S::DEFAULT_FONT).get();
+        float fontHeight = 0.32f;
 
-            // If the text width is bigger than the best bbox then we need to scale it down, we might need to
-            // normalise it across the whole floorplan as this may produce different text sizes per room which looks
-            // awful, will take care of this later, probably having a HouseService function that scans all the rooms
-            // and pre-compute the maximum common denominator of all font heights for all rooms.
+        // If the text width is bigger than the best bbox then we need to scale it down, we might need to
+        // normalise it across the whole floorplan as this may produce different text sizes per room which looks
+        // awful, will take care of this later, probably having a HouseService function that scans all the rooms
+        // and pre-compute the maximum common denominator of all font heights for all rooms.
 
-            auto textPos = FontUtils::fitTextInBox(font, roomName, bestBBox, fontHeight);
-            textPos -= V2fc::Y_AXIS * fontHeight * 0.5f;
+        auto textPos = FontUtils::fitTextInBox(font, roomName, bestBBox, fontHeight);
+        textPos -= V2fc::Y_AXIS * fontHeight * 0.5f;
 
-            auto measureText = RoomService::roomSizeToString(room);
-            auto measurePos = FontUtils::fitTextInBox(font, measureText, bestBBox, fontHeight);
-            measurePos += V2fc::Y_AXIS * fontHeight * 0.5f;
+        auto measureText = RoomService::roomSizeToString(room);
+        auto measurePos = FontUtils::fitTextInBox(font, measureText, bestBBox, fontHeight);
+        measurePos += V2fc::Y_AXIS * fontHeight * 0.5f;
 
-            rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, C4f::BLACK, ims.pm(),
-                           room->hashFeature(roomName, 0));
+        rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, C4f::BLACK, ims.pm(),
+                       room->hashFeature(roomName, 0));
 
-            rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, C4f::BLACK, ims.pm(),
-                           room->hashFeature(roomName, 1));
-        }
+        rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, C4f::BLACK, ims.pm(),
+                       room->hashFeature(roomName, 1));
 
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {

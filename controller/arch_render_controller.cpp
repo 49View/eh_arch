@@ -78,6 +78,10 @@ ArchStructuralFeature ArchRenderController::singleSelectedFeature() const {
     return selection.singleSelectedFeature();
 }
 
+std::optional<ArchStructuralFeatureDescriptor> ArchRenderController::selectionFront() const {
+    return selection.front();
+}
+
 //ArchRenderController::ArchRenderController( const RDSPreMult& mPm, FloorPlanRenderMode mRenderMode ) : mPm(mPm),
 //                                                                                                       mRenderMode(
 //                                                                                                               mRenderMode) {}

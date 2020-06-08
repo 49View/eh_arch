@@ -513,7 +513,9 @@ namespace RoomService {
     }
 
     void addRoomType( RoomBSData *r, ASTypeT rt ) {
-        r->roomTypes.emplace_back(rt);
+        if ( auto it = std::find(r->roomTypes.begin(), r->roomTypes.end(), rt); it == r->roomTypes.end() ) {
+            r->roomTypes.emplace_back(rt);
+        }
     }
 
     void removeRoomType( RoomBSData *r, ASTypeT rt ) {
@@ -527,7 +529,65 @@ namespace RoomService {
     std::string roomTypeToName( ASTypeT ast ) {
         switch ( ast ) {
             case ASType::GenericRoom:
-                return "generic";
+                return "Room";
+
+            case ASType::LivingRoom:
+                return "Living Room";
+
+            case ASType::Studio:
+                return "Studio";
+
+            case ASType::Kitchen:
+                return "Kitchen";
+
+            case ASType::BedroomSingle:
+            case ASType::BedroomDouble:
+                return "Bedroom";
+
+            case ASType::BedroomMaster:
+                return "Master Bedroom";
+
+            case ASType::Bathroom:
+                return "Bathroom";
+
+            case ASType::ShowerRoom:
+                return "Shower Room";
+
+            case ASType::Ensuite:
+                return "En Suite";
+
+            case ASType::ToiletRoom:
+                return "Toilet";
+
+            case ASType::DiningRoom:
+                return "Dining Room";
+
+            case ASType::Conservatory:
+                return "Conservatory";
+
+            case ASType::GamesRoom:
+                return "Games Room";
+
+            case ASType::Laundry:
+                return "Laundry";
+
+            case ASType::Hallway:
+                return "Hallway";
+
+            case ASType::Garage:
+                return "Garage";
+
+            default:
+                break;
+        }
+
+        return std::string{};
+    }
+
+    std::string roomTypeToName1to1( ASTypeT ast ) {
+        switch ( ast ) {
+            case ASType::GenericRoom:
+                return "Generic";
 
             case ASType::LivingRoom:
                 return "living-room";
@@ -539,11 +599,12 @@ namespace RoomService {
                 return "kitchen";
 
             case ASType::BedroomSingle:
+                return "single bedroom";
             case ASType::BedroomDouble:
-                return "Bedroom";
+                return "double bedroom";
 
             case ASType::BedroomMaster:
-                return "Master-bedroom";
+                return "master-bedroom";
 
             case ASType::Bathroom:
                 return "bathroom";
@@ -552,7 +613,7 @@ namespace RoomService {
                 return "shower-room";
 
             case ASType::Ensuite:
-                return "ensuite";
+                return "en-suite";
 
             case ASType::ToiletRoom:
                 return "toilet";
@@ -564,7 +625,7 @@ namespace RoomService {
                 return "conservatory";
 
             case ASType::GamesRoom:
-                return "gameroom";
+                return "game-room";
 
             case ASType::Laundry:
                 return "laundry";
