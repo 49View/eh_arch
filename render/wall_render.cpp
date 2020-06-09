@@ -20,9 +20,9 @@
 
 namespace WallRender {
 
-    void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const ArchRenderController& ims ) {
-        auto color = ims.getFillColor(wall->hash, C4f::BLACK);
-        rr.draw<DPoly>(sm, wall->mTriangles2d, color, ims.pm(), wall->hashFeature("poly"+color.toString(), 0));
+    void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const ArchRenderController& arc ) {
+        auto color = arc.getFillColor(wall->hash, C4f::BLACK);
+        rr.draw<DPoly>(sm, wall->mTriangles2d, color, arc.pm(), wall->hashFeature("poly"+color.toString(), 0));
     }
 
 //    void drawIncrementalAlphaWalls2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
@@ -42,66 +42,66 @@ namespace WallRender {
 //    }
 
     void drawUShapes2d( Renderer& rr, const WallBSData *wall, float lineWidth, DShaderMatrix sm,
-                        const ArchRenderController& ims ) {
+                        const ArchRenderController& arc ) {
 //        std::array<Color4f, 3> usc = { Color4f::PASTEL_YELLOW, Color4f::PASTEL_CYAN, Color4f::PASTEL_GREEN };
         int uShapeRC = 0;
         for ( const auto& us : wall->mUShapes ) {
 //            for ( int t = 0; t < 3; t++ ) {
-//                rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], lineWidth, sm, ims.pm());
+//                rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], lineWidth, sm, arc.pm());
 //            }
-            rr.draw<DCircleFilled>(us.middle, Color4f::DARK_BLUE, 0.035f, sm, ims.pm(), wall->hashFeature("w2dUShape",uShapeRC));
+            rr.draw<DCircleFilled>(us.middle, Color4f::DARK_BLUE, 0.035f, sm, arc.pm(), wall->hashFeature("w2dUShape",uShapeRC));
         }
     }
 
     void drawWallNormals2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
-                            const ArchRenderController& ims ) {
+                            const ArchRenderController& arc ) {
         auto wps = wall->epoints.size();
         for ( size_t t = 0; t < wps - 1 * !wall->wrapLastPoint; t++ ) {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t + 1, wps)];
             auto pm = lerp(0.5f, p1, p2);
-            rr.draw<DLine>(pm, pm + wall->enormals[t] * 0.15f, Color4f::PASTEL_CYAN, width, sm, true, ims.pm(), wall->hashFeature("w2dNormal",t));
+            rr.draw<DLine>(pm, pm + wall->enormals[t] * 0.15f, Color4f::PASTEL_CYAN, width, sm, true, arc.pm(), wall->hashFeature("w2dNormal",t));
         }
     }
 
     void drawWallPoints2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
-                           const ArchRenderController& ims ) {
+                           const ArchRenderController& arc ) {
         for ( auto t = 0u; t < wall->epoints.size(); t++ ) {
             auto p1 = wall->epoints[t];
             ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Point, t, wall->hash };
-            auto color = ims.getFillColor(asf, C4f::RED);
-            rr.draw<DCircleFilled>(p1, color, width, sm, ims.pm(), wall->hashFeature("w2dPoint"+color.toString(),t));
+            auto color = arc.getFillColor(asf, C4f::RED);
+            rr.draw<DCircleFilled>(p1, color, width, sm, arc.pm(), wall->hashFeature("w2dPoint"+color.toString(),t));
         }
     }
 
     void drawWallContours2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
-                             const ArchRenderController& ims ) {
+                             const ArchRenderController& arc ) {
         for ( auto t = 0u; t < wall->epoints.size(); t++ ) {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t+1, wall->epoints.size())];
             ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Edge, t, wall->hash };
-            auto color = ims.getFillColor(asf, Color4f::PASTEL_GREEN);
-            rr.draw<DLine>(p1, p2, color, width*3.f, sm, ims.pm(), wall->hashFeature("w2dEdge"+color.toString(),t));
+            auto color = arc.getFillColor(asf, Color4f::PASTEL_GREEN);
+            rr.draw<DLine>(p1, p2, color, width*3.f, sm, arc.pm(), wall->hashFeature("w2dEdge"+color.toString(),t));
         }
 //        if ( wall->wrapLastPoint ) vlist.emplace_back(wall->epoints[0]);
     }
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *wall, const ArchRenderController& ims ) {
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *wall, const ArchRenderController& arc ) {
 
         // If a wall is part of a door or windows I think it's best to not to render it in IM 2d/3d as it will overlap
         // with the door/window render and also have extra duplicate vertices in common with the adjacent wall, hard
         // to select correctly
         if ( !WallService::isWindowOrDoorPart(wall) ) {
-            auto sm = ims.floorPlanShader();
-            auto width = ims.floorPlanScaler(0.05f);
-            drawWalls2d(rr, wall, sm, ims);
-            bool drawDebug = ims.isFloorPlanRenderModeDebug();
+            auto sm = arc.floorPlanShader();
+            auto width = arc.floorPlanScaler(0.05f);
+            drawWalls2d(rr, wall, sm, arc);
+            bool drawDebug = arc.isFloorPlanRenderModeDebug();
             if ( drawDebug ) {
-                auto lineWidth = ims.floorPlanScaler(0.01f);
-                drawWallContours2d(rr, wall, lineWidth*0.3f, sm, ims);
-                drawWallNormals2d(rr, wall, lineWidth*0.5f, sm, ims);
-                drawUShapes2d(rr, wall, lineWidth*0.5f, sm, ims);
-                drawWallPoints2d(rr, wall, width*0.5f, sm, ims);
+                auto lineWidth = arc.floorPlanScaler(0.01f);
+                drawWallContours2d(rr, wall, lineWidth*0.3f, sm, arc);
+                drawWallNormals2d(rr, wall, lineWidth*0.5f, sm, arc);
+                drawUShapes2d(rr, wall, lineWidth*0.5f, sm, arc);
+                drawWallPoints2d(rr, wall, width*0.5f, sm, arc);
             }
         }
 

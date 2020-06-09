@@ -20,7 +20,7 @@ public:
     explicit ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg );
 
     void show3dHouse( HouseBSData*, const PostHouseLoadCallback& ccf = nullptr );
-    void showIMHouse( HouseBSData*, const ArchRenderController& ims );
+    void showIMHouse( HouseBSData*, const ArchRenderController& arc );
     void loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf = nullptr );
     Matrix4f
     calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> houseJson, float screenRatio, float screenPadding );

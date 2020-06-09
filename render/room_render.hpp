@@ -19,7 +19,7 @@ class HouseRenderContainer;
 class ArchRenderController;
 
 namespace RoomRender {
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *data, const ArchRenderController& ims );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *data, const ArchRenderController& arc );
     void make3dGeometry( SceneGraph& sg, RoomBSData* r, HouseRenderContainer& ret );
 }
 

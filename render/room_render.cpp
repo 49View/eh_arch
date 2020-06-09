@@ -37,7 +37,7 @@ namespace RoomRender {
         return bbox.centreLeft() + V2fc::X_AXIS * textStartOffset;
     }
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *room, const ArchRenderController& ims ) {
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *room, const ArchRenderController& arc ) {
 //        bool drawDebug = fpRenderMode == Use2dDebugRendering::True;
 //        auto color = drawDebug ? Color4f::RANDA1().A(0.5f) : C4f::WHITE.A(0.5f);
 
@@ -45,13 +45,13 @@ namespace RoomRender {
 //        if ( drawDebug) {
 //            rr.draw<DLine>( room->mPerimeterSegments, 0.03f, C4f::RED, false );
 //        }
-        auto rm = ims.floorPlanShader();
-        auto color = ims.getFillColor(room->hash, RoomService::roomColor(room).A(0.5f));
-        auto lineWidth = ims.floorPlanScaler(0.0075f);
+        auto rm = arc.floorPlanShader();
+        auto color = arc.getFillColor(room->hash, RoomService::roomColor(room).A(0.5f));
+        auto lineWidth = arc.floorPlanScaler(0.0075f);
 
-        bool drawDebug = ims.isFloorPlanRenderModeDebug();
+        bool drawDebug = arc.isFloorPlanRenderModeDebug();
         if ( drawDebug ) {
-            rr.draw<DPoly>(room->mPerimeterSegments, color, ims.pm(),
+            rr.draw<DPoly>(room->mPerimeterSegments, color, arc.pm(),
                            room->hashFeature("perimeter" + color.toString(), 0));
         }
 
@@ -75,25 +75,25 @@ namespace RoomRender {
         auto areaPos = FontUtils::fitTextInBox(font, areaSQm, bestBBox, fontHeight);
         areaPos += V2fc::Y_AXIS * fontHeight;
 
-        rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, C4f::BLACK, ims.pm(),
+        rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, C4f::BLACK, arc.pm(),
                        room->hashFeature(roomName, 0));
 
-        rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, C4f::BLACK, ims.pm(),
+        rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, C4f::BLACK, arc.pm(),
                        room->hashFeature(roomName, 1));
 
-        rr.draw<DText>(FDS{ areaSQm, font, areaPos, fontHeight }, C4f::BLACK, ims.pm(),
+        rr.draw<DText>(FDS{ areaSQm, font, areaPos, fontHeight }, C4f::BLACK, arc.pm(),
                        room->hashFeature(roomName, 2));
 
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {
             Matrix4f mt{ ff.position3d * V3f::MASK_Y_OUT, ff.rotation, ff.size };
-            mt.mult(ims.pm()());
+            mt.mult(arc.pm()());
             rr.draw<DLine>(sg.PL(ff.symbolRef), C4f::BLACK, RDSPreMult(mt), rm, lineWidth,
                            room->hashFeature(ff.symbolRef, ffc++));
         }
 
         for ( auto& cov : room->mvSkirtingSegments ) {
-            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, ims.pm(), room->hashFeature("skirting", 0));
+            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, arc.pm(), room->hashFeature("skirting", 0));
         }
     }
 

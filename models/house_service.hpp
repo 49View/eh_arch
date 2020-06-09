@@ -35,7 +35,7 @@ namespace HouseService {
     void mergePoints( HouseBSData *f, const V2fVectorOfVector& points );
 
     // Delete
-    void removeArch( std::shared_ptr<HouseBSData> _house, int64_t hashToRemove );
+    void removeArch( HouseBSData *_house, int64_t hashToRemove );
     void clearHouse( HouseBSData *house );
     void clearHouseRooms( HouseBSData *house );
     void clearFurniture( std::shared_ptr<HouseBSData> _house );
@@ -67,7 +67,7 @@ namespace HouseService {
 
     // Templates
     template<typename T>
-    T* find( HouseBSData *_house, HashEH hash ) {
+    T *find( HouseBSData *_house, HashEH hash ) {
         for ( auto& f : _house->mFloors ) {
             if constexpr ( std::is_same_v<T, WallBSData> ) {
                 for ( auto& w : f->walls ) {

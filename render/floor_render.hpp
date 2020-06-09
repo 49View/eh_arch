@@ -13,6 +13,6 @@ class HouseRenderContainer;
 class ArchRenderController;
 
 namespace FloorRender {
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const FloorBSData *data, const ArchRenderController& ims );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const FloorBSData *data, const ArchRenderController& arc );
     void make3dGeometry( SceneGraph& sg, const FloorBSData* f, HouseRenderContainer& ret );
 }

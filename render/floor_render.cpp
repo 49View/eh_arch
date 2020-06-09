@@ -23,31 +23,31 @@
 
 namespace FloorRender {
 
-    void IMHouseRender( Renderer &rr, SceneGraph &sg, const FloorBSData *f, const ArchRenderController& ims ) {
-        bool drawDebug = isFloorPlanRenderModeDebug(ims.renderMode());
-        auto rm = ims.floorPlanShader();
+    void IMHouseRender( Renderer &rr, SceneGraph &sg, const FloorBSData *f, const ArchRenderController& arc ) {
+        bool drawDebug = isFloorPlanRenderModeDebug(arc.renderMode());
+        auto rm = arc.floorPlanShader();
 
         if ( drawDebug ) {
             int ousc = 0;
             for ( const auto& seg : f->orphanedUShapes ) {
-                rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, rm, 0.075f, ims.pm(), seg.hashFeature("orphanedUshape", ousc++));
+                rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, rm, 0.075f, arc.pm(), seg.hashFeature("orphanedUshape", ousc++));
             }
             for ( const auto& seg : f->orphanedWallSegments ) {
-                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), Color4f::RED, rm, 0.075f, ims.pm(), f->hashFeature("orphanedWallSegments", ousc++));
+                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), Color4f::RED, rm, 0.075f, arc.pm(), f->hashFeature("orphanedWallSegments", ousc++));
             }
         }
 
         for ( const auto& w : f->walls ) {
-            WallRender::IMHouseRender(rr, sg, w.get(), ims);
+            WallRender::IMHouseRender(rr, sg, w.get(), arc);
         }
         for ( const auto& w : f->rooms ) {
-            RoomRender::IMHouseRender(rr, sg, w.get(), ims);
+            RoomRender::IMHouseRender(rr, sg, w.get(), arc);
         }
         for ( const auto& w : f->windows ) {
-            WindowRender::IMHouseRender(rr, sg, w.get(), ims);
+            WindowRender::IMHouseRender(rr, sg, w.get(), arc);
         }
         for ( const auto& w : f->doors ) {
-            DoorRender::IMHouseRender(rr, sg, w.get(), ims);
+            DoorRender::IMHouseRender(rr, sg, w.get(), arc);
         }
     }
 

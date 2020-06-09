@@ -29,10 +29,10 @@ namespace DoorRender {
         return index >= 2;
     }
 
-    void drawSingleDoor2d( Renderer& rr, const DoorBSData *door, DShaderMatrix sm, const ArchRenderController& ims ) {
+    void drawSingleDoor2d( Renderer& rr, const DoorBSData *door, DShaderMatrix sm, const ArchRenderController& arc ) {
 
-        auto lineWidth = ims.floorPlanScaler(0.03f);
-        auto color = ims.getFillColor(door->hash, C4f::BLACK);
+        auto lineWidth = arc.floorPlanScaler(0.03f);
+        auto color = arc.getFillColor(door->hash, C4f::BLACK);
 
         float vwangle = -atan2(-door->dirWidth.y(), door->dirWidth.x());
         float dIndexSign = (isLeft(door->dIndex) ? -1.0f : 1.0f);
@@ -66,14 +66,14 @@ namespace DoorRender {
         }
 
         vLists.emplace_back(p1);
-        rr.draw<DLine>(vLists, color, lineWidth, false, sm, ims.pm(), door->hashFeature("singleDoor2d"+color.toString(), 0));
+        rr.draw<DLine>(vLists, color, lineWidth, false, sm, arc.pm(), door->hashFeature("singleDoor2d"+color.toString(), 0));
     }
 
     void drawDoubleDoor2d();
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, const ArchRenderController& ims ) {
-        auto rm = ims.floorPlanShader();
-        drawSingleDoor2d(rr, data, rm, ims);
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, const ArchRenderController& arc ) {
+        auto rm = arc.floorPlanShader();
+        drawSingleDoor2d(rr, data, rm, arc);
     }
 
     std::shared_ptr<Profile> makeEnglishDoorProfile( const Vector2f& vv2fs ) {

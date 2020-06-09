@@ -18,6 +18,6 @@ struct WindowBSData;
 struct RDSPreMult;
 
 namespace WindowRender {
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WindowBSData *data, const ArchRenderController& ims );
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const WindowBSData *data, const ArchRenderController& arc );
     GeomSPContainer make3dGeometry( SceneGraph& sg, WindowBSData* mData );
 };

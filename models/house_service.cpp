@@ -273,8 +273,8 @@ bool HouseService::whichRoomAmI( std::shared_ptr<HouseBSData> _house, const Vect
 	return false;
 }
 
-void HouseService::removeArch( std::shared_ptr<HouseBSData> _house, int64_t hashToRemove ) {
-	for ( auto& f : _house->mFloors ) {
+void HouseService::removeArch( HouseBSData* house, int64_t hashToRemove ) {
+	for ( auto& f : house->mFloors ) {
 		FloorService::removeArch( f.get(), hashToRemove );
 	}
 }

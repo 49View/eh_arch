@@ -97,8 +97,8 @@ void ArchOrchestrator::centerCameraMiddleOfHouse( HouseBSData* houseJson ) {
     }
 }
 
-void ArchOrchestrator::showIMHouse( HouseBSData* _houseJson, const ArchRenderController& ims  ) {
-    HouseRender::IMHouseRender(rsg.RR(), sg, _houseJson, ims);
+void ArchOrchestrator::showIMHouse( HouseBSData* _houseJson, const ArchRenderController& arc  ) {
+    HouseRender::IMHouseRender(rsg.RR(), sg, _houseJson, arc);
 }
 
 void ArchOrchestrator::show3dHouse( HouseBSData* _houseJson, const PostHouseLoadCallback& ccf ) {
