@@ -38,8 +38,8 @@ std::shared_ptr<WindowBSData> WindowService::createWindow( float _windowHeight, 
 	return d1;
 }
 
-void WindowService::rescale( WindowBSData* w, float _scale ) {
-	TwoUShapesBasedService::rescale( w, _scale );
+void WindowService::rescale( WindowBSData* window, float _scale ) {
+	TwoUShapesBasedService::rescale( window, _scale );
 }
 
 void WindowService::getPlasterMiddlePoints( const WindowBSData* w, std::vector<Vector3f>& mpoints ) {

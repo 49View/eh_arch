@@ -306,13 +306,6 @@ FloorService::externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& w
             if ( bFound ) ws.push_back( as ); else wse.push_back( as );
             vn++;
         }
-        if ( !checkBitWiseFlag( w->slinesGHType[0], GHType::WallPlasterExternal ) && w->linkedHash != 0 ) {
-            for ( auto& lh : f->windows ) {
-                if ( lh->hash == w->linkedHash ) {
-                    lh->insideRoomPointingNormal = w->enormals[0];
-                }
-            }
-        }
     }
 }
 
@@ -516,7 +509,8 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
                 w->hasCurtains = false;
                 w->hasBlinds = true;
             }
-            break;
+            V2f pointCheckInsideRoom = w->center + (w->dirDepth * (w->depth * 0.51f));
+            w->rotOrientation = ArchStructuralService::isPointInside( r, pointCheckInsideRoom ) ? M_PI :  0.0f;
         }
     }
 
