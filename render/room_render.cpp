@@ -51,7 +51,8 @@ namespace RoomRender {
 
         bool drawDebug = ims.isFloorPlanRenderModeDebug();
         if ( drawDebug ) {
-            rr.draw<DPoly>(room->mPerimeterSegments, color, ims.pm(), room->hashFeature("perimeter"+color.toString(), 0));
+            rr.draw<DPoly>(room->mPerimeterSegments, color, ims.pm(),
+                           room->hashFeature("perimeter" + color.toString(), 0));
         }
 
         auto roomName = RoomService::roomNames(room);
@@ -89,6 +90,10 @@ namespace RoomRender {
             mt.mult(ims.pm()());
             rr.draw<DLine>(sg.PL(ff.symbolRef), C4f::BLACK, RDSPreMult(mt), rm, lineWidth,
                            room->hashFeature(ff.symbolRef, ffc++));
+        }
+
+        for ( auto& cov : room->mvSkirtingSegments ) {
+            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, ims.pm(), room->hashFeature("skirting", 0));
         }
     }
 
