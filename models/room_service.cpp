@@ -582,6 +582,15 @@ namespace RoomService {
             case ASType::Garage:
                 return "Garage";
 
+            case ASType::Cupboard:
+                return "Cupboard";
+
+            case ASType::Storage:
+                return "Storage";
+
+            case ASType::BoilerRoom:
+                return "BoilerRoom";
+
             default:
                 break;
         }
@@ -592,7 +601,7 @@ namespace RoomService {
     std::string roomTypeToName1to1( ASTypeT ast ) {
         switch ( ast ) {
             case ASType::GenericRoom:
-                return "Generic";
+                return "generic";
 
             case ASType::LivingRoom:
                 return "living-room";
@@ -640,6 +649,15 @@ namespace RoomService {
 
             case ASType::Garage:
                 return "garage";
+
+            case ASType::Cupboard:
+                return "cupboard";
+
+            case ASType::Storage:
+                return "storage";
+
+            case ASType::BoilerRoom:
+                return "boilerRoom";
 
             default:
                 break;
@@ -695,6 +713,15 @@ namespace RoomService {
 
             case ASType::Garage:
                 return Color4f::PASTEL_GRAY;
+
+            case ASType::Cupboard:
+                return Color4f::DARK_CYAN;
+
+            case ASType::Storage:
+                return Color4f::ORANGE_SCHEME1_1;
+
+            case ASType::BoilerRoom:
+                return C4f::DARK_BLUE;
 
             default:
                 break;
