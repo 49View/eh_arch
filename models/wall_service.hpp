@@ -28,6 +28,7 @@ namespace WallService {
     // Query
     bool contains( const WallBSData *w, const Vector2f& pos );
     void getPlasterMiddlePoints( const WallBSData *w, std::vector<Vector3f>& mpoints );
+    bool hasUShape( const WallBSData *w, const UShape* us );
     void getSegmentUShapePoint( const WallBSData *w, const int index, Vector2f& us1, Vector2f& us2, Vector2f& usm,
                                 Vector2f& usn, const float off = 0.0001f );
     bool checkIndexAreInMiddleAnyUSHape( const WallBSData *w, int i1, int i2 );
@@ -55,7 +56,6 @@ namespace WallService {
     void rescale( WallBSData *w, float _scale );
     void calcBBox( WallBSData *w );
     void updateUShapes( WallBSData *w );
-    void ushapesReconciliation( WallBSData *w );
     void removeUnPairedUShapes( WallBSData *w );
     void addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const V2f& point );
     UShape* addTwoShapeAt( WallBSData *w, const ArchIntersection& archI );

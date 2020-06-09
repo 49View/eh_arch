@@ -139,7 +139,7 @@ FloorService::addWindowFromData( FloorBSData *f, float _windowHeight, float _def
 }
 
 std::vector<UShape *> FloorService::allUShapes( FloorBSData *f ) {
-    std::vector<UShape *> ret;
+    std::vector<UShape *> ret{};
     for ( auto& w : f->walls ) {
         for ( auto& us : w->mUShapes ) ret.push_back(&us);
     }
@@ -158,13 +158,11 @@ bool FloorService::checkTwoUShapesDoNotIntersectAnything( FloorBSData *f, UShape
         }
         auto p2 = s1->middle + s1->crossNormals[0] * 0.01f;
         if ( ArchStructuralService::isPointInside(w.get(), p2) ) {
-            LOGRS("Beccato 3");
             FloorServiceIntermediateData::USI().emplace_back(s1, s2, p2, 2);
             return false;
         }
         auto p3 = s2->middle + s2->crossNormals[0] * 0.01f;
         if ( ArchStructuralService::isPointInside(w.get(), p3) ) {
-            LOGRS("Beccato 2");
             FloorServiceIntermediateData::USI().emplace_back(s1, s2, p3, 3);
             return false;
         }
@@ -185,10 +183,13 @@ bool FloorService::checkTwoUShapesDoNotIntersectAnything( FloorBSData *f, UShape
     return true;
 }
 
-std::vector<std::pair<UShape *, UShape *>> FloorService::alignSuitableUShapesFromWalls( FloorBSData *f ) {
+using VectorOfUShapePairs = std::vector<std::pair<UShape *, UShape *>>;
+
+VectorOfUShapePairs UShapesAlignmentInternal( FloorBSData *f, VectorOfUShapePairs& shapePairs ) {
     Vector2f r{};
     std::vector<UShape *> allUShapes = FloorService::allUShapes(f);
-    std::vector<std::pair<UShape *, UShape *>> shapePairs;
+    VectorOfUShapePairs mergeList{};
+    shapePairs.clear();
 
     for ( size_t t = 0; t < allUShapes.size(); t++ ) {
         UShape *s1 = allUShapes[t];
@@ -211,8 +212,13 @@ std::vector<std::pair<UShape *, UShape *>> FloorService::alignSuitableUShapesFro
                             // We also check that the distance between the ushapes is grater than at least a quarter of
                             // their width, to avoid havign very narrow doors or windows which 99% is a result of an artifact
                             bool hasMinGap = dist > quarter(s1->width);
-                            if ( minDist > dist && hasMinGap ) {
-                                if ( checkTwoUShapesDoNotIntersectAnything(f, s1, s2) ) {
+                            // if the two twoshapes are too closed together then add them to the merge list
+                            if ( !hasMinGap ) {
+                                mergeList.emplace_back(s1, s2);
+                                break;
+                            }
+                            if ( minDist > dist ) {
+                                if ( FloorService::checkTwoUShapesDoNotIntersectAnything(f, s1, s2) ) {
                                     // Align uShapes
                                     s3 = s2;
                                     UShape *sourceUSRay = s1->width < s3->width ? s1 : s3;
@@ -249,6 +255,102 @@ std::vector<std::pair<UShape *, UShape *>> FloorService::alignSuitableUShapesFro
             }
         }
     }
+
+    return mergeList;
+}
+
+void checkUShapesProblemsAfterAlignment( FloorBSData *f, VectorOfUShapePairs& shapePairs, VectorOfUShapePairs& mergeList ) {
+    // Right, now collect the merge list and merge the two walls together
+    struct WM1 {
+        WallBSData* w1;
+        WallBSData* w2;
+        WM1() = default;
+        WM1( WallBSData *w1, WallBSData *w2 ) : w1(w1), w2(w2) {}
+        bool operator==( const WM1& rhs ) const {
+            return w1 == rhs.w1 &&
+                   w2 == rhs.w2;
+        }
+        bool operator!=( const WM1& rhs ) const {
+            return !( rhs == *this );
+        }
+    };
+
+    class WM1HashFunctor {
+    public:
+        size_t operator()( const WM1& _elem ) const {
+            return std::hash<std::string>{}(std::to_string(_elem.w1->hash) + std::to_string(_elem.w2->hash));
+        }
+    };
+
+    if ( !mergeList.empty() ) {
+        std::unordered_set<UShape*> alreadyElaborated{};
+        std::unordered_set<WM1, WM1HashFunctor> wallsToMerge;
+        for ( const auto& mergePair : mergeList ) {
+            auto* s1 = mergePair.first;
+            auto* s2 = mergePair.second;
+
+            if ( alreadyElaborated.find( s1 ) != alreadyElaborated.end() ) continue;
+            if ( alreadyElaborated.find( s2 ) != alreadyElaborated.end() ) continue;
+
+            float dist = half(distance( s1->middle, s2->middle ));
+            WallBSData* w1 = nullptr;
+            WallBSData* w2 = nullptr;
+            for ( auto& w: f->walls ) {
+                if ( WallService::hasUShape(w.get(), s1) ) {
+                    w1 = w.get();
+                    if ( w1 && w2 ) break;
+                }
+                if ( WallService::hasUShape(w.get(), s2) ) {
+                    w2 = w.get();
+                    if ( w1 && w2 ) break;
+                }
+            }
+            ASSERT( w1 && w2 );
+            WallService::movePoint( w1, s1->indices[1], w1->epoints[s1->indices[1]] + s1->crossNormals[0]*dist*1.01f, false);
+            WallService::movePoint( w1, s1->indices[2], w1->epoints[s1->indices[2]] + s1->crossNormals[0]*dist*1.01f, false);
+
+            WallService::movePoint( w2, s2->indices[1], w2->epoints[s2->indices[1]] + s2->crossNormals[0]*dist*1.01f, false);
+            WallService::movePoint( w2, s2->indices[2], w2->epoints[s2->indices[2]] + s2->crossNormals[0]*dist*1.01f, false);
+
+            alreadyElaborated.emplace(s1);
+            alreadyElaborated.emplace(s2);
+            wallsToMerge.emplace(w1, w2);
+            LOGRS("I have merged these two " << s1->middle << " " << s2->middle )
+        }
+
+        // Now merge those walls together
+        std::unordered_set<WallBSData*> wallsToBeDeleted{};
+        for ( auto& wm : wallsToMerge ) {
+            bool w1deleted = wallsToBeDeleted.find(wm.w1) != wallsToBeDeleted.end();
+            bool w2deleted = wallsToBeDeleted.find(wm.w2) != wallsToBeDeleted.end();
+            if ( !(w1deleted && w2deleted) ) {
+                auto wMaster = wm.w1;
+                auto wSlave  = wm.w2;
+                if ( w1deleted ) {
+                    wMaster = wm.w2;
+                    wSlave  = wm.w1;
+                }
+
+                WallService::mergePoints( wMaster, wSlave->epoints );
+                WallService::update( wMaster );
+                wallsToBeDeleted.emplace(wSlave);
+            }
+        }
+        
+        for ( const auto& wd : wallsToBeDeleted ) {
+            FloorService::removeArch( f, wd->hash );
+        }
+
+        // Rinse and repeat ushapes alignments
+        UShapesAlignmentInternal(f, shapePairs);
+    }
+}
+
+std::vector<std::pair<UShape *, UShape *>> FloorService::alignSuitableUShapesFromWalls( FloorBSData *f ) {
+
+    VectorOfUShapePairs shapePairs{};
+    VectorOfUShapePairs mergeList = UShapesAlignmentInternal(f, shapePairs );
+    checkUShapesProblemsAfterAlignment(f, shapePairs, mergeList );
 
     return shapePairs;
 }

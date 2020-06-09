@@ -793,3 +793,12 @@ WallService::getNearestFeatureToPoint( const HouseBSData *houseJson, const V2f& 
 bool WallService::isWindowOrDoorPart( const WallBSData *w ) {
     return checkBitWiseFlag(w->wallFlags, WallFlags::WF_IsDoorPart | WallFlags::WF_IsWindowPart);
 }
+
+bool WallService::hasUShape( const WallBSData *w, const UShape *us ) {
+    for ( const auto& wus : w->mUShapes ) {
+        if ( UShapeService::isTheSame( wus, *us ) ) {
+            return true;
+        }
+    }
+    return false;
+}

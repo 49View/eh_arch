@@ -106,7 +106,6 @@ namespace FloorService {
     // Update
     void calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f );
     std::vector<UShape *> allUShapes( FloorBSData *f );
-    void ushapesReconciliation( FloorBSData *f );
     void
     changeTypeOfSelectedElementTo( FloorBSData *f, ArchStructural *source, ArchType t,
                                    ArchSubTypeT st );
