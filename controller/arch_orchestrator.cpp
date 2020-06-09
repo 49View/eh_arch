@@ -91,6 +91,12 @@ Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( std::shared_ptr<Hou
     return m;
 }
 
+void ArchOrchestrator::centerCameraMiddleOfHouse( HouseBSData* houseJson ) {
+    if ( houseJson->bbox.isValid() ) {
+        rsg.DC()->setPosition(rsg.DC()->center(houseJson->bbox, 0.0f));
+    }
+}
+
 void ArchOrchestrator::showIMHouse( std::shared_ptr<HouseBSData> _houseJson, const ArchRenderController& ims  ) {
     HouseRender::IMHouseRender(rsg.RR(), sg, _houseJson.get(), ims);
 }

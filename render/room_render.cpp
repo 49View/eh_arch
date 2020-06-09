@@ -70,7 +70,9 @@ namespace RoomRender {
         auto measureText = RoomService::roomSizeToString(room);
         auto measurePos = FontUtils::fitTextInBox(font, measureText, bestBBox, fontHeight);
 
-        auto areaPos = measurePos + V2fc::Y_AXIS * fontHeight;
+        auto areaSQm = sqmToString(room->area);
+        auto areaPos = FontUtils::fitTextInBox(font, areaSQm, bestBBox, fontHeight);
+        areaPos += V2fc::Y_AXIS * fontHeight;
 
         rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, C4f::BLACK, ims.pm(),
                        room->hashFeature(roomName, 0));
@@ -78,7 +80,7 @@ namespace RoomRender {
         rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, C4f::BLACK, ims.pm(),
                        room->hashFeature(roomName, 1));
 
-        rr.draw<DText>(FDS{ sqmToString(room->area), font, areaPos, fontHeight }, C4f::BLACK, ims.pm(),
+        rr.draw<DText>(FDS{ areaSQm, font, areaPos, fontHeight }, C4f::BLACK, ims.pm(),
                        room->hashFeature(roomName, 2));
 
         int ffc = 0;

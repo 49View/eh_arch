@@ -25,6 +25,8 @@ public:
     Matrix4f
     calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> houseJson, float screenRatio, float screenPadding );
 
+    void centerCameraMiddleOfHouse( HouseBSData* _houseJson );
+
 protected:
     SceneGraph& sg;
     RenderOrchestrator& rsg;

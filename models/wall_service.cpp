@@ -39,14 +39,8 @@ std::shared_ptr<WallBSData> WallService::createWall2( const std::vector<Vector2f
     return w;
 }
 
-void WallService::update( WallBSData *w ) {
-    removeCollinear(w->epoints, accuracy1Sqmm);
-    makeTriangles2d(w);
-
-    // Normals
+void WallService::calculateNormals( WallBSData *w ) {
     int csize = static_cast<int>( w->epoints.size());
-    w->enormals.resize(csize);
-    w->slinesGHType.resize(csize);
     for ( auto t = 0; t < csize; t++ ) {
         // This small if statement is needed in order to guarantee the normal facing the same way in case of a 2 vertex wall
         // Without it it will assign 2 normals (the second being the inverted of the first) and that's wrong because for
@@ -57,6 +51,29 @@ void WallService::update( WallBSData *w ) {
             w->enormals[t] = w->enormals.back();
         }
         ASSERT(isValid(w->enormals[t].x()));
+    }
+
+}
+
+void WallService::updateFormFactor( WallBSData *w ) {
+    makeTriangles2d(w);
+    calculateNormals( w );
+    calcBBox(w);
+    w->width = w->bbox.width();
+}
+
+void WallService::update( WallBSData *w ) {
+    removeCollinear(w->epoints, accuracy1Sqmm);
+    makeTriangles2d(w);
+
+    // Normals
+    int csize = static_cast<int>( w->epoints.size());
+    w->enormals.resize(csize);
+    calculateNormals( w );
+
+    // Line Types
+    w->slinesGHType.resize(csize);
+    for ( auto t = 0; t < csize; t++ ) {
         w->slinesGHType[t] = static_cast<uint64_t>( GHType::WallPlaster );
     }
 
@@ -552,7 +569,7 @@ void WallService::movePoint( WallBSData *w, uint64_t pointIndex, const V2f& offs
     } else {
         w->epoints[pointIndex] = offset;
     }
-    WallService::update(w);
+    WallService::updateFormFactor(w);
 }
 
 void WallService::deletePoint( WallBSData *w, uint64_t pointIndex ) {

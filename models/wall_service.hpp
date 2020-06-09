@@ -68,6 +68,8 @@ namespace WallService {
     FloorUShapesPair createTwoShapeAt( HouseBSData *houseJson, const V2f& point );
     void makeTriangles2d( WallBSData *w );
     bool mergePoints( WallBSData *w, const V2fVector& points );
+    void updateFormFactor( WallBSData *w );
+    void calculateNormals( WallBSData *w );
 
     // Calcs
     void perimeterFromSegments( const std::vector<std::vector<ArchSegment>>& segments,
