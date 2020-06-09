@@ -588,6 +588,17 @@ void WallService::addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const 
     WallService::update(w);
 }
 
+bool WallService::mergePoints( WallBSData *w, const V2fVector& points ) {
+
+    auto newPoints = PolyServices::clipAgainst( w->epoints, points,PolyServices::ClipMode::Union );
+
+    if ( newPoints.size() > w->epoints.size() ) {
+        WallService::update( w, newPoints );
+        return true;
+    }
+    return false;
+}
+
 UShape* WallService::addTwoShapeAt( WallBSData *w, const ArchIntersection& archI ) {
 
     V2f dir = normalize(archI.p2 - archI.p1);
@@ -613,7 +624,8 @@ UShape* WallService::addTwoShapeAt( WallBSData *w, const ArchIntersection& archI
         if ( UShapeService::isMaineEdgeEspsilon( pus1, pus2, *it2 ) ) {
             ret = &*it2;
             ++it2;
-        } else {
+        }
+        else {
             bool isOld = false;
             for ( const auto& us : oldUShapes ) {
                 if ( UShapeService::doesShareMaineEdgeEpsilon(*it2, us) ) {
@@ -629,30 +641,6 @@ UShape* WallService::addTwoShapeAt( WallBSData *w, const ArchIntersection& archI
         }
     }
 
-//    for ( auto& us : w->mUShapes ) {
-//        if ( UShapeService::isMaineEdgeEspsilon( pus1, pus2, us ) ) {
-//            ret = &us;
-//        }
-//    }
-//    if ( w->mUShapes.size() == 7 ) {
-//        w->mUShapes.erase(w->mUShapes.begin()+4);
-//        w->mUShapes.erase(w->mUShapes.begin()+5);
-//
-//    }
-//    for ( auto i = 0u; i < w->mUShapes.size(); i++ ) {
-//        auto us = w->mUShapes[i];
-//        if ( UShapeService::isMaineEdgeEspsilon( pus1, p1, us ) ) {
-//            w->mUShapes.erase(w->mUShapes.begin()+i);
-//            break;
-//        }
-//    }
-//    for ( auto i = 0u; i < w->mUShapes.size(); i++ ) {
-//        auto us = w->mUShapes[i];
-//        if ( UShapeService::isMaineEdgeEspsilon( pus2, p2, us ) ) {
-//            w->mUShapes.erase(w->mUShapes.begin()+i);
-//            break;
-//        }
-//    }
     return ret;
 }
 

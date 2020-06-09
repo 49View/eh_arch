@@ -121,9 +121,6 @@ bool RoomBuilderSegmentPoints::hasSelfClosingWallsOnly( const V3f& _p ) const {
 }
 
 void RoomBuilderSegmentPoints::finalise() {
-//    if ( front() == back() ) {
-//        pop_back_single();
-//    }
 
     if ( front() == back() ) {
         int numPointsToShift = static_cast<int>(plist.size() - 1);
@@ -144,9 +141,6 @@ void RoomBuilderSegmentPoints::finalise() {
         ss << ptypes[t];
     }
     Hash( ss.str() );
-
-    // Winding Order
-//    forceWindingOrder( plist, WindingOrder::CCW, ptypes );
 }
 
 void RoomBuilderSegmentPoints::clear() {

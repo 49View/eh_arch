@@ -279,6 +279,19 @@ void HouseService::removeArch( std::shared_ptr<HouseBSData> _house, int64_t hash
 	}
 }
 
+void HouseService::mergePoints( HouseBSData *house, const V2fVectorOfVector& points ) {
+    bool inFloors = false;
+    Rect2f pointsBBox{points};
+
+    for ( auto& f : house->mFloors ) {
+        inFloors |= FloorService::mergePoints( f.get(), points, pointsBBox );
+    }
+    if ( !inFloors ) {
+        auto f = addFloorFromData(house, pointsBBox);
+        FloorService::mergePoints( f.get(), points, pointsBBox );
+    }
+}
+
 Vector2f HouseService::centrePointOfBiggestRoom( std::shared_ptr<HouseBSData> _house ) {
     float currMaxArea = 0.0f;
     Vector2f currCenter = V2fc::ZERO;

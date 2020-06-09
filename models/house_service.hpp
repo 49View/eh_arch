@@ -32,6 +32,7 @@ namespace HouseService {
     void rescale( HouseBSData *house, float scale );
     void recalculateBBox( HouseBSData *house );
     void swapWindowOrDoor( HouseBSData *house, int64_t hashOfTwoShape );
+    void mergePoints( HouseBSData *f, const V2fVectorOfVector& points );
 
     // Delete
     void removeArch( std::shared_ptr<HouseBSData> _house, int64_t hashToRemove );

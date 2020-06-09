@@ -829,26 +829,10 @@ namespace HouseMakerBitmap {
         return house;
     }
 
-    void makeFromWalls( std::shared_ptr<HouseBSData> house, const V2fVectorOfVector& wallPoints, HMBBSData &bsdata, const SourceImages& sourceImages ) {
-        PROFILE_BLOCK( "House from wall service elaborate from walls" );
-
-        HouseService::clearHouse( house.get() );
-        guessNumberOfFloors( house.get(), sourceImages );
-
-        for ( auto& f : house->mFloors ) {
-            FloorService::addWallsFromData( f.get(), wallPoints, WallLastPointWrap::Yes );
-        }
-
-        bool ac= true;
-        guessDoorsWindowsRooms( house.get(), sourceImages, ac );
-
-        addAndFinaliseRooms( house.get(), bsdata, sourceImages );
-        rescale( house.get(), 1.0f, 1.0f );
-    }
-
     void makeFromWalls( HouseBSData* house, HMBBSData &bsdata, const SourceImages& sourceImages ) {
         PROFILE_BLOCK( "House from wall service elaborate walls housebsdata" );
         HouseService::clearHouseExcludingFloorsAndWalls( house );
+
         rescale( house, 1.0f/bsdata.rescaleFactor, metersToCentimeters(1.0f/bsdata.rescaleFactor) );
         bool ac= true;
         guessDoorsWindowsRooms( house, sourceImages, ac );
@@ -861,8 +845,8 @@ namespace HouseMakerBitmap {
 
         FloorService::addDoorFromData( fus.f, house->doorHeight, *fus.us1, *fus.us2 );
         HouseService::clearHouseRooms( house );
-        rescale( house, 1.0f/bsdata.rescaleFactor, metersToCentimeters(1.0f/bsdata.rescaleFactor) );
 
+        rescale( house, 1.0f/bsdata.rescaleFactor, metersToCentimeters(1.0f/bsdata.rescaleFactor) );
         guessRooms( house );
         addAndFinaliseRooms( house, bsdata, sourceImages );
         rescale( house, bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
@@ -872,6 +856,7 @@ namespace HouseMakerBitmap {
         PROFILE_BLOCK( "House from wall service elaborate from swap doors and windows" );
         HouseService::swapWindowOrDoor( house, hash );
         HouseService::clearHouseRooms( house );
+
         rescale( house, 1.0f/bsdata.rescaleFactor, metersToCentimeters(1.0f/bsdata.rescaleFactor) );
         guessRooms( house );
         addAndFinaliseRooms( house, bsdata, sourceImages );

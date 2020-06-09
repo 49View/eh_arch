@@ -9,6 +9,7 @@
 #include "floor_service.hpp"
 #include <set>
 #include <ostream>
+#include <core/math/rect2f.h>
 #include <core/util.h>
 #include <core/util_follower.hpp>
 #include <core/math/poly_utils.hpp>
@@ -415,6 +416,23 @@ void FloorService::removeUnPairedUShapes( FloorBSData *f ) {
             return us.width > umedian.second * 1.15f;
         } );
     }
+}
+
+bool FloorService::mergePoints( FloorBSData *f, const V2fVectorOfVector& points, const Rect2f& pointsBBox ) {
+
+    bool ret = false;
+    if ( f->bbox.contains(pointsBBox) || f->bbox.intersect(pointsBBox) ) {
+        for ( auto& w : f->walls ) {
+            for ( const auto& wallPoints : points ) {
+                ret |= WallService::mergePoints(w.get(), wallPoints );
+            }
+        }
+        if ( !ret ) {
+            addWallsFromData(f, points, WallLastPointWrap::Yes );
+        }
+        ret = true;
+    }
+    return ret;
 }
 
 float FloorService::updatePerimeter( FloorBSData *f, const std::vector<ArchSegment>& singleRoomSegmentsExternal ) {

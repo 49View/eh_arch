@@ -49,7 +49,7 @@ public:
     [[nodiscard]] V3f   bestStartingPoint() const;
     [[nodiscard]] float WallWidth() const;
 
-    V2fVectorOfVector bespokeriseWalls( float scaleFactor );
+    V2fVectorOfVector bespokeriseWalls();
 
 private:
     void setUIStatusAfterChange( bool wasFinalised = false );
