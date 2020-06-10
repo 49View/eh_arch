@@ -336,24 +336,6 @@ namespace HouseMakerBitmap {
 
     }
 
-    void assignRoomTypeFromBeingClever( RoomPreData& r ) {
-        // First check:
-        // Count number of doors and windows a room has, if it has 1 door and no windows... Probably it's a bathroom!
-        if ( r.rtypes.size() == 1 && r.rtypes[0] == ASType::GenericRoom ) {
-            size_t doorWallCounts = 0;
-            size_t windowWallCounts = 0;
-            if ( r.wallSegmentsInternal.size() == 1 ) {
-                for ( const auto &ws : r.wallSegmentsInternal[0] ) {
-                    if ( checkBitWiseFlag(ws.tag, WF_IsDoorPart) ) doorWallCounts++;
-                    if ( checkBitWiseFlag(ws.tag, WF_IsWindowPart) ) windowWallCounts++;
-                }
-            }
-            if ( doorWallCounts == 1 && windowWallCounts == 0 ) {
-                r.rtypes[0] = ASType::Bathroom;
-            }
-        }
-    }
-
     void roomOCRScan( const SourceImages &si, HMBBSData &bsdata, std::vector<RoomPreData> &rws, bool doScaling = true ) {
         // Init OCR, dont worry, the OCR init will done only once per run...
         OCR::ocrInitEngine();
@@ -366,7 +348,6 @@ namespace HouseMakerBitmap {
                 cv::Mat origMasked;
                 auto maskedRoom = maskedRoomMat( si, bsdata, cs, csBBox, 1, OCRThresholdMask::False, origMasked );
                 assignRoomTypeFromOcrString( bsdata, maskedRoom, csBBox, r.rtypes );
-                assignRoomTypeFromBeingClever(r);
 //            cv::imwrite(std::to_string(random()) + ".png", maskedRoom);
                 //guessHuMomentsOfRoom( origMasked, r );
             }

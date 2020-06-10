@@ -517,6 +517,11 @@ namespace RoomService {
         return ret;
     }
 
+    void setRoomType( RoomBSData *r, ASTypeT rt ) {
+        r->roomTypes.clear();
+        r->roomTypes.emplace_back(rt);
+    }
+
     void addRoomType( RoomBSData *r, ASTypeT rt ) {
         if ( auto it = std::find(r->roomTypes.begin(), r->roomTypes.end(), rt); it == r->roomTypes.end() ) {
             r->roomTypes.emplace_back(rt);

@@ -104,6 +104,7 @@ namespace FloorService {
     void addCeilingContour( FloorBSData *f, const std::vector<Vector3f>& cc );
 
     // Update
+    void assignRoomTypeFromBeingClever( FloorBSData *f );
     void calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f );
     std::vector<UShape *> allUShapes( FloorBSData *f );
     void

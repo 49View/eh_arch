@@ -259,11 +259,12 @@ VectorOfUShapePairs UShapesAlignmentInternal( FloorBSData *f, VectorOfUShapePair
     return mergeList;
 }
 
-void checkUShapesProblemsAfterAlignment( FloorBSData *f, VectorOfUShapePairs& shapePairs, VectorOfUShapePairs& mergeList ) {
+void
+checkUShapesProblemsAfterAlignment( FloorBSData *f, VectorOfUShapePairs& shapePairs, VectorOfUShapePairs& mergeList ) {
     // Right, now collect the merge list and merge the two walls together
     struct WM1 {
-        WallBSData* w1;
-        WallBSData* w2;
+        WallBSData *w1;
+        WallBSData *w2;
         WM1() = default;
         WM1( WallBSData *w1, WallBSData *w2 ) : w1(w1), w2(w2) {}
         bool operator==( const WM1& rhs ) const {
@@ -283,18 +284,18 @@ void checkUShapesProblemsAfterAlignment( FloorBSData *f, VectorOfUShapePairs& sh
     };
 
     if ( !mergeList.empty() ) {
-        std::unordered_set<UShape*> alreadyElaborated{};
+        std::unordered_set<UShape *> alreadyElaborated{};
         std::unordered_set<WM1, WM1HashFunctor> wallsToMerge;
         for ( const auto& mergePair : mergeList ) {
-            auto* s1 = mergePair.first;
-            auto* s2 = mergePair.second;
+            auto *s1 = mergePair.first;
+            auto *s2 = mergePair.second;
 
-            if ( alreadyElaborated.find( s1 ) != alreadyElaborated.end() ) continue;
-            if ( alreadyElaborated.find( s2 ) != alreadyElaborated.end() ) continue;
+            if ( alreadyElaborated.find(s1) != alreadyElaborated.end() ) continue;
+            if ( alreadyElaborated.find(s2) != alreadyElaborated.end() ) continue;
 
-            float dist = half(distance( s1->middle, s2->middle ));
-            WallBSData* w1 = nullptr;
-            WallBSData* w2 = nullptr;
+            float dist = half(distance(s1->middle, s2->middle));
+            WallBSData *w1 = nullptr;
+            WallBSData *w2 = nullptr;
             for ( auto& w: f->walls ) {
                 if ( WallService::hasUShape(w.get(), s1) ) {
                     w1 = w.get();
@@ -305,40 +306,44 @@ void checkUShapesProblemsAfterAlignment( FloorBSData *f, VectorOfUShapePairs& sh
                     if ( w1 && w2 ) break;
                 }
             }
-            ASSERT( w1 && w2 );
-            WallService::movePoint( w1, s1->indices[1], w1->epoints[s1->indices[1]] + s1->crossNormals[0]*dist*1.01f, false);
-            WallService::movePoint( w1, s1->indices[2], w1->epoints[s1->indices[2]] + s1->crossNormals[0]*dist*1.01f, false);
+            ASSERT(w1 && w2);
+            WallService::movePoint(w1, s1->indices[1], w1->epoints[s1->indices[1]] + s1->crossNormals[0] * dist * 1.01f,
+                                   false);
+            WallService::movePoint(w1, s1->indices[2], w1->epoints[s1->indices[2]] + s1->crossNormals[0] * dist * 1.01f,
+                                   false);
 
-            WallService::movePoint( w2, s2->indices[1], w2->epoints[s2->indices[1]] + s2->crossNormals[0]*dist*1.01f, false);
-            WallService::movePoint( w2, s2->indices[2], w2->epoints[s2->indices[2]] + s2->crossNormals[0]*dist*1.01f, false);
+            WallService::movePoint(w2, s2->indices[1], w2->epoints[s2->indices[1]] + s2->crossNormals[0] * dist * 1.01f,
+                                   false);
+            WallService::movePoint(w2, s2->indices[2], w2->epoints[s2->indices[2]] + s2->crossNormals[0] * dist * 1.01f,
+                                   false);
 
             alreadyElaborated.emplace(s1);
             alreadyElaborated.emplace(s2);
             wallsToMerge.emplace(w1, w2);
-            LOGRS("I have merged these two " << s1->middle << " " << s2->middle )
+            LOGRS("I have merged these two " << s1->middle << " " << s2->middle)
         }
 
         // Now merge those walls together
-        std::unordered_set<WallBSData*> wallsToBeDeleted{};
+        std::unordered_set<WallBSData *> wallsToBeDeleted{};
         for ( auto& wm : wallsToMerge ) {
             bool w1deleted = wallsToBeDeleted.find(wm.w1) != wallsToBeDeleted.end();
             bool w2deleted = wallsToBeDeleted.find(wm.w2) != wallsToBeDeleted.end();
-            if ( !(w1deleted && w2deleted) ) {
+            if ( !( w1deleted && w2deleted ) ) {
                 auto wMaster = wm.w1;
-                auto wSlave  = wm.w2;
+                auto wSlave = wm.w2;
                 if ( w1deleted ) {
                     wMaster = wm.w2;
-                    wSlave  = wm.w1;
+                    wSlave = wm.w1;
                 }
 
-                WallService::mergePoints( wMaster, wSlave->epoints );
-                WallService::update( wMaster );
+                WallService::mergePoints(wMaster, wSlave->epoints);
+                WallService::update(wMaster);
                 wallsToBeDeleted.emplace(wSlave);
             }
         }
-        
+
         for ( const auto& wd : wallsToBeDeleted ) {
-            FloorService::removeArch( f, wd->hash );
+            FloorService::removeArch(f, wd->hash);
         }
 
         // Rinse and repeat ushapes alignments
@@ -349,8 +354,8 @@ void checkUShapesProblemsAfterAlignment( FloorBSData *f, VectorOfUShapePairs& sh
 std::vector<std::pair<UShape *, UShape *>> FloorService::alignSuitableUShapesFromWalls( FloorBSData *f ) {
 
     VectorOfUShapePairs shapePairs{};
-    VectorOfUShapePairs mergeList = UShapesAlignmentInternal(f, shapePairs );
-    checkUShapesProblemsAfterAlignment(f, shapePairs, mergeList );
+    VectorOfUShapePairs mergeList = UShapesAlignmentInternal(f, shapePairs);
+    checkUShapesProblemsAfterAlignment(f, shapePairs, mergeList);
 
     return shapePairs;
 }
@@ -605,6 +610,59 @@ std::vector<RoomBSData *> FloorService::roomsIntersectingBBox( FloorBSData *f, c
     return ret;
 }
 
+void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f ) {
+    int numberOfGenericRoom = 0;
+
+    for ( auto& room : f->rooms ) {
+        auto *r = room.get();
+
+        // Bathrooms
+        // Count number of doors and windows a room has, if it has 1 door and no windows... Probably it's a bathroom!
+        if ( RoomService::hasRoomType(r, ASType::GenericRoom) && r->doors.size() == 1 && r->windows.empty() ) {
+            RoomService::setRoomType(r, ASType::Bathroom);
+        }
+
+        // Hallways
+        // Guess hallways by checking if a room has no windows and more than 2 doors.
+        if ( RoomService::hasRoomType(r, ASType::GenericRoom) && r->doors.size() > 2 && r->windows.empty() ) {
+            RoomService::setRoomType(r, ASType::Hallway);
+        }
+
+        if ( RoomService::hasRoomType(r, ASType::GenericRoom) ) numberOfGenericRoom++;
+    }
+
+    // Guess Bedrooms and Kitchen/living rooms (with open plan)
+    // **** Now this is compelte wild guess but we are going to try it nevertheless ****
+    // Basically the idea is that if we have between 2 and 4 unassigned rooms (a 1 to 3 bedroom flat)
+    // We will guess that the biggest room is the Living/Kitchen area, the rest are the bedrooms
+    // We can do this because we've already detected bathrroms and Hallways above. It's still wild, but might work.
+    if ( numberOfGenericRoom >= 2 && numberOfGenericRoom <= 4 ) {
+        std::vector<std::pair<float, RoomBSData*>> areaPairs{};
+        for ( auto& room : f->rooms ) {
+            auto *r = room.get();
+            if ( RoomService::hasRoomType(r, ASType::GenericRoom) ) {
+                areaPairs.emplace_back( RoomService::area(r), r );
+            }
+        }
+        std::sort(areaPairs.begin(), areaPairs.end(), []( const auto& a, const auto& b ) -> bool {
+            return a.first > b.first;
+        });
+        bool goForIt = areaPairs[0].first > areaPairs[1].first * 1.5f;
+        if ( goForIt ) {
+            // Add the Kitchen/Living
+            RoomService::setRoomType( areaPairs[0].second, ASType::Kitchen );
+            RoomService::addRoomType( areaPairs[0].second, ASType::LivingRoom );
+            // Add the biggest bedroom first, so this is the master bedroom
+            RoomService::setRoomType( areaPairs[1].second, ASType::BedroomMaster );
+            // Add the rest, if any
+            for (auto t = 2u; t < areaPairs.size(); t++ ) {
+                RoomService::setRoomType( areaPairs[t].second, ASType::BedroomDouble );
+            }
+        }
+    }
+
+}
+
 void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
     for ( auto& w : f->windows ) {
         auto rooms = FloorService::roomsIntersectingBBox(f, w->bbox.squared(), true);
@@ -634,14 +692,7 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
     }
 
     // Now we have all doors and windows connected, try to use some more guessing to help us out.
-
-    // Guess hallways by checking if a room has no windows and more than 2 doors.
-    for ( auto& r : f->rooms ) {
-        if ( r->doors.size() > 2 && r->windows.empty() ) {
-            RoomService::addRoomType(r.get(), ASType::Hallway);
-            RoomService::removeRoomType(r.get(), ASType::GenericRoom);
-        }
-    }
+    FloorService::assignRoomTypeFromBeingClever(f);
 
     // Go back to re-evaluate every door after all possible discoveries/guesses have been made
     for ( auto& d : f->doors ) {
@@ -659,11 +710,6 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
                     if ( isInsideRoom || ( d->isMainDoor && !isInsideRoom ) ) {
                         DoorService::setPivotPoint(d.get(), 0);
                     }
-                }
-                // ### This is an hack, remove it asap. (22 May 2020) NDDado
-                // (I just did it to quickly place correctly the kitchen door on the demo property
-                if ( RS::hasRoomType(room, ASType::Kitchen) ) {
-                    DoorService::setPivotPoint(d.get(), 0);
                 }
             }
         }
