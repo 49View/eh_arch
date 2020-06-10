@@ -610,7 +610,7 @@ std::vector<RoomBSData *> FloorService::roomsIntersectingBBox( FloorBSData *f, c
     return ret;
 }
 
-void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f ) {
+void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData* house ) {
     int numberOfGenericRoom = 0;
 
     for ( auto& room : f->rooms ) {
@@ -631,12 +631,12 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f ) {
         if ( RoomService::hasRoomType(r, ASType::GenericRoom) ) numberOfGenericRoom++;
     }
 
-    // Guess Bedrooms and Kitchen/living rooms (with open plan)
+    // Guess Bedrooms and Kitchen/living rooms (with open plan) (Only for flats/apartments) (floors == 1)
     // **** Now this is compelte wild guess but we are going to try it nevertheless ****
     // Basically the idea is that if we have between 2 and 4 unassigned rooms (a 1 to 3 bedroom flat)
     // We will guess that the biggest room is the Living/Kitchen area, the rest are the bedrooms
     // We can do this because we've already detected bathrroms and Hallways above. It's still wild, but might work.
-    if ( numberOfGenericRoom >= 2 && numberOfGenericRoom <= 4 ) {
+    if ( house->mFloors.size() == 1 && numberOfGenericRoom >= 2 && numberOfGenericRoom <= 4 ) {
         std::vector<std::pair<float, RoomBSData*>> areaPairs{};
         for ( auto& room : f->rooms ) {
             auto *r = room.get();
@@ -663,7 +663,7 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f ) {
 
 }
 
-void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
+void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f, HouseBSData* house ) {
     for ( auto& w : f->windows ) {
         auto rooms = FloorService::roomsIntersectingBBox(f, w->bbox.squared(), true);
         if ( !rooms.empty() ) {
@@ -692,7 +692,7 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f ) {
     }
 
     // Now we have all doors and windows connected, try to use some more guessing to help us out.
-    FloorService::assignRoomTypeFromBeingClever(f);
+    FloorService::assignRoomTypeFromBeingClever(f, house);
 
     // Go back to re-evaluate every door after all possible discoveries/guesses have been made
     for ( auto& d : f->doors ) {

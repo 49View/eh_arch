@@ -762,7 +762,7 @@ namespace HouseMakerBitmap {
             LOGRS("PreRooms count: " << f->rds.size() );
             roomOCRScan( sourceImages, bsdata, f->rds );
             FloorService::addRoomsFromData(f.get());
-            FloorService::calcWhichRoomDoorsAndWindowsBelong(f.get());
+            FloorService::calcWhichRoomDoorsAndWindowsBelong(f.get(), house);
         }
     }
 
