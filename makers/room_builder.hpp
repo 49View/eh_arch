@@ -21,48 +21,35 @@ struct ArchHouseBespokeData;
 
 class RoomBuilder {
 public:
-    RoomBuilder( SceneGraph& sg, RenderOrchestrator& rsg,
-                 std::shared_ptr<HouseBSData> _house );
+    RoomBuilder( SceneGraph& sg, RenderOrchestrator& rsg );
 
-    void activate();
-    void activateDebug();
     bool validateAddPoint( const V2f& _p );
     void addPointToRoom();
     void toggleSegmentType();
     void changeSegmentType( ArchTypeT _st );
     [[nodiscard]] bool isPerimeterClosed() const;
-    void onEntry();
-    void onExit();
 
     void clear( const UICallbackHandle& _ch = {} );
     void undo( const UICallbackHandle& _ch = {} );
     void saveSegments( const UICallbackHandle& _ch = {} );
     void loadSegments( const SerializableContainer& _segs );
-    void replaceFurniture( const UICallbackHandle& _ch = {} );
 
     void setSegmentTypeFromIndex( const UICallbackHandle& _ch = {} );
     void setCurrentPointerPos( const V2f& _p );
     void setInputPoint( const V2f& _p );
 
-    std::shared_ptr<HouseBSData> finalise();
-    std::shared_ptr<HouseBSData> finaliseWithClose();
     [[nodiscard]] V3f   bestStartingPoint() const;
     [[nodiscard]] float WallWidth() const;
 
     V2fVectorOfVector bespokeriseWalls();
 
 private:
-    void setUIStatusAfterChange( bool wasFinalised = false );
-    void fade2dScene( float _time, float value );
     void setSegmentType( ArchTypeT _st );
     void setBestFittingSegmentTypeAfterSegmentCompletion();
 
     [[nodiscard]] bool checkSegmentLongEnough() const;
     [[nodiscard]] bool checkPointWillClosePerimeter() const;
     [[nodiscard]] bool checkPointIntersect( const V3f& _p ) const;
-
-    ArchHouseBespokeData bespokerise();
-    void roomPreBakedFurnitureSetup( FurnitureRuleScript& ruleScript );
 
     V3f convert2dPosTo3d( const V2f& _p );
     V3f snapper( const V3f& _p );
@@ -76,7 +63,6 @@ private:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
 
-    std::shared_ptr<HouseBSData> house;
     RoomBuilderSegmentPoints segments;
     SerializableContainer cachedSegments;
     V3f currentPoint = V3f::ZERO;

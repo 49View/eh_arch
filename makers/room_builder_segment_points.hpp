@@ -19,14 +19,17 @@ struct RoomBuilderSegmentPoint {
 class RoomBuilderSegmentPoints : public Hashable<> {
 public:
     RoomBuilderSegmentPoints() = default;
-    JSONSERIAL(RoomBuilderSegmentPoints, plist, ptypes)
+JSONSERIAL(RoomBuilderSegmentPoints, plist, ptypes)
     void add( const RoomBuilderSegmentPoint& _p );
     void clear();
-    V3f back( ) const;
-    V3f front( ) const;
-    void pop_back( );
-    void pop_back_single( );
-    void pop_front( );
+    V3f back() const;
+    V3f front() const;
+    V3f lastDirection() const;
+    void retreatLastPoint( float offset );
+    void retreatLastPoint( const V3f& offset );
+    void pop_back();
+    void pop_back_single();
+    void pop_front();
     size_t size() const { return plist.size(); }
     bool empty() const { return plist.empty(); }
     Rect2f BBox() const { return bbox; }
@@ -43,13 +46,13 @@ public:
     V2fVectorOfVector wallSegments() const;
     std::vector<RoomBuilderSegmentPoint> pointsPair() const;
 
-    template <typename T>
+    template<typename T>
     TwoShapeVector<T> pairOf( ArchTypeT pt ) const {
         TwoShapeVector<T> ret{};
 
-        for ( size_t t = 0; t < plist.size()-1; t++ ) {
-            if ( checkBitWiseFlag( ptypes[t], pt ) ) {
-                ret.emplace_back( plist[t], plist[t+1] );
+        for ( size_t t = 0; t < plist.size() - 1; t++ ) {
+            if ( checkBitWiseFlag(ptypes[t], pt) ) {
+                ret.emplace_back(plist[t], plist[t + 1]);
             }
         }
         return ret;
@@ -63,6 +66,6 @@ private:
     // SOA for faster retrival of plists to draw
     V3fVector plist{};
     std::vector<ArchTypeT> ptypes{};
-    Rect2f bbox{Rect2f::INVALID};
+    Rect2f bbox{ Rect2f::INVALID };
 };
 

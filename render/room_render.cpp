@@ -92,9 +92,9 @@ namespace RoomRender {
                            room->hashFeature(ff.symbolRef, ffc++));
         }
 
-        for ( auto& cov : room->mvSkirtingSegments ) {
-            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, arc.pm(), room->hashFeature("skirting", 0));
-        }
+//        for ( auto& cov : room->mvSkirtingSegments ) {
+//            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, arc.pm(), room->hashFeature("skirting", 0));
+//        }
     }
 
     GeomSPContainer createCovingSegments( SceneGraph& sg, RoomBSData *w ) {

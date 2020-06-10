@@ -200,3 +200,23 @@ void RoomBuilderSegmentPoints::scale( float scaleFactor ) {
         v *= scaleFactor;
     }
 }
+
+V3f RoomBuilderSegmentPoints::lastDirection() const {
+    if ( plist.size() < 2 ) return V3f::ZERO;
+
+    return normalize( plist.back() - plist[plist.size()-2]);
+}
+
+void RoomBuilderSegmentPoints::retreatLastPoint( float offset ) {
+    if ( plist.size() >= 2 ) {
+        auto invDir = -lastDirection();
+        plist[plist.size()-1] += invDir * offset;
+    }
+}
+
+void RoomBuilderSegmentPoints::retreatLastPoint( const V3f& offset ) {
+    if ( !plist.empty() ) {
+        plist[plist.size()-1] = offset;
+    }
+}
+
