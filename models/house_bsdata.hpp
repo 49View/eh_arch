@@ -437,13 +437,14 @@ JSONDATA(RoomPreData, wallSegmentsInternal, bboxInternal, rtypes)
 };
 
 JSONDATA_H(FloorBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
-           linkedHash, sequencePart, mTriangles2d, number, z, concreteHeight, hasCoving, doorHeight, windowHeight,
+           linkedHash, sequencePart, mTriangles2d, number, z, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
            perimeterArchSegments, anchorPoint, defaultCeilingMaterial, defaultCeilingColor, externalWallsColor, rds,
            walls, windows, doors, stairs, rooms, orphanedUShapes, orphanedWallSegments)
 
     int32_t number = -1; // As in floor number, ground floor = 1, etc...
     float z = 0.0f;
+    float area = 0.0f;
     float concreteHeight = 0.0f;
     bool hasCoving = false;
     float doorHeight = 1.97f;
@@ -474,6 +475,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo
 
 JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
              linkedHash, sequencePart, mTriangles2d, version, name, source, declaredSQm, defaultSkybox, sourceData,
+             bestInternalViewingPosition, bestInternalViewingAngle, walkableArea,
              doorHeight, defaultWindowHeight, defaultWindowBaseOffset, defaultCeilingHeigh, windowsillExpansion,
              windowFrameThickness, defaultGroundHeight, worktopHeight, bathRoomSinkHeight, defaultWallColor, accuracy,
              mFloors)
@@ -483,8 +485,9 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albe
     std::string declaredSQm = "";
     std::string defaultSkybox = "";
     HouseSourceData sourceData;
-    V3f bestInternalViewingPosition;
-    V3f bestInternalViewingAngle;
+    V3f bestInternalViewingPosition = V3f::ZERO;
+    V3f bestInternalViewingAngle = V3f::X_AXIS;
+    float walkableArea = 0.0f;
     float doorHeight = 1.94f;
     float defaultWindowHeight = 1.30f;
     float defaultWindowBaseOffset = 0.90f;

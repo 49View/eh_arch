@@ -254,16 +254,6 @@ std::shared_ptr<RoomBSData> HouseService::getRoomOnFloor( std::shared_ptr<HouseB
 	return _house->mFloors[floorIndex]->rooms[roomIndex];
 }
 
-float HouseService::area( HouseBSData* _house ) {
-	float ret = 0.0f;
-	
-	for ( const auto&f : _house->mFloors ) {
-		ret += FloorService::area( f.get() );
-	}
-	
-	return ret;
-}
-
 bool HouseService::whichRoomAmI( std::shared_ptr<HouseBSData> _house, const Vector2f& _pos, std::shared_ptr<RoomBSData>& outRoom ) {
 	for ( const auto& f : _house->mFloors ) {
 		if ( FloorService::whichRoomAmI( f.get(), _pos, outRoom ) ) {
@@ -352,6 +342,7 @@ void HouseService::rescale( HouseBSData *house, float scale ) {
         FloorService::rescale( floor.get(), scale );
     }
     recalculateBBox( house );
+    house->walkableArea = HouseService::area(house);
 }
 
 void HouseService::recalculateBBox( HouseBSData *house ) {
@@ -366,6 +357,14 @@ void HouseService::recalculateBBox( HouseBSData *house ) {
     house->width = house->bbox3d.calcWidth();
     house->height = house->bbox3d.calcHeight();
     house->depth = house->bbox3d.calcDepth();
+}
+
+float HouseService::area( const HouseBSData *house ) {
+    float ret = 0.0f;
+
+    for ( const auto& w : house->mFloors ) ret += FloorService::area(w.get());
+
+    return ret;
 }
 
 void HouseService::swapWindowOrDoor( HouseBSData *house, int64_t hashOfTwoShape ) {

@@ -820,6 +820,16 @@ FloorService::changeTypeOfSelectedElementTo( FloorBSData *f, ArchStructural *sou
     }
 }
 
+float FloorService::area( const FloorBSData *f ) {
+    float ret = 0.0f;
+
+    for ( const auto& w : f->rooms ) ret += RoomService::area(w.get());
+    for ( const auto& w : f->doors ) ret += w->width * w->depth;
+    for ( const auto& w : f->windows ) ret += w->width * w->depth;
+
+    return ret;
+}
+
 void FloorService::rescale( FloorBSData *f, float _scale ) {
     ArchStructuralService::rescale(f, _scale);
 
@@ -850,6 +860,8 @@ void FloorService::rescale( FloorBSData *f, float _scale ) {
     //	for ( auto&& i : stairs ) i->rescale();
 
     calcBBox(f);
+
+    f->area = FloorService::area(f);
 }
 
 void FloorService::setCoving( FloorBSData *f, bool _state ) {
@@ -1005,16 +1017,6 @@ void FloorService::removeWalls( FloorBSData *f ) {
 void FloorService::removeWalls( FloorBSData *f, float wwidth ) {
     f->walls.erase(remove_if(f->walls.begin(), f->walls.end(),
                              [wwidth]( auto const& us ) -> bool { return us->width == wwidth; }), f->walls.end());
-}
-
-float FloorService::area( const FloorBSData *f ) {
-    float ret = 0.0f;
-
-    for ( const auto& w : f->rooms ) {
-        ret += RoomService::area(w.get());
-    }
-
-    return ret;
 }
 
 ArchStructural *FloorService::findElementWithHash( const FloorBSData *f, int64_t _hash ) {

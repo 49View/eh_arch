@@ -44,7 +44,7 @@ namespace HouseService {
     void clearHouseExcludingFloorsAndWalls( HouseBSData *house );
 
     // Query
-    float area( HouseBSData *_house );
+    float area( const HouseBSData *_house );
     V2f centerOfBiggestRoom( const HouseBSData *house );
     int getNumberOfePoints( std::shared_ptr<HouseBSData> _house );
     int getNumberOfWallSegments( std::shared_ptr<HouseBSData> _house );

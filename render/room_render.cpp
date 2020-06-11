@@ -39,8 +39,8 @@ namespace RoomRender {
 
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *room, const ArchRenderController& arc ) {
 
-//        rr.draw<DPoly>( room->mPerimeterSegments, 0.025f, color, true );
 //        if ( drawDebug) {
+//            rr.draw<DPoly>( room->mPerimeterSegments, 0.025f, C4f::RED, true );
 //            rr.draw<DLine>( room->mPerimeterSegments, 0.03f, C4f::RED, false );
 //        }
         auto rm = arc.floorPlanShader();
