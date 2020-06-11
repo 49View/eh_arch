@@ -38,8 +38,6 @@ namespace RoomRender {
     }
 
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *room, const ArchRenderController& arc ) {
-//        bool drawDebug = fpRenderMode == Use2dDebugRendering::True;
-//        auto color = drawDebug ? Color4f::RANDA1().A(0.5f) : C4f::WHITE.A(0.5f);
 
 //        rr.draw<DPoly>( room->mPerimeterSegments, 0.025f, color, true );
 //        if ( drawDebug) {
@@ -54,6 +52,15 @@ namespace RoomRender {
             rr.draw<DPoly>(room->mPerimeterSegments, color, arc.pm(),
                            room->hashFeature("perimeter" + color.toString(), 0));
         }
+
+        int ffc = 0;
+        for ( const auto& ff : room->mFittedFurniture ) {
+            Matrix4f mt{ ff.position3d * V3f::MASK_Y_OUT, ff.rotation, ff.size };
+            mt.mult(arc.pm()());
+            rr.draw<DLine>(sg.PL(ff.symbolRef), C4f::PASTEL_GRAY, RDSPreMult(mt), rm, lineWidth*2.0f,
+                           room->hashFeature(ff.symbolRef, ffc++));
+        }
+
 
         auto roomName = RoomService::roomNames(room);
         JMATH::Rect2f bestBBox(room->mMaxEnclsingBoundingBox);
@@ -83,14 +90,6 @@ namespace RoomRender {
 
         rr.draw<DText>(FDS{ areaSQm, font, areaPos, fontHeight }, C4f::BLACK, arc.pm(),
                        room->hashFeature(roomName, 2));
-
-        int ffc = 0;
-        for ( const auto& ff : room->mFittedFurniture ) {
-            Matrix4f mt{ ff.position3d * V3f::MASK_Y_OUT, ff.rotation, ff.size };
-            mt.mult(arc.pm()());
-            rr.draw<DLine>(sg.PL(ff.symbolRef), C4f::BLACK, RDSPreMult(mt), rm, lineWidth,
-                           room->hashFeature(ff.symbolRef, ffc++));
-        }
 
 //        for ( auto& cov : room->mvSkirtingSegments ) {
 //            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, arc.pm(), room->hashFeature("skirting", 0));

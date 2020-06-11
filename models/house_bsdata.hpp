@@ -483,6 +483,8 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albe
     std::string declaredSQm = "";
     std::string defaultSkybox = "";
     HouseSourceData sourceData;
+    V3f bestInternalViewingPosition;
+    V3f bestInternalViewingAngle;
     float doorHeight = 1.94f;
     float defaultWindowHeight = 1.30f;
     float defaultWindowBaseOffset = 0.90f;

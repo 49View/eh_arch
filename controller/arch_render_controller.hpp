@@ -79,9 +79,18 @@ public:
     std::optional<ArchStructuralFeatureDescriptor> selectionFront() const;
     size_t selectionCount() const;
 
+    float& getFloorPlanTransparencyFactor() {
+        return floorPlanTransparencyFactor;
+    }
+
+    float FloorPlanTransparencyFactor() const {
+        return floorPlanTransparencyFactor;
+    }
+
 private:
     ArchSelection selection;
     RDSPreMult mPm{ Matrix4f::MIDENTITY() };
     FloorPlanRenderMode mRenderMode = FloorPlanRenderMode::Normal2d;
     C4f selectedColor = C4f::ORANGE_SCHEME1_1;
+    float floorPlanTransparencyFactor = 0.5f;
 };
