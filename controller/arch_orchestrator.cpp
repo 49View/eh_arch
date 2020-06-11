@@ -103,6 +103,7 @@ void ArchOrchestrator::showIMHouse( HouseBSData* _houseJson, const ArchRenderCon
 
 void ArchOrchestrator::show3dHouse( HouseBSData* _houseJson, const PostHouse3dResolvedCallback& ccf ) {
     sg.clearNodes();
+    rsg.RR().clearBucket(CommandBufferLimits::PBRStart);
     rsg.RR().setLoadingFlag( true );
     HOD::resolver<HouseBSData>(sg, _houseJson, [&, ccf, _houseJson]() {
 //        sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson));
