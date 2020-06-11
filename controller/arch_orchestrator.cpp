@@ -30,48 +30,48 @@ ArchOrchestrator::ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg ) 
 namespace HOD { // HighOrderDependency
 
     template<>
-    DepRemapsManager resolveDependencies<HouseBSData>( const HouseBSData *data ) {
+    DepRemapsManager resolveDependencies<HouseBSData>( const HouseBSData *data, SceneGraph& sg ) {
         DepRemapsManager ret{};
 
-        ret.addDep(ResourceGroup::Image, data->defaultSkybox);
+        ret.addDep(sg, ResourceGroup::Image, data->defaultSkybox);
         for ( const auto& floor : data->mFloors ) {
-            ret.addDep(ResourceGroup::Material, floor->externalWallsMaterial);
+            ret.addDep(sg, ResourceGroup::Material, floor->externalWallsMaterial);
             for ( const auto& room : floor->rooms ) {
-                ret.addDep(ResourceGroup::Material, room->wallMaterial);
-                ret.addDep(ResourceGroup::Material, room->ceilingMaterial);
-                ret.addDep(ResourceGroup::Material, room->floorMaterial);
-                ret.addDep(ResourceGroup::Material, room->covingMaterial);
-                ret.addDep(ResourceGroup::Material, room->skirtingMaterial);
-                ret.addDep(ResourceGroup::Profile, room->covingProfile);
-                ret.addDep(ResourceGroup::Profile, room->skirtingProfile);
-                ret.addDep(ResourceGroup::Geom, room->spotlightGeom);
-                ret.addDep(ResourceGroup::Geom, "powersocket");
-                ret.addDep(ResourceGroup::Geom, "lightswitch");
+                ret.addDep(sg, ResourceGroup::Material, room->wallMaterial);
+                ret.addDep(sg, ResourceGroup::Material, room->ceilingMaterial);
+                ret.addDep(sg, ResourceGroup::Material, room->floorMaterial);
+                ret.addDep(sg, ResourceGroup::Material, room->covingMaterial);
+                ret.addDep(sg, ResourceGroup::Material, room->skirtingMaterial);
+                ret.addDep(sg, ResourceGroup::Profile, room->covingProfile);
+                ret.addDep(sg, ResourceGroup::Profile, room->skirtingProfile);
+                ret.addDep(sg, ResourceGroup::Geom, room->spotlightGeom);
+                ret.addDep(sg, ResourceGroup::Geom, "powersocket");
+                ret.addDep(sg, ResourceGroup::Geom, "lightswitch");
 
                 for ( const auto& furn : room->mFittedFurniture ) {
-                    ret.addDep(ResourceGroup::Geom, furn.name);
-                    ret.addDep(ResourceGroup::Profile, furn.symbolRef);
+                    ret.addDep(sg, ResourceGroup::Geom, furn.name);
+                    ret.addDep(sg, ResourceGroup::Profile, furn.symbolRef);
                 }
 
                 // Will load Kitchen and bathroom sets here
-                ret.addDep(ResourceGroup::Material, room->kitchenData.worktopMaterial);
-                ret.addDep(ResourceGroup::Material, room->kitchenData.unitsMaterial);
-                ret.addDep(ResourceGroup::Geom, room->kitchenData.sinkModel);
-                ret.addDep(ResourceGroup::Geom, room->kitchenData.ovenPanelModel);
-                ret.addDep(ResourceGroup::Geom, room->kitchenData.microwaveModel);
-                ret.addDep(ResourceGroup::Geom, room->kitchenData.cooktopModel);
-                ret.addDep(ResourceGroup::Geom, room->kitchenData.fridgeModel);
-                ret.addDep(ResourceGroup::Geom, room->kitchenData.extractorHoodModel);
-                ret.addDep(ResourceGroup::Geom, room->kitchenData.drawersHandleModel);
+                ret.addDep(sg, ResourceGroup::Material, room->kitchenData.worktopMaterial);
+                ret.addDep(sg, ResourceGroup::Material, room->kitchenData.unitsMaterial);
+                ret.addDep(sg, ResourceGroup::Geom, room->kitchenData.sinkModel);
+                ret.addDep(sg, ResourceGroup::Geom, room->kitchenData.ovenPanelModel);
+                ret.addDep(sg, ResourceGroup::Geom, room->kitchenData.microwaveModel);
+                ret.addDep(sg, ResourceGroup::Geom, room->kitchenData.cooktopModel);
+                ret.addDep(sg, ResourceGroup::Geom, room->kitchenData.fridgeModel);
+                ret.addDep(sg, ResourceGroup::Geom, room->kitchenData.extractorHoodModel);
+                ret.addDep(sg, ResourceGroup::Geom, room->kitchenData.drawersHandleModel);
             }
             for ( const auto& door : floor->doors ) {
-                ret.addDep(ResourceGroup::Profile, door->architraveProfile);
-                ret.addDep(ResourceGroup::Geom, "doorhandle,sx");
-                ret.addDep(ResourceGroup::Geom, "doorhandle,dx");
+                ret.addDep(sg, ResourceGroup::Profile, door->architraveProfile);
+                ret.addDep(sg, ResourceGroup::Geom, "doorhandle,sx");
+                ret.addDep(sg, ResourceGroup::Geom, "doorhandle,dx");
             }
             for ( const auto& window : floor->windows ) {
-                ret.addDep(ResourceGroup::Geom, window->curtainGeom);
-                ret.addDep(ResourceGroup::Material, window->curtainMaterial);
+                ret.addDep(sg, ResourceGroup::Geom, window->curtainGeom);
+                ret.addDep(sg, ResourceGroup::Material, window->curtainMaterial);
             }
         }
 
@@ -102,14 +102,17 @@ void ArchOrchestrator::showIMHouse( HouseBSData* _houseJson, const ArchRenderCon
 }
 
 void ArchOrchestrator::show3dHouse( HouseBSData* _houseJson, const PostHouseLoadCallback& ccf ) {
-    sg.clearGMNodes();
+    sg.clearNodes();
     rsg.RR().setLoadingFlag( true );
     HOD::resolver<HouseBSData>(sg, _houseJson, [&, ccf, _houseJson]() {
 //        sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson));
-        HouseRender::make3dGeometry(sg, _houseJson);
+        HouseRenderContainer hrc = HouseRender::make3dGeometry(sg, _houseJson);
         // Infinite plane
         sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,
                          GT::Scale(500.0f, 0.1f, 500.0f));
+        if ( hrc.ceiling ) {
+            hrc.ceiling->move(V3f{0.0f, -(_houseJson->depth+0.3f), 0.0f} );
+        }
         if ( ccf ) ccf(_houseJson);
         rsg.RR().setLoadingFlag( false );
         rsg.useSkybox(true);

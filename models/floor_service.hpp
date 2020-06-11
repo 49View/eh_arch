@@ -148,6 +148,7 @@ namespace FloorService {
                                           Vector2f& _currCenter );
     ClipperLib::Paths calcPlainPath( const FloorBSData *f );
     bool isFloorUShapeValid( const FloorUShapesPair& fus );
+    std::optional<uint64_t> findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind, int64_t index );
 
     // Update
     void calcBBox( FloorBSData *f );

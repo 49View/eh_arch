@@ -452,6 +452,7 @@ namespace RoomService {
     std::vector<const ArchSegment*>
     walkAlongWallsUntilCornerChanges( const RoomBSData *r, const ArchSegment *ls, WalkSegmentDirection wsd,
                                       IncludeWindowsOrDoors bwd );
+    std::optional<uint64_t> findArchSegmentWithWallHash( RoomBSData *f, HashEH hashToFind, int64_t index );
     // bsdata getters
     float skirtingDepth( const RoomBSData *r );
 

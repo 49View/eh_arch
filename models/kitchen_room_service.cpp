@@ -305,8 +305,16 @@ namespace KitchenRoomService {
         }
     }
 
+    void createMasterPathSingle( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
+        KitchenData& kd = w->kitchenData;
+        auto ls = RoomService::segmentAtIndex( w, kd.mainWorktopIndex );
+        addWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
+        addTopWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
+    }
+
     void createKitchen( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
         KitchenRoomService::createMasterPath(f, w, furns);
+//        KitchenRoomService::createMasterPathSingle(f, w, furns);
         KitchenRoomService::createUnits(f, w, furns);
         KitchenRoomService::createTopUnits(f, w, furns);
     }

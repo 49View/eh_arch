@@ -372,5 +372,12 @@ void HouseService::swapWindowOrDoor( HouseBSData *house, int64_t hashOfTwoShape 
     for ( auto &floor : house->mFloors ) {
         FloorService::swapWindowOrDoor( floor.get(), house, hashOfTwoShape );
     }
+}
 
+std::optional<uint64_t> HouseService::findRoomArchSegmentWithWallHash( HouseBSData *house, HashEH hashToFind, int64_t index ) {
+    for ( auto &floor : house->mFloors ) {
+        auto ret = FloorService::findRoomArchSegmentWithWallHash( floor.get(), hashToFind, index );
+        if ( ret ) return ret;
+    }
+    return std::nullopt;
 }

@@ -1147,3 +1147,13 @@ bool FloorService::hasAnyWall( const FloorBSData *f ) {
 bool FloorService::isFloorUShapeValid( const FloorUShapesPair& fus ) {
     return fus.f && fus.us1 && fus.us2;
 }
+
+std::optional<uint64_t> FloorService::findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind, int64_t index ) {
+
+    for ( const auto& room : f->rooms ) {
+        auto ret = RoomService::findArchSegmentWithWallHash( room.get(), hashToFind, index );
+        if ( ret ) return ret;
+    }
+
+    return std::nullopt;
+}

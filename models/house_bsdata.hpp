@@ -99,7 +99,7 @@ struct TwoUShapesBased : public ArchStructural {
     uint32_t wallFlags = WallFlags::WF_None;
 };
 
-JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, crossNormal, tag, sequencePart,
+JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, crossNormal, color, tag, sequencePart,
          zHeights)
     int32_t iFloor = 0;
     int32_t iWall = 0;
@@ -112,6 +112,7 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
 
     Vector2f normal = V2fc::ZERO;
     Vector2f crossNormal = V2fc::ZERO;
+    C4f      color = C4f::WHITE;
     uint64_t tag = 0;
     SequencePart sequencePart = 0;
     std::vector<V2f> zHeights;
@@ -123,6 +124,7 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
            << segment.tag << " sequencePart: " << segment.sequencePart << " zHeights: " << segment.zHeights.size();
         return os;
     }
+
     bool operator==( const ArchSegment& rhs ) const {
         return iFloor == rhs.iFloor &&
                iWall == rhs.iWall &&
@@ -326,7 +328,9 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
          kitchenWorktopDepth, kitchenWorktopHeight, worktopThickness, skirtingHeight, kitchenSkirtingRecess,
          kitchenUnitsRecess, kitchenTopUnitsRecess, drawersPadding, drawersThickness, skirtingThickness,
          topUnitsCeilingGap, longDrawersSize, worktopMaterial, unitsMaterial, sinkModel, ovenPanelModel, microwaveModel,
-         cooktopModel, fridgeModel, extractorHoodModel, drawersHandleModel)
+         cooktopModel, fridgeModel, extractorHoodModel, drawersHandleModel,
+         mainWorktopIndex)
+
     std::vector<KitchenPath> kitchenWorktopPath;
     std::vector<KitchenPath> kitchenSkirtingPath;
     std::vector<KitchenPath> kitchenUnitsPath;
@@ -347,6 +351,7 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     float topUnitsCeilingGap = 0.05f;
     Vector2f longDrawersSize = V2f{ 0.6f, 0.9f };
 
+    // Materials
     std::string worktopMaterial = "marble,anemone";
     std::string unitsMaterial = "wood,beech";
     std::string sinkModel = "ktc,sink,double,chrome";
@@ -356,6 +361,10 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     std::string fridgeModel = "ktc,fridge,single";
     std::string extractorHoodModel = "ktc,extractor,hood";
     std::string drawersHandleModel = "ktc,handle,long,contemporary";
+
+    // Indices
+    uint64_t mainWorktopIndex = 2;
+
 };
 
 JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,

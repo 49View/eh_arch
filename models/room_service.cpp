@@ -505,6 +505,17 @@ namespace RoomService {
         return lcenter / static_cast<float>( r->mMaxEnclsingBoundingBox.size());
     }
 
+    std::optional<uint64_t> findArchSegmentWithWallHash( RoomBSData *r, HashEH hashToFind, int64_t index ) {
+        for ( uint64_t t = 0; t < r->mWallSegmentsSorted.size(); t++ ) {
+            auto seg = r->mWallSegmentsSorted[t];
+            if ( seg.wallHash == hashToFind && seg.iIndex == index ) {
+                r->kitchenData.mainWorktopIndex = t;
+                return t;
+            }
+        }
+        return std::nullopt;
+    }
+
     std::string roomName( const RoomBSData *r ) {
         return roomTypeToName(r->roomTypes[0]);
     }

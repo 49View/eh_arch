@@ -33,6 +33,8 @@ namespace HouseService {
     void recalculateBBox( HouseBSData *house );
     void swapWindowOrDoor( HouseBSData *house, int64_t hashOfTwoShape );
     void mergePoints( HouseBSData *f, const V2fVectorOfVector& points );
+    V2fVectorOfVector rescaleWallInverse( const HouseBSData *house, float scaleFactor );
+    void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );
 
     // Delete
     void removeArch( HouseBSData *_house, int64_t hashToRemove );
@@ -62,9 +64,9 @@ namespace HouseService {
     bool
     whichRoomAmI( std::shared_ptr<HouseBSData> _house, const Vector2f& _pos, std::shared_ptr<RoomBSData>& outRoom );
     Vector2f centrePointOfBiggestRoom( std::shared_ptr<HouseBSData> _house );
-    V2fVectorOfVector rescaleWallInverse( const HouseBSData *house, float scaleFactor );
-    void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );
+    std::optional<uint64_t> findRoomArchSegmentWithWallHash( HouseBSData *_house, HashEH hashToFind, int64_t index );
 
+    // Update
     // Templates
     template<typename T>
     T *find( HouseBSData *_house, HashEH hash ) {
