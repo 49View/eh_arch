@@ -101,7 +101,7 @@ void ArchOrchestrator::showIMHouse( HouseBSData* _houseJson, const ArchRenderCon
     HouseRender::IMHouseRender(rsg.RR(), sg, _houseJson, arc);
 }
 
-void ArchOrchestrator::show3dHouse( HouseBSData* _houseJson, const PostHouseLoadCallback& ccf ) {
+void ArchOrchestrator::show3dHouse( HouseBSData* _houseJson, const PostHouse3dResolvedCallback& ccf ) {
     sg.clearNodes();
     rsg.RR().setLoadingFlag( true );
     HOD::resolver<HouseBSData>(sg, _houseJson, [&, ccf, _houseJson]() {
@@ -110,9 +110,9 @@ void ArchOrchestrator::show3dHouse( HouseBSData* _houseJson, const PostHouseLoad
         // Infinite plane
         sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,
                          GT::Scale(500.0f, 0.1f, 500.0f));
-        if ( hrc.ceiling ) {
-            hrc.ceiling->move(V3f{0.0f, -(_houseJson->depth+0.3f), 0.0f} );
-        }
+//        if ( hrc.ceiling ) {
+//            hrc.ceiling->move(V3f{0.0f, -(_houseJson->depth+0.3f), 0.0f} );
+//        }
         if ( ccf ) ccf(_houseJson);
         rsg.RR().setLoadingFlag( false );
         rsg.useSkybox(true);
@@ -120,10 +120,7 @@ void ArchOrchestrator::show3dHouse( HouseBSData* _houseJson, const PostHouseLoad
 }
 
 void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf ) {
-    Http::get(Url{ "/propertybim/" + _pid }, [this, ccf]( HttpResponeParams params ) {
-        auto houseJson = std::make_shared<HouseBSData>(params.bufferString);
-        sg.addGenericCallback([&, ccf, houseJson]() {
-            show3dHouse(houseJson.get(), ccf);
-        } );
+    Http::get(Url{ "/propertybim/" + _pid }, [ccf]( HttpResponeParams params ) {
+        ccf( std::make_shared<HouseBSData>(params.bufferString) );
     });
 }

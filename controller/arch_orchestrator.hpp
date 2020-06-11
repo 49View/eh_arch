@@ -13,15 +13,16 @@
 class SceneGraph;
 class RenderOrchestrator;
 
-using PostHouseLoadCallback = std::function<void(HouseBSData* houseJson)>;
+using PostHouseLoadCallback = std::function<void(std::shared_ptr<HouseBSData> houseJson)>;
+using PostHouse3dResolvedCallback = std::function<void(HouseBSData* houseJson)>;
 
 class ArchOrchestrator {
 public:
     explicit ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg );
 
-    void show3dHouse( HouseBSData*, const PostHouseLoadCallback& ccf = nullptr );
+    void show3dHouse( HouseBSData*, const PostHouse3dResolvedCallback& ccf = nullptr );
     void showIMHouse( HouseBSData*, const ArchRenderController& arc );
-    void loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf = nullptr );
+    void loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf );
     Matrix4f
     calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> houseJson, float screenRatio, float screenPadding );
 
