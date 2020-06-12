@@ -41,16 +41,16 @@ namespace RoomRender {
 
 //        if ( drawDebug) {
 //            rr.draw<DPoly>( room->mPerimeterSegments, 0.025f, C4f::RED, true );
-//            rr.draw<DLine>( room->mPerimeterSegments, 0.03f, C4f::RED, false );
 //        }
         auto rm = arc.floorPlanShader();
-        auto color = arc.getFillColor(room->hash, RoomService::roomColor(room).A(0.5f));
-        auto lineWidth = arc.floorPlanScaler(0.0075f);
+        auto color = arc.getFillColor(room->hash, C4f::BLACK);
+        auto lineWidth = arc.floorPlanScaler(0.015f);
 
         bool drawDebug = arc.isFloorPlanRenderModeDebug();
-        if ( drawDebug ) {
-            rr.draw<DPoly>(room->mPerimeterSegments, color, arc.pm(),
-                           room->hashFeature("perimeter" + color.toString(), 0));
+        if ( drawDebug && !arc.isFloorPlanRenderModeDebugSelection() ) {
+            rr.draw<DLine>( room->mPerimeterSegments, lineWidth, C4f::YELLOW, true );
+//            rr.draw<DPoly>(room->mPerimeterSegments, C4f::WHITE*0.9f, arc.pm(),
+//                           room->hashFeature("perimeter", 0));
         }
 
         int ffc = 0;
@@ -82,14 +82,14 @@ namespace RoomRender {
         auto areaPos = FontUtils::fitTextInBox(font, areaSQm, bestBBox, fontHeight);
         areaPos += V2fc::Y_AXIS * fontHeight;
 
-        rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, C4f::BLACK, arc.pm(),
-                       room->hashFeature(roomName, 0));
+        rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, color, arc.pm(),
+                       room->hashFeature(roomName + color.toString(), 0));
 
-        rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, C4f::BLACK, arc.pm(),
-                       room->hashFeature(roomName, 1));
+        rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, color, arc.pm(),
+                       room->hashFeature(roomName + color.toString(), 1));
 
-        rr.draw<DText>(FDS{ areaSQm, font, areaPos, fontHeight }, C4f::BLACK, arc.pm(),
-                       room->hashFeature(roomName, 2));
+        rr.draw<DText>(FDS{ areaSQm, font, areaPos, fontHeight }, color, arc.pm(),
+                       room->hashFeature(roomName + color.toString(), 2));
 
 //        for ( auto& cov : room->mvSkirtingSegments ) {
 //            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, arc.pm(), room->hashFeature("skirting", 0));

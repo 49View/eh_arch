@@ -10,6 +10,41 @@
 
 struct HouseBSData;
 
+enum class ArchViewingMode {
+    AVM_TopDown2d,
+    AVM_TopDown3d,
+    AVM_Walk,
+    AVM_DollHouse
+};
+
+enum class FloorPlanRenderMode {
+    Normal2d,
+    Normal3d,
+    Debug2d,
+    Debug3d,
+    Debug3dSelection
+};
+
+template<typename T>
+bool isFloorPlanRenderModeDebug( T _flag ) {
+    return _flag == T::Debug2d || _flag == T::Debug3d || _flag == T::Debug3dSelection;
+}
+
+template<typename T>
+bool isFloorPlanRenderMode2d( T _flag ) {
+    return _flag == T::Debug2d || _flag == T::Normal2d;
+}
+
+template<typename T>
+bool isFloorPlanRenderModeSelection( T _flag ) {
+    return _flag == T::Debug3dSelection;
+}
+
+DShaderMatrix floorPlanShader( FloorPlanRenderMode fpRenderMode );
+Vector4f floorPlanElemColor( FloorPlanRenderMode fpRenderMode, const Vector4f& nominalColor );
+Vector4f floorPlanElemColor( FloorPlanRenderMode fpRenderMode );
+float floorPlanScaler( FloorPlanRenderMode fpRenderMode, float value, const Matrix4f& pm );
+
 class ArchRenderController {
 public:
     ArchRenderController() = default;
@@ -25,6 +60,7 @@ public:
     C4f floorPlanElemColor() const;
     bool isFloorPlanRenderModeDebug() const;
     bool isFloorPlanRenderMode2d() const;
+    bool isFloorPlanRenderModeDebugSelection() const;
 
     template<typename T>
     void addToSelectionList( const T& _elem, const V2f& is, SelectionFlagsT flags = SelectionFlags::None ) {
@@ -79,16 +115,15 @@ public:
     std::optional<ArchStructuralFeatureDescriptor> selectionFront() const;
     size_t selectionCount() const;
 
-    float& getFloorPlanTransparencyFactor() {
-        return floorPlanTransparencyFactor;
-    }
+    [[nodiscard]] float getFloorPlanTransparencyFactor() const;
+    void setFloorPlanTransparencyFactor( float _value );
+    float& FloorPlanTransparencyFactor();
 
-    float FloorPlanTransparencyFactor() const {
-        return floorPlanTransparencyFactor;
-    }
-
+    ArchViewingMode getViewingMode() const;
+    void setViewingMode( ArchViewingMode _viewingMode );
 private:
     ArchSelection selection;
+    ArchViewingMode viewingMode = ArchViewingMode::AVM_Walk;
     RDSPreMult mPm{ Matrix4f::MIDENTITY() };
     FloorPlanRenderMode mRenderMode = FloorPlanRenderMode::Normal2d;
     C4f selectedColor = C4f::ORANGE_SCHEME1_1;

@@ -18,18 +18,19 @@ using PostHouse3dResolvedCallback = std::function<void(HouseBSData* houseJson)>;
 
 class ArchOrchestrator {
 public:
-    explicit ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg );
+    explicit ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg, ArchRenderController& _arc );
 
-    void show3dHouse( HouseBSData*, const PostHouse3dResolvedCallback& ccf = nullptr );
-    void showIMHouse( HouseBSData*, const ArchRenderController& arc );
+    void make3dHouse( HouseBSData*, const PostHouse3dResolvedCallback& ccf = nullptr );
+    void showIMHouse( HouseBSData* );
     void loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf );
     Matrix4f
     calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> houseJson, float screenRatio, float screenPadding );
 
-    void centerCameraMiddleOfHouse( HouseBSData* _houseJson );
+    void centerCameraMiddleOfHouse( HouseBSData* _houseJson, float slack = 0.0f );
     HouseRenderContainer& HRC();
 protected:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
+    ArchRenderController& arc;
     HouseRenderContainer hrc;
 };

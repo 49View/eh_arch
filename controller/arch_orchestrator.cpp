@@ -24,7 +24,7 @@
 #include <eh_arch/render/house_render.hpp>
 #include <eh_arch/models/house_service.hpp>
 
-ArchOrchestrator::ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg ) : sg(_sg), rsg(_rsg) {
+ArchOrchestrator::ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg, ArchRenderController& _arc ) : sg(_sg), rsg(_rsg), arc(_arc) {
 }
 
 namespace HOD { // HighOrderDependency
@@ -33,6 +33,7 @@ namespace HOD { // HighOrderDependency
     DepRemapsManager resolveDependencies<HouseBSData>( const HouseBSData *data, SceneGraph& sg ) {
         DepRemapsManager ret{};
 
+        sg.clearNodes();
         ret.addDep(sg, ResourceGroup::Image, data->defaultSkybox);
         for ( const auto& floor : data->mFloors ) {
             ret.addDep(sg, ResourceGroup::Material, floor->externalWallsMaterial);
@@ -91,28 +92,22 @@ Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( std::shared_ptr<Hou
     return m;
 }
 
-void ArchOrchestrator::centerCameraMiddleOfHouse( HouseBSData* houseJson ) {
+void ArchOrchestrator::centerCameraMiddleOfHouse( HouseBSData* houseJson, float slack ) {
     if ( houseJson->bbox.isValid() ) {
         Timeline::play(rsg.DC()->PosAnim(), 0,
-                       KeyFramePair{ 0.9f, rsg.DC()->center(houseJson->bbox, 0.0f) });
+                       KeyFramePair{ 0.9f, rsg.DC()->center(houseJson->bbox, slack) });
     }
 }
 
-void ArchOrchestrator::showIMHouse( HouseBSData* _houseJson, const ArchRenderController& arc  ) {
+void ArchOrchestrator::showIMHouse( HouseBSData* _houseJson  ) {
     HouseRender::IMHouseRender(rsg.RR(), sg, _houseJson, arc);
 }
 
-void ArchOrchestrator::show3dHouse( HouseBSData* _houseJson, const PostHouse3dResolvedCallback& ccf ) {
-    sg.clearNodes();
-    rsg.RR().clearBucket(CommandBufferLimits::PBRStart);
-    rsg.RR().LM()->removeAllPointLights();
+void ArchOrchestrator::make3dHouse( HouseBSData* _houseJson, const PostHouse3dResolvedCallback& ccf ) {
     rsg.RR().setLoadingFlag( true );
     HOD::resolver<HouseBSData>(sg, _houseJson, [&, ccf, _houseJson]() {
 //        sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson));
-        hrc = HouseRender::make3dGeometry(sg, _houseJson);
-        // Infinite plane
-        sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,
-                         GT::Scale(500.0f, 0.1f, 500.0f));
+        hrc = HouseRender::make3dGeometry(rsg.RR(), sg, _houseJson);
         if ( ccf ) ccf(_houseJson);
         rsg.RR().setLoadingFlag( false );
         rsg.setProbePosition( HouseService::centerOfBiggestRoom( _houseJson ));

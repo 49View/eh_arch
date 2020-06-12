@@ -32,6 +32,10 @@ bool ArchRenderController::isFloorPlanRenderModeDebug() const {
     return ::isFloorPlanRenderModeDebug(mRenderMode);
 }
 
+bool ArchRenderController::isFloorPlanRenderModeDebugSelection() const {
+    return isFloorPlanRenderModeSelection(mRenderMode);
+}
+
 bool ArchRenderController::isFloorPlanRenderMode2d() const {
     return ::isFloorPlanRenderMode2d(mRenderMode);
 }
@@ -82,6 +86,23 @@ std::optional<ArchStructuralFeatureDescriptor> ArchRenderController::selectionFr
     return selection.front();
 }
 
-//ArchRenderController::ArchRenderController( const RDSPreMult& mPm, FloorPlanRenderMode mRenderMode ) : mPm(mPm),
-//                                                                                                       mRenderMode(
-//                                                                                                               mRenderMode) {}
+float ArchRenderController::getFloorPlanTransparencyFactor() const {
+    return floorPlanTransparencyFactor;
+}
+
+float& ArchRenderController::FloorPlanTransparencyFactor() {
+    return floorPlanTransparencyFactor;
+}
+
+void ArchRenderController::setFloorPlanTransparencyFactor( float _value ) {
+    floorPlanTransparencyFactor = _value;
+}
+
+ArchViewingMode ArchRenderController::getViewingMode() const {
+    return viewingMode;
+}
+
+void ArchRenderController::setViewingMode( ArchViewingMode _viewingMode ) {
+    viewingMode = _viewingMode;
+}
+

@@ -30,12 +30,7 @@ public:
 
 namespace HouseRender {
 
-    DShaderMatrix floorPlanShader( FloorPlanRenderMode fpRenderMode );
-    Vector4f floorPlanElemColor( FloorPlanRenderMode fpRenderMode, const Vector4f& nominalColor );
-    Vector4f floorPlanElemColor( FloorPlanRenderMode fpRenderMode );
-    float floorPlanScaler( FloorPlanRenderMode fpRenderMode, float value, const Matrix4f& pm );
-
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const HouseBSData *mData, const ArchRenderController& arc );
 
-    HouseRenderContainer make3dGeometry( SceneGraph& sg, const HouseBSData *mData );
+    HouseRenderContainer make3dGeometry( Renderer& rr, SceneGraph& sg, const HouseBSData *mData );
 }
