@@ -23,12 +23,12 @@ std::shared_ptr<FloorBSData> HouseService::addFloorFromData( HouseBSData* _house
 
     std::shared_ptr<FloorBSData> f = std::make_shared<FloorBSData>();
     f->asType = ASType::Floor;
-    f->height = _house->defaultCeilingHeigh;
+    f->height = _house->defaultCeilingHeight;
     f->anchorPoint = JMATH::Rect2fFeature::bottomRight;
     f->number = static_cast<int>( _house->mFloors.size() );
     f->bbox = _rect;
     f->ceilingContours.push_back( f->bbox.points3d( f->height ) );
-    f->z = f->number * ( _house->defaultGroundHeight + _house->defaultCeilingHeigh );
+    f->z = f->number * ( _house->defaultGroundHeight + _house->defaultCeilingHeight );
     f->concreteHeight = _house->defaultGroundHeight;
     f->doorHeight = _house->doorHeight;
     f->windowHeight = _house->defaultWindowHeight;
@@ -96,6 +96,11 @@ bool rayIntersectInternal( std::shared_ptr<HouseBSData> _house, const std::vecto
 }
 
 V2f HouseService::centerOfBiggestRoom( const HouseBSData *house ) {
+
+    if ( house->mFloors.empty() ) {
+        return V2fc::ZERO;
+    }
+
     using floatV2fPair = std::pair<float, V2f>;
     std::vector<floatV2fPair> roomSizes;
 
@@ -103,6 +108,10 @@ V2f HouseService::centerOfBiggestRoom( const HouseBSData *house ) {
         for ( const auto& room : f->rooms ) {
             roomSizes.emplace_back( room->mPerimeter, RS::maxEnclsingBoundingBoxCenter(room.get()) );
         }
+    }
+
+    if ( roomSizes.empty() ) {
+        return house->center;
     }
 
     std::sort( roomSizes.begin(), roomSizes.end(), []( const floatV2fPair &a, const floatV2fPair &b ) -> bool { return a.first > b.first; } );
@@ -379,4 +388,26 @@ std::optional<uint64_t> HouseService::findRoomArchSegmentWithWallHash( HouseBSDa
         if ( ret ) return ret;
     }
     return std::nullopt;
+}
+
+void HouseService::bestStartingPositionAndAngle( const HouseBSData *house, V3f& pos, V3f& rot ) {
+    if ( house->bestInternalViewingPosition == V3f::ZERO ) {
+        pos = XZY::C(HouseService::centerOfBiggestRoom(house), 1.48f);
+        rot = V3f{ 0.08f, -0.70f, 0.0f };
+    } else {
+        pos = house->bestInternalViewingPosition;
+        rot = house->bestInternalViewingAngle;
+    }
+}
+
+void HouseService::bestDollyPositionAndAngle( const HouseBSData *house, V3f& pos, V3f& rot ) {
+    if ( house->bestDollyViewingPosition == V3f::ZERO ) {
+        rot = V3f{ 1.0f, -0.75f, 0.0f };
+        pos = V3f{ house->bbox.bottomRight().x(), house->depth * 3.0f,
+                       house->bbox.bottomRight().y() } ;
+    } else {
+        pos = house->bestDollyViewingPosition;
+        rot = house->bestDollyViewingAngle;
+    }
+
 }

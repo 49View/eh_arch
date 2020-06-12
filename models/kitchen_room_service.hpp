@@ -10,6 +10,7 @@ class FurnitureMapStorage;
 
 namespace KitchenRoomService {
     void createKitchen( FloorBSData *f, RoomBSData *w, FurnitureMapStorage &furns );
+    void clear( RoomBSData *w );
 }
 
 

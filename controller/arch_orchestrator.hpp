@@ -27,8 +27,9 @@ public:
     calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> houseJson, float screenRatio, float screenPadding );
 
     void centerCameraMiddleOfHouse( HouseBSData* _houseJson );
-
+    HouseRenderContainer& HRC();
 protected:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
+    HouseRenderContainer hrc;
 };

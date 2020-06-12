@@ -46,6 +46,8 @@ namespace HouseService {
     // Query
     float area( const HouseBSData *_house );
     V2f centerOfBiggestRoom( const HouseBSData *house );
+    void bestStartingPositionAndAngle( const HouseBSData *house, V3f& pos, V3f& rot );
+    void bestDollyPositionAndAngle( const HouseBSData *house, V3f& pos, V3f& rot );
     int getNumberOfePoints( std::shared_ptr<HouseBSData> _house );
     int getNumberOfWallSegments( std::shared_ptr<HouseBSData> _house );
     Vector2f getFirstFloorAnchor( std::shared_ptr<HouseBSData> _house );

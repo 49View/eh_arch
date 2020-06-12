@@ -318,4 +318,8 @@ namespace KitchenRoomService {
         KitchenRoomService::createUnits(f, w, furns);
         KitchenRoomService::createTopUnits(f, w, furns);
     }
+
+    void clear( RoomBSData *w ) {
+        w->kitchenData = KitchenData{};
+    }
 }

@@ -713,7 +713,8 @@ namespace RoomService {
 
     void furnish( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
 
-        r->mFittedFurniture.clear();
+        RoomService::clearFurniture(r);
+        KitchenRoomService::clear(r);
         std::vector<ASTypeT> prioritySorted[2];
         for ( const auto rtype : r->roomTypes ) {
             switch ( rtype ) {

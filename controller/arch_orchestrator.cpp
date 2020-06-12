@@ -93,7 +93,9 @@ Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( std::shared_ptr<Hou
 
 void ArchOrchestrator::centerCameraMiddleOfHouse( HouseBSData* houseJson ) {
     if ( houseJson->bbox.isValid() ) {
-        rsg.DC()->setPosition(rsg.DC()->center(houseJson->bbox, 0.0f));
+        Timeline::play(rsg.DC()->PosAnim(), 0,
+                       KeyFramePair{ 0.9f, rsg.DC()->center(houseJson->bbox, 0.0f) });
+//        rsg.DC()->setPosition(rsg.DC()->center(houseJson->bbox, 0.0f));
     }
 }
 
@@ -104,18 +106,17 @@ void ArchOrchestrator::showIMHouse( HouseBSData* _houseJson, const ArchRenderCon
 void ArchOrchestrator::show3dHouse( HouseBSData* _houseJson, const PostHouse3dResolvedCallback& ccf ) {
     sg.clearNodes();
     rsg.RR().clearBucket(CommandBufferLimits::PBRStart);
+    rsg.RR().LM()->removeAllPointLights();
     rsg.RR().setLoadingFlag( true );
     HOD::resolver<HouseBSData>(sg, _houseJson, [&, ccf, _houseJson]() {
 //        sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson));
-        HouseRenderContainer hrc = HouseRender::make3dGeometry(sg, _houseJson);
+        hrc = HouseRender::make3dGeometry(sg, _houseJson);
         // Infinite plane
         sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,
                          GT::Scale(500.0f, 0.1f, 500.0f));
-//        if ( hrc.ceiling ) {
-//            hrc.ceiling->move(V3f{0.0f, -(_houseJson->depth+0.3f), 0.0f} );
-//        }
         if ( ccf ) ccf(_houseJson);
         rsg.RR().setLoadingFlag( false );
+        rsg.setProbePosition( HouseService::centerOfBiggestRoom( _houseJson ));
         rsg.useSkybox(true);
     });
 }
@@ -124,4 +125,8 @@ void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCa
     Http::get(Url{ "/propertybim/" + _pid }, [ccf]( HttpResponeParams params ) {
         ccf( std::make_shared<HouseBSData>(params.bufferString) );
     });
+}
+
+HouseRenderContainer& ArchOrchestrator::HRC() {
+    return hrc;
 }

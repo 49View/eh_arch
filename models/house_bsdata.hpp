@@ -22,7 +22,7 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 1020;
+static const uint64_t SHouseJSONVersion = 2001;
 static const float defaltToBeOverwritten = 7543859749023.0f;
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
@@ -476,7 +476,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo
 JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
              linkedHash, sequencePart, mTriangles2d, version, name, source, declaredSQm, defaultSkybox, sourceData,
              bestInternalViewingPosition, bestInternalViewingAngle, walkableArea,
-             doorHeight, defaultWindowHeight, defaultWindowBaseOffset, defaultCeilingHeigh, windowsillExpansion,
+             doorHeight, defaultWindowHeight, defaultWindowBaseOffset, defaultCeilingHeight, windowsillExpansion,
              windowFrameThickness, defaultGroundHeight, worktopHeight, bathRoomSinkHeight, defaultWallColor, accuracy,
              mFloors)
     uint64_t version = SHouseJSONVersion;
@@ -486,12 +486,14 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albe
     std::string defaultSkybox = "";
     HouseSourceData sourceData;
     V3f bestInternalViewingPosition = V3f::ZERO;
-    V3f bestInternalViewingAngle = V3f::X_AXIS;
+    V3f bestInternalViewingAngle = V3f::ZERO;
+    V3f bestDollyViewingPosition = V3f::ZERO;
+    V3f bestDollyViewingAngle = V3f::ZERO;
     float walkableArea = 0.0f;
     float doorHeight = 1.94f;
     float defaultWindowHeight = 1.30f;
     float defaultWindowBaseOffset = 0.90f;
-    float defaultCeilingHeigh = 2.45f;
+    float defaultCeilingHeight = 2.45f;
     float defaultGroundHeight = 0.3f;
     float windowsillExpansion = 0.04f;
     float windowFrameThickness = 0.04f;
