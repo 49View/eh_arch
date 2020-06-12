@@ -95,7 +95,6 @@ void ArchOrchestrator::centerCameraMiddleOfHouse( HouseBSData* houseJson ) {
     if ( houseJson->bbox.isValid() ) {
         Timeline::play(rsg.DC()->PosAnim(), 0,
                        KeyFramePair{ 0.9f, rsg.DC()->center(houseJson->bbox, 0.0f) });
-//        rsg.DC()->setPosition(rsg.DC()->center(houseJson->bbox, 0.0f));
     }
 }
 
