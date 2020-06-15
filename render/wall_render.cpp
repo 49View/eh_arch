@@ -99,8 +99,8 @@ namespace WallRender {
             if ( drawDebug ) {
                 auto lineWidth = arc.floorPlanScaler(0.01f);
                 drawWallContours2d(rr, wall, lineWidth*0.3f, sm, arc);
-                drawWallNormals2d(rr, wall, lineWidth*0.5f, sm, arc);
-                drawUShapes2d(rr, wall, lineWidth*0.5f, sm, arc);
+//                drawWallNormals2d(rr, wall, lineWidth*0.5f, sm, arc);
+//                drawUShapes2d(rr, wall, lineWidth*0.5f, sm, arc);
                 drawWallPoints2d(rr, wall, width*0.5f, sm, arc);
             }
         }

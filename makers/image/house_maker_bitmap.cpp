@@ -22,27 +22,20 @@
 #include "../../models/room_name_mapping.hpp"
 #include "opencvutils/cvmatutil.hpp"
 
-// NDDado: disabled for now as approximating contours and straight lines still proves to be a winner against a pure
-// image processing approach
-
-//std::vector<HUV> huWindows{
-//        { 1.57289, 3.15725, 6.36935, 6.43829, 12.8423, 8.03133,  -14.3529 },
-//        { 2.40803, 5.01565, 9.05006, 9.08278, 18.1515, 11.608,   -19.1369 },
-//        { 2.40532, 5.06555, 9.13393, 9.28882, 18.52,   11.9234,  -19.0303 },
-//        { 2.47032, 6.12642, 7.50424, 9.90787, 18.669,  -12.9917, 18.9387 },
-//        { 2.06148, 4.20109, 8.02796, 8.41489, 16.6721, 10.7031,  -17.0457 },
-//        {2.06272,  4.16624,  9.20573,  9.40279,  18.71,  11.5738,  19.6404},
-//        {2.18097, 4.39478, 12.5361, 12.5361, 25.0722, -14.7335, 49.6219},
-//        {0.598655,  1.22477,  33.3996,  34.3978,  -68.4963,  -35.0556,  -68.4069},
-//};
-//
-//std::vector<HUV> huDoors{
-//        {10000.0f,  10000.0f,  10000.0f,  10000.0f,  10000.0f,  10000.0f,  10000.0f},
-//};
+HMBBSData g_hmbBSData;
+SourceImages g_sourceImages;
 
 constexpr size_t NumStrategies = 3;
 
 namespace HouseMakerBitmap {
+
+    void updateHMB( const HMBBSData& bsdata ) {
+        g_hmbBSData = bsdata;
+    }
+
+    HMBBSData& HMB() {
+        return g_hmbBSData;
+    }
 
     void generateSourceFileBC( const RawImage &_ri, SourceImages &si, const HMBBSData &bsdata ) {
         cv::Mat inputSourcePngImage;
@@ -751,12 +744,6 @@ namespace HouseMakerBitmap {
         return bestScoringHouse( houses, bsscores, bsdata );
     }
 
-    SourceImages prepareImages( const HMBBSData &bsdata ) {
-        SourceImages sourceImages;
-        generateSourceFileBC( bsdata.image, sourceImages, bsdata );
-        return sourceImages;
-    }
-
     void addAndFinaliseRooms( HouseBSData *house, HMBBSData &bsdata, const SourceImages& sourceImages ) {
         for ( auto &f : house->mFloors ) {
             LOGRS("PreRooms count: " << f->rds.size() );
@@ -780,72 +767,78 @@ namespace HouseMakerBitmap {
         return newHouse;
     }
 
-    std::shared_ptr<HouseBSData> make( HMBBSData &bsdata ) {
+    const SourceImages& prepareImages() {
+        generateSourceFileBC( g_hmbBSData.image, g_sourceImages, g_hmbBSData );
+        return g_sourceImages;
+    }
+
+    std::shared_ptr<HouseBSData> make() {
         PROFILE_BLOCK( "House service elaborate" );
 
-        SourceImages sourceImages = prepareImages( bsdata );
+        prepareImages();
 
-        auto house = runWallStrategies( sourceImages, bsdata );
-        addAndFinaliseRooms( house.get(), bsdata, sourceImages );
+        auto house = runWallStrategies( g_sourceImages, g_hmbBSData );
+        addAndFinaliseRooms( house.get(), g_hmbBSData, g_sourceImages );
 
-//        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
-        rescale( house.get(), bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
+//        gatherGeneralTextInformations( house.get(), g_sourceImages, g_hmbBSData );
+        rescale( house.get(), g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
 
-        setHouseSourceDataSection(house.get(), bsdata );
+        setHouseSourceDataSection(house.get(), g_hmbBSData );
 
         return house;
     }
 
-    std::shared_ptr<HouseBSData> make( HMBBSData &bsdata, const SourceImages& sourceImages ) {
+    std::shared_ptr<HouseBSData> make( const SourceImages& sourceImages ) {
         PROFILE_BLOCK( "House service elaborate" );
+        g_sourceImages = sourceImages;
 
-        auto house = runWallStrategies( sourceImages, bsdata );
-        addAndFinaliseRooms( house.get(), bsdata, sourceImages );
+        auto house = runWallStrategies( g_sourceImages, g_hmbBSData );
+        addAndFinaliseRooms( house.get(), g_hmbBSData, g_sourceImages );
 
-//        gatherGeneralTextInformations( house.get(), sourceImages, bsdata );
-        rescale( house.get(), bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
+//        gatherGeneralTextInformations( house.get(), g_sourceImages, g_hmbBSData );
+        rescale( house.get(), g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
 
-        setHouseSourceDataSection(house.get(), bsdata );
+        setHouseSourceDataSection(house.get(), g_hmbBSData );
 
         return house;
     }
 
-    void makeFromWalls( HouseBSData* house, HMBBSData &bsdata, const SourceImages& sourceImages ) {
+    void makeFromWalls( HouseBSData* house ) {
         PROFILE_BLOCK( "House from wall service elaborate walls housebsdata" );
         HouseService::clearHouseExcludingFloorsAndWalls( house );
 
-        rescale( house, 1.0f/bsdata.rescaleFactor, metersToCentimeters(1.0f/bsdata.rescaleFactor) );
+        rescale( house, 1.0f/g_hmbBSData.rescaleFactor, metersToCentimeters(1.0f/g_hmbBSData.rescaleFactor) );
         bool ac= true;
-        guessDoorsWindowsRooms( house, sourceImages, ac );
-        addAndFinaliseRooms( house, bsdata, sourceImages );
-        rescale( house, bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
+        guessDoorsWindowsRooms( house, g_sourceImages, ac );
+        addAndFinaliseRooms( house, g_hmbBSData, g_sourceImages );
+        rescale( house, g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
     }
 
-    void makeAddDoor( HouseBSData* house, HMBBSData &bsdata, const SourceImages& sourceImages, const FloorUShapesPair& fus ) {
+    void makeAddDoor( HouseBSData* house, const FloorUShapesPair& fus ) {
         PROFILE_BLOCK( "House from wall service elaborate house make door" );
 
         FloorService::addDoorFromData( fus.f, house->doorHeight, *fus.us1, *fus.us2 );
         HouseService::clearHouseRooms( house );
 
-        rescale( house, 1.0f/bsdata.rescaleFactor, metersToCentimeters(1.0f/bsdata.rescaleFactor) );
+        rescale( house, 1.0f/g_hmbBSData.rescaleFactor, metersToCentimeters(1.0f/g_hmbBSData.rescaleFactor) );
         guessRooms( house );
-        addAndFinaliseRooms( house, bsdata, sourceImages );
-        rescale( house, bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
+        addAndFinaliseRooms( house, g_hmbBSData, g_sourceImages );
+        rescale( house, g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
     }
 
-    void makeFromSwapDoorOrWindow( HouseBSData* house, HMBBSData &bsdata, const SourceImages& sourceImages, HashEH hash ) {
+    void makeFromSwapDoorOrWindow( HouseBSData* house, HashEH hash ) {
         PROFILE_BLOCK( "House from wall service elaborate from swap doors and windows" );
         HouseService::swapWindowOrDoor( house, hash );
         HouseService::clearHouseRooms( house );
 
-        rescale( house, 1.0f/bsdata.rescaleFactor, metersToCentimeters(1.0f/bsdata.rescaleFactor) );
+        rescale( house, 1.0f/g_hmbBSData.rescaleFactor, metersToCentimeters(1.0f/g_hmbBSData.rescaleFactor) );
         guessRooms( house );
-        addAndFinaliseRooms( house, bsdata, sourceImages );
-        rescale( house, bsdata.rescaleFactor, centimetersToMeters(bsdata.rescaleFactor) );
+        addAndFinaliseRooms( house, g_hmbBSData, g_sourceImages );
+        rescale( house, g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
     }
 
-    std::shared_ptr<HouseBSData> makeEmpty( HMBBSData &bsdata ) {
-        return newHouseFromHMB( bsdata );
+    std::shared_ptr<HouseBSData> makeEmpty() {
+        return newHouseFromHMB( g_hmbBSData );
     }
 
 }

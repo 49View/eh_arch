@@ -80,9 +80,13 @@ namespace HOD { // HighOrderDependency
     }
 }
 
-Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> _houseJson, float screenRatio, float screenPadding ) {
+HouseBSData* ArchOrchestrator::H() {
+    return houseJson.get();
+}
+
+Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( float screenRatio, float screenPadding ) {
     auto m = Matrix4f{Matrix4f::IDENTITY};
-    float vmax = max(_houseJson->bbox.bottomRight().x(), _houseJson->bbox.bottomRight().y());
+    float vmax = max(houseJson->bbox.bottomRight().x(), houseJson->bbox.bottomRight().y());
     float screenFloorplanRatio = ( 1.0f / screenRatio );
     float vmaxScale = vmax / screenFloorplanRatio;
     auto vr = 1.0f / vmaxScale;
@@ -92,35 +96,49 @@ Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( std::shared_ptr<Hou
     return m;
 }
 
-void ArchOrchestrator::centerCameraMiddleOfHouse( HouseBSData* houseJson, float slack ) {
+void ArchOrchestrator::centerCameraMiddleOfHouse( float slack ) {
     if ( houseJson->bbox.isValid() ) {
         Timeline::play(rsg.DC()->PosAnim(), 0,
                        KeyFramePair{ 0.9f, rsg.DC()->center(houseJson->bbox, slack) });
     }
 }
 
-void ArchOrchestrator::showIMHouse( HouseBSData* _houseJson  ) {
-    HouseRender::IMHouseRender(rsg.RR(), sg, _houseJson, arc);
+void ArchOrchestrator::showIMHouse() {
+    if ( houseJson ) {
+        // #!#
+//        HouseService::guessFittings(houseJson.get(), furnitureMap);
+        HouseRender::IMHouseRender(rsg.RR(), sg, houseJson.get(), arc);
+    }
 }
 
-void ArchOrchestrator::make3dHouse( HouseBSData* _houseJson, const PostHouse3dResolvedCallback& ccf ) {
+void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
     rsg.RR().setLoadingFlag( true );
-    HOD::resolver<HouseBSData>(sg, _houseJson, [&, ccf, _houseJson]() {
+    HOD::resolver<HouseBSData>(sg, houseJson.get(), [&, ccf]() {
 //        sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson));
-        hrc = HouseRender::make3dGeometry(rsg.RR(), sg, _houseJson);
-        if ( ccf ) ccf(_houseJson);
+        hrc = HouseRender::make3dGeometry(rsg.RR(), sg, houseJson.get());
+        if ( ccf ) ccf(houseJson.get());
         rsg.RR().setLoadingFlag( false );
-        rsg.setProbePosition( HouseService::centerOfBiggestRoom( _houseJson ));
+        rsg.setProbePosition( HouseService::centerOfBiggestRoom( houseJson.get() ));
         rsg.useSkybox(true);
     });
 }
 
+/// This loads a house with a http get
+/// \param _pid
+/// \param ccf
 void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf ) {
     Http::get(Url{ "/propertybim/" + _pid }, [ccf]( HttpResponeParams params ) {
         ccf( std::make_shared<HouseBSData>(params.bufferString) );
     });
 }
 
+/// This loads a house with an already created HouseBSData so basically sets the smart pointer
+/// \param _houseJson
+void ArchOrchestrator::setHouse( const std::shared_ptr<HouseBSData>& _houseJson ) {
+    houseJson = _houseJson;
+}
+
 HouseRenderContainer& ArchOrchestrator::HRC() {
     return hrc;
 }
+

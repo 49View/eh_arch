@@ -320,6 +320,7 @@ void HouseService::clearHouseExcludingFloorsAndWalls( HouseBSData *house ) {
 }
 
 void HouseService::clearHouse( HouseBSData *house ) {
+    if ( !house ) return;
     house->mFloors.clear();
 }
 

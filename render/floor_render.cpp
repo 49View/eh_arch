@@ -36,11 +36,11 @@ namespace FloorRender {
             }
         }
 
-        for ( const auto& w : f->walls ) {
-            WallRender::IMHouseRender(rr, sg, w.get(), arc);
-        }
         for ( const auto& w : f->rooms ) {
             RoomRender::IMHouseRender(rr, sg, w.get(), arc);
+        }
+        for ( const auto& w : f->walls ) {
+            WallRender::IMHouseRender(rr, sg, w.get(), arc);
         }
         for ( const auto& w : f->windows ) {
             WindowRender::IMHouseRender(rr, sg, w.get(), arc);

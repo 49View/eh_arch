@@ -20,17 +20,20 @@ class ArchOrchestrator {
 public:
     explicit ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg, ArchRenderController& _arc );
 
-    void make3dHouse( HouseBSData*, const PostHouse3dResolvedCallback& ccf = nullptr );
-    void showIMHouse( HouseBSData* );
+    void make3dHouse( const PostHouse3dResolvedCallback& ccf = nullptr );
+    void showIMHouse();
     void loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf );
-    Matrix4f
-    calcFloorplanNavigationTransform( std::shared_ptr<HouseBSData> houseJson, float screenRatio, float screenPadding );
+    void setHouse( const std::shared_ptr<HouseBSData>& _houseJson );
+    Matrix4f calcFloorplanNavigationTransform( float screenRatio, float screenPadding );
 
-    void centerCameraMiddleOfHouse( HouseBSData* _houseJson, float slack = 0.0f );
+    void centerCameraMiddleOfHouse( float slack = 0.0f );
     HouseRenderContainer& HRC();
+    HouseBSData *H();
+
 protected:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
     ArchRenderController& arc;
+    std::shared_ptr<HouseBSData> houseJson;
     HouseRenderContainer hrc;
 };
