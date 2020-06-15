@@ -145,14 +145,14 @@ namespace RoomRender {
     void make3dGeometry( SceneGraph& sg, RoomBSData *w, HouseRenderContainer& ret ) {
         auto wc = RoomRender::createCovingSegments(sg, w);
         auto ws = RoomRender::createSkirtingSegments(sg, w);
-        WallRender::renderWalls(sg, w->mWallSegmentsSorted, w->wallMaterial, w->wallColor);
+        WallRender::renderWalls(sg, w->mWallSegmentsSorted, w->wallsMaterial.materialHash, w->wallsMaterial.color);
         ret.covingGB.insert(ret.covingGB.end(), wc.begin(), wc.end());
         ret.skirtingGB.insert(ret.skirtingGB.end(), ws.begin(), ws.end());
 
         auto outline = PolyOutLine{ XZY::C(w->mPerimeterSegments), V3f::UP_AXIS, 0.1f };
         ret.floor = sg.GB<GT::Extrude>(outline,
                                        V3f{ V3f::UP_AXIS * -0.1f },
-                                       GT::M(w->floorMaterial),
+                                       GT::M(w->floorMaterial.materialHash),
                                        GT::Tag(ArchType::FloorT));
 
         for ( const auto& lf : w->mLightFittingsLocators ) {

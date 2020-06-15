@@ -33,6 +33,21 @@ JSONDATA(HouseSourceData, floorPlanSize, floorPlanSourceName)
     std::string floorPlanSourceName{};
 };
 
+JSONDATA(HouseMaterialProperty, materialName, materialHash, colorName, colorHash, color)
+    HouseMaterialProperty( const std::string& materialHash, const C4f& color ) : materialHash(materialHash),
+                                                                                 color(color) {
+        materialName = materialHash;
+    }
+    HouseMaterialProperty( const char* materialHash) : materialHash(materialHash) {
+        materialName = materialHash;
+    }
+    std::string materialName{};
+    std::string materialHash{};
+    std::string colorName{};
+    std::string colorHash{};
+    C4f color{C4f::WHITE};
+};
+
 #define BASE_ELEMENT ArchBase hash, type
 
 struct ArchBase {
@@ -374,7 +389,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
            mMaxEnclsingBoundingBox, mLightFittingsLocators, mSocketLocators, mSwichesLocators, maxSizeEnclosedHP1,
            maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite,
            mLongestWallOppositePoint, mPerimeter, area, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth,
-           defaultCeilingThickness, wallMaterial, wallColor, floorMaterial, ceilingMaterial, covingProfile,
+           defaultCeilingThickness, wallsMaterial, floorMaterial, ceilingMaterial, covingProfile,
            skirtingProfile, skirtingMaterial, covingMaterial, skirtingColor, covingColor, spotlightGeom, kitchenData)
     std::vector<ASTypeT> roomTypes{};
     std::vector<int64_t> windows;
@@ -409,9 +424,8 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     float minLightFittingDistance = 2.0f;
     float mArchiTravesWidth = 0.1f;
     float defaultCeilingThickness = 0.02f;
-    std::string wallMaterial = "plaster_ultra_fine_spray";
-    C4f wallColor = C4f{ 0.7f, 0.9f, 0.9f, 1.0f };
-    std::string floorMaterial = "european,ash";
+    HouseMaterialProperty wallsMaterial{"plaster_ultra_fine_spray", C4f{ 0.93f, 0.91f, 0.89f, 1.0f }};
+    HouseMaterialProperty floorMaterial{ "european,ash"};
     std::string ceilingMaterial = "plaster_ultra_fine_spray";
     std::string covingProfile = "coving,model1";
     std::string skirtingProfile = "skirting,kensington";
