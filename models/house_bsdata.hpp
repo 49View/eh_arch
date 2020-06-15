@@ -390,7 +390,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
            maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite,
            mLongestWallOppositePoint, mPerimeter, area, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth,
            defaultCeilingThickness, wallsMaterial, floorMaterial, ceilingMaterial, covingProfile,
-           skirtingProfile, skirtingMaterial, covingMaterial, skirtingColor, covingColor, spotlightGeom, kitchenData)
+           skirtingProfile, skirtingMaterial, covingMaterial, spotlightGeom, kitchenData)
     std::vector<ASTypeT> roomTypes{};
     std::vector<int64_t> windows;
     std::vector<int64_t> doors;
@@ -429,10 +429,8 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     std::string ceilingMaterial = "plaster_ultra_fine_spray";
     std::string covingProfile = "coving,model1";
     std::string skirtingProfile = "skirting,kensington";
-    std::string skirtingMaterial = S::WHITE_PBR;
-    std::string covingMaterial = S::WHITE_PBR;
-    C4f skirtingColor = C4f::WHITE;
-    C4f covingColor = C4f::WHITE;
+    HouseMaterialProperty skirtingMaterial{S::WHITE_PBR, C4f::WHITE};
+    HouseMaterialProperty covingMaterial{S::WHITE_PBR, C4f::PASTEL_GRAYLIGHT};
     std::string spotlightGeom = "spotlight_basic";
     // Ad-hoc room type data, it's a bit redundant but I'll leave it here until I found a better place
     KitchenData kitchenData;

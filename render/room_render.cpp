@@ -48,7 +48,7 @@ namespace RoomRender {
 
         bool drawDebug = arc.isFloorPlanRenderModeDebug();
         if ( drawDebug && !arc.isFloorPlanRenderModeDebugSelection() ) {
-            rr.draw<DLine>( room->mPerimeterSegments, lineWidth, C4f::YELLOW, true );
+            rr.draw<DLine>(room->mPerimeterSegments, lineWidth, C4f::YELLOW, true);
 //            rr.draw<DPoly>(room->mPerimeterSegments, C4f::WHITE*0.9f, arc.pm(),
 //                           room->hashFeature("perimeter", 0));
         }
@@ -57,7 +57,7 @@ namespace RoomRender {
         for ( const auto& ff : room->mFittedFurniture ) {
             Matrix4f mt{ ff.position3d * V3f::MASK_Y_OUT, ff.rotation, ff.size };
             mt.mult(arc.pm()());
-            rr.draw<DLine>(sg.PL(ff.symbolRef), C4f::PASTEL_GRAY, RDSPreMult(mt), rm, lineWidth*2.0f,
+            rr.draw<DLine>(sg.PL(ff.symbolRef), C4f::PASTEL_GRAY, RDSPreMult(mt), rm, lineWidth * 2.0f,
                            room->hashFeature(ff.symbolRef, ffc++));
         }
 
@@ -111,7 +111,8 @@ namespace RoomRender {
                     ret.emplace_back(
                             sg.GB<GT::Follower>(profile, XZY::C(cov, w->height), ff, PolyRaise::VerticalNeg,
                                                 GT::ForceNormalAxis(Vector3f::UP_AXIS),
-                                                GT::Flip(V2fc::X_AXIS), GT::M(w->covingMaterial)));
+                                                GT::Flip(V2fc::X_AXIS), GT::M(w->covingMaterial.materialHash),
+                                                w->covingMaterial.color));
                 }
             }
         }
@@ -135,7 +136,8 @@ namespace RoomRender {
                 if ( auto profile = sg.PL(w->skirtingProfile); profile ) {
                     ret.emplace_back(
                             sg.GB<GT::Follower>(profile, XZY::C(cov, 0.0f), GT::ForceNormalAxis(Vector3f::UP_AXIS),
-                                                ff, GT::Flip(V2fc::X_AXIS), GT::M(w->skirtingMaterial)));
+                                                ff, GT::Flip(V2fc::X_AXIS), GT::M(w->skirtingMaterial.materialHash),
+                                                w->skirtingMaterial.color));
                 }
             }
         }
@@ -156,7 +158,7 @@ namespace RoomRender {
                                        GT::Tag(ArchType::FloorT));
 
         for ( const auto& lf : w->mLightFittingsLocators ) {
-            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, XZY::C(lf)+V3f::UP_AXIS*0.023f);
+            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, XZY::C(lf) + V3f::UP_AXIS * 0.023f);
             auto lKey = ResourceGroup::Light + lf.toString();
             sg.add<Light>(lKey,
                           Light{ LightType_Point, w->spotlightGeom, XZY::C(lf) + V3f::UP_AXIS_NEG * 0.1f,

@@ -41,8 +41,8 @@ namespace HOD { // HighOrderDependency
                 ret.addDep(sg, ResourceGroup::Material, room->wallsMaterial.materialHash);
                 ret.addDep(sg, ResourceGroup::Material, room->ceilingMaterial);
                 ret.addDep(sg, ResourceGroup::Material, room->floorMaterial.materialHash);
-                ret.addDep(sg, ResourceGroup::Material, room->covingMaterial);
-                ret.addDep(sg, ResourceGroup::Material, room->skirtingMaterial);
+                ret.addDep(sg, ResourceGroup::Material, room->covingMaterial.materialHash);
+                ret.addDep(sg, ResourceGroup::Material, room->skirtingMaterial.materialHash);
                 ret.addDep(sg, ResourceGroup::Profile, room->covingProfile);
                 ret.addDep(sg, ResourceGroup::Profile, room->skirtingProfile);
                 ret.addDep(sg, ResourceGroup::Geom, room->spotlightGeom);
