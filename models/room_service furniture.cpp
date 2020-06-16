@@ -815,7 +815,7 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     std::string tv = "sony,tv";
     std::string plant1 = "plant,spider";
     std::string toilet = "urby,toilet";
-    std::string shower = "generic,shower,round";
+    std::string shower = "shower,tresse";
     std::string bathroomSink = "urby,sink";
     std::string bathroomTowerRadiator = "bathroom,tower,radiator";
 
