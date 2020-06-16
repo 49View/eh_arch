@@ -151,11 +151,19 @@ namespace RoomRender {
         ret.covingGB.insert(ret.covingGB.end(), wc.begin(), wc.end());
         ret.skirtingGB.insert(ret.skirtingGB.end(), ws.begin(), ws.end());
 
-        auto outline = PolyOutLine{ XZY::C(w->mPerimeterSegments), V3f::UP_AXIS, 0.1f };
+        float zPull = 0.001f;
+        auto outline = PolyOutLine{ XZY::C(w->mPerimeterSegments), V3f::UP_AXIS, zPull };
         ret.floor = sg.GB<GT::Extrude>(outline,
-                                       V3f{ V3f::UP_AXIS * -0.1f },
+                                       V3f{ V3f::UP_AXIS * -zPull },
                                        GT::M(w->floorMaterial.materialHash),
+                                       w->floorMaterial.color,
                                        GT::Tag(ArchType::FloorT));
+
+        ret.ceiling = sg.GB<GT::Extrude>(outline,
+                                       V3f{ V3f::UP_AXIS * (w->height - zPull) },
+                                       GT::M(w->ceilingMaterial.materialHash),
+                                       w->ceilingMaterial.color,
+                                       GT::Tag(ArchType::CeilingT));
 
         for ( const auto& lf : w->mLightFittingsLocators ) {
             auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, XZY::C(lf) + V3f::UP_AXIS * 0.023f);

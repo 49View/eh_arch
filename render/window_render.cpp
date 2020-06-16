@@ -199,8 +199,11 @@ namespace WindowRender {
 
         for ( int t = 0; t < 2; t++ ) {
             std::array<Vector2f, 2> vline{};
-            vline[1] = Vector2f(0.0f, window->depth * 0.25f);
-            vline[0] = Vector2f(0.0f, -window->depth * 0.25f);
+            float plasterWidth = max(window->us1.width, window->us2.width);
+            vline[1] = Vector2f(0.0f, plasterWidth * 0.25f);
+            vline[0] = Vector2f(0.0f, -plasterWidth * 0.25f);
+
+
 
             auto profile = Profile::fromPoints("WindowPlasterAround", { vline[0], vline[1] });
 

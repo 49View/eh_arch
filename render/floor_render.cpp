@@ -55,11 +55,11 @@ namespace FloorRender {
         // External walls of this floor
         WallRender::renderWalls( sg, f->perimeterArchSegments, f->externalWallsMaterial, f->externalWallsColor );
         // Ceilings
-        ret.ceiling = sg.GB<GT::Extrude>( PolyOutLine{ XZY::C( f->mPerimeterSegments ), V3f::UP_AXIS, 0.1f },
-                                          V3f{ V3f::UP_AXIS * f->height },
-                                          GT::M( f->defaultCeilingMaterial ),
-                                          f->defaultCeilingColor,
-                                          GT::Tag( ArchType::CeilingT ));
+//        ret.ceiling = sg.GB<GT::Extrude>( PolyOutLine{ XZY::C( f->mPerimeterSegments ), V3f::UP_AXIS, 0.1f },
+//                                          V3f{ V3f::UP_AXIS * f->height },
+//                                          GT::M( f->defaultCeilingMaterial ),
+//                                          f->defaultCeilingColor,
+//                                          GT::Tag( ArchType::CeilingT ));
 
         for ( const auto &w : f->rooms ) {
             RoomRender::make3dGeometry( sg, w.get(), ret );

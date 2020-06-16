@@ -426,11 +426,11 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     float defaultCeilingThickness = 0.02f;
     HouseMaterialProperty wallsMaterial{"plaster_ultra_fine_spray", C4f{ 0.93f, 0.91f, 0.89f, 1.0f }};
     HouseMaterialProperty floorMaterial{ "european,ash"};
-    std::string ceilingMaterial = "plaster_ultra_fine_spray";
-    std::string covingProfile = "coving,model1";
-    std::string skirtingProfile = "skirting,kensington";
+    HouseMaterialProperty ceilingMaterial{"plaster_ultra_fine_spray"};
     HouseMaterialProperty skirtingMaterial{S::WHITE_PBR, C4f::WHITE};
     HouseMaterialProperty covingMaterial{S::WHITE_PBR, C4f::PASTEL_GRAYLIGHT};
+    std::string covingProfile = "coving,model1";
+    std::string skirtingProfile = "skirting,kensington";
     std::string spotlightGeom = "spotlight_basic";
     // Ad-hoc room type data, it's a bit redundant but I'll leave it here until I found a better place
     KitchenData kitchenData;
