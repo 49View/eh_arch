@@ -13,8 +13,8 @@
 class SceneGraph;
 class RenderOrchestrator;
 
-using PostHouseLoadCallback = std::function<void(std::shared_ptr<HouseBSData> houseJson)>;
-using PostHouse3dResolvedCallback = std::function<void(HouseBSData* houseJson)>;
+using PostHouseLoadCallback = std::function<void()>;
+using PostHouse3dResolvedCallback = std::function<void()>;
 
 class ArchOrchestrator {
 public:
