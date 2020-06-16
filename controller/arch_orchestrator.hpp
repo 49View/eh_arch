@@ -20,6 +20,9 @@ class ArchOrchestrator {
 public:
     explicit ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg, ArchRenderController& _arc );
 
+    void loadFurnitureMapStorage( const std::string& _name );
+    FurnitureMapStorage& FurnitureMap();
+
     void make3dHouse( const PostHouse3dResolvedCallback& ccf = nullptr );
     void showIMHouse();
     void loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf );
@@ -36,4 +39,5 @@ protected:
     ArchRenderController& arc;
     std::shared_ptr<HouseBSData> houseJson;
     HouseRenderContainer hrc;
+    FurnitureMapStorage furnitureMap;
 };

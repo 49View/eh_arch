@@ -772,7 +772,7 @@ namespace HouseMakerBitmap {
         return g_sourceImages;
     }
 
-    std::shared_ptr<HouseBSData> make() {
+    std::shared_ptr<HouseBSData> make( FurnitureMapStorage& furnitureMap ) {
         PROFILE_BLOCK( "House service elaborate" );
 
         prepareImages();
@@ -784,11 +784,12 @@ namespace HouseMakerBitmap {
         rescale( house.get(), g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
 
         setHouseSourceDataSection(house.get(), g_hmbBSData );
+        HouseService::guessFittings(house.get(), furnitureMap);
 
         return house;
     }
 
-    std::shared_ptr<HouseBSData> make( const SourceImages& sourceImages ) {
+    std::shared_ptr<HouseBSData> make( const SourceImages& sourceImages,  FurnitureMapStorage& furnitureMap  ) {
         PROFILE_BLOCK( "House service elaborate" );
         g_sourceImages = sourceImages;
 
@@ -799,6 +800,7 @@ namespace HouseMakerBitmap {
         rescale( house.get(), g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
 
         setHouseSourceDataSection(house.get(), g_hmbBSData );
+        HouseService::guessFittings(house.get(), furnitureMap);
 
         return house;
     }

@@ -105,8 +105,6 @@ void ArchOrchestrator::centerCameraMiddleOfHouse( float slack ) {
 
 void ArchOrchestrator::showIMHouse() {
     if ( houseJson ) {
-        // #!#
-//        HouseService::guessFittings(houseJson.get(), furnitureMap);
         HouseRender::IMHouseRender(rsg.RR(), sg, houseJson.get(), arc);
     }
 }
@@ -140,5 +138,18 @@ void ArchOrchestrator::setHouse( const std::shared_ptr<HouseBSData>& _houseJson 
 
 HouseRenderContainer& ArchOrchestrator::HRC() {
     return hrc;
+}
+
+void ArchOrchestrator::loadFurnitureMapStorage( const std::string& _name ) {
+    Http::get(Url{ "/furnitureset/" + _name }, [&, this]( HttpResponeParams& res ) {
+        FurnitureSetContainer fset{ res.bufferString };
+        for ( const auto& f : fset.set ) {
+            sg.loadProfile(f.symbol);
+            furnitureMap.addIndex(f);
+        }
+    });
+}
+FurnitureMapStorage& ArchOrchestrator::FurnitureMap() {
+    return furnitureMap;
 }
 

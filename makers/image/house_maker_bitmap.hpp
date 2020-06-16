@@ -86,8 +86,8 @@ namespace HouseMakerBitmap {
     const SourceImages& prepareImages();
     void rescale( HouseBSData *house, float rescaleFactor, float floorPlanRescaleFactor );
     std::shared_ptr<HouseBSData> makeEmpty();
-    std::shared_ptr<HouseBSData> make( const SourceImages& sourceImages );
-    std::shared_ptr<HouseBSData> make();
+    std::shared_ptr<HouseBSData> make( const SourceImages& sourceImages, FurnitureMapStorage& furnitureMap  );
+    std::shared_ptr<HouseBSData> make( FurnitureMapStorage& furnitureMap );
     void makeFromWalls( HouseBSData *house );
     void makeAddDoor( HouseBSData *house, const FloorUShapesPair& fus );
     void makeFromSwapDoorOrWindow( HouseBSData *house, HashEH hash );
