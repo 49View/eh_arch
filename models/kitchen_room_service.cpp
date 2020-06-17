@@ -51,14 +51,17 @@ namespace KitchenRoomService {
         V2f lp1Dir = normalize(middle - p1);
         V2f lp2Dir = normalize(middle - p2);
 
-        V2f inW1 = isMain ? ( lp1Dir * ( skirtingOffset + sho ) ) : lp1Dir * -( kd.kitchenSkirtingRecess );
-        V2f inW2 = isMain ? ( lp2Dir * ( skirtingOffset + sho ) ) : V2fc::ZERO;
+        bool needsSpaceForUnitsOnLeft = isMain & (kd.kitchenShape == KS_UShape);
+        bool needsSpaceForUnitsOnRight = isMain & ((kd.kitchenShape == KS_UShape) || (kd.kitchenShape == KS_LShape));
+
+        V2f inW1 = needsSpaceForUnitsOnLeft ? ( lp1Dir * ( skirtingOffset + sho ) ) : lp1Dir * -( kd.kitchenSkirtingRecess );
+        V2f inW2 = needsSpaceForUnitsOnRight ? ( lp2Dir * ( skirtingOffset + sho ) ) : V2fc::ZERO;
 
         kd.kitchenSkirtingPath.emplace_back(p1 + inwardSkirting + inW1, p2 + inwardSkirting + inW2, normal,
                                             crossNormal, skirtingOffset);
 
-        inW1 = isMain ? ( lp1Dir * ( unitOffset + dho ) ) : lp1Dir * -kd.kitchenUnitsRecess;
-        inW2 = isMain ? ( lp2Dir * ( unitOffset + dho ) ) : V2fc::ZERO;
+        inW1 = needsSpaceForUnitsOnLeft ? ( lp1Dir * ( unitOffset + dho ) ) : lp1Dir * -kd.kitchenUnitsRecess;
+        inW2 = needsSpaceForUnitsOnRight ? ( lp2Dir * ( unitOffset + dho ) ) : V2fc::ZERO;
 
         kd.kitchenUnitsPath.emplace_back(p1 + inwardUnits + inW1, p2 + inwardUnits + inW2, normal, crossNormal,
                                          unitOffset);
@@ -77,8 +80,11 @@ namespace KitchenRoomService {
         V2f lp1Dir = normalize(middle - p1);
         V2f lp2Dir = normalize(middle - p2);
 
-        V2f inW1 = isMain ? ( lp1Dir * ( topUnitOffset + dho ) ) : lp1Dir * -( kd.kitchenTopUnitsRecess );
-        V2f inW2 = isMain ? ( lp2Dir * ( topUnitOffset + dho ) ) : V2fc::ZERO;
+        bool needsSpaceForUnitsOnLeft = isMain & (kd.kitchenShape == KS_UShape);
+        bool needsSpaceForUnitsOnRight = isMain & ((kd.kitchenShape == KS_UShape) || (kd.kitchenShape == KS_LShape));
+
+        V2f inW1 = needsSpaceForUnitsOnLeft ? ( lp1Dir * ( topUnitOffset + dho ) ) : lp1Dir * -( kd.kitchenTopUnitsRecess );
+        V2f inW2 = needsSpaceForUnitsOnRight ? ( lp2Dir * ( topUnitOffset + dho ) ) : V2fc::ZERO;
 
         kd.kitchenTopUnitsPath.emplace_back(p1 + inwardTopUnits + inW1, p2 + inwardTopUnits + inW2, normal,
                                             crossNormal, topUnitOffset);

@@ -112,7 +112,7 @@ void ArchOrchestrator::showIMHouse() {
 void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
     rsg.RR().setLoadingFlag( true );
     HOD::resolver<HouseBSData>(sg, houseJson.get(), [&, ccf]() {
-//        sg.loadCollisionMesh(HouseService::createCollisionMesh(_houseJson));
+        sg.loadCollisionMesh(HouseService::createCollisionMesh(houseJson.get()));
         hrc = HouseRender::make3dGeometry(rsg.RR(), sg, houseJson.get());
         if ( ccf ) ccf();
         rsg.RR().setLoadingFlag( false );
@@ -126,8 +126,10 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
 /// \param ccf
 void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf ) {
     Http::get(Url{ "/propertybim/" + _pid }, [&,ccf]( HttpResponeParams params ) {
-        houseJson = std::make_shared<HouseBSData>(params.bufferString);
-        if ( ccf ) ccf();
+        if ( !params.bufferString.empty() ) {
+            houseJson = std::make_shared<HouseBSData>(params.bufferString);
+            if ( ccf ) ccf();
+        }
     });
 }
 
