@@ -8,7 +8,6 @@
 #include <core/math/vector4f.h>
 #include <core/math/anim_type.hpp>
 #include <core/raw_image.h>
-#include <core/http/webclient.h>
 #include <core/math/matrix_anim.h>
 #include <graphics/ghtypes.hpp>
 #include <render_scene_graph/ui_view.hpp>

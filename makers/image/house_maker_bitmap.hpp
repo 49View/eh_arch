@@ -40,6 +40,7 @@ JSONDATA(HMBBSData, propertyId, sourceGuassianSigma, sourceGuassianBeta, sourceG
          minPerimeterLength, winningStrategy, winningMargin, pixelCMFromOCR)
 
     std::string propertyId{};
+    std::string floorplanUrl{};
     RawImage image = RawImage::WHITE4x4();
     int sourceGuassianSigma = 3; // Must be odd? I think so
     float sourceGuassianBeta = -0.75f;

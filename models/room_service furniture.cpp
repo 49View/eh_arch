@@ -8,6 +8,7 @@
 
 #include "room_service.hpp"
 
+#include <core/http/webclient.h>
 #include <core/util.h>
 #include <core/math/triangulator.hpp>
 #include <core/service_factory.h>

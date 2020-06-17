@@ -17,34 +17,29 @@ JSONDATA ( PointOfInterestListing, name, type, distance )
 	float distance = -1.0f;
 };
 
-JSONDATA_R ( PropertyListing, name, addressLine1, addressLine2, postCode, city, region, country, latlon, price, type, numBedroom, epcRating, longBoringDesc, floorPlanImage, mainFeatures, pictureNames, schools, transport )
-	std::string name = "";
+JSONDATA ( HouseLocation, coordinates, type )
+    V2f coordinates{V2fc::ZERO};
+    std::string type{"point"};
+};
+
+JSONDATA_R ( PropertyListing, _id, origin, addressLine1, addressLine2, addressLine3, buyOrLet, description, estateAgentId, keyFeatures, location, name, price, priceReadable, priceUnity, status, userId, floorplanUrl, images, thumbs )
+	std::string _id = "";
+	std::string origin = "";
 	std::string addressLine1 = "";
 	std::string addressLine2 = "";
-	std::string postCode = "";
-	std::string city = "";
-	std::string region = "";
-	std::string country = "";
-	Vector2f latlon = V2fc::ZERO;
-	uint64_t price = 0;
-	std::string type = "";
-	uint64_t numBedroom = 0;
-	std::string epcRating = "";
-	std::string longBoringDesc = "";
-
-	std::string floorPlanImage = "";
-	std::vector<std::string> mainFeatures;
-	std::vector<std::string> pictureNames;
-	std::vector<PointOfInterestListing> schools;
-	std::vector<PointOfInterestListing> transport;
-};
-
-struct PropertyListingWithMapping {
-	std::shared_ptr< PropertyListing > pl;
-	KVFMapping kvmapping;
-};
-
-class PropertyListingService {
-public:
-	static std::shared_ptr<PropertyListingWithMapping> load( const std::string& _name );
+	std::string addressLine3 = "";
+	std::string buyOrLet{};
+	std::string description{};
+	std::string estateAgentId{};
+	std::vector<std::string> keyFeatures{};
+	HouseLocation location{};
+	std::string name;
+	std::vector<int> price;
+	std::string priceReadable;
+	std::string priceUnity;
+	std::string status;
+	std::string userId;
+	std::string floorplanUrl;
+    std::vector<std::string> images{};
+    std::vector<std::string> thumbs{};
 };
