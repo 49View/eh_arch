@@ -340,12 +340,19 @@ JSONDATA(KitchenDrawer, p1, p2, z, unitHeight, depth, normal, shape, color)
                                                                                    color(color) {}
 };
 
+enum KitchenShape {
+    KS_Straight = 0,
+    KS_LShape = 1,
+    KS_UShape = 2,
+    KS_Custom = 3
+};
+
 JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath, kitchenTopUnitsPath, kitchenDrawers,
          kitchenWorktopDepth, kitchenWorktopHeight, worktopThickness, skirtingHeight, kitchenSkirtingRecess,
          kitchenUnitsRecess, kitchenTopUnitsRecess, drawersPadding, drawersThickness, skirtingThickness,
          topUnitsCeilingGap, longDrawersSize, worktopMaterial, unitsMaterial, sinkModel, ovenPanelModel, microwaveModel,
          cooktopModel, fridgeModel, extractorHoodModel, drawersHandleModel,
-         mainWorktopIndex)
+         kitchenIndexMainWorktop)
 
     std::vector<KitchenPath> kitchenWorktopPath;
     std::vector<KitchenPath> kitchenSkirtingPath;
@@ -368,8 +375,8 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     Vector2f longDrawersSize = V2f{ 0.6f, 0.9f };
 
     // Materials
-    std::string worktopMaterial = "marble,anemone";
-    std::string unitsMaterial = "wood,beech";
+    HouseMaterialProperty worktopMaterial = "marble,anemone";
+    HouseMaterialProperty unitsMaterial = "wood,beech";
     std::string sinkModel = "ktc,sink,double,chrome";
     std::string ovenPanelModel = "ktc,oven,flat";
     std::string microwaveModel = "ktc,microwave";
@@ -378,9 +385,9 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     std::string extractorHoodModel = "ktc,extractor,hood";
     std::string drawersHandleModel = "ktc,handle,long,contemporary";
 
-    // Indices
-    uint64_t mainWorktopIndex = 2;
-
+    // Settings and Indices
+    KitchenShape kitchenShape = KS_Straight;
+    uint64_t kitchenIndexMainWorktop = 2;
 };
 
 JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,

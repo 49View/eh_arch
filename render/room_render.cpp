@@ -47,8 +47,8 @@ namespace RoomRender {
         auto lineWidth = arc.floorPlanScaler(0.015f);
 
         bool drawDebug = arc.isFloorPlanRenderModeDebug();
-        if ( drawDebug && !arc.isFloorPlanRenderModeDebugSelection() ) {
-            rr.draw<DLine>(room->mPerimeterSegments, lineWidth, C4f::YELLOW, true);
+        if ( drawDebug && arc.isSelected(room->hash) ) {
+            rr.draw<DLine>(room->mPerimeterSegments, lineWidth*2.0f, color, true);
 //            rr.draw<DPoly>(room->mPerimeterSegments, C4f::WHITE*0.9f, arc.pm(),
 //                           room->hashFeature("perimeter", 0));
         }

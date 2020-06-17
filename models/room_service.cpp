@@ -509,7 +509,7 @@ namespace RoomService {
         for ( uint64_t t = 0; t < r->mWallSegmentsSorted.size(); t++ ) {
             auto seg = r->mWallSegmentsSorted[t];
             if ( seg.wallHash == hashToFind && seg.iIndex == index ) {
-                r->kitchenData.mainWorktopIndex = t;
+                r->kitchenData.kitchenIndexMainWorktop = t;
                 return t;
             }
         }

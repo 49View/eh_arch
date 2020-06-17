@@ -307,19 +307,37 @@ namespace KitchenRoomService {
 
     void createMasterPathSingle( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
         KitchenData& kd = w->kitchenData;
-        auto ls = RoomService::segmentAtIndex( w, kd.mainWorktopIndex );
+        auto ls = RoomService::segmentAtIndex( w, kd.kitchenIndexMainWorktop );
         addWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
         addTopWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
     }
 
     void createKitchen( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
-//        KitchenRoomService::createMasterPath(f, w, furns);
-        KitchenRoomService::createMasterPathSingle(f, w, furns);
+        KitchenData& kd = w->kitchenData;
+        switch ( kd.kitchenShape) {
+            case KS_Straight:
+                KitchenRoomService::createMasterPathSingle(f, w, furns);
+                break;
+            case KS_LShape:
+                KitchenRoomService::createMasterPath(f, w, furns);
+                break;
+            case KS_UShape:
+                KitchenRoomService::createMasterPath(f, w, furns);
+                break;
+            case KS_Custom:
+                KitchenRoomService::createMasterPath(f, w, furns);
+                break;
+        }
+
         KitchenRoomService::createUnits(f, w, furns);
         KitchenRoomService::createTopUnits(f, w, furns);
     }
 
     void clear( RoomBSData *w ) {
-        w->kitchenData = KitchenData{};
+        w->kitchenData.kitchenWorktopPath.clear();
+        w->kitchenData.kitchenSkirtingPath.clear();
+        w->kitchenData.kitchenUnitsPath.clear();
+        w->kitchenData.kitchenTopUnitsPath.clear();
+        w->kitchenData.kitchenDrawers.clear();
     }
 }
