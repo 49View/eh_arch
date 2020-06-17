@@ -105,6 +105,7 @@ namespace FloorService {
 
     // Update
     void assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData* house );
+    void reevaluateDoorsAndWindowsAfterRoomChange( FloorBSData* f );
     void calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f, HouseBSData* house );
     std::vector<UShape *> allUShapes( FloorBSData *f );
     void

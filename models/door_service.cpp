@@ -9,9 +9,12 @@
 #include "door_service.hpp"
 #include <core/util_follower.hpp>
 #include "twoushapes_service.hpp"
+#include "room_service.hpp"
+#include "floor_service.hpp"
 
 std::shared_ptr<DoorBSData>
-DoorService::createDoor( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2, ArchSubTypeT st ) {
+DoorService::createDoor( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
+                         ArchSubTypeT st ) {
     std::shared_ptr<DoorBSData> d1 = std::make_shared<DoorBSData>();
 
     d1->asType = ASType::Door;
@@ -33,11 +36,11 @@ DoorService::createDoor( float _doorHeight, float _ceilingHeight, const UShape& 
 }
 
 void DoorService::toggleOrientations( DoorBSData *d ) {
-    d->dIndex = (d->dIndex + 1) % 4;
+    d->dIndex = ( d->dIndex + 1 ) % 4;
     calculatePivots(d);
 }
 
-void DoorService::setPivotPoint( DoorBSData*d, int pivotPointIndex ) {
+void DoorService::setPivotPoint( DoorBSData *d, int pivotPointIndex ) {
     d->dIndex = pivotPointIndex;
     calculatePivots(d);
 }
@@ -61,7 +64,7 @@ std::string DoorService::orientationToString( const DoorBSData *d ) {
 
 void DoorService::rescale( DoorBSData *d, float _scale ) {
     TwoUShapesBasedService::rescale(d, _scale);
-    calculatePivots( d );
+    calculatePivots(d);
 }
 
 bool isLeft( int index ) {
@@ -93,7 +96,8 @@ void DoorService::calculatePivots( DoorBSData *d ) {
     if ( isLeft(d->dIndex) ) {
         d->doorHandlePivotLeft += V3f::Z_AXIS * d->doorGeomThickness;
         d->doorHandlePivotRight -= V3f::Z_AXIS * d->doorGeomThickness;
-        d->doorHandleRot = Quaternion(M_PI, V3f::Z_AXIS) * Quaternion(M_PI, V3f::UP_AXIS) * Quaternion(M_PI, V3f::X_AXIS);
+        d->doorHandleRot =
+                Quaternion(M_PI, V3f::Z_AXIS) * Quaternion(M_PI, V3f::UP_AXIS) * Quaternion(M_PI, V3f::X_AXIS);
     }
 
     d->doorHandlePlateDoorSidePivot = Vector3f(-side * realDoorWidth * 0.5f, 0.0f, d->height * 0.5f);
@@ -111,6 +115,34 @@ void DoorService::calculatePivots( DoorBSData *d ) {
     // This 2.5f here is to leave space for the frame trim, the inner frame trim, and the 0.5 is a bit of air between it.
     d->doorSize = V2f{ d->width - totalTrim, d->height - d->doorTrim * 2.5f };
     d->doorGeomPivot = V3f{ xPivot, 0.0f, depthGap };
+}
+
+void DoorService::reevaluateInRoom( DoorBSData *d, const RoomBSData* room ) {
+    if ( RS::hasRoomType(room, ASType::Hallway) ) {
+        float vwangle = -atan2(-d->dirWidth.y(), d->dirWidth.x());
+        V2f dn = V2fc::X_AXIS * d->width;
+        dn.rotate(vwangle + M_PI * 0.8f);
+        V2f checkPoint = d->center + dn;
+
+        bool isInsideRoom = RS::isPointInsideRoom(room, checkPoint);
+        if ( isInsideRoom || ( d->isMainDoor && !isInsideRoom ) ) {
+            DoorService::setPivotPoint(d, 0);
+        }
+    }
+    if ( RoomService::hasRoomType(room, ASType::Storage) |
+         RoomService::hasRoomType(room, ASType::Cupboard) ) {
+        d->isDoorTypicallyShut = true;
+    }
+}
+
+void DoorService::reevaluate( DoorBSData *d, FloorBSData* f ) {
+    DoorService::calculatePivots(d);
+    for ( auto& roomHash : d->rooms ) {
+        auto room = FloorService::findRoomWithHash(f, roomHash);
+        if ( room ) {
+            DoorService::reevaluateInRoom( d, room );
+        }
+    }
 }
 
 void DoorService::getPlasterMiddlePoints( const DoorBSData *d, std::vector<Vector3f>& mpoints ) {

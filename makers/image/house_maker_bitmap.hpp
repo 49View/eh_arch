@@ -35,11 +35,11 @@ struct HMBScores {
     int mainWallStrategyIndex = 1;
 };
 
-JSONDATA(HMBBSData, filename, sourceGuassianSigma, sourceGuassianBeta, sourceGuassian, sourceContrast, sourceBrightness,
+JSONDATA(HMBBSData, propertyId, sourceGuassianSigma, sourceGuassianBeta, sourceGuassian, sourceContrast, sourceBrightness,
          minBinThreshold, maxBinThreshold, sourceSharpen, rescaleFactor, maxUShapeLengthRatio,
          minPerimeterLength, winningStrategy, winningMargin, pixelCMFromOCR)
 
-    std::string filename{};
+    std::string propertyId{};
     RawImage image = RawImage::WHITE4x4();
     int sourceGuassianSigma = 3; // Must be odd? I think so
     float sourceGuassianBeta = -0.75f;
@@ -56,7 +56,7 @@ JSONDATA(HMBBSData, filename, sourceGuassianSigma, sourceGuassianBeta, sourceGua
     float winningMargin = 0.0f;
     std::vector<float> pixelCMFromOCR;
 
-    HMBBSData( const std::string& filename, const RawImage& image ) : filename(filename), image(image) {}
+    HMBBSData( const std::string& pid, const RawImage& image ) : propertyId(pid), image(image) {}
 };
 
 struct RoomOCR {

@@ -247,7 +247,7 @@ namespace DoorRender {
         sg.GB<GT::Asset>("doorhandle,dx", child, d->doorHandlePivotLeft, GT::Rotate(d->doorHandleRot));
         sg.GB<GT::Asset>("doorhandle,sx", child, d->doorHandlePivotRight, GT::Rotate(d->doorHandleRot));
 
-        float openAngle = d->isMainDoor ? 0.0f : d->openingAngleMax;
+        float openAngle = d->isMainDoor || d->isDoorTypicallyShut ? 0.0f : d->openingAngleMax;
         Quaternion rot(openAngle, V3f::UP_AXIS);
         child->updateTransform(d->doorPivot, rot, V3f::ONE);
 

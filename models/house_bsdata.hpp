@@ -198,7 +198,7 @@ JSONDATA(FittedFurniture, name, symbolRef, size, position3d, xyLocation, heightO
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
            asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
-           rooms, subType, isMainDoor, architraveProfile,
+           rooms, subType, isMainDoor, isDoorTypicallyShut, architraveProfile,
            dIndex, doorInnerBumpSize, doorGeomThickness, doorTrim, openingAngleMax, openingAngleMin,
            hingesPivot, doorHandlePivotLeft, doorHandlePivotRight, doorHandleAngle, frameHingesPivot,
            doorHandlePlateDoorSidePivot, doorHandlePlateFrameSidePivot, doorPivot, doorHandleRot, doorGeomPivot,
@@ -206,6 +206,7 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     std::vector<int64_t> rooms;
     ArchSubTypeT subType = ArchSubType::DoorSingle;
     bool isMainDoor = false;
+    bool isDoorTypicallyShut = false;
     std::string architraveProfile = "architrave,ovolo";
 
     // Internal door data
@@ -486,12 +487,13 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo
 };
 
 JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
-             linkedHash, sequencePart, mTriangles2d, version, name, source, declaredSQm, defaultSkybox, sourceData,
-             bestInternalViewingPosition, bestInternalViewingAngle, walkableArea,
+             linkedHash, sequencePart, mTriangles2d, version, propertyId, name, source, declaredSQm, defaultSkybox,
+             sourceData, bestInternalViewingPosition, bestInternalViewingAngle, walkableArea,
              doorHeight, defaultWindowHeight, defaultWindowBaseOffset, defaultCeilingHeight, windowsillExpansion,
              windowFrameThickness, defaultGroundHeight, worktopHeight, bathRoomSinkHeight, defaultWallColor, accuracy,
              mFloors)
     uint64_t version = SHouseJSONVersion;
+    std::string propertyId;
     std::string name = "";
     std::string source = "";
     std::string declaredSQm = "";

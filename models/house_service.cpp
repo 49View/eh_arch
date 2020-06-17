@@ -412,3 +412,9 @@ void HouseService::bestDollyPositionAndAngle( const HouseBSData *house, V3f& pos
     }
 
 }
+
+void HouseService::reevaluateDoorsAndWindowsAfterRoomChange( HouseBSData* house ) {
+    for ( auto &floor : house->mFloors ) {
+        FloorService::reevaluateDoorsAndWindowsAfterRoomChange( floor.get() );
+    }
+}

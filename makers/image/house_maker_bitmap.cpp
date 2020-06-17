@@ -754,7 +754,8 @@ namespace HouseMakerBitmap {
     }
 
     void setHouseSourceDataSection( HouseBSData* newHouse, const HMBBSData &bsdata ) {
-        newHouse->name = bsdata.filename;
+        newHouse->propertyId = bsdata.propertyId;
+        newHouse->name = bsdata.propertyId;
         newHouse->sourceData.floorPlanSourceName = newHouse->name;
         newHouse->sourceData.floorPlanSize = V2f{bsdata.image.width, bsdata.image.height};
         newHouse->sourceData.floorPlanBBox = Rect2f{V2fc::ZERO, newHouse->sourceData.floorPlanSize} * bsdata.rescaleFactor;

@@ -610,7 +610,13 @@ std::vector<RoomBSData *> FloorService::roomsIntersectingBBox( FloorBSData *f, c
     return ret;
 }
 
-void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData* house ) {
+void FloorService::reevaluateDoorsAndWindowsAfterRoomChange( FloorBSData* f ) {
+    for ( auto& d : f->doors ) {
+        DoorService::reevaluate(d.get(), f);
+    }
+}
+
+void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *house ) {
     int numberOfGenericRoom = 0;
 
     for ( auto& room : f->rooms ) {
@@ -637,11 +643,11 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData* h
     // We will guess that the biggest room is the Living/Kitchen area, the rest are the bedrooms
     // We can do this because we've already detected bathrroms and Hallways above. It's still wild, but might work.
     if ( house->mFloors.size() == 1 && numberOfGenericRoom >= 2 && numberOfGenericRoom <= 4 ) {
-        std::vector<std::pair<float, RoomBSData*>> areaPairs{};
+        std::vector<std::pair<float, RoomBSData *>> areaPairs{};
         for ( auto& room : f->rooms ) {
             auto *r = room.get();
             if ( RoomService::hasRoomType(r, ASType::GenericRoom) ) {
-                areaPairs.emplace_back( RoomService::area(r), r );
+                areaPairs.emplace_back(RoomService::area(r), r);
             }
         }
         std::sort(areaPairs.begin(), areaPairs.end(), []( const auto& a, const auto& b ) -> bool {
@@ -650,20 +656,20 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData* h
         bool goForIt = areaPairs[0].first > areaPairs[1].first * 1.5f;
         if ( goForIt ) {
             // Add the Kitchen/Living
-            RoomService::setRoomType( areaPairs[0].second, ASType::Kitchen );
-            RoomService::addRoomType( areaPairs[0].second, ASType::LivingRoom );
+            RoomService::setRoomType(areaPairs[0].second, ASType::Kitchen);
+            RoomService::addRoomType(areaPairs[0].second, ASType::LivingRoom);
             // Add the biggest bedroom first, so this is the master bedroom
-            RoomService::setRoomType( areaPairs[1].second, ASType::BedroomMaster );
+            RoomService::setRoomType(areaPairs[1].second, ASType::BedroomMaster);
             // Add the rest, if any
-            for (auto t = 2u; t < areaPairs.size(); t++ ) {
-                RoomService::setRoomType( areaPairs[t].second, ASType::BedroomDouble );
+            for ( auto t = 2u; t < areaPairs.size(); t++ ) {
+                RoomService::setRoomType(areaPairs[t].second, ASType::BedroomDouble);
             }
         }
     }
 
 }
 
-void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f, HouseBSData* house ) {
+void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f, HouseBSData *house ) {
     for ( auto& w : f->windows ) {
         auto rooms = FloorService::roomsIntersectingBBox(f, w->bbox.squared(), true);
         if ( !rooms.empty() ) {
@@ -695,25 +701,7 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f, HouseBSDa
     FloorService::assignRoomTypeFromBeingClever(f, house);
 
     // Go back to re-evaluate every door after all possible discoveries/guesses have been made
-    for ( auto& d : f->doors ) {
-        DoorService::calculatePivots(d.get());
-        for ( auto& roomHash : d->rooms ) {
-            auto room = findRoomWithHash(f, roomHash);
-            if ( room ) {
-                if ( RS::hasRoomType(room, ASType::Hallway) ) {
-                    float vwangle = -atan2(-d->dirWidth.y(), d->dirWidth.x());
-                    V2f dn = V2fc::X_AXIS * d->width;
-                    dn.rotate(vwangle + M_PI * 0.8f);
-                    V2f checkPoint = d->center + dn;
-
-                    bool isInsideRoom = RS::isPointInsideRoom(room, checkPoint);
-                    if ( isInsideRoom || ( d->isMainDoor && !isInsideRoom ) ) {
-                        DoorService::setPivotPoint(d.get(), 0);
-                    }
-                }
-            }
-        }
-    }
+    FloorService::reevaluateDoorsAndWindowsAfterRoomChange(f);
 }
 
 void FloorService::guessFittings( FloorBSData *f, FurnitureMapStorage& furns ) {
@@ -1150,10 +1138,11 @@ bool FloorService::isFloorUShapeValid( const FloorUShapesPair& fus ) {
     return fus.f && fus.us1 && fus.us2;
 }
 
-std::optional<uint64_t> FloorService::findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind, int64_t index ) {
+std::optional<uint64_t>
+FloorService::findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind, int64_t index ) {
 
     for ( const auto& room : f->rooms ) {
-        auto ret = RoomService::findArchSegmentWithWallHash( room.get(), hashToFind, index );
+        auto ret = RoomService::findArchSegmentWithWallHash(room.get(), hashToFind, index);
         if ( ret ) return ret;
     }
 

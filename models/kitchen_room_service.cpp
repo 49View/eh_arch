@@ -313,8 +313,8 @@ namespace KitchenRoomService {
     }
 
     void createKitchen( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
-        KitchenRoomService::createMasterPath(f, w, furns);
-//        KitchenRoomService::createMasterPathSingle(f, w, furns);
+//        KitchenRoomService::createMasterPath(f, w, furns);
+        KitchenRoomService::createMasterPathSingle(f, w, furns);
         KitchenRoomService::createUnits(f, w, furns);
         KitchenRoomService::createTopUnits(f, w, furns);
     }
