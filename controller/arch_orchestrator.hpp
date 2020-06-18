@@ -26,6 +26,7 @@ public:
     void make3dHouse( const PostHouse3dResolvedCallback& ccf = nullptr );
     void showIMHouse();
     void loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf );
+    void saveHouse();
     void setHouse( const std::shared_ptr<HouseBSData>& _houseJson );
     Matrix4f calcFloorplanNavigationTransform( float screenRatio, float screenPadding );
 

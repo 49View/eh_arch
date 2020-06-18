@@ -22,7 +22,7 @@ JSONDATA ( HouseLocation, coordinates, type )
     std::string type{"point"};
 };
 
-JSONDATA_R ( PropertyListing, _id, origin, addressLine1, addressLine2, addressLine3, buyOrLet, description, estateAgentId, keyFeatures, location, name, price, priceReadable, priceUnity, status, userId, floorplanUrl, images, thumbs )
+JSONDATA ( PropertyListing, _id, origin, addressLine1, addressLine2, addressLine3, buyOrLet, description, estateAgentId, keyFeatures, location, name, price, priceReadable, priceUnity, status, userId, floorplanUrl, images, thumbs )
 	std::string _id = "";
 	std::string origin = "";
 	std::string addressLine1 = "";

@@ -133,6 +133,14 @@ void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCa
     });
 }
 
+///
+void ArchOrchestrator::saveHouse() {
+    Http::post(Url{ "/propertybim/" + H()->propertyId }, H()->serialize(),
+               []( HttpResponeParams params ) {
+                   LOGRS("Bim updated")
+               });
+}
+
 /// This loads a house with an already created HouseBSData so basically sets the smart pointer
 /// \param _houseJson
 void ArchOrchestrator::setHouse( const std::shared_ptr<HouseBSData>& _houseJson ) {
