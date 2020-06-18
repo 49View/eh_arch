@@ -751,6 +751,13 @@ namespace HouseMakerBitmap {
         return g_sourceImages;
     }
 
+    void setHouseSourceDataSection( HouseBSData* dest, const HouseBSData* source) {
+        dest->propertyId = source->propertyId;
+        dest->name = source->name;
+        dest->sourceData.floorPlanSize = source->sourceData.floorPlanSize;
+        dest->sourceData.floorPlanBBox = source->sourceData.floorPlanBBox;
+    }
+
     std::shared_ptr<HouseBSData> make( HouseBSData* sourceHouse, FurnitureMapStorage& furnitureMap ) {
         PROFILE_BLOCK( "House service elaborate" );
 
@@ -760,9 +767,9 @@ namespace HouseMakerBitmap {
         addAndFinaliseRooms( house.get(), g_sourceImages );
 
 //        gatherGeneralTextInformations( house.get(), g_sourceImages, house->sourceData );
+        setHouseSourceDataSection(house.get(), sourceHouse );
         rescale( house.get(), house->sourceData.rescaleFactor, centimetersToMeters(house->sourceData.rescaleFactor) );
 
-//        setHouseSourceDataSection(house.get(), house->sourceData );
         HouseService::guessFittings(house.get(), furnitureMap);
 
         return house;
@@ -776,9 +783,9 @@ namespace HouseMakerBitmap {
         addAndFinaliseRooms( house.get(), g_sourceImages );
 
 //        gatherGeneralTextInformations( house.get(), g_sourceImages, house->sourceData );
+        setHouseSourceDataSection(house.get(), sourceHouse );
         rescale( house.get(), house->sourceData.rescaleFactor, centimetersToMeters(house->sourceData.rescaleFactor) );
 
-//        setHouseSourceDataSection(house.get(), house->sourceData );
         HouseService::guessFittings(house.get(), furnitureMap);
 
         return house;
@@ -820,15 +827,19 @@ namespace HouseMakerBitmap {
 
     std::shared_ptr<HouseBSData> makeEmpty( const PropertyListing& property ) {
         std::shared_ptr<HouseBSData> newHouse = std::make_shared<HouseBSData>();
-        newHouse->sourceData.image = RawImage{ FM::readLocalFileC("/home/dado/media/media/" + property.floorplanUrl) };
+        HouseMakerBitmap::createSourceDataImage( newHouse.get(), property );
         newHouse->propertyId = property._id;
         newHouse->name = property.addressLine1 + property.addressLine2 + property.name;
         newHouse->sourceData.floorPlanSize = V2f{newHouse->sourceData.image.width, newHouse->sourceData.image.height};
         newHouse->sourceData.floorPlanBBox = Rect2f{V2fc::ZERO, newHouse->sourceData.floorPlanSize} * newHouse->sourceData.rescaleFactor;
         newHouse->bbox = newHouse->sourceData.floorPlanBBox;
-        HouseMakerBitmap::prepareImages( newHouse.get() );
 
         return newHouse;
+    }
+
+    void createSourceDataImage( HouseBSData* house, const PropertyListing& property ) {
+        house->sourceData.image = RawImage{ FM::readLocalFileC("/home/dado/media/media/" + property.floorplanUrl) };
+        HouseMakerBitmap::prepareImages( house );
     }
 
     const SourceImages& getSourceImages() {

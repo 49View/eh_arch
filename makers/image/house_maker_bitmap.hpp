@@ -59,6 +59,7 @@ struct WallsEvaluation {
 
 namespace HouseMakerBitmap {
     const SourceImages& getSourceImages();
+    void createSourceDataImage( HouseBSData* house, const PropertyListing& property );
     const SourceImages& prepareImages( HouseBSData *newHouse );
     void rescale( HouseBSData *house, float rescaleFactor, float floorPlanRescaleFactor );
     std::shared_ptr<HouseBSData> makeEmpty( const PropertyListing& property );

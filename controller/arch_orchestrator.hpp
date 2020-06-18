@@ -11,10 +11,17 @@
 #include <eh_arch/render/house_render.hpp>
 
 class SceneGraph;
+
 class RenderOrchestrator;
 
 using PostHouseLoadCallback = std::function<void()>;
 using PostHouse3dResolvedCallback = std::function<void()>;
+
+enum class ArchIOEvents {
+    AIOE_None,
+    AIOE_OnLoad,
+    AIOE_OnLoadComplete,
+};
 
 class ArchOrchestrator {
 public:
@@ -25,9 +32,12 @@ public:
 
     void make3dHouse( const PostHouse3dResolvedCallback& ccf = nullptr );
     void showIMHouse();
-    void loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf );
+    void loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf,
+                    const PostHouseLoadCallback& ccfailure = nullptr );
     void saveHouse();
     void setHouse( const std::shared_ptr<HouseBSData>& _houseJson );
+    void onEvent(ArchIOEvents event);
+    bool hasEvent(ArchIOEvents event) const;
     Matrix4f calcFloorplanNavigationTransform( float screenRatio, float screenPadding );
 
     void centerCameraMiddleOfHouse( float slack = 0.0f );
@@ -39,6 +49,7 @@ protected:
     RenderOrchestrator& rsg;
     ArchRenderController& arc;
     std::shared_ptr<HouseBSData> houseJson;
+    ArchIOEvents currIOEvent = ArchIOEvents::AIOE_None;
     HouseRenderContainer hrc;
     FurnitureMapStorage furnitureMap;
 };

@@ -124,18 +124,20 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
 /// This loads a house with a http get
 /// \param _pid
 /// \param ccf
-void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf ) {
+void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf, const PostHouseLoadCallback& ccfailure ) {
     Http::get(Url{ "/propertybim/" + _pid }, [&,ccf]( HttpResponeParams params ) {
         if ( !params.bufferString.empty() ) {
             houseJson = std::make_shared<HouseBSData>(params.bufferString);
             if ( ccf ) ccf();
+        } else {
+            if ( ccfailure ) ccfailure();
         }
     });
 }
 
 ///
 void ArchOrchestrator::saveHouse() {
-    Http::post(Url{ "/propertybim/" + H()->propertyId }, H()->serialize(),
+    Http::post(Url{ "/propertybim/" }, H()->serialize(),
                []( HttpResponeParams params ) {
                    LOGRS("Bim updated")
                });
@@ -162,5 +164,13 @@ void ArchOrchestrator::loadFurnitureMapStorage( const std::string& _name ) {
 }
 FurnitureMapStorage& ArchOrchestrator::FurnitureMap() {
     return furnitureMap;
+}
+
+void ArchOrchestrator::onEvent(ArchIOEvents event) {
+    currIOEvent = event;
+}
+
+bool ArchOrchestrator::hasEvent(ArchIOEvents event) const {
+    return currIOEvent == event;
 }
 
