@@ -13,12 +13,13 @@
 #include <memory>
 #include <array>
 #include <ostream>
-#include "core/math/vector4f.h"
-#include "core/math/quaternion.h"
-#include "core/hashing/incremental_hash.hpp"
-#include "core/htypes_shared.hpp"
-#include "core/serialization.hpp"
-#include "core/names.hpp"
+#include <core/raw_image.h>
+#include <core/math/vector4f.h>
+#include <core/math/quaternion.h>
+#include <core/hashing/incremental_hash.hpp>
+#include <core/htypes_shared.hpp>
+#include <core/serialization.hpp>
+#include <core/names.hpp>
 
 #include "htypes.hpp"
 
@@ -27,10 +28,28 @@ static const float defaltToBeOverwritten = 7543859749023.0f;
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
 
-JSONDATA(HouseSourceData, floorPlanSize, floorPlanSourceName)
+JSONDATA(HouseSourceData, floorPlanSize, floorPlanBBox, floorPlanSourceName, sourceGuassianSigma, sourceGuassianBeta,
+         sourceGuassian, sourceContrast, sourceBrightness, minBinThreshold, maxBinThreshold, sourceSharpen,
+         rescaleFactor, maxUShapeLengthRatio, minPerimeterLength, winningStrategy, winningMargin, pixelCMFromOCR)
     Vector2f floorPlanSize = V2fc::ZERO;
     Rect2f floorPlanBBox = Rect2f::ZERO;
     std::string floorPlanSourceName{};
+    RawImage image = RawImage::WHITE4x4();
+
+    int sourceGuassianSigma = 3; // Must be odd? I think so
+    float sourceGuassianBeta = -0.75f;
+    float sourceGuassian = 1.75f;
+    float sourceContrast = 1.8f;
+    float minBinThreshold = 254.0f;
+    float maxBinThreshold = 255.0f;
+    float sourceBrightness = 30.0f;
+    float sourceSharpen = 0.0f;
+    float rescaleFactor = 0.01f; // This is the default value for a "normal" floorplan of 1000x1000px in which 1px = 1cm
+    float maxUShapeLengthRatio = 1.75f;
+    float minPerimeterLength = 1.2f;
+    int winningStrategy = -1;
+    float winningMargin = 0.0f;
+    std::vector<float> pixelCMFromOCR;
 };
 
 JSONDATA(HouseMaterialProperty, materialName, materialHash, colorName, colorHash, color)
@@ -38,14 +57,14 @@ JSONDATA(HouseMaterialProperty, materialName, materialHash, colorName, colorHash
                                                                                  color(color) {
         materialName = materialHash;
     }
-    HouseMaterialProperty( const char* materialHash) : materialHash(materialHash) {
+    HouseMaterialProperty( const char *materialHash ) : materialHash(materialHash) {
         materialName = materialHash;
     }
     std::string materialName{};
     std::string materialHash{};
     std::string colorName{};
     std::string colorHash{};
-    C4f color{C4f::WHITE};
+    C4f color{ C4f::WHITE };
 };
 
 #define BASE_ELEMENT ArchBase hash, type
@@ -55,7 +74,7 @@ struct ArchBase {
     HashEH hash = HashInc();
     uint64_t type = ArchType::GenericT; // ArchType type;
 
-    template <typename T>
+    template<typename T>
     [[nodiscard]] std::string hashFeature( const std::string& _base, T _sf ) const {
         return std::to_string(hash) + _base + std::to_string(_sf);
     }
@@ -127,7 +146,7 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
 
     Vector2f normal = V2fc::ZERO;
     Vector2f crossNormal = V2fc::ZERO;
-    C4f      color = C4f::WHITE;
+    C4f color = C4f::WHITE;
     uint64_t tag = 0;
     SequencePart sequencePart = 0;
     std::vector<V2f> zHeights;
@@ -432,11 +451,11 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     float minLightFittingDistance = 2.0f;
     float mArchiTravesWidth = 0.1f;
     float defaultCeilingThickness = 0.02f;
-    HouseMaterialProperty wallsMaterial{"plaster_ultra_fine_spray", C4f{ 0.93f, 0.91f, 0.89f, 1.0f }};
-    HouseMaterialProperty floorMaterial{ "european,ash"};
-    HouseMaterialProperty ceilingMaterial{"plaster_ultra_fine_spray"};
-    HouseMaterialProperty skirtingMaterial{S::WHITE_PBR, C4f::WHITE};
-    HouseMaterialProperty covingMaterial{S::WHITE_PBR, C4f::PASTEL_GRAYLIGHT};
+    HouseMaterialProperty wallsMaterial{ "plaster_ultra_fine_spray", C4f{ 0.93f, 0.91f, 0.89f, 1.0f } };
+    HouseMaterialProperty floorMaterial{ "european,ash" };
+    HouseMaterialProperty ceilingMaterial{ "plaster_ultra_fine_spray" };
+    HouseMaterialProperty skirtingMaterial{ S::WHITE_PBR, C4f::WHITE };
+    HouseMaterialProperty covingMaterial{ S::WHITE_PBR, C4f::PASTEL_GRAYLIGHT };
     std::string covingProfile = "coving,model1";
     std::string skirtingProfile = "skirting,kensington";
     std::string spotlightGeom = "spotlight_basic";

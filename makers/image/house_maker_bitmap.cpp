@@ -16,28 +16,21 @@
 #include "../../models/wall_service.hpp"
 #include <event_horizon/native/poly/poly_services.hpp>
 #include <eh_arch/models/arch_structural_service.hpp>
+#include <eh_arch/models/property_list.hpp>
+#include <core/file_manager.h>
 
 #include "machine_learning/hu_moments.hpp"
 
 #include "../../models/room_name_mapping.hpp"
 #include "opencvutils/cvmatutil.hpp"
 
-HMBBSData g_hmbBSData;
 SourceImages g_sourceImages;
 
 constexpr size_t NumStrategies = 3;
 
 namespace HouseMakerBitmap {
 
-    void updateHMB( const HMBBSData& bsdata ) {
-        g_hmbBSData = bsdata;
-    }
-
-    HMBBSData& HMB() {
-        return g_hmbBSData;
-    }
-
-    void generateSourceFileBC( const RawImage &_ri, SourceImages &si, const HMBBSData &bsdata ) {
+    void generateSourceFileBC( const RawImage &_ri, SourceImages &si, const HouseSourceData &bsdata ) {
         cv::Mat inputSourcePngImage;
 
         inputSourcePngImage = decodeRawImageIntoMat( _ri );
@@ -185,7 +178,7 @@ namespace HouseMakerBitmap {
         }
     }
 
-    cv::Mat maskedRoomMat( const SourceImages &si, HMBBSData &bsdata,
+    cv::Mat maskedRoomMat( const SourceImages &si, HouseSourceData &bsdata,
                            const std::vector<std::vector<Vector2f>> &ws,
                            const JMATH::Rect2f _bbox,
                            int resizeFactor, OCRThresholdMask useThreshold, cv::Mat &origMask ) {
@@ -248,7 +241,7 @@ namespace HouseMakerBitmap {
 //	return rmatMasked1PixelContour;
     }
 
-    void assignRoomTypeFromOcrString( HMBBSData &bsdata, const cv::Mat &maskedRoom,
+    void assignRoomTypeFromOcrString( HouseSourceData& bsdata, const cv::Mat &maskedRoom,
                                       const JMATH::Rect2f &_bboxCoving, std::vector<ASTypeT> &retType ) {
         std::string text = OCR::ocrTextRecognition( maskedRoom );
 
@@ -329,7 +322,7 @@ namespace HouseMakerBitmap {
 
     }
 
-    void roomOCRScan( const SourceImages &si, HMBBSData &bsdata, std::vector<RoomPreData> &rws, bool doScaling = true ) {
+    void roomOCRScan( const SourceImages &si, HouseSourceData &bsdata, std::vector<RoomPreData> &rws, bool doScaling = true ) {
         // Init OCR, dont worry, the OCR init will done only once per run...
         OCR::ocrInitEngine();
         // OCR for rooms
@@ -485,7 +478,7 @@ namespace HouseMakerBitmap {
         return false;
     }
 
-    void gatherGeneralTextInformations( HouseBSData *house, const SourceImages &si, HMBBSData &bsdata ) {
+    void gatherGeneralTextInformations( HouseBSData *house, const SourceImages &si, HouseSourceData& bsdata ) {
 //        float newSqm = -1.0f;
 //    std::vector<std::vector<Vector2f>> ws;
 //    cv::Mat origMat;
@@ -703,7 +696,7 @@ namespace HouseMakerBitmap {
     }
 
     std::shared_ptr<HouseBSData> bestScoringHouse( std::array<std::shared_ptr<HouseBSData>, NumStrategies> &houses,
-                                                   std::array<HMBScores, NumStrategies> &bsscores, HMBBSData &bsdata ) {
+                                                   std::array<HMBScores, NumStrategies> &bsscores, HouseSourceData& bsdata ) {
         std::shared_ptr<HouseBSData> house = nullptr;
         float maxScore = -1.0f;
         for ( auto si = 0u; si < NumStrategies; si++ ) {
@@ -726,7 +719,7 @@ namespace HouseMakerBitmap {
         return !isAtLeastARoomOk;
     }
 
-    std::shared_ptr<HouseBSData> runWallStrategies( const SourceImages &sourceImages, HMBBSData &bsdata ) {
+    std::shared_ptr<HouseBSData> runWallStrategies( const SourceImages &sourceImages, HouseSourceData& bsdata ) {
         PROFILE_BLOCK( "Wall strategies" );
 
         std::array<std::shared_ptr<HouseBSData>, NumStrategies> houses{};
@@ -744,63 +737,48 @@ namespace HouseMakerBitmap {
         return bestScoringHouse( houses, bsscores, bsdata );
     }
 
-    void addAndFinaliseRooms( HouseBSData *house, HMBBSData &bsdata, const SourceImages& sourceImages ) {
+    void addAndFinaliseRooms( HouseBSData *house, const SourceImages& sourceImages ) {
         for ( auto &f : house->mFloors ) {
             LOGRS("PreRooms count: " << f->rds.size() );
-            roomOCRScan( sourceImages, bsdata, f->rds );
+            roomOCRScan( sourceImages, house->sourceData, f->rds );
             FloorService::addRoomsFromData(f.get());
             FloorService::calcWhichRoomDoorsAndWindowsBelong(f.get(), house);
         }
     }
 
-    void setHouseSourceDataSection( HouseBSData* newHouse, const HMBBSData &bsdata ) {
-        newHouse->propertyId = bsdata.propertyId;
-        newHouse->name = bsdata.propertyId;
-        newHouse->sourceData.floorPlanSourceName = newHouse->name;
-        newHouse->sourceData.floorPlanSize = V2f{bsdata.image.width, bsdata.image.height};
-        newHouse->sourceData.floorPlanBBox = Rect2f{V2fc::ZERO, newHouse->sourceData.floorPlanSize} * bsdata.rescaleFactor;
-    }
-
-    std::shared_ptr<HouseBSData> newHouseFromHMB( HMBBSData &bsdata ) {
-        std::shared_ptr<HouseBSData> newHouse = std::make_shared<HouseBSData>();
-        setHouseSourceDataSection(newHouse.get(), bsdata );
-        newHouse->bbox = newHouse->sourceData.floorPlanBBox;
-        return newHouse;
-    }
-
-    const SourceImages& prepareImages() {
-        generateSourceFileBC( g_hmbBSData.image, g_sourceImages, g_hmbBSData );
+    const SourceImages& prepareImages( HouseBSData* newHouse ) {
+        generateSourceFileBC( newHouse->sourceData.image, g_sourceImages, newHouse->sourceData );
         return g_sourceImages;
     }
 
-    std::shared_ptr<HouseBSData> make( FurnitureMapStorage& furnitureMap ) {
+    std::shared_ptr<HouseBSData> make( HouseBSData* sourceHouse, FurnitureMapStorage& furnitureMap ) {
         PROFILE_BLOCK( "House service elaborate" );
 
-        prepareImages();
+        prepareImages(sourceHouse);
 
-        auto house = runWallStrategies( g_sourceImages, g_hmbBSData );
-        addAndFinaliseRooms( house.get(), g_hmbBSData, g_sourceImages );
+        auto house = runWallStrategies( g_sourceImages, sourceHouse->sourceData );
+        addAndFinaliseRooms( house.get(), g_sourceImages );
 
-//        gatherGeneralTextInformations( house.get(), g_sourceImages, g_hmbBSData );
-        rescale( house.get(), g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
+//        gatherGeneralTextInformations( house.get(), g_sourceImages, house->sourceData );
+        rescale( house.get(), house->sourceData.rescaleFactor, centimetersToMeters(house->sourceData.rescaleFactor) );
 
-        setHouseSourceDataSection(house.get(), g_hmbBSData );
+//        setHouseSourceDataSection(house.get(), house->sourceData );
         HouseService::guessFittings(house.get(), furnitureMap);
 
         return house;
     }
 
-    std::shared_ptr<HouseBSData> make( const SourceImages& sourceImages,  FurnitureMapStorage& furnitureMap  ) {
+    std::shared_ptr<HouseBSData> make(  HouseBSData* sourceHouse, const SourceImages& sourceImages,  FurnitureMapStorage& furnitureMap  ) {
         PROFILE_BLOCK( "House service elaborate" );
         g_sourceImages = sourceImages;
 
-        auto house = runWallStrategies( g_sourceImages, g_hmbBSData );
-        addAndFinaliseRooms( house.get(), g_hmbBSData, g_sourceImages );
+        auto house = runWallStrategies( g_sourceImages, sourceHouse->sourceData );
+        addAndFinaliseRooms( house.get(), g_sourceImages );
 
-//        gatherGeneralTextInformations( house.get(), g_sourceImages, g_hmbBSData );
-        rescale( house.get(), g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
+//        gatherGeneralTextInformations( house.get(), g_sourceImages, house->sourceData );
+        rescale( house.get(), house->sourceData.rescaleFactor, centimetersToMeters(house->sourceData.rescaleFactor) );
 
-        setHouseSourceDataSection(house.get(), g_hmbBSData );
+//        setHouseSourceDataSection(house.get(), house->sourceData );
         HouseService::guessFittings(house.get(), furnitureMap);
 
         return house;
@@ -810,11 +788,11 @@ namespace HouseMakerBitmap {
         PROFILE_BLOCK( "House from wall service elaborate walls housebsdata" );
         HouseService::clearHouseExcludingFloorsAndWalls( house );
 
-        rescale( house, 1.0f/g_hmbBSData.rescaleFactor, metersToCentimeters(1.0f/g_hmbBSData.rescaleFactor) );
+        rescale( house, 1.0f/house->sourceData.rescaleFactor, metersToCentimeters(1.0f/house->sourceData.rescaleFactor) );
         bool ac= true;
         guessDoorsWindowsRooms( house, g_sourceImages, ac );
-        addAndFinaliseRooms( house, g_hmbBSData, g_sourceImages );
-        rescale( house, g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
+        addAndFinaliseRooms( house, g_sourceImages );
+        rescale( house, house->sourceData.rescaleFactor, centimetersToMeters(house->sourceData.rescaleFactor) );
     }
 
     void makeAddDoor( HouseBSData* house, const FloorUShapesPair& fus ) {
@@ -823,10 +801,10 @@ namespace HouseMakerBitmap {
         FloorService::addDoorFromData( fus.f, house->doorHeight, *fus.us1, *fus.us2 );
         HouseService::clearHouseRooms( house );
 
-        rescale( house, 1.0f/g_hmbBSData.rescaleFactor, metersToCentimeters(1.0f/g_hmbBSData.rescaleFactor) );
+        rescale( house, 1.0f/house->sourceData.rescaleFactor, metersToCentimeters(1.0f/house->sourceData.rescaleFactor) );
         guessRooms( house );
-        addAndFinaliseRooms( house, g_hmbBSData, g_sourceImages );
-        rescale( house, g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
+        addAndFinaliseRooms( house, g_sourceImages );
+        rescale( house, house->sourceData.rescaleFactor, centimetersToMeters(house->sourceData.rescaleFactor) );
     }
 
     void makeFromSwapDoorOrWindow( HouseBSData* house, HashEH hash ) {
@@ -834,14 +812,27 @@ namespace HouseMakerBitmap {
         HouseService::swapWindowOrDoor( house, hash );
         HouseService::clearHouseRooms( house );
 
-        rescale( house, 1.0f/g_hmbBSData.rescaleFactor, metersToCentimeters(1.0f/g_hmbBSData.rescaleFactor) );
+        rescale( house, 1.0f/house->sourceData.rescaleFactor, metersToCentimeters(1.0f/house->sourceData.rescaleFactor) );
         guessRooms( house );
-        addAndFinaliseRooms( house, g_hmbBSData, g_sourceImages );
-        rescale( house, g_hmbBSData.rescaleFactor, centimetersToMeters(g_hmbBSData.rescaleFactor) );
+        addAndFinaliseRooms( house, g_sourceImages );
+        rescale( house, house->sourceData.rescaleFactor, centimetersToMeters(house->sourceData.rescaleFactor) );
     }
 
-    std::shared_ptr<HouseBSData> makeEmpty() {
-        return newHouseFromHMB( g_hmbBSData );
+    std::shared_ptr<HouseBSData> makeEmpty( const PropertyListing& property ) {
+        std::shared_ptr<HouseBSData> newHouse = std::make_shared<HouseBSData>();
+        newHouse->sourceData.image = RawImage{ FM::readLocalFileC("/home/dado/media/media/" + property.floorplanUrl) };
+        newHouse->propertyId = property._id;
+        newHouse->name = property.addressLine1 + property.addressLine2 + property.name;
+        newHouse->sourceData.floorPlanSize = V2f{newHouse->sourceData.image.width, newHouse->sourceData.image.height};
+        newHouse->sourceData.floorPlanBBox = Rect2f{V2fc::ZERO, newHouse->sourceData.floorPlanSize} * newHouse->sourceData.rescaleFactor;
+        newHouse->bbox = newHouse->sourceData.floorPlanBBox;
+        HouseMakerBitmap::prepareImages( newHouse.get() );
+
+        return newHouse;
+    }
+
+    const SourceImages& getSourceImages() {
+        return g_sourceImages;
     }
 
 }

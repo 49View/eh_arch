@@ -22,6 +22,7 @@
 
 namespace cv { class Mat; };
 namespace JMATH { class Rect2f; };
+struct PropertyListing;
 
 enum OCRThresholdMask {
     True, False
@@ -33,31 +34,6 @@ struct HMBScores {
     float roomScore = 0.0f;
     bool allRoomsAreFullyClosed = true;
     int mainWallStrategyIndex = 1;
-};
-
-JSONDATA(HMBBSData, propertyId, sourceGuassianSigma, sourceGuassianBeta, sourceGuassian, sourceContrast, sourceBrightness,
-         minBinThreshold, maxBinThreshold, sourceSharpen, rescaleFactor, maxUShapeLengthRatio,
-         minPerimeterLength, winningStrategy, winningMargin, pixelCMFromOCR)
-
-    std::string propertyId{};
-    std::string floorplanUrl{};
-    RawImage image = RawImage::WHITE4x4();
-    int sourceGuassianSigma = 3; // Must be odd? I think so
-    float sourceGuassianBeta = -0.75f;
-    float sourceGuassian = 1.75f;
-    float sourceContrast = 1.8f;
-    float minBinThreshold = 254.0f;
-    float maxBinThreshold = 255.0f;
-    float sourceBrightness = 30.0f;
-    float sourceSharpen = 0.0f;
-    float rescaleFactor = 0.01f; // This is the default value for a "normal" floorplan of 1000x1000px in which 1px = 1cm
-    float maxUShapeLengthRatio = 1.75f;
-    float minPerimeterLength = 1.2f;
-    int winningStrategy = -1;
-    float winningMargin = 0.0f;
-    std::vector<float> pixelCMFromOCR;
-
-    HMBBSData( const std::string& pid, const RawImage& image ) : propertyId(pid), image(image) {}
 };
 
 struct RoomOCR {
@@ -82,13 +58,12 @@ struct WallsEvaluation {
 };
 
 namespace HouseMakerBitmap {
-    HMBBSData& HMB();
-    void updateHMB( const HMBBSData& bsdata );
-    const SourceImages& prepareImages();
+    const SourceImages& getSourceImages();
+    const SourceImages& prepareImages( HouseBSData *newHouse );
     void rescale( HouseBSData *house, float rescaleFactor, float floorPlanRescaleFactor );
-    std::shared_ptr<HouseBSData> makeEmpty();
-    std::shared_ptr<HouseBSData> make( const SourceImages& sourceImages, FurnitureMapStorage& furnitureMap  );
-    std::shared_ptr<HouseBSData> make( FurnitureMapStorage& furnitureMap );
+    std::shared_ptr<HouseBSData> makeEmpty( const PropertyListing& property );
+    std::shared_ptr<HouseBSData> make( HouseBSData* sourceHouse, const SourceImages& sourceImages, FurnitureMapStorage& furnitureMap );
+    std::shared_ptr<HouseBSData> make( HouseBSData* sourceHouse, FurnitureMapStorage& furnitureMap );
     void makeFromWalls( HouseBSData *house );
     void makeAddDoor( HouseBSData *house, const FloorUShapesPair& fus );
     void makeFromSwapDoorOrWindow( HouseBSData *house, HashEH hash );
