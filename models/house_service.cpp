@@ -263,7 +263,7 @@ std::shared_ptr<RoomBSData> HouseService::getRoomOnFloor( std::shared_ptr<HouseB
 	return _house->mFloors[floorIndex]->rooms[roomIndex];
 }
 
-bool HouseService::whichRoomAmI( std::shared_ptr<HouseBSData> _house, const Vector2f& _pos, std::shared_ptr<RoomBSData>& outRoom ) {
+bool HouseService::whichRoomAmI( HouseBSData* _house, const Vector2f& _pos, RoomBSData* outRoom ) {
 	for ( const auto& f : _house->mFloors ) {
 		if ( FloorService::whichRoomAmI( f.get(), _pos, outRoom ) ) {
 			return true;

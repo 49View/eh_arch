@@ -134,7 +134,7 @@ namespace FloorService {
                         uint32_t filterFlags = 0xffffffff );
     bool isInsideRoomRDS( const V2f& i, const std::vector<RoomPreData>& rds );
     bool isIndexInUShape( size_t t, WallBSData *w );
-    bool whichRoomAmI( const FloorBSData *f, const Vector2f& _pos, std::shared_ptr<RoomBSData>& outRoom );
+    bool whichRoomAmI( const FloorBSData *f, const Vector2f& _pos, RoomBSData* outRoom );
     std::vector<RoomBSData*> roomsIntersectingBBox( FloorBSData *f, const Rect2f& bbox, bool earlyOut );
     int64_t findWallIndex( const FloorBSData *f, int64_t hash );
     bool findWallAt( const FloorBSData *f, const Vector2f& matPos, std::vector<ArchStructural *>& ret );
