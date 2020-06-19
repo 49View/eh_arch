@@ -744,6 +744,9 @@ namespace HouseMakerBitmap {
             FloorService::addRoomsFromData(f.get());
             FloorService::calcWhichRoomDoorsAndWindowsBelong(f.get(), house);
         }
+        erase_if( house->mFloors, [](const auto& elem) -> bool {
+            return !FloorService::hasAnyWall(elem.get());
+        });
     }
 
     const SourceImages& prepareImages( HouseBSData* newHouse ) {
