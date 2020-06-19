@@ -1059,15 +1059,14 @@ bool FloorService::findRoomAt( const FloorBSData *f, const Vector2f& matPos, std
     return hasBeenFound;
 }
 
-bool FloorService::whichRoomAmI( const FloorBSData *f, const Vector2f& _pos, RoomBSData* outRoom ) {
+std::optional<RoomBSData*> FloorService::whichRoomAmI( const FloorBSData *f, const Vector2f& _pos ) {
     for ( const auto& r : f->rooms ) {
         bool isInHere = ArchStructuralService::isPointInside(r.get(), _pos);
         if ( isInHere ) {
-            outRoom = r.get();
-            return true;
+            return r.get();
         }
     }
-    return false;
+    return std::nullopt;
 }
 
 int64_t FloorService::findWallIndex( const FloorBSData *f, int64_t _hash ) {

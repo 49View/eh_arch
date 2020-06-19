@@ -64,8 +64,7 @@ namespace HouseService {
     std::vector<std::tuple<std::string, int64_t>> getRooms( std::shared_ptr<HouseBSData> _house );
     std::shared_ptr<RoomBSData> getRoomByName( std::shared_ptr<HouseBSData> _house, const std::string& roomName );
     std::shared_ptr<RoomBSData> getRoomOnFloor( std::shared_ptr<HouseBSData> _house, int floorIndex, int roomIndex );
-    bool
-    whichRoomAmI( HouseBSData* _house, const Vector2f& _pos, RoomBSData* outRoom );
+    std::optional<RoomBSData*> whichRoomAmI( HouseBSData* _house, const Vector2f& _pos );
     Vector2f centrePointOfBiggestRoom( std::shared_ptr<HouseBSData> _house );
     std::optional<uint64_t> findRoomArchSegmentWithWallHash( HouseBSData *_house, HashEH hashToFind, int64_t index );
 

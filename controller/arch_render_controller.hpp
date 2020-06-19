@@ -62,6 +62,15 @@ public:
     bool isFloorPlanRenderMode2d() const;
     bool isFloorPlanRenderModeDebugSelection() const;
 
+    void addToSelectionList( HashEH _hash ) {
+        selection.addToSelectionList(ArchSelectionElement{ _hash} );
+    }
+
+    void setSelectionList( HashEH _hash ) {
+        selection.clear();
+        selection.addToSelectionList(ArchSelectionElement{ _hash} );
+    }
+
     template<typename T>
     void addToSelectionList( const T& _elem, const V2f& is, SelectionFlagsT flags = SelectionFlags::None ) {
         selection.addToSelectionList({ _elem, is, flags });

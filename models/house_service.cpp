@@ -263,13 +263,13 @@ std::shared_ptr<RoomBSData> HouseService::getRoomOnFloor( std::shared_ptr<HouseB
 	return _house->mFloors[floorIndex]->rooms[roomIndex];
 }
 
-bool HouseService::whichRoomAmI( HouseBSData* _house, const Vector2f& _pos, RoomBSData* outRoom ) {
+std::optional<RoomBSData*> HouseService::whichRoomAmI( HouseBSData* _house, const Vector2f& _pos ) {
 	for ( const auto& f : _house->mFloors ) {
-		if ( FloorService::whichRoomAmI( f.get(), _pos, outRoom ) ) {
-			return true;
+		if ( auto ret = FloorService::whichRoomAmI( f.get(), _pos ); ret ) {
+			return ret;
 		}
 	}
-	return false;
+	return std::nullopt;
 }
 
 void HouseService::removeArch( HouseBSData* house, int64_t hashToRemove ) {
