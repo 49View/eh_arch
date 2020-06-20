@@ -18,6 +18,7 @@
 #include <core/math/quaternion.h>
 #include <core/hashing/incremental_hash.hpp>
 #include <core/htypes_shared.hpp>
+#include <core/resources/material_and_color_property.hpp>
 #include <core/serialization.hpp>
 #include <core/names.hpp>
 
@@ -50,21 +51,6 @@ JSONDATA(HouseSourceData, floorPlanSize, floorPlanBBox, floorPlanSourceName, sou
     int winningStrategy = -1;
     float winningMargin = 0.0f;
     std::vector<float> pixelCMFromOCR;
-};
-
-JSONDATA(HouseMaterialProperty, materialName, materialHash, colorName, colorHash, color)
-    HouseMaterialProperty( const std::string& materialHash, const C4f& color ) : materialHash(materialHash),
-                                                                                 color(color) {
-        materialName = materialHash;
-    }
-    HouseMaterialProperty( const char *materialHash ) : materialHash(materialHash) {
-        materialName = materialHash;
-    }
-    std::string materialName{};
-    std::string materialHash{};
-    std::string colorName{};
-    std::string colorHash{};
-    C4f color{ C4f::WHITE };
 };
 
 #define BASE_ELEMENT ArchBase hash, type
@@ -394,8 +380,8 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     Vector2f longDrawersSize = V2f{ 0.6f, 0.9f };
 
     // Materials
-    HouseMaterialProperty worktopMaterial = "marble,anemone";
-    HouseMaterialProperty unitsMaterial = "wood,beech";
+    MaterialAndColorProperty worktopMaterial = "marble,anemone";
+    MaterialAndColorProperty unitsMaterial = "wood,beech";
     std::string sinkModel = "ktc,sink,double,chrome";
     std::string ovenPanelModel = "ktc,oven,flat";
     std::string microwaveModel = "ktc,microwave";
@@ -451,11 +437,11 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     float minLightFittingDistance = 2.0f;
     float mArchiTravesWidth = 0.1f;
     float defaultCeilingThickness = 0.02f;
-    HouseMaterialProperty wallsMaterial{ "plaster_ultra_fine_spray", C4f{ 0.93f, 0.91f, 0.89f, 1.0f } };
-    HouseMaterialProperty floorMaterial{ "european,ash" };
-    HouseMaterialProperty ceilingMaterial{ "plaster_ultra_fine_spray" };
-    HouseMaterialProperty skirtingMaterial{ S::WHITE_PBR, C4f::WHITE };
-    HouseMaterialProperty covingMaterial{ S::WHITE_PBR, C4f::PASTEL_GRAYLIGHT };
+    MaterialAndColorProperty wallsMaterial{ "plaster_ultra_fine_spray", C4f{ 0.93f, 0.91f, 0.89f, 1.0f } };
+    MaterialAndColorProperty floorMaterial{ "european,ash" };
+    MaterialAndColorProperty ceilingMaterial{ "plaster_ultra_fine_spray" };
+    MaterialAndColorProperty skirtingMaterial{ S::WHITE_PBR, C4f::WHITE };
+    MaterialAndColorProperty covingMaterial{ S::WHITE_PBR, C4f::PASTEL_GRAYLIGHT };
     std::string covingProfile = "coving,model1";
     std::string skirtingProfile = "skirting,kensington";
     std::string spotlightGeom = "spotlight_basic";
