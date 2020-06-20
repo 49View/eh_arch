@@ -14,3 +14,4 @@ Profile loadCovingProfile();
 Profile loadDoorFrameProfile( const float _architraveWidth );
 Profile loadInnerDoorFrameProfile( float thickness, const Vector2f& bump, float trim, float doorGeomThickness );
 Profile loadKitchenWorktopProfile( const Vector2f& size, float bevelAmount = 0.0f );
+void makePicture();

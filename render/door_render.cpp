@@ -240,6 +240,19 @@ namespace DoorRender {
                            V3f{ 0.0f, doorPivot.yz() });
     }
 
+    std::vector<QuadVector3fNormal> createQuads( const V2f& wss ) {
+        std::vector<QuadVector3fNormal> wallQuads;
+
+        V3f v1 = XZY::C(-half(wss.x()), 0.0f, 0.0f);
+        V3f v2 = XZY::C(half(wss.x()), 0.0f, 0.0f);
+        V3f v3 = v1 + V3f::UP_AXIS * wss.y();
+        V3f v4 = v2 + V3f::UP_AXIS * wss.y();
+        auto quad = QuadVector3f{ { v1, v2, v4, v3 } };
+        wallQuads.emplace_back(QuadVector3fNormal{ quad, XZY::C(V2fc::Y_AXIS, 0.0f) });
+        return wallQuads;
+    }
+
+
     auto addDoorGeom( SceneGraph& sg, GeomSP mRootH, const DoorBSData *d ) {
         auto child = mRootH->addChildren("ActualDoor");
         englishDoor(sg, child, d->doorSize, d->doorGeomPivot, d->doorGeomThickness);

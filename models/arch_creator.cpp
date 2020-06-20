@@ -70,3 +70,13 @@ Profile loadDoorFrameProfile( const float _architraveWidth ) {
 
     return doorFrame_profile;
 }
+
+void makePicture() {
+//    if ( auto architrave_ovolo = sg.PL("architrave,ovolo"); architrave_ovolo ) {
+//        auto fverts = utilGenerateFlatRect(Vector2f(d->width*0.5f, d->height*0.5f),
+//                                           WindingOrder::CCW,
+//                                           PivotPointPosition::BottomCenter);
+//        sg.GB<GT::Follower>(architrave_ovolo, fverts, mRootH, V3f::Y_AXIS, FollowerFlags::WrapPath );
+//        sg.GB<GT::Mesh>(QuadVector3fNormal{ QuadVector3f{ { fverts[0], fverts[3], fverts[2], fverts[1] } }, XZY::C(V2fc::Y_AXIS, 0.0f) }, mRootH, V3f::Y_AXIS, C4f::GOLD );
+//    }
+}
