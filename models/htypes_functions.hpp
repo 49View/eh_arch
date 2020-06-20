@@ -1,0 +1,26 @@
+//
+// Created by dado on 20/06/2020.
+//
+
+#pragma once
+
+#include "htypes.hpp"
+#include "house_bsdata.hpp"
+#include <core/resources/material_and_color_property.hpp>
+
+template<typename R>
+inline static MaterialAndColorProperty *getCommonMaterialChangeMapping( GHTypeT key, R *resource ) {
+    if constexpr ( std::is_same_v<R, RoomBSData> ) {
+        if ( key == GHType::Wall ) return &resource->wallsMaterial;
+        if ( key == GHType::Floor ) return &resource->floorMaterial;
+        if ( key == GHType::Skirting ) return &resource->skirtingMaterial;
+        if ( key == GHType::Coving ) return &resource->covingMaterial;
+        if ( key == GHType::Ceiling ) return &resource->ceilingMaterial;
+        if ( key == GHType::KitchenWorktop ) return &resource->kitchenData.worktopMaterial;
+        if ( key == GHType::KitchenCabinet ) return &resource->kitchenData.unitsMaterial;
+    }
+    return nullptr;
+}
+
+std::string GHTypeToString( uint64_t elem );
+std::string defaultMaterialAndColorPropertyPresetsForGHType( GHTypeT key );

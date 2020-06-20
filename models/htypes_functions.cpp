@@ -3,6 +3,7 @@
 //
 
 #include "htypes.hpp"
+#include "htypes_functions.hpp"
 #include <core/util.h>
 
 std::string GHTypeToString( uint64_t elem ) {
@@ -36,6 +37,24 @@ std::string GHTypeToString( uint64_t elem ) {
     if ( checkBitWiseFlag(elem, GHType::PowerSocket) ) ret+="PowerSocket";
     if ( checkBitWiseFlag(elem, GHType::LightSwitch) ) ret+="LightSwitch";
     if ( checkBitWiseFlag(elem, GHType::Room) ) ret+="Room";
+
+    return ret;
+}
+
+std::string defaultMaterialAndColorPropertyPresetsForGHType( GHTypeT key ) {
+    std::string ret{};
+
+    auto append = [](const std::string& input) -> std::string {
+        return input.empty() ? input : "+" + input;
+    };
+
+    if ( checkBitWiseFlag( key, GHType::KitchenWorktop) )   ret+= append( "granite+marble");
+    if ( checkBitWiseFlag( key, GHType::KitchenCabinet) )   ret+= append( "wood+metal");
+    if ( checkBitWiseFlag( key, GHType::Wall) )             ret+= append( "plaster");
+    if ( checkBitWiseFlag( key, GHType::Floor) )            ret+= append( "wood+tiles+carpet");
+    if ( checkBitWiseFlag( key, GHType::Skirting) )         ret+= append( "wood+tiles");
+    if ( checkBitWiseFlag( key, GHType::Coving) )           ret+= append( "wood+tiles");
+    if ( checkBitWiseFlag( key, GHType::Ceiling) )          ret+= append( "plaster");
 
     return ret;
 }

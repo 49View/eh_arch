@@ -15,8 +15,8 @@
 #include <tuple>
 #include <core/math/vector2f.h>
 
-const static float inch = 2.54f;
-const static float inch1o = 1.0f / 2.54f;
+constexpr float inch = 2.54f;
+constexpr float inch1o = 1.0f / 2.54f;
 struct ArchStructural;
 struct FloorBSData;
 struct UShape;
@@ -202,7 +202,9 @@ struct ArchSubType {
 
 using ArchSubTypeT = int64_t;
 
+// ************************************************************
 // Warning: any changes here needs to update **GHTypeToString**
+// ************************************************************
 namespace GHType {
 	const static uint64_t None = 0;
 	const static uint64_t Generic = 1;
@@ -231,9 +233,10 @@ namespace GHType {
 	const static uint64_t Locator = 1 << 23;
 	const static uint64_t PowerSocket = 1 << 24;
 	const static uint64_t LightSwitch = 1 << 25;
-	const static uint64_t Room = 1 << 26;
+	constexpr uint64_t Room = 1 << 26;
 };
+// ************************************************************
+// Warning: any changes here needs to update **GHTypeToString**
+// ************************************************************
 
 using GHTypeT = uint64_t;
-
-std::string GHTypeToString( uint64_t elem );
