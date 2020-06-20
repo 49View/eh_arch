@@ -57,6 +57,7 @@ namespace HOD { // HighOrderDependency
                 // Will load Kitchen and bathroom sets here
                 ret.addDep(sg, ResourceGroup::Material, room->kitchenData.worktopMaterial.materialHash);
                 ret.addDep(sg, ResourceGroup::Material, room->kitchenData.unitsMaterial.materialHash);
+                ret.addDep(sg, ResourceGroup::Material, room->kitchenData.backSplashMaterial.materialHash);
                 ret.addDep(sg, ResourceGroup::Geom, room->kitchenData.sinkModel);
                 ret.addDep(sg, ResourceGroup::Geom, room->kitchenData.ovenPanelModel);
                 ret.addDep(sg, ResourceGroup::Geom, room->kitchenData.microwaveModel);

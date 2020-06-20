@@ -22,6 +22,7 @@ inline static MaterialAndColorProperty *getCommonMaterialChangeMapping( GHTypeT 
         if ( KitchenRoomService::hasKitchen( resource ) ) {
             if ( key == GHType::KitchenWorktop ) return &resource->kitchenData.worktopMaterial;
             if ( key == GHType::KitchenCabinet ) return &resource->kitchenData.unitsMaterial;
+            if ( key == GHType::KitchenBackSplash ) return &resource->kitchenData.backSplashMaterial;
         }
     }
     return nullptr;

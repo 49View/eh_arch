@@ -29,6 +29,7 @@ std::string GHTypeToString( uint64_t elem ) {
     if ( checkBitWiseFlag(elem, GHType::WallTilesInternal) ) ret+="WallTilesInternal";
     if ( checkBitWiseFlag(elem, GHType::KitchenWorktop) ) ret+="KitchenWorktop";
     if ( checkBitWiseFlag(elem, GHType::KitchenCabinet) ) ret+="KitchenCabinet";
+    if ( checkBitWiseFlag(elem, GHType::KitchenBackSplash) ) ret+="KitchenBackSplash";
     if ( checkBitWiseFlag(elem, GHType::KitchenSink) ) ret+="KitchenSink";
     if ( checkBitWiseFlag(elem, GHType::KitchenOven) ) ret+="KitchenOven";
     if ( checkBitWiseFlag(elem, GHType::KitchenHob) ) ret+="KitchenHob";
@@ -48,8 +49,9 @@ std::string defaultMaterialAndColorPropertyPresetsForGHType( GHTypeT key ) {
         return input.empty() ? input : "+" + input;
     };
 
-    if ( checkBitWiseFlag( key, GHType::KitchenWorktop) )   ret+= append( "granite+marble");
-    if ( checkBitWiseFlag( key, GHType::KitchenCabinet) )   ret+= append( "wood+metal");
+    if ( checkBitWiseFlag( key, GHType::KitchenWorktop) )    ret+= append( "granite+marble");
+    if ( checkBitWiseFlag( key, GHType::KitchenCabinet) )    ret+= append( "wood+metal");
+    if ( checkBitWiseFlag( key, GHType::KitchenBackSplash) ) ret+= append( "wood+metal");
     if ( checkBitWiseFlag( key, GHType::Wall) )             ret+= append( "plaster");
     if ( checkBitWiseFlag( key, GHType::Floor) )            ret+= append( "wood+tiles+carpet");
     if ( checkBitWiseFlag( key, GHType::Skirting) )         ret+= append( "wood+tiles");

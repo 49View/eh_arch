@@ -356,8 +356,8 @@ enum KitchenShape {
 JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath, kitchenTopUnitsPath, kitchenDrawers,
          kitchenWorktopDepth, kitchenWorktopHeight, worktopThickness, skirtingHeight, kitchenSkirtingRecess,
          kitchenUnitsRecess, kitchenTopUnitsRecess, drawersPadding, drawersThickness, skirtingThickness,
-         topUnitsCeilingGap, longDrawersSize, worktopMaterial, unitsMaterial, sinkModel, ovenPanelModel, microwaveModel,
-         cooktopModel, fridgeModel, extractorHoodModel, drawersHandleModel,
+         topUnitsCeilingGap, longDrawersSize, worktopMaterial, unitsMaterial, backSplashMaterial, sinkModel,
+         ovenPanelModel, microwaveModel, cooktopModel, fridgeModel, extractorHoodModel, drawersHandleModel,
          kitchenIndexMainWorktop)
 
     std::vector<KitchenPath> kitchenWorktopPath;
@@ -383,6 +383,7 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     // Materials
     MaterialAndColorProperty worktopMaterial = "marble,anemone";
     MaterialAndColorProperty unitsMaterial = "wood,beech";
+    MaterialAndColorProperty backSplashMaterial = "yule,flemish,tiles";
     std::string sinkModel = "ktc,sink,double,chrome";
     std::string ovenPanelModel = "ktc,oven,flat";
     std::string microwaveModel = "ktc,microwave";
