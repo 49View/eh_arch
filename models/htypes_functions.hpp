@@ -6,6 +6,7 @@
 
 #include "htypes.hpp"
 #include "house_bsdata.hpp"
+#include "kitchen_room_service.hpp"
 #include <core/resources/material_and_color_property.hpp>
 
 template<typename R>
@@ -16,8 +17,12 @@ inline static MaterialAndColorProperty *getCommonMaterialChangeMapping( GHTypeT 
         if ( key == GHType::Skirting ) return &resource->skirtingMaterial;
         if ( key == GHType::Coving ) return &resource->covingMaterial;
         if ( key == GHType::Ceiling ) return &resource->ceilingMaterial;
-        if ( key == GHType::KitchenWorktop ) return &resource->kitchenData.worktopMaterial;
-        if ( key == GHType::KitchenCabinet ) return &resource->kitchenData.unitsMaterial;
+
+        // This can be optional
+        if ( KitchenRoomService::hasKitchen( resource ) ) {
+            if ( key == GHType::KitchenWorktop ) return &resource->kitchenData.worktopMaterial;
+            if ( key == GHType::KitchenCabinet ) return &resource->kitchenData.unitsMaterial;
+        }
     }
     return nullptr;
 }

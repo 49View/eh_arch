@@ -346,4 +346,8 @@ namespace KitchenRoomService {
         w->kitchenData.kitchenTopUnitsPath.clear();
         w->kitchenData.kitchenDrawers.clear();
     }
+
+    bool hasKitchen( const RoomBSData *w ) {
+        return !w->kitchenData.kitchenWorktopPath.empty();
+    }
 }
