@@ -202,6 +202,7 @@ struct ArchSubType {
 
 using ArchSubTypeT = int64_t;
 
+// Warning: any changes here needs to update **GHTypeToString**
 namespace GHType {
 	const static uint64_t None = 0;
 	const static uint64_t Generic = 1;
@@ -232,3 +233,7 @@ namespace GHType {
 	const static uint64_t LightSwitch = 1 << 25;
 	const static uint64_t Room = 1 << 26;
 };
+
+using GHTypeT = uint64_t;
+
+std::string GHTypeToString( uint64_t elem );
