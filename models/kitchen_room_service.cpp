@@ -314,6 +314,7 @@ namespace KitchenRoomService {
     void createMasterPathSingle( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
         KitchenData& kd = w->kitchenData;
         auto ls = RoomService::segmentAtIndex( w, kd.kitchenIndexMainWorktop );
+        ls->wallMaterial = "yule,flemish,tiles";
         addWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
         addTopWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
     }

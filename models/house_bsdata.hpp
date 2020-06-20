@@ -120,7 +120,7 @@ struct TwoUShapesBased : public ArchStructural {
 };
 
 JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, crossNormal, color, tag, sequencePart,
-         zHeights)
+         zHeights, wallMaterial)
     int32_t iFloor = 0;
     int32_t iWall = 0;
     int32_t iIndex = 0;
@@ -136,6 +136,7 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     uint64_t tag = 0;
     SequencePart sequencePart = 0;
     std::vector<V2f> zHeights;
+    MaterialAndColorProperty wallMaterial{};
 
     friend std::ostream& operator<<( std::ostream& os, const ArchSegment& segment ) {
         os << "iFloor: " << segment.iFloor << " iWall: " << segment.iWall << " iIndex: " << segment.iIndex

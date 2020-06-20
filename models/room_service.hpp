@@ -340,6 +340,7 @@ namespace RoomService {
 
     void furnish( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns );
     const ArchSegment *getWallSegmentFor( RoomBSData *r, WSLO wslo, uint32_t _exactIndex = 0 );
+    ArchSegment *segmentAtIndex( RoomBSData *r, uint32_t _index );
 
     void clearFurniture( RoomBSData *r );
     [[nodiscard]] bool addFurniture( FloorBSData *f, RoomBSData *r, FittedFurniture& ff );

@@ -98,6 +98,11 @@ namespace RoomService {
         return nullptr;
     }
 
+    ArchSegment *segmentAtIndex( RoomBSData *r, uint32_t _index ) {
+        if ( r->mWallSegmentsSorted.size() <= _index ) return nullptr;
+        return &r->mWallSegmentsSorted[_index];
+    }
+
     const ArchSegment *segmentAtIndex( const RoomBSData *r, uint32_t _index ) {
         if ( r->mWallSegmentsSorted.size() <= _index ) return nullptr;
         return &r->mWallSegmentsSorted[_index];
@@ -729,7 +734,6 @@ namespace RoomService {
 
     void furnishKitchen( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
         r->floorMaterial = "parquet,american";
-        r->wallsMaterial = "yule,flemish,tiles";
         KitchenRoomService::createKitchen(f, r, furns);
     }
 
