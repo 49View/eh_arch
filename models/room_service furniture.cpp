@@ -373,7 +373,7 @@ namespace RoomService {
     }
 
     bool placeWallAligned( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff,
-                           const WSLO wslo, float extraSlack, uint32_t _exactIndex ) {
+                           const WSLO wslo, float extraSlack, uint32_t _exactIndex, float _heightOffset ) {
 
         auto ls = getWallSegmentFor(r, wslo, _exactIndex);
         if ( !ls ) return false;
@@ -381,6 +381,7 @@ namespace RoomService {
 
         Vector2f offset = ls->normal * ( ( _ff.size.depth() * 0.5f ) + skirtingDepth(r) + extraSlack );
         _ff.xyLocation = ls->middle + offset;
+        _ff.heightOffset = _heightOffset;
         _ff.rotation = Quaternion{ RoomService::furnitureAngleFromWall(ls), V3f::UP_AXIS };
         _ff.widthNormal = ls->crossNormal;
         _ff.depthNormal = ls->normal;
@@ -475,6 +476,19 @@ namespace RoomService {
             completed &= RS::placeAround(f, r, furns.spawn(fpd.getBase(1)), mainF, PPP::BottomCenter, fpd.getSlack());
         }
         completed &= RS::placeDecorations(f, r, mainF, furns, fpd);
+        return completed;
+    }
+
+    bool
+    cplaceSetBestFitHanged( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd ) {
+        FT main = fpd.getBase(0);
+        WSLO refWall = fpd.getWallSegmentId().type;
+        bool completed = true;
+        auto mainF = furns.spawn(main);
+        for ( auto rwIndex = 0UL; rwIndex < r->mWallSegmentsSorted.size(); rwIndex++ ) {
+            completed = RS::placeWallAligned(f, r, mainF, refWall, fpd.getSlack(0).x(), rwIndex, r->height*0.5f);
+            if ( completed ) break;
+        }
         return completed;
     }
 
@@ -611,6 +625,14 @@ namespace RoomService {
         r->mFittedFurniture.clear();
     }
 
+    void furnishHallway( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
+        FurnitureRuleScript ruleScript;
+        V3f cornerSlack{ 0.05f, 0.0f, 0.0f };
+        ruleScript.clear();
+        ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::FRBestFitHanged), FurnitureRefs{{ FTH::FT_Picture }} });
+        RS::runRuleScript(f, r, furns, ruleScript);
+    }
+
     void furnishBedroom( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
         r->floorMaterial = {"carpet,grey", C4f::WHITE};
         FurnitureRuleScript ruleScript;
@@ -731,6 +753,9 @@ namespace RoomService {
             for ( const auto rtype : prioritySort ) {
                 switch ( rtype ) {
                     case ASType::GenericRoom:
+                        break;
+                    case ASType::Hallway:
+                        furnishHallway(f, r, furns);
                         break;
                     case ASType::Bathroom:
                         furnishBathroom(f, r, furns);

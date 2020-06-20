@@ -346,7 +346,7 @@ namespace RoomService {
     bool placeManually( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff, const V2f& _pos, const Quaternion& _rot,
                         const V2f& _widthNormal, const V2f& _depthNormal );
     [[nodiscard]] bool placeWallAligned( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff,
-                                         WSLO wslo, float extraSlack = 0.0f, uint32_t _exactIndex = 0 );
+                                         WSLO wslo, float extraSlack = 0.0f, uint32_t _exactIndex = 0, float _heightOffset = 0.0f );
     [[nodiscard]] bool placeWallCorner( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff,
                                         const ArchSegment *ls,
                                         const V2f& slack = V2fc::ZERO,
@@ -374,6 +374,8 @@ namespace RoomService {
                                                const FurniturePlacementRule& fpd );
     [[nodiscard]] bool cplaceSetBestFit( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns,
                                          const FurniturePlacementRule& fpd );
+    [[nodiscard]] bool cplaceSetBestFitHanged( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns,
+                                         const FurniturePlacementRule& fpd );
     [[nodiscard]] bool cplacedFirstAvailableCorner( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns,
                                                     const FurniturePlacementRule& fpd );
     [[nodiscard]] bool
@@ -386,6 +388,7 @@ namespace RoomService {
             cplaceSetAlignedAtCorner,
             cplaceSetAlignedMiddle,
             cplaceSetBestFit,
+            cplaceSetBestFitHanged,
             cplacedFirstAvailableCorner,
             cplaceMiddleOfRoom,
     };
@@ -395,6 +398,7 @@ namespace RoomService {
         SetAlignedAtCorner,
         SetAlignedMiddle,
         FRBestFit,
+        FRBestFitHanged,
         FRFirstAvailableCorner,
         MiddleOfRoom,
     };
