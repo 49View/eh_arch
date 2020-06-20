@@ -53,7 +53,7 @@ namespace FloorRender {
     void make3dGeometry( SceneGraph &sg, const FloorBSData *f, HouseRenderContainer &ret ) {
 
         // External walls of this floor
-        WallRender::renderWalls( sg, f->perimeterArchSegments, f->externalWallsMaterial, f->externalWallsColor );
+        WallRender::renderWalls( sg, f->perimeterArchSegments, f->externalWallsMaterial );
         // Ceilings
 //        ret.ceiling = sg.GB<GT::Extrude>( PolyOutLine{ XZY::C( f->mPerimeterSegments ), V3f::UP_AXIS, 0.1f },
 //                                          V3f{ V3f::UP_AXIS * f->height },

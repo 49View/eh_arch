@@ -17,12 +17,12 @@ struct RDSPreMult;
 class ArchRenderController;
 struct WallBSData;
 struct ArchSegment;
+struct MaterialAndColorProperty;
 
 namespace WallRender  {
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, const ArchRenderController& arc );
     GeomSPContainer make3dGeometry( SceneGraph& sg, const WallBSData* mWall,
                                     const V3fVectorOfVector& ceilingContours );
 
-    GeomSPContainer renderWalls( SceneGraph &sg, const std::vector<ArchSegment> &wss, const std::string &wallMaterial,
-                                 const C4f &wallColor );
+    GeomSPContainer renderWalls( SceneGraph &sg, const std::vector<ArchSegment> &wss, const MaterialAndColorProperty &wallMaterial );
 };

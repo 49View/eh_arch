@@ -36,7 +36,7 @@ namespace HOD { // HighOrderDependency
         sg.clearNodes();
         ret.addDep(sg, ResourceGroup::Image, data->defaultSkybox);
         for ( const auto& floor : data->mFloors ) {
-            ret.addDep(sg, ResourceGroup::Material, floor->externalWallsMaterial);
+            ret.addDep(sg, ResourceGroup::Material, floor->externalWallsMaterial.materialHash);
             for ( const auto& room : floor->rooms ) {
                 ret.addDep(sg, ResourceGroup::Material, room->wallsMaterial.materialHash);
                 ret.addDep(sg, ResourceGroup::Material, room->ceilingMaterial.materialHash);

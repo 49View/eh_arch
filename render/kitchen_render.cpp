@@ -70,12 +70,12 @@ namespace KitchenRender {
             }
         }
 
-        sg.GB<GT::Extrude>(drawerOutlines, GT::M(kd.unitsMaterial.materialHash));
+        sg.GB<GT::Extrude>(drawerOutlines, kd.unitsMaterial);
     }
 
     void drawFillerDrawer( SceneGraph& sg, KitchenData& kd, const KitchenDrawer& kuw ) {
         auto linex = FollowerService::createLinePath(kuw.p1, kuw.p2, kd.drawersThickness, kuw.z);
-        sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kuw.unitHeight }, GT::M(kd.unitsMaterial.materialHash), kuw.color);
+        sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kuw.unitHeight }, kd.unitsMaterial);
     }
 
     void render( SceneGraph& sg, RoomBSData *w, HouseRenderContainer& ret ) {
@@ -96,7 +96,7 @@ namespace KitchenRender {
             if ( !kwp.flags.hasSink ) {
                 auto linex = FollowerService::createLinePath(kwp.p1, kwp.p2, kd.kitchenWorktopDepth,
                                                              kd.kitchenWorktopHeight);
-                sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.worktopThickness }, GT::M(kd.worktopMaterial.materialHash));
+                sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
             } else {
                 // I've decided to split the worktop in 4 pieces (a'la having a frame around the sink)
                 // instead of clipping an hole through it as I still don't trust booleans they are still too risky
@@ -112,12 +112,12 @@ namespace KitchenRender {
                 // Left side of the worktop
                 auto linex = FollowerService::createLinePath(kwp.p1, sinkp1, kd.kitchenWorktopDepth,
                                                              kd.kitchenWorktopHeight);
-                sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.worktopThickness }, GT::M(kd.worktopMaterial.materialHash));
+                sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
 
                 // Right side of the worktop
                 auto linex2 = FollowerService::createLinePath(sinkp2, kwp.p2, kd.kitchenWorktopDepth,
                                                               kd.kitchenWorktopHeight);
-                sg.GB<GT::Extrude>(PolyOutLine{ linex2, V3f::UP_AXIS, kd.worktopThickness }, GT::M(kd.worktopMaterial.materialHash));
+                sg.GB<GT::Extrude>(PolyOutLine{ linex2, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
 
                 // Add some filling (0.02f) for the top/bottom also
                 float topAndBottomDepth = ( ( kd.kitchenWorktopDepth - sinkHalfDepth * 2.0f ) * 0.5f ) + 0.02f;
@@ -128,20 +128,20 @@ namespace KitchenRender {
                 auto sinkp3b = sinkp2 + topSideOffset;
                 auto linex3 = FollowerService::createLinePath(sinkp3b, sinkp3a, topAndBottomDepth,
                                                               kd.kitchenWorktopHeight);
-                sg.GB<GT::Extrude>(PolyOutLine{ linex3, V3f::UP_AXIS, kd.worktopThickness }, GT::M(kd.worktopMaterial.materialHash));
+                sg.GB<GT::Extrude>(PolyOutLine{ linex3, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
 
                 // Bottom side of the worktop
                 auto sinkp4a = sinkp1 - topSideOffset;
                 auto sinkp4b = sinkp2 - topSideOffset;
                 auto linex4 = FollowerService::createLinePath(sinkp4b, sinkp4a, topAndBottomDepth,
                                                               kd.kitchenWorktopHeight);
-                sg.GB<GT::Extrude>(PolyOutLine{ linex4, V3f::UP_AXIS, kd.worktopThickness }, GT::M(kd.worktopMaterial.materialHash));
+                sg.GB<GT::Extrude>(PolyOutLine{ linex4, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
             }
         }
 
         for ( const auto& kwp : kd.kitchenSkirtingPath ) {
             auto linex = FollowerService::createLinePath(kwp.p1, kwp.p2, 0.02f, 0.0f);
-            sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.skirtingHeight }, GT::M(kd.unitsMaterial.materialHash));
+            sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.skirtingHeight }, kd.unitsMaterial);
         }
 
         float topOfWorktop = kd.kitchenWorktopHeight + kd.worktopThickness;

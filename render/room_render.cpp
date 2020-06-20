@@ -111,8 +111,7 @@ namespace RoomRender {
                     ret.emplace_back(
                             sg.GB<GT::Follower>(profile, XZY::C(cov, w->height), ff, PolyRaise::VerticalNeg,
                                                 GT::ForceNormalAxis(Vector3f::UP_AXIS),
-                                                GT::Flip(V2fc::X_AXIS), GT::M(w->covingMaterial.materialHash),
-                                                w->covingMaterial.color));
+                                                GT::Flip(V2fc::X_AXIS), w->covingMaterial));
                 }
             }
         }
@@ -136,8 +135,7 @@ namespace RoomRender {
                 if ( auto profile = sg.PL(w->skirtingProfile); profile ) {
                     ret.emplace_back(
                             sg.GB<GT::Follower>(profile, XZY::C(cov, 0.0f), GT::ForceNormalAxis(Vector3f::UP_AXIS),
-                                                ff, GT::Flip(V2fc::X_AXIS), GT::M(w->skirtingMaterial.materialHash),
-                                                w->skirtingMaterial.color));
+                                                ff, GT::Flip(V2fc::X_AXIS), w->skirtingMaterial));
                 }
             }
         }
@@ -147,7 +145,7 @@ namespace RoomRender {
     void make3dGeometry( SceneGraph& sg, RoomBSData *w, HouseRenderContainer& ret ) {
         auto wc = RoomRender::createCovingSegments(sg, w);
         auto ws = RoomRender::createSkirtingSegments(sg, w);
-        WallRender::renderWalls(sg, w->mWallSegmentsSorted, w->wallsMaterial.materialHash, w->wallsMaterial.color);
+        WallRender::renderWalls(sg, w->mWallSegmentsSorted, w->wallsMaterial);
         ret.covingGB.insert(ret.covingGB.end(), wc.begin(), wc.end());
         ret.skirtingGB.insert(ret.skirtingGB.end(), ws.begin(), ws.end());
 
@@ -155,14 +153,12 @@ namespace RoomRender {
         auto outline = PolyOutLine{ XZY::C(w->mPerimeterSegments), V3f::UP_AXIS, zPull };
         ret.floor = sg.GB<GT::Extrude>(outline,
                                        V3f{ V3f::UP_AXIS * -zPull },
-                                       GT::M(w->floorMaterial.materialHash),
-                                       w->floorMaterial.color,
+                                       w->floorMaterial,
                                        GT::Tag(ArchType::FloorT));
 
         ret.ceiling = sg.GB<GT::Extrude>(outline,
                                        V3f{ V3f::UP_AXIS * (w->height - zPull) },
-                                       GT::M(w->ceilingMaterial.materialHash),
-                                       w->ceilingMaterial.color,
+                                       w->ceilingMaterial,
                                        GT::Tag(ArchType::CeilingT));
 
         for ( const auto& lf : w->mLightFittingsLocators ) {
