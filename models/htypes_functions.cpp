@@ -27,9 +27,9 @@ std::string GHTypeToString( uint64_t elem ) {
     if ( checkBitWiseFlag(elem, GHType::WallPlasterExternal) ) ret+="WallPlasterExternal";
     if ( checkBitWiseFlag(elem, GHType::WallPlasterInternal) ) ret+="WallPlasterInternal";
     if ( checkBitWiseFlag(elem, GHType::WallTilesInternal) ) ret+="WallTilesInternal";
-    if ( checkBitWiseFlag(elem, GHType::KitchenWorktop) ) ret+="KitchenWorktop";
-    if ( checkBitWiseFlag(elem, GHType::KitchenCabinet) ) ret+="KitchenCabinet";
-    if ( checkBitWiseFlag(elem, GHType::KitchenBackSplash) ) ret+="KitchenBackSplash";
+    if ( checkBitWiseFlag(elem, GHType::KitchenWorktop) ) ret+="Worktop";
+    if ( checkBitWiseFlag(elem, GHType::KitchenCabinet) ) ret+="Cabinet";
+    if ( checkBitWiseFlag(elem, GHType::KitchenBackSplash) ) ret+="BackSplash";
     if ( checkBitWiseFlag(elem, GHType::KitchenSink) ) ret+="KitchenSink";
     if ( checkBitWiseFlag(elem, GHType::KitchenOven) ) ret+="KitchenOven";
     if ( checkBitWiseFlag(elem, GHType::KitchenHob) ) ret+="KitchenHob";
