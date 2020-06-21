@@ -21,6 +21,8 @@ struct ArchStructural;
 struct FloorBSData;
 struct UShape;
 
+using GenericCallback = std::function<void()>;
+
 enum class MeasureUnitType {
 	Inch = 0,
 	Centimeter = 1,

@@ -64,4 +64,8 @@ public:
 	    return doSegmentsEndsMeet( segs.front(), segs.back());
     }
 
+    static bool isSegmentPartOfWindowOrDoor(const ArchSegment& ls) {
+        return checkBitWiseFlag(ls.tag, WallFlags::WF_IsDoorPart) | checkBitWiseFlag(ls.tag, WallFlags::WF_IsWindowPart);
+	}
+
 };

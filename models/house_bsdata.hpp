@@ -394,7 +394,7 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
 
     // Settings and Indices
     KitchenShape kitchenShape = KS_Straight;
-    uint64_t kitchenIndexMainWorktop = 2;
+    int kitchenIndexMainWorktop = -1;
 };
 
 JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,

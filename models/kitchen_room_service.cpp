@@ -9,6 +9,7 @@
 #include "../models/house_bsdata.hpp"
 #include "../models/room_service.hpp"
 #include "../models/room_service_furniture.hpp"
+#include "arch_segment_service.hpp"
 
 namespace KitchenRoomService {
 
@@ -51,16 +52,19 @@ namespace KitchenRoomService {
         V2f lp1Dir = normalize(middle - p1);
         V2f lp2Dir = normalize(middle - p2);
 
-        bool needsSpaceForUnitsOnLeft = isMain & (kd.kitchenShape == KS_UShape);
-        bool needsSpaceForUnitsOnRight = isMain & ((kd.kitchenShape == KS_UShape) || (kd.kitchenShape == KS_LShape));
+        bool needsSpaceForUnitsOnLeft = isMain & ( kd.kitchenShape == KS_UShape );
+        bool needsSpaceForUnitsOnRight =
+                isMain & ( ( kd.kitchenShape == KS_UShape ) || ( kd.kitchenShape == KS_LShape ) );
 
-        V2f inW1 = needsSpaceForUnitsOnLeft ? ( lp1Dir * ( skirtingOffset + sho ) ) : lp1Dir * -( kd.kitchenSkirtingRecess );
+        V2f inW1 = needsSpaceForUnitsOnLeft ? ( lp1Dir * ( skirtingOffset + sho ) ) : lp1Dir *
+                                                                                      -( kd.kitchenSkirtingRecess );
         V2f inW2 = needsSpaceForUnitsOnRight ? ( lp2Dir * ( skirtingOffset + sho ) ) : V2fc::ZERO;
 
         kd.kitchenSkirtingPath.emplace_back(p1 + inwardSkirting + inW1, p2 + inwardSkirting + inW2, normal,
                                             crossNormal, skirtingOffset);
 
-        inW1 = needsSpaceForUnitsOnLeft ? ( lp1Dir * ( unitOffset + dho ) ) : V2fc::ZERO;// lp1Dir * -kd.kitchenUnitsRecess;
+        inW1 = needsSpaceForUnitsOnLeft ? ( lp1Dir * ( unitOffset + dho ) )
+                                        : V2fc::ZERO;// lp1Dir * -kd.kitchenUnitsRecess;
         inW2 = needsSpaceForUnitsOnRight ? ( lp2Dir * ( unitOffset + dho ) ) : V2fc::ZERO;
 
         kd.kitchenUnitsPath.emplace_back(p1 + inwardUnits + inW1, p2 + inwardUnits + inW2, normal, crossNormal,
@@ -80,8 +84,9 @@ namespace KitchenRoomService {
         V2f lp1Dir = normalize(middle - p1);
         V2f lp2Dir = normalize(middle - p2);
 
-        bool needsSpaceForUnitsOnLeft = isMain & (kd.kitchenShape == KS_UShape);
-        bool needsSpaceForUnitsOnRight = isMain & ((kd.kitchenShape == KS_UShape) || (kd.kitchenShape == KS_LShape));
+        bool needsSpaceForUnitsOnLeft = isMain & ( kd.kitchenShape == KS_UShape );
+        bool needsSpaceForUnitsOnRight =
+                isMain & ( ( kd.kitchenShape == KS_UShape ) || ( kd.kitchenShape == KS_LShape ) );
 
         V2f inW1 = needsSpaceForUnitsOnLeft ? ( lp1Dir * ( topUnitOffset + dho ) ) : V2fc::ZERO;
         V2f inW2 = needsSpaceForUnitsOnRight ? ( lp2Dir * ( topUnitOffset + dho ) ) : V2fc::ZERO;
@@ -313,7 +318,10 @@ namespace KitchenRoomService {
 
     void createMasterPathSingle( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
         KitchenData& kd = w->kitchenData;
-        auto ls = RoomService::segmentAtIndex( w, kd.kitchenIndexMainWorktop );
+        if ( kd.kitchenIndexMainWorktop == -1 ) {
+            setNextMainWorktopIndexCandidate(w);
+        }
+        auto ls = RoomService::segmentAtIndex(w, kd.kitchenIndexMainWorktop);
         ls->wallMaterial = kd.backSplashMaterial;
         addWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
         addTopWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
@@ -321,7 +329,7 @@ namespace KitchenRoomService {
 
     void createKitchen( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
         KitchenData& kd = w->kitchenData;
-        switch ( kd.kitchenShape) {
+        switch ( kd.kitchenShape ) {
             case KS_Straight:
                 KitchenRoomService::createMasterPathSingle(f, w, furns);
                 break;
@@ -350,5 +358,35 @@ namespace KitchenRoomService {
 
     bool hasKitchen( const RoomBSData *w ) {
         return !w->kitchenData.kitchenWorktopPath.empty();
+    }
+
+    void setNextMainWorktopIndexCandidate( RoomBSData *room, GenericCallback ccf ) {
+        size_t candidate = room->kitchenData.kitchenIndexMainWorktop+1;
+        for ( auto t = 0u; t < room->mWallSegmentsSorted.size(); t++ ) {
+            if ( candidate >= room->mWallSegmentsSorted.size() ) {
+                candidate = 0;
+            }
+            if ( !ArchSegmentService::isSegmentPartOfWindowOrDoor(room->mWallSegmentsSorted[candidate]) &&
+                 room->mWallSegmentsSorted[candidate].length() > 1.5f ) {
+                // All this massive code bit is to check that the edges of the worktop do not align with a door
+                // If they do we allow a mininum safe distance (gap) to be taken into account.
+                // (IE a long wall with a door on it's end that's quite far from the worktop end will be allowed)
+                auto& ls = room->mWallSegmentsSorted[candidate];
+                V2f hit=V2fc::ZERO;
+                std::pair<size_t, size_t> targetWall;
+                float gap = ls.length()*0.5f + 0.6f;
+                V2f p1 = ls.middle + ls.normal*room->kitchenData.kitchenWorktopDepth*0.8f;
+                if ( RoomService::findOppositeWallFromPointAllowingGap(room, p1, ls.crossNormal, targetWall,
+                                                            hit, IncludeWindowsOrDoors::WindowsOnly, gap) &&
+                        RoomService::findOppositeWallFromPointAllowingGap(room, p1, -ls.crossNormal, targetWall,
+                                                               hit, IncludeWindowsOrDoors::WindowsOnly, gap) ) {
+                    // Is all conditions suggested above are met, set the candidate index
+                    room->kitchenData.kitchenIndexMainWorktop = candidate;
+                    if ( ccf ) ccf();
+                    break;
+                }
+            }
+            ++candidate;
+        }
     }
 }

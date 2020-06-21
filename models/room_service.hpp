@@ -437,6 +437,9 @@ namespace RoomService {
     bool findOppositeWallFromPoint( const RoomBSData *r, const Vector2f& p1, const Vector2f& normal,
                                     std::pair<size_t, size_t>& ret, Vector2f& iPoint,
                                     IncludeWindowsOrDoors bwd = IncludeWindowsOrDoors::None );
+    bool findOppositeWallFromPointAllowingGap( const RoomBSData *r, const Vector2f& p1, const Vector2f& normal,
+                                    std::pair<size_t, size_t>& ret, Vector2f& iPoint,
+                                    IncludeWindowsOrDoors bwd = IncludeWindowsOrDoors::None, float allowedGap = 0.0f );
     float furnitureAngleFromWall( const ArchSegment *ls );
     float furnitureAngleFromNormal( const Vector2f& normal );
     Vector2f furnitureNormalFromAngle( float angle );
