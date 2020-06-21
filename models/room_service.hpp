@@ -344,21 +344,21 @@ namespace RoomService {
     ArchSegment *segmentAtIndex( RoomBSData *r, uint32_t _index );
 
     void clearFurniture( RoomBSData *r );
-    [[nodiscard]] bool addFurniture( FloorBSData *f, RoomBSData *r, FittedFurniture& ff );
-    bool placeManually( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff, const V2f& _pos, const Quaternion& _rot,
+    [[nodiscard]] bool addFurniture( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> ff );
+    bool placeManually( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff, const V2f& _pos, const Quaternion& _rot,
                         const V2f& _widthNormal, const V2f& _depthNormal );
-    [[nodiscard]] bool placeWallAligned( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff,
+    [[nodiscard]] bool placeWallAligned( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff,
                                          WSLO wslo, float extraSlack = 0.0f, uint32_t _exactIndex = 0, float _heightOffset = 0.0f );
-    [[nodiscard]] bool placeWallCorner( FloorBSData *f, RoomBSData *r, FittedFurniture& _ff,
+    [[nodiscard]] bool placeWallCorner( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff,
                                         const ArchSegment *ls,
                                         const V2f& slack = V2fc::ZERO,
                                         WallSegmentCorner wsc = WSC_P1,
                                         float _height = 0.0f );
-    [[nodiscard]] bool placeAround( FloorBSData *f, RoomBSData *r, FittedFurniture& dest, const FittedFurniture& source,
+    [[nodiscard]] bool placeAround( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source,
                                     PivotPointPosition where,
                                     const V2f& slack = V2fc::ZERO, float _height = 0.0f );
     [[nodiscard]] bool
-    placeWallAlong( FloorBSData *f, RoomBSData *r, FittedFurniture& dest, const FittedFurniture& source,
+    placeWallAlong( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source,
                     const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f& slack = V2fc::ZERO,
                     float _height = 0.0f );
     [[nodiscard]] bool

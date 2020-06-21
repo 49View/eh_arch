@@ -174,9 +174,9 @@ namespace KitchenRoomService {
         auto cooker = furns.spawn(FTH::FT_Cooktop);
         auto oven = furns.spawn(FTH::FT_OvenPanel);
         auto sink = furns.spawn(FTH::FT_Sink);
-        auto cookerHalfWidth = cooker.size.width() * 0.5;
-        auto ovenHalfWidth = oven.size.width() * 0.5;
-        auto sinkHalfWidth = sink.size.width() * 0.5;
+        auto cookerHalfWidth = cooker->size.width() * 0.5;
+        auto ovenHalfWidth = oven->size.width() * 0.5;
+        auto sinkHalfWidth = sink->size.width() * 0.5;
         auto carryingIndex = 0u;
         float floorLevel = kd.skirtingHeight;// kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f;
         float unitHeight = kd.kitchenWorktopHeight - ( kd.skirtingHeight + ( kd.drawersPadding.x() * 2 ) );
@@ -236,7 +236,7 @@ namespace KitchenRoomService {
             float z = w->height - kd.longDrawersSize.y() - kd.topUnitsCeilingGap;
             if ( kwp.flags.hasCooker ) {
                 auto extractorHood = furns.spawn(FTH::FT_ExtractorHood);
-                auto extractorHoodHalfWidth = extractorHood.size.width() * 0.5;
+                auto extractorHoodHalfWidth = extractorHood->size.width() * 0.5;
                 addDrawersFromPoint(kd, z, kd.longDrawersSize.y(), kwp.cookerPosDelta, extractorHoodHalfWidth, kup);
             } else {
                 addDrawersSequencially(kd, kup.p1, kup.p2, z, kd.longDrawersSize.y(), kup.depth, kup.normal,
@@ -249,8 +249,8 @@ namespace KitchenRoomService {
                    const V2f& normal,
                    const V2f& crossNormal ) {
         auto fridge = furns.spawn(FTH::FT_Fridge);
-        auto fridgeWidth = fridge.size.width();
-        auto fridgeDepth = fridge.size.depth();
+        auto fridgeWidth = fridge->size.width();
+        auto fridgeDepth = fridge->size.depth();
         if ( distance(p1, p2) > fridgeWidth * 1.2f ) { // giving it a bit of slack (*1.2f)
             std::pair<size_t, size_t> targetWall;
             float fridgeSlackGap = 0.15f;

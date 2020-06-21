@@ -55,10 +55,10 @@ namespace RoomRender {
 
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {
-            Matrix4f mt{ ff.position3d * V3f::MASK_Y_OUT, ff.rotation, ff.size };
+            Matrix4f mt{ ff->position3d * V3f::MASK_Y_OUT, ff->rotation, ff->size };
             mt.mult(arc.pm()());
-            rr.draw<DLine>(sg.PL(ff.symbolRef), C4f::PASTEL_GRAY, RDSPreMult(mt), rm, lineWidth * 2.0f,
-                           room->hashFeature(ff.symbolRef, ffc++));
+            rr.draw<DLine>(sg.PL(ff->symbolRef), C4f::PASTEL_GRAY, RDSPreMult(mt), rm, lineWidth * 2.0f,
+                           room->hashFeature(ff->symbolRef, ffc++));
         }
 
 
@@ -177,7 +177,7 @@ namespace RoomRender {
                              GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
         }
         for ( const auto& fur : w->mFittedFurniture ) {
-            auto furn = sg.GB<GT::Asset>(fur.name, fur.position3d, GT::Rotate(fur.rotation));
+            auto furn = sg.GB<GT::Asset>(fur->name, fur->position3d, GT::Rotate(fur->rotation));
             ret.furnituresGB.emplace_back(furn);
         }
         if ( RoomService::hasRoomType(w, ASType::Kitchen) ) {

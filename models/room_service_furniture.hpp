@@ -31,7 +31,7 @@ public:
     void addIndex( const FurnitureSet& _fs );
     void addIndex( FT _ft, FittedFurniture& _ff );
 
-    FittedFurniture& spawn( FT ft );
+    std::shared_ptr<FittedFurniture> spawn( FT ft );
 private:
     FurnitureMultiMap storage{};
     FurnitureMap index{};

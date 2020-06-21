@@ -50,8 +50,8 @@ namespace HOD { // HighOrderDependency
                 ret.addDep(sg, ResourceGroup::Geom, "lightswitch");
 
                 for ( const auto& furn : room->mFittedFurniture ) {
-                    ret.addDep(sg, ResourceGroup::Geom, furn.name);
-                    ret.addDep(sg, ResourceGroup::Profile, furn.symbolRef);
+                    ret.addDep(sg, ResourceGroup::Geom, furn->name);
+                    ret.addDep(sg, ResourceGroup::Profile, furn->symbolRef);
                 }
 
                 // Will load Kitchen and bathroom sets here

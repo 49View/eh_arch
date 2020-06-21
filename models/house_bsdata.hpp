@@ -413,7 +413,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     bool mHasCoving = true;
     Rect2f mBBoxCoving = Rect2f::INVALID;
     FloorMatTypeT floorType = 0;
-    std::vector<FittedFurniture> mFittedFurniture;
+    std::vector<std::shared_ptr<FittedFurniture>> mFittedFurniture;
     std::vector<std::vector<ArchSegment>> mWallSegments;
     std::vector<ArchSegment> mWallSegmentsSorted;
     std::vector<Vector2f> mPerimeterSegments;
