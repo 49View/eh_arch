@@ -157,6 +157,17 @@ namespace HouseService {
                         }
                     }
                 }
+//                if constexpr ( std::is_same_v<T, FittedFurniture> ) {
+//                    for ( const auto& w : f->rooms ) {
+//                        if ( checkNearOrInside(w.get()) ) {
+//                            for ( const auto& ff : w->mFittedFurniture ) {
+//                                if ( ff.bbox3d.topDown().contains(point) ) {
+//                                    return ff;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
                 if constexpr ( std::is_same_v<T, StairsBSData> ) {
                     for ( const auto& w : f->stairs ) {
                         if ( checkNearOrInside(w.get()) ) {
