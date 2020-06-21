@@ -381,6 +381,11 @@ namespace KitchenRoomService {
                         RoomService::findOppositeWallFromPointAllowingGap(room, p1, -ls.crossNormal, targetWall,
                                                                hit, IncludeWindowsOrDoors::WindowsOnly, gap) ) {
                     // Is all conditions suggested above are met, set the candidate index
+
+                    // If the worktop index was already assigned, then revert the wall type to normal on the old one
+                    if ( room->kitchenData.kitchenIndexMainWorktop != -1 ) {
+                        room->mWallSegmentsSorted[room->kitchenData.kitchenIndexMainWorktop].wallMaterial = room->wallsMaterial;
+                    }
                     room->kitchenData.kitchenIndexMainWorktop = candidate;
                     if ( ccf ) ccf();
                     break;
