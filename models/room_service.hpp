@@ -318,7 +318,7 @@ private:
 };
 
 namespace RoomService {
-    std::shared_ptr<RoomBSData> createRoom( const RoomPreData& _preData, float _floorHeight, float _z );
+    std::shared_ptr<RoomBSData> createRoom( const RoomPreData& _preData, float _floorHeight, float _z, const HouseBSData* house );
 
     void updateFromArchSegments( RoomBSData *r, const std::vector<std::vector<ArchSegment>>& ws );
     void calcOptimalLightingFittingPositions( RoomBSData *r );
@@ -326,6 +326,7 @@ namespace RoomService {
     void calcSkirtingSegments( RoomBSData *r );
     void setCoving( RoomBSData *r, bool _state );
     void changeFloorType( RoomBSData *r, FloorMatTypeT _fmt );
+    void assignDefaultRoomFeaturesForType( RoomBSData *r, ASTypeT ast, const HouseBSData* house );
     std::vector<std::vector<Vector2f>> calcCovingSegments( const std::vector<std::vector<ArchSegment>>& ws );
 
     void calcBBox( RoomBSData *r );
@@ -405,8 +406,8 @@ namespace RoomService {
     };
     bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurnitureRuleScript& fs );
 
-    void setRoomType( RoomBSData *r, ASTypeT rt );
-    void addRoomType( RoomBSData *r, ASTypeT rt );
+    void setRoomType( RoomBSData *r, ASTypeT rt, const HouseBSData* house );
+    void addRoomType( RoomBSData *r, ASTypeT rt, const HouseBSData* house );
     void removeRoomType( RoomBSData *r, ASTypeT rt );
 
     // Query

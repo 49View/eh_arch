@@ -96,7 +96,7 @@ namespace FloorService {
     void
     addWallsFromData( FloorBSData *f, const V2fVectorOfVector& floorWalls,
                       WallLastPointWrapT wpw = WallLastPointWrap::No );
-    void addRoomsFromData( FloorBSData *f );
+    void addRoomsFromData( FloorBSData *f, const HouseBSData* house );
     void addDoorFromData( FloorBSData *f, float _doorHeight, const UShape& w1, const UShape& w2,
                                  ArchSubTypeT st = ArchSubType::NotApplicable );
     void addWindowFromData( FloorBSData *f, float _windowHeight, float _defaultWindowBaseOffset,

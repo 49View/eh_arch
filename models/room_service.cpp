@@ -17,10 +17,12 @@
 
 namespace RoomService {
 
-    std::shared_ptr<RoomBSData> createRoom( const RoomPreData& _preData, const float _floorHeight, const float _z ) {
+    std::shared_ptr<RoomBSData> createRoom( const RoomPreData& _preData, const float _floorHeight, const float _z, const HouseBSData* house ) {
         auto w = ServiceFactory::create<RoomBSData>();
         w->type = ArchType::RoomT;
-        w->roomTypes = _preData.rtypes;
+        for ( const auto& rt: _preData.rtypes ) {
+            RoomService::addRoomType(w.get(), rt, house);
+        }
         w->mHasCoving = !RS::hasRoomType(w.get(), ASType::Kitchen);
         w->height = _floorHeight;
         w->width = _preData.bboxInternal.calcWidth();
@@ -528,14 +530,19 @@ namespace RoomService {
         return ret;
     }
 
-    void setRoomType( RoomBSData *r, ASTypeT rt ) {
+    void setRoomType( RoomBSData *r, ASTypeT rt, const HouseBSData* house ) {
         r->roomTypes.clear();
         r->roomTypes.emplace_back(rt);
+        RoomService::assignDefaultRoomFeaturesForType(r, rt, house);
     }
 
-    void addRoomType( RoomBSData *r, ASTypeT rt ) {
+    void addRoomType( RoomBSData *r, ASTypeT rt, const HouseBSData* house ) {
         if ( auto it = std::find(r->roomTypes.begin(), r->roomTypes.end(), rt); it == r->roomTypes.end() ) {
-            r->roomTypes.emplace_back(rt);
+            if ( r->roomTypes.empty() ) {
+                RoomService::setRoomType(r, rt, house);
+            } else {
+                r->roomTypes.emplace_back(rt);
+            }
         }
     }
 
@@ -545,6 +552,44 @@ namespace RoomService {
 
     bool isGeneric( const RoomBSData *r ) {
         return r->asType == ASType::GenericRoom && r->roomTypes.size() == 1 && r->roomTypes[0] == ASType::GenericRoom;
+    }
+
+    void assignDefaultRoomFeaturesForType( RoomBSData *r, ASTypeT ast, const HouseBSData* house ) {
+        switch ( ast ) {
+            case ASType::GenericRoom:
+            case ASType::LivingRoom:
+            case ASType::Studio:
+            case ASType::DiningRoom:
+            case ASType::Conservatory:
+            case ASType::GamesRoom:
+            case ASType::Laundry:
+            case ASType::Hallway:
+            case ASType::Garage:
+            case ASType::Cupboard:
+            case ASType::Storage:
+            case ASType::BoilerRoom:
+            return;
+            case ASType::Kitchen:
+                r->floorMaterial = house->defaultKitchenFloorMaterial;
+                return;
+
+            case ASType::BedroomSingle:
+            case ASType::BedroomDouble:
+            case ASType::BedroomMaster:
+                r->floorMaterial = house->defaultBedroomFloorMaterial;
+                return;
+
+            case ASType::Bathroom:
+            case ASType::ShowerRoom:
+            case ASType::Ensuite:
+            case ASType::ToiletRoom:
+                r->floorMaterial = house->defaultBathroomFloorMaterial;
+                r->wallsMaterial = house->defaultBathroomWallMaterial;
+                return;
+
+            default:
+                break;
+        }
     }
 
     std::string roomTypeToName( ASTypeT ast ) {

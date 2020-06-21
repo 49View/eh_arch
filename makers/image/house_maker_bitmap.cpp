@@ -741,7 +741,7 @@ namespace HouseMakerBitmap {
         for ( auto &f : house->mFloors ) {
             LOGRS("PreRooms count: " << f->rds.size() );
             roomOCRScan( sourceImages, house->sourceData, f->rds );
-            FloorService::addRoomsFromData(f.get());
+            FloorService::addRoomsFromData(f.get(), house);
             FloorService::calcWhichRoomDoorsAndWindowsBelong(f.get(), house);
         }
         erase_if( house->mFloors, [](const auto& elem) -> bool {

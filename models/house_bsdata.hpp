@@ -527,6 +527,10 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albe
     float windowFrameThickness = 0.04f;
     float worktopHeight = 0.9f;
     float bathRoomSinkHeight = 0.9f;
+    MaterialAndColorProperty defaultKitchenFloorMaterial = "parquet,american";
+    MaterialAndColorProperty defaultBedroomFloorMaterial = "carpet,grey";
+    MaterialAndColorProperty defaultBathroomFloorMaterial = "pavonazzo,tiles";
+    MaterialAndColorProperty defaultBathroomWallMaterial = "yule,weave,tiles";
     Color4f defaultWallColor = Color4f::WHITE;
     subdivisionAccuray accuracy = accuracyNone;
     std::vector<std::shared_ptr<FloorBSData>> mFloors;

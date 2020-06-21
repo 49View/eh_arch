@@ -37,8 +37,8 @@ std::shared_ptr<HouseBSData> HouseMakerBespokeData::make( ArchHouseBespokeData&&
 
 void HouseMakerBespokeData::guessRooms() {
 
-    for ( auto& f : mHouse->mFloors ) {
-        FloorService::roomRecognition( f.get() );
-        FloorService::addRoomsFromData( f.get() );
-    }
+//    for ( auto& f : mHouse->mFloors ) {
+//        FloorService::roomRecognition( f.get() );
+//        FloorService::addRoomsFromData( f.get() );
+//    }
 }

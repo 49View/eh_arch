@@ -639,7 +639,6 @@ namespace RoomService {
     }
 
     void furnishBedroom( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
-        r->floorMaterial = {"carpet,grey", C4f::WHITE};
         FurnitureRuleScript ruleScript;
         V3f cornerSlack{ 0.05f, 0.0f, 0.0f };
         ruleScript.clear();
@@ -711,8 +710,6 @@ namespace RoomService {
 
     void furnishBathroom( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
         FurnitureRuleScript ruleScript;
-        r->floorMaterial = "pavonazzo,tiles";
-        r->wallsMaterial = "yule,weave,tiles";
 
         ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::FRFirstAvailableCorner),
                                                    FurnitureRefs{ { FTH::FT_Shower } }
@@ -733,7 +730,6 @@ namespace RoomService {
     }
 
     void furnishKitchen( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
-        r->floorMaterial = "parquet,american";
         KitchenRoomService::createKitchen(f, r, furns);
     }
 

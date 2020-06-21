@@ -41,10 +41,10 @@ void FloorService::addWallsFromData( FloorBSData *f, const V2fVectorOfVector& fl
     calcBBox(f);
 }
 
-void FloorService::addRoomsFromData( FloorBSData *f ) {
+void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData* house ) {
     // finally insert in floor
     for ( auto& r : f->rds ) {
-        auto newRoom = RoomService::createRoom(r, f->height, f->z);
+        auto newRoom = RoomService::createRoom(r, f->height, f->z, house);
         RoomService::updateFromArchSegments(newRoom.get(), r.wallSegmentsInternal);
         f->rooms.push_back(newRoom);
     }
@@ -625,13 +625,13 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *h
         // Bathrooms
         // Count number of doors and windows a room has, if it has 1 door and no windows... Probably it's a bathroom!
         if ( RoomService::hasRoomType(r, ASType::GenericRoom) && r->doors.size() == 1 && r->windows.empty() ) {
-            RoomService::setRoomType(r, ASType::Bathroom);
+            RoomService::setRoomType(r, ASType::Bathroom, house);
         }
 
         // Hallways
         // Guess hallways by checking if a room has no windows and more than 2 doors.
         if ( RoomService::hasRoomType(r, ASType::GenericRoom) && r->doors.size() > 2 && r->windows.empty() ) {
-            RoomService::setRoomType(r, ASType::Hallway);
+            RoomService::setRoomType(r, ASType::Hallway, house);
         }
 
         if ( RoomService::hasRoomType(r, ASType::GenericRoom) ) numberOfGenericRoom++;
@@ -656,13 +656,13 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *h
         bool goForIt = areaPairs[0].first > areaPairs[1].first * 1.5f;
         if ( goForIt ) {
             // Add the Kitchen/Living
-            RoomService::setRoomType(areaPairs[0].second, ASType::Kitchen);
-            RoomService::addRoomType(areaPairs[0].second, ASType::LivingRoom);
+            RoomService::setRoomType(areaPairs[0].second, ASType::Kitchen, house);
+            RoomService::addRoomType(areaPairs[0].second, ASType::LivingRoom, house);
             // Add the biggest bedroom first, so this is the master bedroom
-            RoomService::setRoomType(areaPairs[1].second, ASType::BedroomMaster);
+            RoomService::setRoomType(areaPairs[1].second, ASType::BedroomMaster, house);
             // Add the rest, if any
             for ( auto t = 2u; t < areaPairs.size(); t++ ) {
-                RoomService::setRoomType(areaPairs[t].second, ASType::BedroomDouble);
+                RoomService::setRoomType(areaPairs[t].second, ASType::BedroomDouble, house);
             }
         }
     }
