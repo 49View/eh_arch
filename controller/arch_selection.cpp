@@ -5,9 +5,12 @@
 #include "arch_selection.hpp"
 
 void ArchSelection::moveSelectionList( const V2f& _point, moveSelectionCallback ccf ) {
-    for ( const auto& s1 : selection ) {
+    for ( auto& s1 : selection ) {
         if ( s1.asf.feature == ArchStructuralFeature::ASF_Point ) {
             auto offset = s1.asf.pointOfInterests[0] + ( _point - s1.initialSelectedPoint );
+            ccf(s1.asf, offset);
+        } else if ( s1.asf.feature == ArchStructuralFeature::ASF_Poly ) {
+            auto offset = _point - s1.lastMovingPoint;
             ccf(s1.asf, offset);
         } else if ( s1.asf.feature == ArchStructuralFeature::ASF_Edge ) {
             auto dom = s1.asf.normalDirection.dominantElement();
@@ -19,7 +22,9 @@ void ArchSelection::moveSelectionList( const V2f& _point, moveSelectionCallback 
             auto offset = s1.asf.normalDirection * offsetDistance * sol;
             ccf(s1.asf, offset);
         }
+        s1.lastMovingPoint = _point;
     }
+
 }
 
 void ArchSelection::createTwoShapeOnSelectedEdge( const V2f& _point, splitSelectionCallback ccf ) {
@@ -70,10 +75,12 @@ ArchStructuralFeature ArchSelection::singleSelectedFeature() const {
 }
 
 void ArchSelection::addToSelectionList( const ArchSelectionElement& _elem ) {
-    selection.emplace(_elem);
+    if ( auto it = std::find( selection.begin(), selection.end(), _elem); it == selection.end() ) {
+        selection.emplace_back(_elem);
+    }
 }
 
 void ArchSelection::removeFromSelectionList( const ArchSelectionElement& _elem ) {
-    selection.erase(selection.find(_elem));
+    selection.erase(std::find( selection.begin(), selection.end(), _elem));
 }
 

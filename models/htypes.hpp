@@ -191,7 +191,8 @@ enum ArchType : uint64_t {
 	StairsT = 1 << 13,
 	RoomT = 1 << 14,
 	CurtainT = 1 << 15,
-	CeilingT = 1 << 16
+	CeilingT = 1 << 16,
+	FittedFurnitureT = 1 << 17
 };
 
 using ArchTypeT = uint64_t;

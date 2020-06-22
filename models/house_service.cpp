@@ -278,6 +278,12 @@ void HouseService::removeArch( HouseBSData* house, int64_t hashToRemove ) {
 	}
 }
 
+void HouseService::moveArch( HouseBSData* house, int64_t hashToMove, const V2f& offset2d ) {
+    for ( auto& f : house->mFloors ) {
+        FloorService::moveArch( f.get(), hashToMove, offset2d );
+    }
+}
+
 void HouseService::mergePoints( HouseBSData *house, const V2fVectorOfVector& points ) {
     bool inFloors = false;
     Rect2f pointsBBox{points};

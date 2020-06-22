@@ -582,10 +582,19 @@ namespace RoomService {
         return fs.execute(f, r, furns, RS::functionRules);
     }
 
-    bool addFurniture( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff ) {
-        _ff->position3d = XZY::C(_ff->xyLocation, _ff->heightOffset);
+    void calculateFurnitureBBox( FittedFurniture* _ff ) {
         _ff->bbox3d = AABB{ _ff->position3d - ( _ff->size * 0.5f ), _ff->position3d + ( _ff->size * 0.5f ) };
         _ff->bbox3d = _ff->bbox3d.rotate(_ff->rotation);
+        _ff->bbox = _ff->bbox3d.topDown();
+        _ff->center = _ff->bbox.centre();
+        _ff->width = _ff->bbox.width();
+        _ff->depth = _ff->bbox.height();
+        _ff->height = _ff->bbox3d.calcHeight();
+    }
+
+    bool addFurniture( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff ) {
+        _ff->position3d = XZY::C(_ff->xyLocation, _ff->heightOffset);
+        calculateFurnitureBBox( _ff.get() );
 
         Rect2f subjectBBox = _ff->bbox3d.topDown();
         for ( const auto& door : f->doors ) {
@@ -793,7 +802,7 @@ std::shared_ptr<FittedFurniture> FurnitureMapStorage::spawn( FT _ft ) {
     for ( ; i != range.second; ++i ) {
         ret = i;
     }
-    return std::make_shared<FittedFurniture>(ret->second);
+    return EntityFactory::cloneHashed(ret->second);
 }
 
 void initializeDefaultFurnituresFlags( FT _ft, FittedFurniture& _ff ) {

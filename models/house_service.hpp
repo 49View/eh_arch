@@ -36,6 +36,7 @@ namespace HouseService {
     V2fVectorOfVector rescaleWallInverse( const HouseBSData *house, float scaleFactor );
     void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );
     void reevaluateDoorsAndWindowsAfterRoomChange( HouseBSData* h );
+    void moveArch( HouseBSData *_house, int64_t hashToMove, const V2f& offset2d );
 
     // Delete
     void removeArch( HouseBSData *_house, int64_t hashToRemove );
@@ -157,17 +158,17 @@ namespace HouseService {
                         }
                     }
                 }
-//                if constexpr ( std::is_same_v<T, FittedFurniture> ) {
-//                    for ( const auto& w : f->rooms ) {
-//                        if ( checkNearOrInside(w.get()) ) {
-//                            for ( const auto& ff : w->mFittedFurniture ) {
-//                                if ( ff.bbox3d.topDown().contains(point) ) {
-//                                    return ff;
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
+                if constexpr ( std::is_same_v<T, FittedFurniture> ) {
+                    for ( const auto& w : f->rooms ) {
+                        if ( checkNearOrInside(w.get()) ) {
+                            for ( const auto& ff : w->mFittedFurniture ) {
+                                if ( checkNearOrInside(ff.get()) ) {
+                                    return ff;
+                                }
+                            }
+                        }
+                    }
+                }
                 if constexpr ( std::is_same_v<T, StairsBSData> ) {
                     for ( const auto& w : f->stairs ) {
                         if ( checkNearOrInside(w.get()) ) {

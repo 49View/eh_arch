@@ -749,8 +749,32 @@ void FloorService::removeArch( FloorBSData *f, int64_t hashToRemove ) {
         erase_if(f->doors, hashToRemove);
     } else if ( ArchStructuralService::typeIsWall(elem) ) {
         erase_if(f->walls, hashToRemove);
+    } else if ( ArchStructuralService::typeIsFittedFurniture(elem) ) {
+        for ( auto& room : f->rooms ) {
+            erase_if(room->mFittedFurniture, hashToRemove);
+        }
     } else {
         erase_if(f->stairs, hashToRemove);
+    }
+}
+
+void FloorService::moveArch( FloorBSData *f, int64_t hashToMove, const V2f& offset2d ) {
+    // First check what type it is, in case we need to do cross-checking with other elements
+    ArchStructural *elem = findElementWithHash(f, hashToMove);
+    if ( elem == nullptr ) return;
+
+    if ( ArchStructuralService::typeIsiPoint(elem) ) {
+    } else if ( ArchStructuralService::typeIsDOW(elem) ) {
+    } else if ( ArchStructuralService::typeIsWall(elem) ) {
+    } else if ( ArchStructuralService::typeIsFittedFurniture(elem) ) {
+        for ( auto& room : f->rooms ) {
+            for ( auto& ff : room->mFittedFurniture ) {
+                if ( ff->hash == hashToMove ) {
+                    ff->position3d += XZY::C(offset2d, 0.0f);
+                    RoomService::calculateFurnitureBBox( ff.get() );
+                }
+            }
+        }
     }
 }
 
@@ -1011,6 +1035,12 @@ ArchStructural *FloorService::findElementWithHash( const FloorBSData *f, int64_t
     for ( auto& i : f->windows ) if ( i->hash == _hash ) return i.get();
     for ( auto& i : f->doors ) if ( i->hash == _hash ) return i.get();
     for ( auto& i : f->walls ) if ( i->hash == _hash ) return i.get();
+    for ( auto& i : f->rooms ) {
+        if ( i->hash == _hash ) return i.get();
+        for ( auto& i2 : i->mFittedFurniture ) {
+            if ( i2->hash == _hash ) return i2.get();
+        }
+    }
     for ( auto&& i : f->stairs ) if ( i->hash == _hash ) return i.get();
 
     return nullptr;

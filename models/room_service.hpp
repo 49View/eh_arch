@@ -343,6 +343,7 @@ namespace RoomService {
     const ArchSegment *getWallSegmentFor( RoomBSData *r, WSLO wslo, uint32_t _exactIndex = 0 );
     ArchSegment *segmentAtIndex( RoomBSData *r, uint32_t _index );
 
+    void calculateFurnitureBBox( FittedFurniture* _ff );
     void clearFurniture( RoomBSData *r );
     [[nodiscard]] bool addFurniture( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> ff );
     bool placeManually( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff, const V2f& _pos, const Quaternion& _rot,

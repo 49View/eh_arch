@@ -183,8 +183,9 @@ enum FittedFurnitureFlags {
     FF_isDecoration = 1 << 3
 };
 
-JSONDATA(FittedFurniture, name, symbolRef, size, position3d, xyLocation, heightOffset, rotation, widthNormal,
-         depthNormal, bbox3d, flags)
+JSONDATA_H(FittedFurniture, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
+        name, symbolRef, size, position3d, xyLocation, heightOffset, rotation, widthNormal,
+         depthNormal, flags)
     std::string name;
     std::string symbolRef = S::SQUARE;
     Vector3f size = Vector3f::ONE;
@@ -194,11 +195,14 @@ JSONDATA(FittedFurniture, name, symbolRef, size, position3d, xyLocation, heightO
     Quaternion rotation{ V3f::ZERO, 1.0f };
     V2f widthNormal = V2fc::ZERO;
     V2f depthNormal = V2fc::ZERO;
-    JMATH::AABB bbox3d = JMATH::AABB::INVALID;
     int flags = 0;
     explicit FittedFurniture( const std::tuple<std::string, V3f>& args, std::string _symbolRef ) :
-            name(std::get<0>(args)), symbolRef(std::move(_symbolRef)), size(std::get<1>(args)) {}
-    FittedFurniture( std::string _name, const Vector3f& _size ) : name(std::move(_name)), size(_size) {}
+            name(std::get<0>(args)), symbolRef(std::move(_symbolRef)), size(std::get<1>(args)) {
+        type = ArchType::FittedFurnitureT;
+    }
+    FittedFurniture( std::string _name, const Vector3f& _size ) : name(std::move(_name)), size(_size) {
+        type = ArchType::FittedFurnitureT;
+    }
     [[nodiscard]] bool checkIf( FittedFurnitureFlags _flag ) const;
 };
 

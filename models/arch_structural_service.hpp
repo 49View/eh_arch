@@ -54,7 +54,11 @@ public:
 		return a->type == ArchType::WallT;
 	}
 
-	static bool isPointInside( const ArchStructural* a, const Vector2f& _pos ) {
+    static bool typeIsFittedFurniture( const ArchStructural* a ) {
+        return a->type == ArchType::FittedFurnitureT;
+    }
+
+    static bool isPointInside( const ArchStructural* a, const Vector2f& _pos ) {
 		if ( !a->bbox.contains( _pos ) ) return false;
 
 		if ( a->mTriangles2d.size() == 0 ) {
