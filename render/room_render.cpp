@@ -43,11 +43,11 @@ namespace RoomRender {
 //            rr.draw<DPoly>( room->mPerimeterSegments, 0.025f, C4f::RED, true );
 //        }
         auto rm = arc.floorPlanShader();
-        auto color = arc.getFillColor(room->hash, C4f::BLACK);
+        auto color = arc.getFillColor(room, C4f::BLACK);
         auto lineWidth = arc.floorPlanScaler(0.015f);
 
         bool drawDebug = arc.isFloorPlanRenderModeDebug();
-        if ( drawDebug && arc.isSelected(room->hash) ) {
+        if ( drawDebug && arc.isSelected(room) ) {
             rr.draw<DLine>(room->mPerimeterSegments, lineWidth*2.0f, color, true);
 //            rr.draw<DPoly>(room->mPerimeterSegments, C4f::WHITE*0.9f, arc.pm(),
 //                           room->hashFeature("perimeter", 0));
@@ -55,7 +55,7 @@ namespace RoomRender {
 
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {
-            auto ffcolor = arc.getFillColor(ff->hash, C4f::BLACK.A(0.8f));
+            auto ffcolor = arc.getFillColor(ff.get(), C4f::BLACK.A(0.8f));
             Matrix4f mt{ ff->position3d * V3f::MASK_Y_OUT, ff->rotation, ff->size };
             mt.mult(arc.pm()());
             rr.draw<DLine>(sg.PL(ff->symbolRef), ffcolor, RDSPreMult(mt), rm, lineWidth * 2.0f,

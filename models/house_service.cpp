@@ -278,9 +278,9 @@ void HouseService::removeArch( HouseBSData* house, int64_t hashToRemove ) {
 	}
 }
 
-void HouseService::moveArch( HouseBSData* house, int64_t hashToMove, const V2f& offset2d ) {
+void HouseService::moveArch( HouseBSData* house, ArchStructural* elem, const V2f& offset2d ) {
     for ( auto& f : house->mFloors ) {
-        FloorService::moveArch( f.get(), hashToMove, offset2d );
+        FloorService::moveArch( f.get(), elem, offset2d );
     }
 }
 

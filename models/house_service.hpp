@@ -36,7 +36,7 @@ namespace HouseService {
     V2fVectorOfVector rescaleWallInverse( const HouseBSData *house, float scaleFactor );
     void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );
     void reevaluateDoorsAndWindowsAfterRoomChange( HouseBSData* h );
-    void moveArch( HouseBSData *_house, int64_t hashToMove, const V2f& offset2d );
+    void moveArch( HouseBSData *_house, ArchStructural* elem, const V2f& offset2d );
 
     // Delete
     void removeArch( HouseBSData *_house, int64_t hashToRemove );

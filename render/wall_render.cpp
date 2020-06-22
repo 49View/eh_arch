@@ -21,7 +21,7 @@
 namespace WallRender {
 
     void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const ArchRenderController& arc ) {
-        auto color = arc.getFillColor(wall->hash, C4f::BLACK);
+        auto color = arc.getFillColor(wall, C4f::BLACK);
         rr.draw<DPoly>(sm, wall->mTriangles2d, color, arc.pm(), wall->hashFeature("poly"+color.toString(), 0));
     }
 
@@ -68,8 +68,8 @@ namespace WallRender {
                            const ArchRenderController& arc ) {
         for ( auto t = 0u; t < wall->epoints.size(); t++ ) {
             auto p1 = wall->epoints[t];
-            ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Point, t, wall->hash };
-            auto color = arc.getFillColor(asf, C4f::RED);
+//            ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Point, t, wall };
+            auto color = arc.getFillColor(ArchStructuralFeature::ASF_Point, t, wall, C4f::RED);
             rr.draw<DCircleFilled>(p1, color, width, sm, arc.pm(), wall->hashFeature("w2dPoint"+color.toString(),t));
         }
     }
@@ -79,8 +79,7 @@ namespace WallRender {
         for ( auto t = 0u; t < wall->epoints.size(); t++ ) {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t+1, wall->epoints.size())];
-            ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Edge, t, wall->hash };
-            auto color = arc.getFillColor(asf, Color4f::PASTEL_GREEN);
+            auto color = arc.getFillColor(ArchStructuralFeature::ASF_Edge, t, wall, Color4f::PASTEL_GREEN);
             rr.draw<DLine>(p1, p2, color, width*3.f, sm, arc.pm(), wall->hashFeature("w2dEdge"+color.toString(),t));
         }
 //        if ( wall->wrapLastPoint ) vlist.emplace_back(wall->epoints[0]);

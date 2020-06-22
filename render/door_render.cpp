@@ -32,7 +32,7 @@ namespace DoorRender {
     void drawSingleDoor2d( Renderer& rr, const DoorBSData *door, DShaderMatrix sm, const ArchRenderController& arc ) {
 
         auto lineWidth = arc.floorPlanScaler(0.03f);
-        auto color = arc.getFillColor(door->hash, C4f::BLACK);
+        auto color = arc.getFillColor(door, C4f::BLACK);
 
         float vwangle = -atan2(-door->dirWidth.y(), door->dirWidth.x());
         float dIndexSign = (isLeft(door->dIndex) ? -1.0f : 1.0f);

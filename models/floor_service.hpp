@@ -118,7 +118,7 @@ namespace FloorService {
     changeUShapeType( FloorBSData *f, const UShape& sourceUShape1, const UShape& sourceUShape2,
                       ArchType _type );
     void swapWindowOrDoor( FloorBSData *f, HouseBSData *h, int64_t hashOfTwoShape );
-    void moveArch( FloorBSData *f, int64_t hashToMove, const V2f& offset2d );
+    void moveArch( FloorBSData *f, ArchStructural* elem, const V2f& offset2d );
 
     // Delete
     void removeArch( FloorBSData *f, int64_t hashToRemove );

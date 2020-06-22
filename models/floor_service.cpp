@@ -743,9 +743,8 @@ void FloorService::removeArch( FloorBSData *f, int64_t hashToRemove ) {
     }
 }
 
-void FloorService::moveArch( FloorBSData *f, int64_t hashToMove, const V2f& offset2d ) {
+void FloorService::moveArch( FloorBSData *f, ArchStructural* elem, const V2f& offset2d ) {
     // First check what type it is, in case we need to do cross-checking with other elements
-    ArchStructural *elem = findElementWithHash(f, hashToMove);
     if ( elem == nullptr ) return;
 
     if ( ArchStructuralService::typeIsiPoint(elem) ) {
@@ -754,7 +753,7 @@ void FloorService::moveArch( FloorBSData *f, int64_t hashToMove, const V2f& offs
     } else if ( ArchStructuralService::typeIsFittedFurniture(elem) ) {
         for ( auto& room : f->rooms ) {
             for ( auto& ff : room->mFittedFurniture ) {
-                if ( ff->hash == hashToMove ) {
+                if ( ff.get() == elem ) {
                     ff->position3d += XZY::C(offset2d, 0.0f);
                     RoomService::calculateFurnitureBBox( ff.get() );
                 }

@@ -62,9 +62,9 @@ namespace WallService {
     void movePoint( WallBSData *w, uint64_t pointIndex, const V2f& offset, bool incremental );
     void deletePoint( WallBSData *w, uint64_t pointIndex );
     void deleteEdge( WallBSData *w, uint64_t pointIndex );
-    void moveFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& offset, bool incremental );
-    void deleteFeature( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf );
-    void splitEdgeAndAddPointInTheMiddle( HouseBSData *houseJson, const ArchStructuralFeatureDescriptor& asf, const V2f& newPoint );
+    void moveFeature( const ArchStructuralFeatureDescriptor& asf, const V2f& offset, bool incremental );
+    void deleteFeature( const ArchStructuralFeatureDescriptor& asf );
+    void splitEdgeAndAddPointInTheMiddle( const ArchStructuralFeatureDescriptor& asf, const V2f& newPoint );
     FloorUShapesPair createTwoShapeAt( HouseBSData *houseJson, const V2f& point );
     void makeTriangles2d( WallBSData *w );
     bool mergePoints( WallBSData *w, const V2fVector& points );

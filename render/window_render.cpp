@@ -22,7 +22,7 @@ namespace WindowRender {
         const V2f& _p2 = data->us1.middle;
         float _lineWidth = data->us2.width;
         auto rm = arc.floorPlanShader();
-        auto color = arc.getFillColor(data->hash, C4f::BLACK);
+        auto color = arc.getFillColor(data, C4f::BLACK);
         float windowLineWidth = _lineWidth * 0.2f;
         float halfWindowLineWidth = windowLineWidth * 0.5f;
         float halfLineWidth = _lineWidth * 0.5f;

@@ -62,13 +62,13 @@ public:
     bool isFloorPlanRenderMode2d() const;
     bool isFloorPlanRenderModeDebugSelection() const;
 
-    void addToSelectionList( HashEH _hash ) {
-        selection.addToSelectionList(ArchSelectionElement{ _hash} );
+    void addToSelectionList( ArchBase* _elem ) {
+        selection.addToSelectionList(ArchSelectionElement{ _elem } );
     }
 
-    void setSelectionList( HashEH _hash ) {
+    void setSelectionList( ArchBase* _elem ) {
         selection.clear();
-        selection.addToSelectionList(ArchSelectionElement{ _hash} );
+        selection.addToSelectionList(ArchSelectionElement{ _elem } );
     }
 
     template<typename T>
@@ -97,7 +97,6 @@ public:
 
     template<typename T>
     C4f getFillColor( const T& elem, const C4f& c1, const C4f& c2 ) const {
-
         if ( const auto* it = selection.find(elem); it ) {
             return selectedColor;
         }
@@ -111,7 +110,15 @@ public:
 
     template<typename T>
     C4f getFillColor( const T& elem, const C4f& c1 ) const {
-        return getFillColor(elem, c1, c1);
+        return getFillColor( elem, c1, c1);
+    }
+
+    C4f getFillColor( ArchStructuralFeature _asf, int64_t _index, const ArchBase* _elem, const C4f& c1 ) const {
+        if ( const auto* it = selection.find(_asf, _index, _elem); it ) {
+            return selectedColor;
+        }
+
+        return c1;
     }
 
     template<typename T>

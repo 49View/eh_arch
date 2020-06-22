@@ -39,4 +39,5 @@ private:
 
 namespace RoomServiceFurniture {
     void addDefaultFurnitureSet( const std::string& _name );
+    void rotateFurniture( FittedFurniture* ff );
 }

@@ -21,11 +21,11 @@ using toggleSelectionCallback = std::function<void( const ArchStructuralFeatureD
 
 struct ArchSelectionElement {
     ArchSelectionElement() = default;
-    explicit ArchSelectionElement( HashEH elemHash ) {
-        asf = ArchStructuralFeatureDescriptor{ elemHash };
+    explicit ArchSelectionElement( ArchBase *_elem ) {
+        asf = ArchStructuralFeatureDescriptor{ _elem };
     }
-    ArchSelectionElement( HashEH elemHash, const V2f& isp ) : initialSelectedPoint(isp), lastMovingPoint(isp) {
-        asf = ArchStructuralFeatureDescriptor{ elemHash };
+    ArchSelectionElement( ArchBase *_elem, const V2f& isp ) : initialSelectedPoint(isp), lastMovingPoint(isp) {
+        asf = ArchStructuralFeatureDescriptor{ _elem };
     }
     ArchSelectionElement( const ArchStructuralFeatureDescriptor& asf ) : asf(asf) {}
     ArchSelectionElement( const ArchStructuralFeatureDescriptor& asf, const V2f& isp ) : asf(asf),
@@ -53,14 +53,14 @@ struct ArchSelectionElement {
     SelectionFlagsT flags = SelectionFlags::None;
 };
 
-template <>
-struct std::hash<ArchSelectionElement> {
-    size_t operator()( const ArchSelectionElement& _elem ) const {
-        return std::hash<std::string>{}(
-                std::to_string(_elem.asf.hash) + std::to_string(_elem.asf.index) + std::to_string(
-                        static_cast<int>(_elem.asf.feature)));
-    }
-};
+//template <>
+//struct std::hash<ArchSelectionElement> {
+//    size_t operator()( const ArchSelectionElement& _elem ) const {
+//        return std::hash<std::string>{}(
+//                std::to_string(_elem.asf.hash) + std::to_string(_elem.asf.index) + std::to_string(
+//                        static_cast<int>(_elem.asf.feature)));
+//    }
+//};
 
 class ArchSelection {
 public:
@@ -73,22 +73,32 @@ public:
 
     void removeFromSelectionList( const ArchSelectionElement& _elem );
 
-    template<typename T>
-    const ArchSelectionElement *find( const T& elem ) const {
+    const ArchSelectionElement *
+    find( const ArchStructuralFeature& elem, int64_t _index, const ArchBase *_arch ) const {
 
-        if constexpr ( std::is_same_v<T, HashEH> ) {
-            if ( auto it = std::find( selection.begin(), selection.end(),ArchStructuralFeatureDescriptor{ ArchStructuralFeature::ASF_Poly, -1, elem });
-                    it != selection.end() ) {
-                return &( *it );
+        for ( const auto& it : selection ) {
+            if ( it.asf.feature == elem && it.asf.index == _index && it.asf.elem == _arch ) {
+                return &it;
             }
         }
 
-        if constexpr ( std::is_same_v<T, ArchStructuralFeatureDescriptor> ) {
-            if ( auto it = std::find(selection.begin(), selection.end(), ArchSelectionElement{ elem }); it != selection.end() ) {
-                return &( *it );
+        return nullptr;
+    }
+
+    const ArchSelectionElement *find( const ArchStructuralFeatureDescriptor& elem ) const {
+        if ( auto it = std::find(selection.begin(), selection.end(), ArchSelectionElement{ elem }); it !=
+                                                                                                    selection.end() ) {
+            return &( *it );
+        }
+        return nullptr;
+    }
+
+    const ArchSelectionElement *find( const ArchBase *_elem ) const {
+        for ( const auto& it : selection ) {
+            if ( it.asf.elem == _elem ) {
+                return &it;
             }
         }
-
         return nullptr;
     }
 

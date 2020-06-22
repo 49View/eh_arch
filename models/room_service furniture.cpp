@@ -19,6 +19,8 @@
 #include "room_service_furniture.hpp"
 #include "kitchen_room_service.hpp"
 
+auto quarterRotation = quatFromAxis(V4f{0.0f, 1.0f, 0.0f, M_PI_4f32});
+
 [[nodiscard]] bool FittedFurniture::checkIf( FittedFurnitureFlags _flag ) const {
     return checkBitWiseFlag(flags, _flag);
 }
@@ -907,4 +909,9 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     Http::post(Url{ "/furnitureset" }, furnitureSet.serialize(), []( HttpResponeParams& res ) {
         LOGRS(res.bufferString);
     });
+}
+
+void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff ) {
+    ff->rotation = ff->rotation * quarterRotation;
+    ff->rotation.normalise();
 }
