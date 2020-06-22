@@ -17,7 +17,6 @@ DoorService::createDoor( float _doorHeight, float _ceilingHeight, const UShape& 
                          ArchSubTypeT st ) {
     std::shared_ptr<DoorBSData> d1 = std::make_shared<DoorBSData>();
 
-    d1->asType = ASType::Door;
     d1->type = ArchType::DoorT;
     d1->us1 = w1;
     d1->us2 = w2;

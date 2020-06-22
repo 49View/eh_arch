@@ -25,7 +25,6 @@ std::shared_ptr<WallBSData> WallService::createWall2( const std::vector<Vector2f
                                                       SequencePart sequencePart ) {
 
     auto w = std::make_shared<WallBSData>();
-    w->asType = ASType::Wall;
     w->type = ArchType::WallT;
     w->wrapLastPoint = wlpw;
     w->linkedHash = _linkedHash;

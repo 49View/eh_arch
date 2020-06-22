@@ -88,8 +88,6 @@ namespace FloorService {
     bool roomRecognition( FloorBSData *f );
     void guessFittings( FloorBSData *f, FurnitureMapStorage& furns );
     std::string naturalLanguageFloorNumber( int numFloor );
-    bool findRoom( FloorBSData *f, int _floorNumber, ASTypeT _roomASTypeToFind,
-                          std::shared_ptr<RoomBSData>& ret );
     const RoomBSData* findRoomWithHash( FloorBSData *f, int64_t hash );
 
     // Create

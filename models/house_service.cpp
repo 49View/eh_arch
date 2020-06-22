@@ -22,7 +22,7 @@
 std::shared_ptr<FloorBSData> HouseService::addFloorFromData( HouseBSData* _house, const JMATH::Rect2f& _rect ) {
 
     std::shared_ptr<FloorBSData> f = std::make_shared<FloorBSData>();
-    f->asType = ASType::Floor;
+    f->type = ArchType::FloorT;
     f->height = _house->defaultCeilingHeight;
     f->anchorPoint = JMATH::Rect2fFeature::bottomRight;
     f->number = static_cast<int>( _house->mFloors.size() );

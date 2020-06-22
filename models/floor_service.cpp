@@ -723,21 +723,6 @@ const RoomBSData *FloorService::findRoomWithHash( FloorBSData *f, int64_t hash )
     return nullptr;
 }
 
-bool FloorService::findRoom( FloorBSData *f, int _floorNumber, const ASTypeT _roomASTypeToFind,
-                             std::shared_ptr<RoomBSData>& ret ) {
-
-    if ( f->number != _floorNumber ) return false;
-
-    for ( const auto& r : f->rooms ) {
-        if ( r->asType == _roomASTypeToFind ) {
-            ret = r;
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void FloorService::removeArch( FloorBSData *f, int64_t hashToRemove ) {
     // First check what type it is, in case we need to do cross-checking with other elements
     ArchStructural *elem = findElementWithHash(f, hashToRemove);

@@ -13,7 +13,6 @@
 std::shared_ptr<WindowBSData> WindowService::createWindow( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1, const UShape& w2, ArchSubTypeT /*st*/ /*= ArchSubType::NotApplicable */ ) {
 	std::shared_ptr<WindowBSData> d1 = std::make_shared<WindowBSData>();
 
-	d1->asType = ASType::Window;
 	d1->type = ArchType::WindowT;
 	d1->wallFlags = WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving;
 	d1->us1 = w1;

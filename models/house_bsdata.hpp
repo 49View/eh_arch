@@ -68,10 +68,9 @@ struct ArchBase {
 
 using SequencePart = int64_t;
 
-#define STRUCTURAL_ELEMENT ArchStructural, asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d
+#define STRUCTURAL_ELEMENT ArchStructural, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d
 
 struct ArchStructural : public ArchBase {
-    ASTypeT asType = ASType::GenericRoom;
     JMATH::Rect2f bbox = JMATH::Rect2f::IDENTITY;
     JMATH::AABB bbox3d = JMATH::AABB::IDENTITY;
     Color4f albedo = Color4f::WHITE;
@@ -183,7 +182,7 @@ enum FittedFurnitureFlags {
     FF_isDecoration = 1 << 3
 };
 
-JSONDATA_H(FittedFurniture, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
+JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
         name, symbolRef, size, position3d, xyLocation, heightOffset, rotation, widthNormal,
          depthNormal, flags)
     std::string name;
@@ -207,7 +206,7 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, asType, bbox, bbox3d, al
 };
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
-           asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
+           bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
            rooms, subType, isMainDoor, isDoorTypicallyShut, architraveProfile,
            dIndex, doorInnerBumpSize, doorGeomThickness, doorTrim, openingAngleMax, openingAngleMin,
            hingesPivot, doorHandlePivotLeft, doorHandlePivotRight, doorHandleAngle, frameHingesPivot,
@@ -241,7 +240,7 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
 };
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
-           wallFlags, asType, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart,
+           wallFlags, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart,
            mTriangles2d, rooms, numPanels, sillThickness, mainFrameWidth, minPanelWidth, baseOffset,
            rotOrientation, hasBlinds, hasCurtains, curtainGeom, curtainMaterial)
     std::vector<int64_t> rooms;
@@ -257,7 +256,7 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
     std::string curtainMaterial = "diamante,curtain";
 };
 
-JSONDATA_H(WallBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
+JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center,
            linkedHash, sequencePart, mTriangles2d, epoints, enormals, slinesGHType, mUShapes, z, wallFlags,
            wrapLastPoint)
 
@@ -274,7 +273,7 @@ JSONDATA_H(WallBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo,
     WallLastPointWrapT wrapLastPoint = true;
 };
 
-JSONDATA_H(StairsBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
+JSONDATA_H(StairsBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center,
            linkedHash, sequencePart, mTriangles2d, name)
     std::string name = "";
 };
@@ -401,7 +400,7 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     int kitchenIndexMainWorktop = -1;
 };
 
-JSONDATA_H(RoomBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
+JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center,
            linkedHash, sequencePart, mTriangles2d, roomTypes, windows, doors, z, mHasCoving, mBBoxCoving, floorType,
            mFittedFurniture,
            mWallSegments, mWallSegmentsSorted, mPerimeterSegments, mvCovingSegments, mvSkirtingSegments,
@@ -467,7 +466,7 @@ JSONDATA(RoomPreData, wallSegmentsInternal, bboxInternal, rtypes)
     std::vector<ASTypeT> rtypes;
 };
 
-JSONDATA_H(FloorBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
+JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center,
            linkedHash, sequencePart, mTriangles2d, number, z, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
            perimeterArchSegments, anchorPoint, defaultCeilingMaterial, defaultCeilingColor, externalWallsColor, rds,
@@ -504,7 +503,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo
     std::vector<ArchSegment> orphanedWallSegments;
 };
 
-JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, asType, bbox, bbox3d, albedo, height, width, depth, center,
+JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center,
              linkedHash, sequencePart, mTriangles2d, version, propertyId, name, source, declaredSQm, defaultSkybox,
              sourceData, bestInternalViewingPosition, bestInternalViewingAngle, walkableArea,
              doorHeight, defaultWindowHeight, defaultWindowBaseOffset, defaultCeilingHeight, windowsillExpansion,

@@ -588,7 +588,7 @@ namespace RoomService {
     }
 
     bool isGeneric( const RoomBSData *r ) {
-        return r->asType == ASType::GenericRoom && r->roomTypes.size() == 1 && r->roomTypes[0] == ASType::GenericRoom;
+        return r->roomTypes.size() == 1 && r->roomTypes[0] == ASType::GenericRoom;
     }
 
     void assignDefaultRoomFeaturesForType( RoomBSData *r, ASTypeT ast, const HouseBSData* house ) {
