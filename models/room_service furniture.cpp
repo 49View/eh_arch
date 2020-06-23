@@ -324,95 +324,107 @@ namespace RoomService {
 //        dest->widthNormal = source->widthNormal;
 //    }
 
-    bool placeAround( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source,
-                      PivotPointPosition where,
-                      const V2f& slack, const float _height ) {
-        placeAroundInternal(dest, source, where, slack, _height);
-        bool completed = RS::addFurniture(f, r, dest);
+    bool placeAround( FurnitureRuleParams params
+//                       FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source,
+//                      PivotPointPosition where,
+//                      const V2f& slack, const float params.heightOffset
+                      ) {
+        placeAroundInternal(params.ff, params.source, params.where, params.slack, params.heightOffset);
+        bool completed = RS::addFurniture(params);
 
         // If the around area is not available, try the opposite direction if there's space
         if ( !completed ) {
-            if ( auto newwhere = pivotPointPositionMirrorY(where); newwhere != PivotPointPosition::Invalid ) {
-                placeAroundInternal(dest, source, newwhere, slack, _height);
-                completed = RS::addFurniture(f, r, dest);
+            if ( auto newwhere = pivotPointPositionMirrorY(params.where); newwhere != PivotPointPosition::Invalid ) {
+                placeAroundInternal(params.ff, params.source, newwhere, params.slack, params.heightOffset);
+                completed = RS::addFurniture(params);
             }
         }
         return completed;
     }
 
-    bool placeWallAlong( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source,
-                         const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f& slack,
-                         const float _height ) {
-        placeAlongWallInternal(dest, source, ls, preferredCorner, slack, _height);
-        return RS::addFurniture(f, r, dest);
+    bool placeWallAlong( FurnitureRuleParams params
+//            FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> params.source,
+//                         const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f& params.slack,
+//                         const float params.heightOffset
+                         ) {
+        placeAlongWallInternal(params.ff, params.source, params.ls, params.preferredCorner, params.slack, params.heightOffset);
+        return RS::addFurniture(params);
     }
-//    bool placeInBetween( RoomBSData* r, const std::vector<FittedFurniture>& fset, PivotPointPosition where,
-//                      const V2f& slack, const float _height ) {
-//        placeAroundInternal( dest, source, where, slack, _height );
-//        bool completed = RS::addFurniture( r, dest );
-//
-//        // If the around area is not available, try the opposite direction if there's space
-//        if ( !completed ) {
-//            if ( auto newwhere = pivotPointPositionMirrorY( where ); newwhere != PivotPointPosition::Invalid ) {
-//                placeAroundInternal( dest, source, newwhere, slack, _height );
-//                completed = RS::addFurniture( r, dest );
-//            }
-//        }
-//        return completed;
-//    }
 
-    bool placeWallCorner( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff, const ArchSegment *ls,
-                          const V2f& slack, WallSegmentCorner wsc, float _height ) {
+    bool placeInBetween( FurnitureRuleParams params
+//            RoomBSData* r, const std::vector<FittedFurniture>& fset, PivotPointPosition params.where,
+//                      const V2f& params.slack, const float params.heightOffset
+                      ) {
+        placeAroundInternal( params.ff, params.source, params.where, params.slack, params.heightOffset );
+        bool completed = RS::addFurniture( params );
+
+        // If the around area is not available, try the opposite direction if there's space
+        if ( !completed ) {
+            if ( auto newwhere = pivotPointPositionMirrorY( params.where ); newwhere != PivotPointPosition::Invalid ) {
+                placeAroundInternal( params.ff, params.source, newwhere, params.slack, params.heightOffset );
+                completed = RS::addFurniture( params );
+            }
+        }
+        return completed;
+    }
+
+    bool placeWallCorner( FurnitureRuleParams params
+//            FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff, const ArchSegment *ls,
+//                          const V2f& params.slack, WallSegmentCorner wsc, float params.heightOffset
+                          ) {
+        if ( !params.ls ) return false;
+        if ( checkBitWiseFlag(params.ls->tag, WF_IsDoorPart) || checkBitWiseFlag(params.ls->tag, WF_IsWindowPart) ) return false;
+
+        auto cornerPoint = params.preferredCorner == WSC_P1 ? params.ls->p1 : params.ls->p2;
+        Vector2f lpn = normalize(params.ls->middle - cornerPoint);
+        Vector2f offset = params.ls->normal * ( ( params.ff->size.depth() * 0.5f ) + skirtingDepth(params.r) + params.slack.y() ) +
+                          ( lpn * ( params.ff->size.width() * 0.5f + skirtingDepth(params.r) + params.slack.x() ) );
+        params.ff->xyLocation = cornerPoint + offset;
+        params.ff->heightOffset = params.heightOffset;
+        params.ff->rotation = Quaternion{ RoomService::furnitureAngleFromWall(params.ls), V3f::UP_AXIS };
+        params.ff->widthNormal = params.ls->crossNormal;
+        params.ff->depthNormal = params.ls->normal;
+
+        return RS::addFurniture(params);
+    }
+
+    bool placeWallAligned( FurnitureRuleParams params
+//            FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> params.ff,
+//                           const WSLO wslo, float extraSlack, uint32_t _exactIndex, float _heightOffset
+                           ) {
+
+        auto ls = getWallSegmentFor(params.r, params.wslo, params.exactIndex);
         if ( !ls ) return false;
         if ( checkBitWiseFlag(ls->tag, WF_IsDoorPart) || checkBitWiseFlag(ls->tag, WF_IsWindowPart) ) return false;
 
-        auto cornerPoint = wsc == WSC_P1 ? ls->p1 : ls->p2;
-        Vector2f lpn = normalize(ls->middle - cornerPoint);
-        Vector2f offset = ls->normal * ( ( _ff->size.depth() * 0.5f ) + skirtingDepth(r) + slack.y() ) +
-                          ( lpn * ( _ff->size.width() * 0.5f + skirtingDepth(r) + slack.x() ) );
-        _ff->xyLocation = cornerPoint + offset;
-        _ff->heightOffset = _height;
-        _ff->rotation = Quaternion{ RoomService::furnitureAngleFromWall(ls), V3f::UP_AXIS };
-        _ff->widthNormal = ls->crossNormal;
-        _ff->depthNormal = ls->normal;
+        Vector2f offset = ls->normal * ( ( params.ff->size.depth() * 0.5f ) + skirtingDepth(params.r) + params.slackScalar );
+        params.ff->xyLocation = ls->middle + offset;
+        params.ff->heightOffset = params.heightOffset;
+        params.ff->rotation = Quaternion{ RoomService::furnitureAngleFromWall(ls), V3f::UP_AXIS };
+        params.ff->widthNormal = ls->crossNormal;
+        params.ff->depthNormal = ls->normal;
 
-        return RS::addFurniture(f, r, _ff);
+        return addFurniture(params);
     }
 
-    bool placeWallAligned( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff,
-                           const WSLO wslo, float extraSlack, uint32_t _exactIndex, float _heightOffset ) {
+    bool placeMiddle( FurnitureRuleParams params
+//            FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> params.ff, const V2f& _pos
+            ) {
 
-        auto ls = getWallSegmentFor(r, wslo, _exactIndex);
-        if ( !ls ) return false;
-        if ( checkBitWiseFlag(ls->tag, WF_IsDoorPart) || checkBitWiseFlag(ls->tag, WF_IsWindowPart) ) return false;
+        params.ff->xyLocation = params.pos;
+        params.ff->rotation = Quaternion{ 0.0f, V3f::UP_AXIS };
+        params.ff->widthNormal = V2fc::X_AXIS;
+        params.ff->depthNormal = V2fc::Y_AXIS;
 
-        Vector2f offset = ls->normal * ( ( _ff->size.depth() * 0.5f ) + skirtingDepth(r) + extraSlack );
-        _ff->xyLocation = ls->middle + offset;
-        _ff->heightOffset = _heightOffset;
-        _ff->rotation = Quaternion{ RoomService::furnitureAngleFromWall(ls), V3f::UP_AXIS };
-        _ff->widthNormal = ls->crossNormal;
-        _ff->depthNormal = ls->normal;
-
-        return addFurniture(f, r, _ff);
+        return addFurniture(params);
     }
 
-    bool placeMiddle( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff, const V2f& _center ) {
-
-        _ff->xyLocation = _center;
-        _ff->rotation = Quaternion{ 0.0f, V3f::UP_AXIS };
-        _ff->widthNormal = V2fc::X_AXIS;
-        _ff->depthNormal = V2fc::Y_AXIS;
-
-        return addFurniture(f, r, _ff);
-    }
-
-    bool placeManually( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff, const V2f& _pos, const Quaternion& _rot,
-                        const V2f& _widthNormal, const V2f& _depthNormal ) {
-        _ff->xyLocation = _pos;
-        _ff->rotation = _rot;
-        _ff->widthNormal = _widthNormal;
-        _ff->depthNormal = _depthNormal;
-        return addFurniture(f, r, _ff);
+    bool placeManually( FurnitureRuleParams params ) {
+        params.ff->xyLocation = params.pos;
+        params.ff->rotation = params.rot;
+        params.ff->widthNormal = params.widthNormal;
+        params.ff->depthNormal = params.depthNormal;
+        return addFurniture(params );
     }
 
     bool placeDecorations( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> mainF, FurnitureMapStorage& furns,
@@ -426,7 +438,7 @@ namespace RoomService {
                 completed &= h1 >= 0.0f;
                 if ( h1 >= 0.0f ) {
                     float h = mainF->size.y() + h1;
-                    completed &= RS::placeAround(f, r, decF, mainF, PPP::TopCenter, V2fc::ZERO, h);
+                    completed &= RS::placeAround({f, r, decF, FRPSource{mainF}, PPP::TopCenter, h});
                 }
             }
         }
@@ -440,13 +452,13 @@ namespace RoomService {
         bool completed = true;
 
         auto mainF = furns.spawn(main);
-        completed = RS::placeWallAligned(f, r, mainF, refWall);
+        completed = RS::placeWallAligned({f, r, mainF, FRPWSLO{refWall}});
         if ( completed ) {
             if ( fpd.hasBase(1) ) {
-                completed &= RS::placeAround(f, r, furns.spawn(fpd.getBase(1)), mainF, PPP::TopLeft);
+                completed &= RS::placeAround({f, r, furns.spawn(fpd.getBase(1)), FRPSource{mainF}, PPP::TopLeft});
             }
             if ( fpd.hasBase(2) ) {
-                completed &= RS::placeAround(f, r, furns.spawn(fpd.getBase(2)), mainF, PPP::TopRight);
+                completed &= RS::placeAround({f, r, furns.spawn(fpd.getBase(2)), FRPSource{mainF}, PPP::TopRight});
             }
         }
         completed &= RS::placeDecorations(f, r, mainF, furns, fpd);
@@ -459,10 +471,10 @@ namespace RoomService {
         WSLO refWall = fpd.getWallSegmentId().type;
         bool completed = true;
         auto mainF = furns.spawn(main);
-        completed = RS::placeWallAligned(f, r, mainF, refWall);
+        completed = RS::placeWallAligned({f, r, mainF, FRPWSLO{refWall}});
         // If it has more than 1 furniture then place them in front of the main furniture, like a coffee table in front of a sofa
         if ( fpd.hasBase(1) ) {
-            completed &= RS::placeAround(f, r, furns.spawn(fpd.getBase(1)), mainF, PPP::BottomCenter, fpd.getSlack());
+            completed &= RS::placeAround({f, r, furns.spawn(fpd.getBase(1)), FRPSource{mainF}, PPP::BottomCenter, FRPSlack{fpd.getSlack()} });
         }
         completed &= RS::placeDecorations(f, r, mainF, furns, fpd);
         return completed;
@@ -474,13 +486,13 @@ namespace RoomService {
         WSLO refWall = fpd.getWallSegmentId().type;
         bool completed = true;
         auto mainF = furns.spawn(main);
-        for ( auto rwIndex = 0UL; rwIndex < r->mWallSegmentsSorted.size(); rwIndex++ ) {
-            completed = RS::placeWallAligned(f, r, mainF, refWall, fpd.getSlack(0).x(), rwIndex);
+        for ( uint32_t rwIndex = 0UL; rwIndex < r->mWallSegmentsSorted.size(); rwIndex++ ) {
+            completed = RS::placeWallAligned({f, r, mainF, FRPWSLO{refWall}, FRPSlackScalar{fpd.getSlack(0).x()}, rwIndex});
             if ( completed ) break;
         }
         // If it has more than 1 furniture then place them in front of the main furniture, like a coffee table in front of a sofa
         if ( fpd.hasBase(1) ) {
-            completed &= RS::placeAround(f, r, furns.spawn(fpd.getBase(1)), mainF, PPP::BottomCenter, fpd.getSlack());
+            completed &= RS::placeAround({f, r, furns.spawn(fpd.getBase(1)), FRPSource{mainF}, PPP::BottomCenter, FRPSlack{fpd.getSlack()} });
         }
         completed &= RS::placeDecorations(f, r, mainF, furns, fpd);
         return completed;
@@ -492,8 +504,8 @@ namespace RoomService {
         WSLO refWall = fpd.getWallSegmentId().type;
         bool completed = true;
         auto mainF = furns.spawn(main);
-        for ( auto rwIndex = 0UL; rwIndex < r->mWallSegmentsSorted.size(); rwIndex++ ) {
-            completed = RS::placeWallAligned(f, r, mainF, refWall, fpd.getSlack(0).x(), rwIndex, r->height*0.5f);
+        for ( uint32_t rwIndex = 0UL; rwIndex < r->mWallSegmentsSorted.size(); rwIndex++ ) {
+            completed = RS::placeWallAligned({f, r, mainF, FRPWSLO{refWall}, FRPSlackScalar{fpd.getSlack(0).x()}, rwIndex, r->height*0.5f});
             if ( completed ) break;
         }
         return completed;
@@ -510,13 +522,13 @@ namespace RoomService {
         if ( !ls ) return false;
         if ( checkBitWiseFlag(ls->tag, WF_IsDoorPart) || checkBitWiseFlag(ls->tag, WF_IsWindowPart) ) return false;
         auto prevFurn = furns.spawn(fset.front());
-        completed = RS::placeWallCorner(f, r, prevFurn, ls, fpd.getSlack().xy(), fpd.getPreferredCorner());
+        completed = RS::placeWallCorner({f, r, prevFurn, ls, FRPSlack{fpd.getSlack().xy()}, FRPWallSegmentCorner{fpd.getPreferredCorner()} });
         if ( !completed ) return false;
 
         for ( size_t t = 1; t < fset.size(); t++ ) {
             auto currFurn = furns.spawn(fset[t]);
-            completed &= RS::placeWallAlong(f, r, currFurn, prevFurn, ls, fpd.getPreferredCorner(),
-                                            fpd.getSlack(t).xy());
+            completed &= RS::placeWallAlong({f, r, currFurn, FRPSource{prevFurn}, ls, FRPWallSegmentCorner{fpd.getPreferredCorner()},
+                                             FRPSlack{fpd.getSlack(t).xy()} });
             if ( !completed ) break;
             prevFurn = currFurn;
         }
@@ -531,7 +543,7 @@ namespace RoomService {
         bool completed = true;
         auto mainF = furns.spawn(main);
         auto ls = getWallSegmentFor(r, refWall, fpd.getWallSegmentId().index);
-        completed &= RS::placeWallCorner(f, r, mainF, ls, fpd.getSlack().xy(), WSC_P2);
+        completed &= RS::placeWallCorner({f, r, mainF, ls, FRPSlack{fpd.getSlack().xy()}, FRPWallSegmentCorner{WSC_P2} });
         if ( !completed ) return false;
 
         if ( fpd.hasDecorations() ) {
@@ -541,7 +553,7 @@ namespace RoomService {
             completed &= h1 >= 0.0f;
             if ( h1 >= 0.0f ) {
                 float h = mainF->size.y() + h1;
-                completed &= RS::placeWallCorner(f, r, dec, ls, fpd.getSlack().xy(), WSC_P2, h);
+                completed &= RS::placeWallCorner({ f, r, dec, ls, FRPSlack{fpd.getSlack().xy()}, FRPWallSegmentCorner{WSC_P2}, h} );
             }
         } else {
             completed = false;
@@ -558,13 +570,13 @@ namespace RoomService {
             for ( auto i = 0u; i < wss.size(); ++i ) {
                 auto ls = &wss[i];
                 if ( checkBitWiseFlag(ls->tag, WF_IsDoorPart) || checkBitWiseFlag(ls->tag, WF_IsWindowPart) ) continue;
-                auto ls2 = &wss[cai(i + 1, wss.size())];
+                const ArchSegment* ls2 = &wss[cai(i + 1, wss.size())];
                 auto p1 = ls->p1;
                 auto p2 = ls->p2;
                 auto p3 = ls2->p2;
                 if ( !isCollinear(p1, p2, p3) && detectWindingOrder(p1, p2, p3) == WindingOrder::CCW ) {
                     auto prevFurn = furns.spawn(fset.front());
-                    completed = RS::placeWallCorner(f, r, prevFurn, ls2, fpd.getSlack().xy(), WSC_P1);
+                    completed = RS::placeWallCorner({f, r, prevFurn, ls2, FRPSlack{fpd.getSlack().xy()}, FRPWallSegmentCorner{WSC_P1}});
                     if ( completed ) break;
                 }
             }
@@ -577,7 +589,7 @@ namespace RoomService {
     cplaceMiddleOfRoom( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd ) {
         auto center = RS::maxEnclsingBoundingBoxCenter(r);
 
-        return placeMiddle(f, r, furns.spawn(fpd.getBase(0)), center);
+        return placeMiddle({f, r, furns.spawn(fpd.getBase(0)), center, FRPFurnitureRuleFlags{fpd.getFlags()}});
     }
 
     bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurnitureRuleScript& fs ) {
@@ -594,43 +606,45 @@ namespace RoomService {
         _ff->height = _ff->bbox3d.calcHeight();
     }
 
-    bool addFurniture( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff ) {
-        _ff->position3d = XZY::C(_ff->xyLocation, _ff->heightOffset);
-        calculateFurnitureBBox( _ff.get() );
+    bool addFurniture( FurnitureRuleParams& params ) {
+        params.ff->position3d = XZY::C(params.ff->xyLocation, params.ff->heightOffset);
+        calculateFurnitureBBox( params.ff.get() );
 
-        Rect2f subjectBBox = _ff->bbox3d.topDown();
-        for ( const auto& door : f->doors ) {
-            auto dbbox = door->bbox.squaredBothSides();
-            if ( dbbox.contains(subjectBBox) || subjectBBox.intersect(dbbox, 0.001f, EdgeTouchingIsIntersecting::Yes) ) {
-                return false;
+        Rect2f subjectBBox = params.ff->bbox;
+        if ( !checkBitWiseFlag(params.flags, FurnitureRuleFlags::IgnoreDoorClipping) ) {
+            for ( const auto& door : params.f->doors ) {
+                auto dbbox = door->bbox.squaredBothSides();
+                if ( dbbox.contains(subjectBBox) || subjectBBox.intersect(dbbox, 0.001f, EdgeTouchingIsIntersecting::Yes) ) {
+                    return false;
+                }
             }
         }
 
         ClipperLib::Clipper c;
-        ClipperLib::Path pathSubject = ClipperLib::V2fToPath(_ff->bbox3d.topDown().points());
+        ClipperLib::Path pathSubject = ClipperLib::V2fToPath(params.ff->bbox.points());
         V2f subjectPathSize = ClipperLib::pathSize(pathSubject);
         c.AddPath(pathSubject, ClipperLib::ptSubject, true);
-        c.AddPath(ClipperLib::V2fToPath(r->mPerimeterSegments), ClipperLib::ptClip, true);
+        c.AddPath(ClipperLib::V2fToPath(params.r->mPerimeterSegments), ClipperLib::ptClip, true);
         ClipperLib::Paths solution;
         c.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
 
         if ( !solution.empty() && solution.size() == 1 && solution[0].size() == 4 ) {
             V2f solutionPathSize = ClipperLib::pathSize(solution[0]);
             if ( isVerySimilar(solutionPathSize, subjectPathSize) ) {
-                if ( !_ff->checkIf(FF_CanOverlap) ) {
-                    for ( const auto& furn : r->mFittedFurniture ) {
-                        if ( _ff->heightOffset != furn->heightOffset ) {
-                            if ( _ff->heightOffset > furn->heightOffset + furn->bbox3d.calcHeight() ||
-                                 _ff->heightOffset + _ff->bbox3d.calcHeight() < furn->heightOffset ) {
+                if ( !params.ff->checkIf(FF_CanOverlap) && !checkBitWiseFlag(params.flags, FurnitureRuleFlags::ForceCanOverlap) ) {
+                    for ( const auto& furn : params.r->mFittedFurniture ) {
+                        if ( params.ff->heightOffset != furn->heightOffset ) {
+                            if ( params.ff->heightOffset > furn->heightOffset + furn->bbox3d.calcHeight() ||
+                                 params.ff->heightOffset + params.ff->bbox3d.calcHeight() < furn->heightOffset ) {
                                 continue;
                             }
                         }
-                        if ( _ff->bbox3d.topDown().intersect(furn->bbox3d.topDown(), 0.001f) ) {
+                        if ( params.ff->bbox.intersect(furn->bbox, 0.001f) ) {
                             return false;
                         }
                     }
                 }
-                r->mFittedFurniture.push_back(_ff);
+                params.r->mFittedFurniture.push_back(params.ff);
                 return true;
             }
         }
@@ -914,4 +928,12 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
 void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff ) {
     ff->rotation = ff->rotation * quarterRotation;
     ff->rotation.normalise();
+}
+
+void RoomServiceFurniture::addFurnitureSingle( FloorBSData*f, RoomBSData *room, FurnitureMapStorage& furns, FT ftype ) {
+    FurnitureRuleScript ruleScript;
+    ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::MiddleOfRoom),
+                                               FurnitureRefs{ { ftype } }, FurnitureRuleIgnoreDoorClipping{}, FurnitureRuleForceCanOverlap{}
+    });
+    RS::runRuleScript(f, room, furns, ruleScript);
 }

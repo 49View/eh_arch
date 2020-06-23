@@ -58,7 +58,7 @@ namespace HouseService {
     std::shared_ptr<ArchStructural>
     rayIntersect( std::shared_ptr<HouseBSData> _house, const Vector3f& origin, const Vector3f& dir );
     bool findFloorOrRoomAt( std::shared_ptr<HouseBSData> _house, const Vector2f& pos, int& floorIndex );
-    std::shared_ptr<FloorBSData> findFloorOf( std::shared_ptr<HouseBSData> _house, const int64_t _hash );
+    FloorBSData* findFloorOf( HouseBSData* _house, const int64_t _hash );
     bool areThereStairsAtFloorNumber( std::shared_ptr<HouseBSData> _house, int floorNumber );
     int floorIndexAtHeight( std::shared_ptr<HouseBSData> _house, float heightToCheck );
     Vector2f maxSingleFloorSize( std::shared_ptr<HouseBSData> _house );

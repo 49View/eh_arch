@@ -260,8 +260,9 @@ namespace KitchenRoomService {
                                                               hittingPoint, IncludeWindowsOrDoors::None);
             if ( hit ) {
                 auto rot = Quaternion{ RoomService::furnitureAngleFromNormal(normal), V3f::UP_AXIS };
-                RS::placeManually(f, w, fridge, hittingPoint + ( normal * fridgeDepth * 0.5f ), rot, crossNormal,
-                                  normal);
+                RS::placeManually({ f, w, fridge, hittingPoint + ( normal * fridgeDepth * 0.5f ), rot,
+                                    FRPWidthNormal{ crossNormal },
+                                    FRPDepthNormal{ normal } });
                 return mp - ( crossNormal * ( fridgeWidth * 0.5f ) );
             }
         }
@@ -361,7 +362,7 @@ namespace KitchenRoomService {
     }
 
     void setNextMainWorktopIndexCandidate( RoomBSData *room, GenericCallback ccf ) {
-        size_t candidate = room->kitchenData.kitchenIndexMainWorktop+1;
+        size_t candidate = room->kitchenData.kitchenIndexMainWorktop + 1;
         for ( auto t = 0u; t < room->mWallSegmentsSorted.size(); t++ ) {
             if ( candidate >= room->mWallSegmentsSorted.size() ) {
                 candidate = 0;
@@ -372,14 +373,14 @@ namespace KitchenRoomService {
                 // If they do we allow a mininum safe distance (gap) to be taken into account.
                 // (IE a long wall with a door on it's end that's quite far from the worktop end will be allowed)
                 auto& ls = room->mWallSegmentsSorted[candidate];
-                V2f hit=V2fc::ZERO;
+                V2f hit = V2fc::ZERO;
                 std::pair<size_t, size_t> targetWall;
-                float gap = ls.length()*0.5f + 0.6f;
-                V2f p1 = ls.middle + ls.normal*room->kitchenData.kitchenWorktopDepth*0.8f;
+                float gap = ls.length() * 0.5f + 0.6f;
+                V2f p1 = ls.middle + ls.normal * room->kitchenData.kitchenWorktopDepth * 0.8f;
                 if ( RoomService::findOppositeWallFromPointAllowingGap(room, p1, ls.crossNormal, targetWall,
-                                                            hit, IncludeWindowsOrDoors::WindowsOnly, gap) &&
-                        RoomService::findOppositeWallFromPointAllowingGap(room, p1, -ls.crossNormal, targetWall,
-                                                               hit, IncludeWindowsOrDoors::WindowsOnly, gap) ) {
+                                                                       hit, IncludeWindowsOrDoors::WindowsOnly, gap) &&
+                     RoomService::findOppositeWallFromPointAllowingGap(room, p1, -ls.crossNormal, targetWall,
+                                                                       hit, IncludeWindowsOrDoors::WindowsOnly, gap) ) {
                     // Is all conditions suggested above are met, set the candidate index
 
                     // If the worktop index was already assigned, then revert the wall type to normal on the old one

@@ -141,26 +141,31 @@ std::pair<uint64_t, uint64_t> HouseService::getFloorWallPairFor( std::shared_ptr
 	return std::make_pair( 0, 0 );
 }
 
-std::shared_ptr<FloorBSData> HouseService::findFloorOf( std::shared_ptr<HouseBSData> _house, const int64_t _hash ) {
+FloorBSData* HouseService::findFloorOf( HouseBSData* _house, const int64_t _hash ) {
 	for ( auto& f : _house->mFloors ) {
 		for ( uint64_t t = 0; t < f->walls.size(); t++ ) {
 			if ( f->walls[t]->hash == _hash ) {
-				return f;
+				return f.get();
 			}
 		}
 		for ( auto& w : f->doors ) {
 			if ( w->hash == _hash ) {
-				return f;
+				return f.get();
 			}
 		}
 		for ( auto& w : f->windows ) {
 			if ( w->hash == _hash ) {
-				return f;
+				return f.get();
 			}
 		}
+        for ( auto& w : f->rooms ) {
+            if ( w->hash == _hash ) {
+                return f.get();
+            }
+        }
 		for ( uint64_t t = 0; t < f->stairs.size(); t++ ) {
 			if ( f->stairs[t]->hash == _hash ) {
-				return f;
+				return f.get();
 			}
 		}
 	}

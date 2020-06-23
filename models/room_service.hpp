@@ -131,6 +131,9 @@ struct WallSegmentIdentifier {
     int index = 0;
 };
 
+struct FurnitureRuleIgnoreDoorClipping {};
+struct FurnitureRuleForceCanOverlap {};
+
 template<typename T>
 struct DistanceNormalPair {
     float distance;
@@ -150,8 +153,14 @@ using FurnitureRuleFunction = std::function<bool( FloorBSData *, RoomBSData *, F
                                                   const FurniturePlacementRule& )>;
 using FurnitureRuleFunctionContainer = std::vector<FurnitureRuleFunction>;
 
-namespace RoomService {
+namespace FurnitureRuleFlags {
+    constexpr uint64_t None = 0;
+    constexpr uint64_t IgnoreDoorClipping = 1u << 0u;
+    constexpr uint64_t ForceCanOverlap = 1u << 1u;
 }
+
+using FurnitureRuleFlagsT = uint64_t ;
+
 class FurniturePlacementRule {
 public:
     inline static constexpr size_t BASE_FURNITURE_INDEX = 0;
@@ -193,7 +202,15 @@ public:
             ruleFunctionIndex = _data;
             return;
         }
-        LOGR("Houston we have a problem");
+        if constexpr ( std::is_same_v<D, FurnitureRuleIgnoreDoorClipping> ) {
+            flags |= FurnitureRuleFlags::IgnoreDoorClipping;
+            return;
+        }
+        if constexpr ( std::is_same_v<D, FurnitureRuleForceCanOverlap> ) {
+            flags |= FurnitureRuleFlags::ForceCanOverlap;
+            return;
+        }
+        LOGR("Houston we have a problem, furniture set rule is bonkers");
     }
 
     [[nodiscard]] bool hasSomethingToDo() const {
@@ -294,6 +311,10 @@ public:
         ruleFunctionIndex = _ruleFunctionIndex;
     }
 
+    [[nodiscard]] FurnitureRuleFlagsT getFlags() const {
+        return flags;
+    }
+
     static FurniturePlacementRule randomGeneration();
 
 private:
@@ -301,7 +322,124 @@ private:
     FurnitureRefs furnitureRefs{};
     WallSegmentIdentifier wallSegmentId{ WSLOH::Longest() };
     FurnitureSlacks slack{};
+    FurnitureRuleFlagsT flags = FurnitureRuleFlags::None;
     WallSegmentCorner preferredCorner = WSC_P1;
+};
+
+struct FRPSource {
+    std::shared_ptr<FittedFurniture> source;
+};
+
+struct FRPWidthNormal {
+    V2f widthNormal;
+};
+
+struct FRPDepthNormal {
+    V2f depthNormal;
+};
+
+struct FRPSlack {
+    V2f slack;
+};
+
+struct FRPSlackScalar {
+    float slackScalar = 0.0f;
+};
+
+struct FRPWSLO {
+    WSLO wslo = WSLO::WSLO_Longest;
+};
+
+struct FRPWallSegmentCorner {
+    WallSegmentCorner preferredCorner = WSC_P1;
+};
+
+struct FRPFurnitureRuleFlags {
+    FurnitureRuleFlagsT flags = FurnitureRuleFlags::None;
+};
+
+struct FurnitureRuleParams {
+    template<typename ...Args>
+    FurnitureRuleParams( Args&& ...args ) {
+        (initParams( std::forward<Args>( args )), ...); // Fold expression (c++17)
+    }
+
+    template <typename T>
+    void initParams( const T& param ) {
+        if constexpr ( std::is_same_v<std::decay_t<T>, FloorBSData*> ) {
+            f = param;
+        }
+        if constexpr ( std::is_same_v<std::decay_t<T>, RoomBSData*> ) {
+            r = param;
+        }
+        if constexpr ( std::is_same_v<T, const ArchSegment*> ) {
+            ls = param;
+        }
+        if constexpr ( std::is_same_v<T, std::shared_ptr<FittedFurniture>> ) {
+            ff = param;
+        }
+        if constexpr ( std::is_same_v<T, FRPSource> ) {
+            source = param.source;
+        }
+        if constexpr ( std::is_same_v<T, Quaternion> ) {
+            rot = param;
+        }
+        if constexpr ( std::is_same_v<T, FRPWidthNormal> ) {
+            widthNormal = param.widthNormal;
+        }
+        if constexpr ( std::is_same_v<T, FRPDepthNormal> ) {
+            depthNormal = param.depthNormal;
+        }
+        if constexpr ( std::is_same_v<T, FRPSlack> ) {
+            slack = param.slack;
+        }
+        if constexpr ( std::is_same_v<T, FRPSlackScalar> ) {
+            slackScalar = param.slackScalar;
+        }
+        if constexpr ( std::is_same_v<T, V2f> ) {
+            pos = param;
+        }
+        if constexpr ( std::is_same_v<T, float> ) {
+            heightOffset = param;
+        }
+        if constexpr ( std::is_same_v<T, FRPWallSegmentCorner> ) {
+            preferredCorner = param.preferredCorner;
+        }
+        if constexpr ( std::is_same_v<T, PivotPointPosition> ) {
+            where = param;
+        }
+        if constexpr ( std::is_same_v<T, uint32_t> ) {
+            exactIndex = param;
+        }
+        if constexpr ( std::is_same_v<T, FRPWSLO> ) { //WSLO
+            wslo = param.wslo;
+        }
+        if constexpr ( std::is_same_v<T, FRPFurnitureRuleFlags> ) {
+            flags = param.flags;
+        }
+        if constexpr ( std::is_same_v<T, std::vector<std::shared_ptr<FittedFurniture>>> ) {
+            furnitureList = param;
+        }
+    }
+
+    FloorBSData *f = nullptr;
+    RoomBSData *r = nullptr;
+    std::shared_ptr<FittedFurniture> ff;
+    std::shared_ptr<FittedFurniture> source;
+    V2f pos = V2fc::ZERO;
+    Quaternion rot{};
+    V2f widthNormal = V2fc::ZERO;
+    V2f depthNormal = V2fc::ZERO;
+    const ArchSegment *ls = nullptr;
+    V2f slack = V2fc::ZERO;
+    float slackScalar = 0.0f;
+    WallSegmentCorner preferredCorner = WSC_P1;
+    float heightOffset = 0.0f;
+    PivotPointPosition where = PivotPointPosition::Center;
+    uint32_t exactIndex = 0;
+    WSLO wslo{WSLO::WSLO_Longest};
+    FurnitureRuleFlagsT flags = FurnitureRuleFlags::None;
+    std::vector<std::shared_ptr<FittedFurniture>> furnitureList{};
 };
 
 class FurnitureRuleScript {
@@ -345,26 +483,20 @@ namespace RoomService {
 
     void calculateFurnitureBBox( FittedFurniture* _ff );
     void clearFurniture( RoomBSData *r );
-    [[nodiscard]] bool addFurniture( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> ff );
-    bool placeManually( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff, const V2f& _pos, const Quaternion& _rot,
-                        const V2f& _widthNormal, const V2f& _depthNormal );
-    [[nodiscard]] bool placeWallAligned( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff,
-                                         WSLO wslo, float extraSlack = 0.0f, uint32_t _exactIndex = 0, float _heightOffset = 0.0f );
-    [[nodiscard]] bool placeWallCorner( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff,
-                                        const ArchSegment *ls,
-                                        const V2f& slack = V2fc::ZERO,
-                                        WallSegmentCorner wsc = WSC_P1,
-                                        float _height = 0.0f );
-    [[nodiscard]] bool placeAround( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source,
-                                    PivotPointPosition where,
-                                    const V2f& slack = V2fc::ZERO, float _height = 0.0f );
-    [[nodiscard]] bool
-    placeWallAlong( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source,
-                    const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f& slack = V2fc::ZERO,
-                    float _height = 0.0f );
-    [[nodiscard]] bool
-    placeInBetween( FloorBSData *f, RoomBSData *r, const std::vector<FittedFurniture>& fset, PivotPointPosition where,
-                    const V2f& slack = V2fc::ZERO, float _height = 0.0f );
+    [[nodiscard]] bool addFurniture( FurnitureRuleParams& params );
+
+    // ********************
+    // Main furniture rules
+    // ********************
+    bool placeManually( FurnitureRuleParams params );
+    [[nodiscard]] bool placeWallAligned( FurnitureRuleParams params );
+    [[nodiscard]] bool placeWallCorner( FurnitureRuleParams params );
+    [[nodiscard]] bool placeAround( FurnitureRuleParams params );
+    [[nodiscard]] bool placeWallAlong( FurnitureRuleParams params );
+    [[nodiscard]] bool placeInBetween( FurnitureRuleParams params );
+    // ********************
+    // Main furniture rules
+    // ********************
 
     // Composite furnitures
     [[nodiscard]] bool cplaceMainWith2Sides( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns,
