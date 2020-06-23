@@ -19,7 +19,7 @@
 #include "room_service_furniture.hpp"
 #include "kitchen_room_service.hpp"
 
-auto quarterRotation = quatFromAxis(V4f{0.0f, 1.0f, 0.0f, M_PI_4f32});
+auto quarterRotation = quatFromAxis(V4f{0.0f, 1.0f, 0.0f, static_cast<float>(M_PI_4)});
 
 [[nodiscard]] bool FittedFurniture::checkIf( FittedFurnitureFlags _flag ) const {
     return checkBitWiseFlag(flags, _flag);
