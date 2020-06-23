@@ -597,7 +597,8 @@ namespace RoomService {
     }
 
     void calculateFurnitureBBox( FittedFurniture* _ff ) {
-        _ff->bbox3d = AABB{ _ff->position3d - ( _ff->size * 0.5f ), _ff->position3d + ( _ff->size * 0.5f ) };
+        V3f scaledHalf = half( _ff->size * _ff->scale );
+        _ff->bbox3d = AABB{ _ff->position3d - scaledHalf, _ff->position3d + scaledHalf };
         _ff->bbox3d = _ff->bbox3d.rotate(_ff->rotation);
         _ff->bbox = _ff->bbox3d.topDown();
         _ff->center = _ff->bbox.centre();
@@ -620,6 +621,11 @@ namespace RoomService {
             }
         }
 
+        if ( checkBitWiseFlag(params.flags, FurnitureRuleFlags::DoNotClipAgainstRoom) ) {
+            params.r->mFittedFurniture.push_back(params.ff);
+            return true;
+        }
+
         ClipperLib::Clipper c;
         ClipperLib::Path pathSubject = ClipperLib::V2fToPath(params.ff->bbox.points());
         V2f subjectPathSize = ClipperLib::pathSize(pathSubject);
@@ -628,7 +634,7 @@ namespace RoomService {
         ClipperLib::Paths solution;
         c.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
 
-        if ( !solution.empty() && solution.size() == 1 && solution[0].size() == 4 ) {
+        if ( (!solution.empty() && solution.size() == 1 && solution[0].size() == 4) ) {
             V2f solutionPathSize = ClipperLib::pathSize(solution[0]);
             if ( isVerySimilar(solutionPathSize, subjectPathSize) ) {
                 if ( !params.ff->checkIf(FF_CanOverlap) && !checkBitWiseFlag(params.flags, FurnitureRuleFlags::ForceCanOverlap) ) {
@@ -930,12 +936,18 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
 void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff ) {
     ff->rotation = ff->rotation * quarterRotation;
     ff->rotation.normalise();
+    RS::calculateFurnitureBBox(ff);
 }
 
 void RoomServiceFurniture::addFurnitureSingle( FloorBSData*f, RoomBSData *room, FurnitureMapStorage& furns, FT ftype ) {
     FurnitureRuleScript ruleScript;
     ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::MiddleOfRoom),
-                                               FurnitureRefs{ { ftype } }, FurnitureRuleIgnoreDoorClipping{}, FurnitureRuleForceCanOverlap{}
+                                               FurnitureRefs{ { ftype } }, FurnitureRuleIgnoreDoorClipping{}, FurnitureRuleForceCanOverlap{}, FurnitureRuleDoNotClipAgainstRoom{}
     });
     RS::runRuleScript(f, room, furns, ruleScript);
+}
+
+void RoomServiceFurniture::scaleIncrementalFurniture( FittedFurniture *ff, float scale ) {
+    ff->scale += V3f{scale};
+    RS::calculateFurnitureBBox(ff);
 }

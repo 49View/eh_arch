@@ -41,4 +41,5 @@ namespace RoomServiceFurniture {
     void addDefaultFurnitureSet( const std::string& _name );
     void addFurnitureSingle( FloorBSData* f, RoomBSData* room, FurnitureMapStorage& furn, FT ftype );
     void rotateFurniture( FittedFurniture* ff );
+    void scaleIncrementalFurniture( FittedFurniture* ff, float scale );
 }

@@ -198,6 +198,7 @@ struct WallSegmentIdentifier {
 
 struct FurnitureRuleIgnoreDoorClipping {};
 struct FurnitureRuleForceCanOverlap {};
+struct FurnitureRuleDoNotClipAgainstRoom {};
 
 template<typename T>
 struct DistanceNormalPair {
@@ -222,6 +223,7 @@ namespace FurnitureRuleFlags {
     constexpr uint64_t None = 0;
     constexpr uint64_t IgnoreDoorClipping = 1u << 0u;
     constexpr uint64_t ForceCanOverlap = 1u << 1u;
+    constexpr uint64_t DoNotClipAgainstRoom = 1u << 2u;
 }
 
 using FurnitureRuleFlagsT = uint64_t ;
@@ -273,6 +275,10 @@ public:
         }
         if constexpr ( std::is_same_v<D, FurnitureRuleForceCanOverlap> ) {
             flags |= FurnitureRuleFlags::ForceCanOverlap;
+            return;
+        }
+        if constexpr ( std::is_same_v<D, FurnitureRuleDoNotClipAgainstRoom> ) {
+            flags |= FurnitureRuleFlags::DoNotClipAgainstRoom;
             return;
         }
         LOGR("Houston we have a problem, furniture set rule is bonkers");
