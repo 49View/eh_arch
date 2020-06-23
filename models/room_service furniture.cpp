@@ -867,6 +867,7 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     std::string plant1 = "plant,spider";
     std::string toilet = "urby,toilet";
     std::string shower = "shower,tresse";
+    std::string bathTub = "bath,tub,standard";
     std::string bathroomSink = "urby,sink";
     std::string bathroomTowerRadiator = "bathroom,tower,radiator";
 
@@ -908,6 +909,7 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     furnitureSet.set.emplace_back(FTH::FT_Plant, plant1, V3f::ZERO, neutralSquareIcon);
     furnitureSet.set.emplace_back(FTH::FT_Toilet, toilet, V3f::ZERO, toiletIcon);
     furnitureSet.set.emplace_back(FTH::FT_Shower, shower, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_BathTub, bathTub, V3f::ZERO, neutralSquareIcon);
     furnitureSet.set.emplace_back(FTH::FT_BathroomSink, bathroomSink, V3f::ZERO, bathroomSinkIcon);
     furnitureSet.set.emplace_back(FTH::FT_BathroomTowerRadiator, bathroomTowerRadiator, V3f::ZERO, neutralSquareIcon);
 

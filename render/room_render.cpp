@@ -178,7 +178,7 @@ namespace RoomRender {
                              GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
         }
         for ( const auto& fur : w->mFittedFurniture ) {
-            auto furn = sg.GB<GT::Asset>(fur->name, fur->position3d, GT::Rotate(fur->rotation));
+            auto furn = sg.GB<GT::Asset>(fur->name, fur->position3d, GT::Rotate(fur->rotation), GT::Scale(fur->scale));
             ret.furnituresGB.emplace_back(furn);
         }
         if ( RoomService::hasRoomType(w, ASType::Kitchen) ) {

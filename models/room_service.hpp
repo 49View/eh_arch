@@ -34,6 +34,7 @@ public:
         FT_Plant,
         FT_Toilet,
         FT_Shower,
+        FT_BathTub,
         FT_BathroomSink,
         FT_BathroomTowerRadiator,
         FT_Sink,
@@ -47,6 +48,70 @@ public:
         FT_Invalid,
         Last
     };
+
+    static std::string name( FurnitureTypeHandler::Type fth ) {
+        switch ( fth ) {
+            case FT_Bed:
+                return "Bed";
+            case FT_Bedside:
+                return "Bedside";
+            case FT_Shelf:
+                return "Shelf";
+            case FT_Wardrobe:
+                return "Wardrobe";
+            case FT_Drawer:
+                return "Drawer";
+            case FT_Carpet:
+                return "Carpet";
+            case FT_Armchair:
+                return "Armchair";
+            case FT_Sofa:
+                return "Sofa";
+            case FT_SideBoard:
+                return "SideBoard";
+            case FT_TVHanged:
+                return "TVHanged";
+            case FT_TVWithStand:
+                return "TVWithStand";
+            case FT_Picture:
+                return "Picture";
+            case FT_CoffeeTable:
+                return "CoffeeTable";
+            case FT_DiningTable:
+                return "DiningTable";
+            case FT_Plant:
+                return "Plant";
+            case FT_Toilet:
+                return "Toilet";
+            case FT_Shower:
+                return "Shower";
+            case FT_BathroomSink:
+                return "BathroomSink";
+            case FT_BathroomTowerRadiator:
+                return "BathroomTowerRadiator";
+            case FT_Sink:
+                return "Sink";
+            case FT_OvenPanel:
+                return "OvenPanel";
+            case FT_Microwave:
+                return "Microwave";
+            case FT_Cooktop:
+                return "Cooktop";
+            case FT_Fridge:
+                return "Fridge";
+            case FT_ExtractorHood:
+                return "ExtractorHood";
+            case FT_DrawersHandle:
+                return "DrawersHandle";
+            case FT_Invalid:
+                return "Invalid";
+            case Last:
+                return "Last";
+            case FT_BathTub:
+                return "BathTub";
+        }
+        return "[MISSING FURNITURE TYPE]";
+    }
 
     static Type random() {
         return Type(unitRandI(Type::Last));

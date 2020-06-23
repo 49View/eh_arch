@@ -183,11 +183,12 @@ enum FittedFurnitureFlags {
 };
 
 JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
-        name, symbolRef, size, position3d, xyLocation, heightOffset, rotation, widthNormal,
+        name, symbolRef, size, scale, position3d, xyLocation, heightOffset, rotation, widthNormal,
          depthNormal, flags)
     std::string name;
     std::string symbolRef = S::SQUARE;
     Vector3f size = Vector3f::ONE;
+    Vector3f scale = Vector3f::ONE;
     Vector3f position3d = V3f::ZERO;
     Vector2f xyLocation = V2fc::ZERO;
     float heightOffset = 0.0f;
