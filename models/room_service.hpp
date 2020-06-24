@@ -30,6 +30,7 @@ public:
         FT_TVWithStand,
         FT_Picture,
         FT_CoffeeTable,
+        FT_CoffeeMachine,
         FT_DiningTable,
         FT_Plant,
         FT_Toilet,
@@ -109,6 +110,8 @@ public:
                 return "Last";
             case FT_BathTub:
                 return "BathTub";
+            case FT_CoffeeMachine:
+                return "CoffeeMachine";
         }
         return "[MISSING FURNITURE TYPE]";
     }

@@ -167,6 +167,24 @@ namespace KitchenRoomService {
         }
     }
 
+
+    void createWorktopAppliancies( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
+        KitchenData& kd = w->kitchenData;
+        auto kwp = kd.kitchenWorktopPath[0];
+        auto coffeeMachine = furns.spawn(FTH::FT_CoffeeMachine);
+        auto rot = Quaternion{ RoomService::furnitureAngleFromNormal(kwp.normal), V3f::UP_AXIS };
+        V2f pos = kwp.p1 + (kwp.crossNormal * coffeeMachine->size.x());
+        float height = kd.kitchenWorktopHeight + kd.worktopThickness;
+        RS::placeManually({ f, w, coffeeMachine, pos, rot,
+                            height,
+                            FRPWidthNormal{ kwp.crossNormal },
+                            FRPDepthNormal{ kwp.normal },
+                            FRPFurnitureRuleFlags{
+                                    FurnitureRuleFlags::IgnoreDoorClipping | FurnitureRuleFlags::ForceCanOverlap |
+                                    FurnitureRuleFlags::DoNotClipAgainstRoom }
+                          });
+    }
+
     void createUnits( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
         KitchenData& kd = w->kitchenData;
         std::pair<size_t, size_t> targetWall;
@@ -345,6 +363,7 @@ namespace KitchenRoomService {
                 break;
         }
 
+        KitchenRoomService::createWorktopAppliancies(f, w, furns);
         KitchenRoomService::createUnits(f, w, furns);
         KitchenRoomService::createTopUnits(f, w, furns);
     }

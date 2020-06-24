@@ -421,6 +421,7 @@ namespace RoomService {
 
     bool placeManually( FurnitureRuleParams params ) {
         params.ff->xyLocation = params.pos;
+        params.ff->heightOffset = params.heightOffset;
         params.ff->rotation = params.rot;
         params.ff->widthNormal = params.widthNormal;
         params.ff->depthNormal = params.depthNormal;
@@ -857,20 +858,23 @@ FurniturePlacementRule FurniturePlacementRule::randomGeneration() {
 
     return ret;
 }
+
 void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     std::string brimnes_bed = "Brimnes";
     std::string lauter_selije = "lauter_selije";
     std::string hemnes_shelf = "hemnes_shelf";
     std::string hemnes_drawer = "hemnes_drawer";
-    std::string soderhamn = "soderhamn";
+    std::string soderhamn = "sofa,hoop"; //"soderhamn";
     std::string carpet_flottebo = "carpet";
     std::string Strandmon = "strandmon";
     std::string pictures_set_3 = "pictures2";
     std::string coffeeTable = "noguchi";
     std::string diningTable = "ktc,table,round";
-    std::string sideBoard = "sideboard";
-    std::string tv = "sony,tv";
+    std::string sideBoard = "gallotti,radice,tama";
+    std::string tv = "smart,tv";
     std::string plant1 = "plant,spider";
+    std::string coffeeMachine = "coffee,machine";
+
     std::string toilet = "urby,toilet";
     std::string shower = "shower,tresse";
     std::string bathTub = "bath,tub,standard";
@@ -884,7 +888,6 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     std::string fridgeModel = "ktc,fridge,single";
     std::string extractorHoodModel = "ktc,extractor,hood";
     std::string drawersHandleModel = "ktc,handle,long,contemporary";
-
 
     std::string queenBedIcon = "fia,queen,icon";
     std::string bedSideIcon = "fia,bedside";
@@ -909,6 +912,7 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     furnitureSet.set.emplace_back(FTH::FT_Carpet, carpet_flottebo, V3f::ZERO, neutralSquareIcon);
     furnitureSet.set.emplace_back(FTH::FT_Armchair, Strandmon, V3f::ZERO, armchairIcon);
     furnitureSet.set.emplace_back(FTH::FT_CoffeeTable, coffeeTable, V3f::ZERO, coffeeTableIcon);
+    furnitureSet.set.emplace_back(FTH::FT_CoffeeMachine, coffeeMachine, V3f::ZERO, coffeeTableIcon);
     furnitureSet.set.emplace_back(FTH::FT_DiningTable, diningTable, V3f::ZERO, coffeeTableIcon);
     furnitureSet.set.emplace_back(FTH::FT_SideBoard, sideBoard, V3f::ZERO, neutralSquareIcon);
     furnitureSet.set.emplace_back(FTH::FT_TVWithStand, tv, V3f::ZERO, neutralSquareIcon);
