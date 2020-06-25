@@ -51,6 +51,7 @@ struct ArchSelectionElement {
     V2f initialSelectedPoint = V2fc::HUGE_VALUE_NEG;
     V2f lastMovingPoint = V2fc::HUGE_VALUE_NEG;
     SelectionFlagsT flags = SelectionFlags::None;
+    float timeStamp = 0.0f;
 };
 
 //template <>
@@ -69,13 +70,12 @@ public:
     [[nodiscard]] size_t count() const;
     [[nodiscard]] ArchStructuralFeature singleSelectedFeature() const;
 
-    void addToSelectionList( const ArchSelectionElement& _elem );
+    void addToSelectionList( ArchSelectionElement _elem );
 
     void removeFromSelectionList( const ArchSelectionElement& _elem );
 
     const ArchSelectionElement *
     find( const ArchStructuralFeature& elem, int64_t _index, const ArchBase *_arch ) const {
-
         for ( const auto& it : selection ) {
             if ( it.asf.feature == elem && it.asf.index == _index && it.asf.elem == _arch ) {
                 return &it;
@@ -85,17 +85,18 @@ public:
         return nullptr;
     }
 
-    const ArchSelectionElement *find( const ArchStructuralFeatureDescriptor& elem ) const {
-        if ( auto it = std::find(selection.begin(), selection.end(), ArchSelectionElement{ elem }); it !=
-                                                                                                    selection.end() ) {
+    const ArchSelectionElement *find( const ArchStructuralFeatureDescriptor& elem, float timeGap = 0.0f ) const {
+        if ( auto it = std::find(selection.begin(), selection.end(), ArchSelectionElement{ elem });
+                it != selection.end() &&
+                ( timeGap == 0.0f || it->timeStamp == 0.0f || GameTime::getCurrTimeStamp() - it->timeStamp > timeGap ) ) {
             return &( *it );
         }
         return nullptr;
     }
 
-    const ArchSelectionElement *find( const ArchBase *_elem ) const {
+    const ArchSelectionElement *find( const ArchBase *_elem, float timeGap = 0.0f ) const {
         for ( const auto& it : selection ) {
-            if ( it.asf.elem == _elem ) {
+            if ( it.asf.elem == _elem && ( timeGap == 0.0f || it.timeStamp == 0.0f || GameTime::getCurrTimeStamp() - it.timeStamp > timeGap ) ) {
                 return &it;
             }
         }

@@ -6,6 +6,7 @@
 
 #include <eh_arch/models/house_bsdata.hpp>
 #include <graphics/renderer.h>
+#include <core/game_time.h>
 #include "arch_selection.hpp"
 
 struct HouseBSData;
@@ -86,10 +87,19 @@ public:
     }
 
     template<typename T>
-    void singleToggleSelection( const T& _elem, const V2f& is, SelectionFlagsT flags = SelectionFlags::None ) {
-        if ( selection.find(_elem) ) {
+    void singleSelectionToggle( const T& _elem, const V2f& is, SelectionFlagsT flags = SelectionFlags::None ) {
+        if ( selection.find(_elem, 0.3f) ) {
             selection.clear();
-        } else {
+        }
+//        else {
+//            selection.clear();
+//            selection.addToSelectionList({ _elem, is, flags });
+//        }
+    }
+
+    template<typename T>
+    void singleSelectionKeep( const T& _elem, const V2f& is, SelectionFlagsT flags = SelectionFlags::None ) {
+        if ( !selection.find(_elem) ) {
             selection.clear();
             selection.addToSelectionList({ _elem, is, flags });
         }

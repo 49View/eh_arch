@@ -2,6 +2,7 @@
 // Created by dado on 31/05/2020.
 //
 
+#include <core/game_time.h>
 #include "arch_selection.hpp"
 
 void ArchSelection::moveSelectionList( const V2f& _point, moveSelectionCallback ccf ) {
@@ -74,7 +75,8 @@ ArchStructuralFeature ArchSelection::singleSelectedFeature() const {
     return selection.empty() ? ArchStructuralFeature::ASF_None : selection.begin()->asf.feature;
 }
 
-void ArchSelection::addToSelectionList( const ArchSelectionElement& _elem ) {
+void ArchSelection::addToSelectionList( ArchSelectionElement _elem ) {
+    _elem.timeStamp = GameTime::getCurrTimeStamp();
     if ( auto it = std::find( selection.begin(), selection.end(), _elem); it == selection.end() ) {
         selection.emplace_back(_elem);
     }
