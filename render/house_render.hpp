@@ -18,6 +18,8 @@ struct HouseBSData;
 
 class HouseRenderContainer {
 public:
+    HouseRenderContainer() = default;
+    HouseRenderContainer( const std::string& houseId ) : houseId(houseId) {}
     std::vector<GeomSP> wallsGB;
     std::vector<GeomSP> covingGB;
     std::vector<GeomSP> skirtingGB;
@@ -26,6 +28,7 @@ public:
     std::vector<GeomSP> furnituresGB;
     GeomSP floor;
     GeomSP ceiling;
+    std::string houseId{};
 };
 
 namespace HouseRender {

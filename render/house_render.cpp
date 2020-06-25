@@ -28,7 +28,7 @@ namespace HouseRender {
         if ( data->sourceData.floorPlanSize != V2fc::ZERO && !isFloorPlanRenderMode2d(arc.renderMode()) ) {
             // 1)
             auto color1 = C4f::WHITE.A(arc.getFloorPlanTransparencyFactor());
-            auto nameKey = data->sourceData.floorPlanSourceName+data->sourceData.floorPlanBBox.size().toString()+color1.toString();
+            auto nameKey = data->propertyId+data->sourceData.floorPlanBBox.size().toString()+color1.toString();
             rr.draw<DRect>(data->sourceData.floorPlanBBox, color1, RDSImage(data->propertyId),
                            RDSRectAxis::XZ, nameKey);
         } else if ( isFloorPlanRenderMode2d(arc.renderMode()) ) {
@@ -49,7 +49,7 @@ namespace HouseRender {
     }
 
     HouseRenderContainer make3dGeometry( Renderer& rr, SceneGraph& sg, const HouseBSData *data ) {
-        HouseRenderContainer ret{};
+        HouseRenderContainer ret{data->propertyId};
         rr.clearBucket(CommandBufferLimits::PBRStart);
         rr.LM()->removeAllPointLights();
 
