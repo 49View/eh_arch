@@ -126,9 +126,9 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
 /// \param _pid
 /// \param ccf
 void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf, const PostHouseLoadCallback& ccfailure ) {
-    Http::get(Url{ "/propertybim/" + _pid }, [&,ccf]( HttpResponeParams params ) {
-        if ( !params.bufferString.empty() ) {
-            houseJson = std::make_shared<HouseBSData>(params.bufferString);
+    Http::getNoCache(Url{ "/propertybim/" + _pid }, [&,ccf]( HttpResponeParams params ) {
+        if ( !params.BufferString().empty() ) {
+            houseJson = std::make_shared<HouseBSData>(params.BufferString());
             if ( ccf ) ccf();
         } else {
             if ( ccfailure ) ccfailure();
@@ -156,7 +156,7 @@ HouseRenderContainer& ArchOrchestrator::HRC() {
 
 void ArchOrchestrator::loadFurnitureMapStorage( const std::string& _name ) {
     Http::get(Url{ "/furnitureset/" + _name }, [&, this]( HttpResponeParams& res ) {
-        FurnitureSetContainer fset{ res.bufferString };
+        FurnitureSetContainer fset{ res.BufferString() };
         for ( const auto& f : fset.set ) {
             sg.loadProfile(f.symbol);
             furnitureMap.addIndex(f);

@@ -933,7 +933,7 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     furnitureSet.set.emplace_back(FTH::FT_DrawersHandle, drawersHandleModel, V3f::ZERO, neutralSquareIcon);
 
     Http::post(Url{ "/furnitureset" }, furnitureSet.serialize(), []( HttpResponeParams& res ) {
-        LOGRS(res.bufferString);
+        LOGRS(res.BufferString());
     });
 }
 
