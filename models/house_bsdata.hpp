@@ -455,23 +455,11 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height,
     KitchenData kitchenData;
 };
 
-JSONDATA(RoomPreData, wallSegmentsInternal, bboxInternal, rtypes)
-
-    RoomPreData( const std::vector<std::vector<ArchSegment>>& wallSegmentsInternal, const Rect2f& bboxInternal,
-                 const std::vector<ASTypeT>& _rtypes ) : wallSegmentsInternal(wallSegmentsInternal),
-                                                         bboxInternal(bboxInternal),
-                                                         rtypes(_rtypes) {}
-
-    std::vector<std::vector<ArchSegment>> wallSegmentsInternal;
-    Rect2f bboxInternal;
-    std::vector<ASTypeT> rtypes;
-};
-
 JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center,
            linkedHash, sequencePart, mTriangles2d, number, z, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
-           perimeterArchSegments, anchorPoint, defaultCeilingMaterial, defaultCeilingColor, externalWallsColor, rds,
-           walls, windows, doors, stairs, rooms, orphanedUShapes, orphanedWallSegments)
+           perimeterArchSegments, anchorPoint, defaultCeilingMaterial, defaultCeilingColor, externalWallsColor,
+           walls, windows, doors, stairs, rooms, orphanedUShapes)
 
     int32_t number = -1; // As in floor number, ground floor = 1, etc...
     float z = 0.0f;
@@ -493,14 +481,14 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height
 
     JMATH::Rect2fFeatureT anchorPoint = Rect2fFeature::bottomRight;
 
-    std::vector<RoomPreData> rds;
-
     std::vector<std::shared_ptr<WallBSData>> walls;
     std::vector<std::shared_ptr<WindowBSData>> windows;
     std::vector<std::shared_ptr<DoorBSData>> doors;
     std::vector<std::shared_ptr<StairsBSData>> stairs;
     std::vector<std::shared_ptr<RoomBSData>> rooms;
     std::vector<UShape> orphanedUShapes;
+
+    // Debugging only, maybe put on a debug flag or something
     std::vector<ArchSegment> orphanedWallSegments;
 };
 

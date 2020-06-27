@@ -57,6 +57,8 @@ struct WallsEvaluation {
     float mMaxExternalScore = 0;
 };
 
+using HouseStrategyResult = std::tuple<std::shared_ptr<HouseBSData>, RoomPreDataResultContainer>;
+
 namespace HouseMakerBitmap {
     const SourceImages& getSourceImages();
     void createSourceDataImage( HouseBSData* house, const PropertyListing& property, const std::string& mediaFolder );

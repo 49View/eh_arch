@@ -20,6 +20,7 @@
 
 struct RoomPreData;
 class FurnitureMapStorage;
+class RoomPreDataResult;
 
 struct DebugUShapeIntersection {
     UShape *s1 = nullptr;
@@ -85,7 +86,7 @@ struct ArchSegmentBucket {
 
 namespace FloorService {
     void externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& ws, std::vector<ArchSegment>& wse );
-    bool roomRecognition( FloorBSData *f );
+    RoomPreDataResult roomRecognition( FloorBSData *f );
     void guessFittings( FloorBSData *f, FurnitureMapStorage& furns );
     std::string naturalLanguageFloorNumber( int numFloor );
     const RoomBSData* findRoomWithHash( FloorBSData *f, int64_t hash );
@@ -94,7 +95,7 @@ namespace FloorService {
     void
     addWallsFromData( FloorBSData *f, const V2fVectorOfVector& floorWalls,
                       WallLastPointWrapT wpw = WallLastPointWrap::No );
-    void addRoomsFromData( FloorBSData *f, const HouseBSData* house );
+    void addRoomsFromData( FloorBSData *f, const HouseBSData* house, const std::vector<RoomPreData>& rds );
     void addDoorFromData( FloorBSData *f, float _doorHeight, const UShape& w1, const UShape& w2,
                                  ArchSubTypeT st = ArchSubType::NotApplicable );
     void addWindowFromData( FloorBSData *f, float _windowHeight, float _defaultWindowBaseOffset,

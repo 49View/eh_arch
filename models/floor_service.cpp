@@ -41,9 +41,9 @@ void FloorService::addWallsFromData( FloorBSData *f, const V2fVectorOfVector& fl
     calcBBox(f);
 }
 
-void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData* house ) {
+void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData* house, const std::vector<RoomPreData>& rds ) {
     // finally insert in floor
-    for ( auto& r : f->rds ) {
+    for ( auto& r : rds ) {
         auto newRoom = RoomService::createRoom(r, f->height, f->z, house);
         RoomService::updateFromArchSegments(newRoom.get(), r.wallSegmentsInternal);
         f->rooms.push_back(newRoom);
@@ -59,9 +59,9 @@ void FloorService::updateFromNewDoorOrWindow( FloorBSData *f ) {
     for ( auto& room : f->rooms ) {
         float minDistanceError = std::numeric_limits<float>::max();
         int ri = 0;
-        for ( auto& rw : f->rds ) {
-            float distTL = distance(rw.bboxInternal.topLeft(), room->bbox.topLeft());
-            float distBR = distance(rw.bboxInternal.bottomRight(), room->bbox.bottomRight());
+        for ( auto& rw : f->rooms ) {
+            float distTL = distance(rw->bbox.topLeft(), room->bbox.topLeft());
+            float distBR = distance(rw->bbox.bottomRight(), room->bbox.bottomRight());
             float td = distTL + distBR;
             if ( td < minDistanceError ) {
                 rwsMapping = { ri, room };
@@ -71,7 +71,7 @@ void FloorService::updateFromNewDoorOrWindow( FloorBSData *f ) {
         }
 
         float lPerimeter = 0.0;
-        for ( auto& rwsp : f->rds[rwsMapping.first].wallSegmentsInternal ) {
+        for ( auto& rwsp : f->rooms[rwsMapping.first]->mWallSegments ) {
             int csize = static_cast<int>( rwsp.size());
             for ( int q = 0; q < csize; q++ ) {
                 lPerimeter += ArchSegmentService::length(rwsp[q]);
@@ -81,7 +81,7 @@ void FloorService::updateFromNewDoorOrWindow( FloorBSData *f ) {
         //		if ( rwsMapping.second->WallSegments().size() != rws[rwsMapping.first].wallSegments.size() ) {
         if ( !isScalarEqual(rwsMapping.second->mPerimeter, lPerimeter, 0.01f) ) {
             RoomService::updateFromArchSegments(rwsMapping.second.get(),
-                                                f->rds[rwsMapping.first].wallSegmentsInternal);
+                                                f->rooms[rwsMapping.first]->mWallSegments);
         }
     }
 }
@@ -466,33 +466,36 @@ bool addRoomSegmentsCore( std::vector<ArchSegment>& output, std::vector<ArchSegm
     return isValidRoom;
 }
 
-bool addRoomSegments( FloorBSData *f, std::vector<ArchSegment>& ws, size_t firstIndex = 0 ) {
+void addRoomSegments( FloorBSData *f, std::vector<ArchSegment>& ws, RoomPreDataResult& rdsc, size_t firstIndex = 0 ) {
 
     JMATH::Rect2f rbbox{ JMATH::Rect2f::INVALID };
     std::vector<ArchSegment> output{};
-    bool isValidRoom = addRoomSegmentsCore(output, ws, rbbox, firstIndex);
+    bool isValidPreRoom = addRoomSegmentsCore(output, ws, rbbox, firstIndex);
 
-    if ( isValidRoom ) {
+    if ( isValidPreRoom ) {
         std::vector<std::vector<ArchSegment>> allRoomSegments;
         allRoomSegments.push_back(output);
-        f->rds.emplace_back(allRoomSegments, rbbox, std::vector<ASTypeT>{ ASType::GenericRoom });
+        rdsc.rds.emplace_back(allRoomSegments, rbbox, std::vector<ASTypeT>{ ASType::GenericRoom });
     }
 
-    return isValidRoom;
 //    LOGRS( "Room size: " << output.size() << " Original Segments # " << ws.size());
 
 }
 
-bool addRDSRooms( FloorBSData *f, std::vector<ArchSegment>& ws ) {
+RoomPreDataResult addRDSRooms( FloorBSData *f, std::vector<ArchSegment>& ws ) {
 
-    if ( ws.empty() ) return false;
+    RoomPreDataResult ret;
+
+    if ( ws.empty() ) {
+        return RoomPreDataResult{false};
+    }
 
     // Add rooms
     size_t incCounter = 0;
     size_t firstIndex = 0;
     size_t tooLong = ws.size();
     while ( incCounter < tooLong && !ws.empty() ) {
-        addRoomSegments(f, ws, firstIndex);
+        addRoomSegments(f, ws, ret, firstIndex);
         firstIndex = tooLong == ws.size() ? firstIndex + 1 : 0;
         tooLong = ws.size();
         ++incCounter;
@@ -500,7 +503,8 @@ bool addRDSRooms( FloorBSData *f, std::vector<ArchSegment>& ws ) {
 
     f->orphanedWallSegments = ws;
 
-    return ws.empty();
+    ret.isValidPreRoom = ws.empty();
+    return ret;
 }
 
 void FloorService::removeUnPairedUShapes( FloorBSData *f ) {
@@ -553,9 +557,9 @@ float FloorService::updatePerimeter( FloorBSData *f, const std::vector<ArchSegme
     return lPerimeter;
 }
 
-bool FloorService::roomRecognition( FloorBSData *f ) {
+RoomPreDataResult FloorService::roomRecognition( FloorBSData *f ) {
 
-    f->rds.clear();
+    RoomPreDataResult rds{};
 
     std::vector<ArchSegment> ws{};
     std::vector<ArchSegment> wse{};
@@ -564,15 +568,16 @@ bool FloorService::roomRecognition( FloorBSData *f ) {
 
     if ( ws.empty() ) {
         LOGRS("[ERROR] externalRaysIntoWalls returned zero array");
-        return false;
+        rds.isValidPreRoom = false;
+        return rds;
     }
 
     FloorServiceIntermediateData::WSGE() = wse;
     FloorServiceIntermediateData::WSG() = ws;
 
-    bool roomsHaveBeenCalculatedCorrectly = addRDSRooms(f, ws);
+    rds = addRDSRooms(f, ws );
 
-    if ( roomsHaveBeenCalculatedCorrectly ) {
+    if ( rds.isValidPreRoom ) {
         // External floor Perimeter
         std::vector<ArchSegment> externalFloorSegments{};
         JMATH::Rect2f rbboxExternal = JMATH::Rect2f::INVALID;
@@ -580,15 +585,16 @@ bool FloorService::roomRecognition( FloorBSData *f ) {
         FloorService::updatePerimeter(f, externalFloorSegments);
         if ( !ArchSegmentService::doSegmentsEndsMeet(externalFloorSegments) ) {
             LOGRS("[ERROR] Cannot close external perimeter of the house");
-            return false;
+            rds.isValidPreRoom = false;
+            return rds;
         }
     }
 
-    if ( !roomsHaveBeenCalculatedCorrectly ) {
+    if ( !rds.isValidPreRoom ) {
         LOGRS("[ERROR] Rooms have not been detected");
     }
 
-    return roomsHaveBeenCalculatedCorrectly;
+    return rds;
 }
 
 std::vector<RoomBSData *> FloorService::roomsIntersectingBBox( FloorBSData *f, const Rect2f& bbox, bool earlyOut ) {
@@ -1133,7 +1139,6 @@ void FloorService::rollbackToCalculatedWalls( FloorBSData *f ) {
         return WallService::isWindowOrDoorPart(w.get());
     });
     f->rooms.clear();
-    f->rds.clear();
     f->windows.clear();
     f->doors.clear();
     f->stairs.clear();

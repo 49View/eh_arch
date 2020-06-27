@@ -14,6 +14,28 @@
 
 #include "house_bsdata.hpp"
 
+JSONDATA(RoomPreData, wallSegmentsInternal, bboxInternal, rtypes)
+
+    RoomPreData( const std::vector<std::vector<ArchSegment>>& wallSegmentsInternal, const Rect2f& bboxInternal,
+                 const std::vector<ASTypeT>& _rtypes ) : wallSegmentsInternal(wallSegmentsInternal),
+                                                         bboxInternal(bboxInternal),
+                                                         rtypes(_rtypes) {}
+
+    std::vector<std::vector<ArchSegment>> wallSegmentsInternal;
+    Rect2f bboxInternal;
+    std::vector<ASTypeT> rtypes;
+};
+
+struct RoomPreDataResult {
+    RoomPreDataResult() = default;
+    RoomPreDataResult( bool isValidPreRoom ) : isValidPreRoom(isValidPreRoom) {}
+
+    bool isValidPreRoom = true;
+    std::vector<RoomPreData> rds{};
+};
+
+using RoomPreDataResultContainer = std::vector<RoomPreDataResult>;
+
 class FurnitureTypeHandler {
 public:
     enum Type {
