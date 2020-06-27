@@ -523,21 +523,19 @@ void FloorService::removeUnPairedUShapes( FloorBSData *f ) {
     }
 }
 
-bool FloorService::mergePoints( FloorBSData *f, const V2fVectorOfVector& points, const Rect2f& pointsBBox ) {
+void FloorService::mergePoints( FloorBSData *f, const V2fVectorOfVector& points, const Rect2f& pointsBBox ) {
 
-    bool ret = false;
     if ( f->bbox.contains(pointsBBox) || f->bbox.intersect(pointsBBox) ) {
-        for ( auto& w : f->walls ) {
-            for ( const auto& wallPoints : points ) {
-                ret |= WallService::mergePoints(w.get(), wallPoints);
+        for ( const auto& wallPoints : points ) {
+            bool bHasMerged = false;
+            for ( auto& w : f->walls ) {
+                bHasMerged |= WallService::mergePoints(w.get(), wallPoints);
+            }
+            if ( !bHasMerged ) {
+                addWallsFromData(f, points, WallLastPointWrap::Yes);
             }
         }
-        if ( !ret ) {
-            addWallsFromData(f, points, WallLastPointWrap::Yes);
-        }
-        ret = true;
     }
-    return ret;
 }
 
 float FloorService::updatePerimeter( FloorBSData *f, const std::vector<ArchSegment>& singleRoomSegmentsExternal ) {

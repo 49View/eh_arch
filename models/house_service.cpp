@@ -290,14 +290,13 @@ void HouseService::moveArch( HouseBSData* house, ArchStructural* elem, const V2f
 }
 
 void HouseService::mergePoints( HouseBSData *house, const V2fVectorOfVector& points ) {
-    bool inFloors = false;
     Rect2f pointsBBox{points};
 
-    for ( auto& f : house->mFloors ) {
-        inFloors |= FloorService::mergePoints( f.get(), points, pointsBBox );
+    if ( house->mFloors.empty() ) {
+        HouseService::addFloorFromData( house, pointsBBox );
     }
-    if ( !inFloors ) {
-        auto f = addFloorFromData(house, pointsBBox);
+
+    for ( auto& f : house->mFloors ) {
         FloorService::mergePoints( f.get(), points, pointsBBox );
     }
 }
