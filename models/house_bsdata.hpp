@@ -29,13 +29,10 @@ static const float defaltToBeOverwritten = 7543859749023.0f;
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
 
-JSONDATA(HouseSourceData, floorPlanSize, floorPlanBBox, floorPlanSourceName, sourceGuassianSigma, sourceGuassianBeta,
+JSONDATA(HouseSourceData, floorPlanSourceName, sourceGuassianSigma, sourceGuassianBeta,
          sourceGuassian, sourceContrast, sourceBrightness, minBinThreshold, maxBinThreshold, sourceSharpen,
          rescaleFactor, maxUShapeLengthRatio, minPerimeterLength, winningStrategy, winningMargin, pixelCMFromOCR)
-    Vector2f floorPlanSize = V2fc::ZERO;
-    Rect2f floorPlanBBox = Rect2f::ZERO;
     std::string floorPlanSourceName{};
-    RawImage image = RawImage::WHITE4x4();
 
     int sourceGuassianSigma = 3; // Must be odd? I think so
     float sourceGuassianBeta = -0.75f;

@@ -29,11 +29,14 @@ namespace HouseRender {
         // 1) It's a 3d floorPlan with a source image, render the source image as a background
         // 2) it's a 2d floorPlan so no images allowed, render a flat poly
         // 3) it's a 3d floorPlan but it hasn't got a source image, (IE not HouseMakerBitmap), renders a flat poly
-        if ( data->sourceData.floorPlanSize != V2fc::ZERO && !isFloorPlanRenderMode2d(arc.renderMode()) ) {
+
+        auto sourceImage = sg.get<RawImage>(data->propertyId);
+        if ( sourceImage && !isFloorPlanRenderMode2d(arc.renderMode()) ) {
             // 1)
             auto color1 = C4f::WHITE.A(arc.getFloorPlanTransparencyFactor());
-            auto nameKey = data->propertyId+data->sourceData.floorPlanBBox.size().toString()+color1.toString();
-            rr.draw<DRect>(data->sourceData.floorPlanBBox, color1, RDSImage(data->propertyId),
+            auto floorPlanBBox = Rect2f{V2fc::ZERO, V2f{sourceImage->width, sourceImage->height} * data->sourceData.rescaleFactor};
+            auto nameKey = data->propertyId + std::to_string(data->sourceData.rescaleFactor) + color1.toString();
+            rr.draw<DRect>(floorPlanBBox, color1, RDSImage(data->propertyId),
                            RDSRectAxis::XZ, nameKey);
         } else if ( isFloorPlanRenderMode2d(arc.renderMode()) ) {
             // 2)
