@@ -6,6 +6,7 @@
 
 #include "../models/house_bsdata.hpp"
 #include "../models/room_service_furniture.hpp"
+#include <core/memento.hpp>
 #include <core/resources/resource_utils.hpp>
 #include <core/resources/resource_manager.hpp>
 #include <eh_arch/render/house_render.hpp>
@@ -36,6 +37,10 @@ public:
                     const PostHouseLoadCallback& ccfailure = nullptr );
     void saveHouse();
     void setHouse( const std::shared_ptr<HouseBSData>& _houseJson );
+    void pushHouseChange();
+    HouseBSData* undoHouseChange();
+    HouseBSData* redoHouseChange();
+
     void onEvent(ArchIOEvents event);
     bool hasEvent(ArchIOEvents event) const;
     Matrix4f calcFloorplanNavigationTransform( float screenRatio, float screenPadding );
@@ -48,8 +53,9 @@ protected:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
     ArchRenderController& arc;
-    std::shared_ptr<HouseBSData> houseJson;
+    Memento<HouseBSData> houseJson;
     ArchIOEvents currIOEvent = ArchIOEvents::AIOE_None;
     HouseRenderContainer hrc;
     FurnitureMapStorage furnitureMap;
+    bool loadingMutex = false;
 };

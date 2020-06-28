@@ -82,12 +82,12 @@ namespace HOD { // HighOrderDependency
 }
 
 HouseBSData* ArchOrchestrator::H() {
-    return houseJson.get();
+    return houseJson().get();
 }
 
 Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( float screenRatio, float screenPadding ) {
     auto m = Matrix4f{Matrix4f::IDENTITY};
-    float vmax = max(houseJson->bbox.bottomRight().x(), houseJson->bbox.bottomRight().y());
+    float vmax = max(houseJson()->bbox.bottomRight().x(), houseJson()->bbox.bottomRight().y());
     float screenFloorplanRatio = ( 1.0f / screenRatio );
     float vmaxScale = vmax / screenFloorplanRatio;
     auto vr = 1.0f / vmaxScale;
@@ -98,28 +98,30 @@ Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( float screenRatio, 
 }
 
 void ArchOrchestrator::centerCameraMiddleOfHouse( float slack ) {
-    if ( houseJson->bbox.isValid() ) {
+    if ( houseJson()->bbox.isValid() ) {
         Timeline::play(rsg.DC()->PosAnim(), 0,
-                       KeyFramePair{ 0.9f, rsg.DC()->center(houseJson->bbox, slack) });
+                       KeyFramePair{ 0.9f, rsg.DC()->center(houseJson()->bbox, slack) });
     }
 }
 
 void ArchOrchestrator::showIMHouse() {
-    if ( houseJson ) {
-        HouseRender::IMHouseRender(rsg.RR(), sg, houseJson.get(), arc);
-    }
+    HouseRender::IMHouseRender(rsg.RR(), sg, H(), arc);
 }
 
 void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
-    rsg.RR().setLoadingFlag( true );
-    HOD::resolver<HouseBSData>(sg, houseJson.get(), [&, ccf]() {
-        sg.loadCollisionMesh(HouseService::createCollisionMesh(houseJson.get()));
-        hrc = HouseRender::make3dGeometry(rsg.RR(), sg, houseJson.get());
-        if ( ccf ) ccf();
-        rsg.RR().setLoadingFlag( false );
-        rsg.setProbePosition( HouseService::centerOfBiggestRoom( houseJson.get() ));
-        rsg.useSkybox(true);
-    });
+    if ( !loadingMutex && H() ) {
+        loadingMutex = true;
+        rsg.RR().setLoadingFlag( true );
+        HOD::resolver<HouseBSData>(sg, H(), [&, ccf]() {
+            sg.loadCollisionMesh(HouseService::createCollisionMesh(H()));
+            hrc = HouseRender::make3dGeometry(rsg.RR(), sg, H());
+            if ( ccf ) ccf();
+            rsg.RR().setLoadingFlag( false );
+            rsg.setProbePosition( HouseService::centerOfBiggestRoom( H() ));
+            rsg.useSkybox(true);
+            loadingMutex = false;
+        });
+    }
 }
 
 /// This loads a house with a http get
@@ -128,7 +130,7 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
 void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf, const PostHouseLoadCallback& ccfailure ) {
     Http::getNoCache(Url{ "/propertybim/" + _pid }, [&,ccf]( HttpResponeParams params ) {
         if ( !params.BufferString().empty() ) {
-            houseJson = std::make_shared<HouseBSData>(params.BufferString());
+            houseJson.reset(std::make_shared<HouseBSData>(params.BufferString()));
             if ( ccf ) ccf();
         } else {
             if ( ccfailure ) ccfailure();
@@ -147,7 +149,7 @@ void ArchOrchestrator::saveHouse() {
 /// This loads a house with an already created HouseBSData so basically sets the smart pointer
 /// \param _houseJson
 void ArchOrchestrator::setHouse( const std::shared_ptr<HouseBSData>& _houseJson ) {
-    houseJson = _houseJson;
+    houseJson.reset(_houseJson);
 }
 
 HouseRenderContainer& ArchOrchestrator::HRC() {
@@ -173,5 +175,17 @@ void ArchOrchestrator::onEvent(ArchIOEvents event) {
 
 bool ArchOrchestrator::hasEvent(ArchIOEvents event) const {
     return currIOEvent == event;
+}
+
+HouseBSData *ArchOrchestrator::undoHouseChange() {
+    return houseJson.undo().get();
+}
+
+HouseBSData *ArchOrchestrator::redoHouseChange() {
+    return houseJson.redo().get();
+}
+
+void ArchOrchestrator::pushHouseChange() {
+    houseJson.push( EntityFactory::create<HouseBSData>(houseJson()->serialize()) );
 }
 

@@ -19,7 +19,11 @@ namespace HouseRender {
 
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const HouseBSData *data, const ArchRenderController& arc ) {
 
+        // Clear the bucket always, because if house it's null it should show a clear/empty screen
         rr.clearBucket(CommandBufferLimits::UI2dStart);
+
+        // If no data clearly early exit with just clear of buckets performed
+        if ( !data ) return;
 
         // We have 3 combinations here:
         // 1) It's a 3d floorPlan with a source image, render the source image as a background
@@ -49,9 +53,14 @@ namespace HouseRender {
     }
 
     HouseRenderContainer make3dGeometry( Renderer& rr, SceneGraph& sg, const HouseBSData *data ) {
-        HouseRenderContainer ret{data->propertyId};
+        // Clear the bucket always, because if house it's null it should show a clear/empty screen
         rr.clearBucket(CommandBufferLimits::PBRStart);
         rr.LM()->removeAllPointLights();
+
+        // If no data clearly early exit with just clear of buckets performed
+        if ( !data ) return HouseRenderContainer{};
+
+        HouseRenderContainer ret{data->propertyId};
 
         sg.addSkybox(data->defaultSkybox);
 
