@@ -177,15 +177,15 @@ bool ArchOrchestrator::hasEvent(ArchIOEvents event) const {
     return currIOEvent == event;
 }
 
-HouseBSData *ArchOrchestrator::undoHouseChange() {
-    return houseJson.undo().get();
+void ArchOrchestrator::undoHouseChange() {
+    houseJson.undo();
 }
 
-HouseBSData *ArchOrchestrator::redoHouseChange() {
-    return houseJson.redo().get();
+void ArchOrchestrator::redoHouseChange() {
+    houseJson.redo();
 }
 
 void ArchOrchestrator::pushHouseChange() {
-    houseJson.push( EntityFactory::create<HouseBSData>(houseJson()->serialize()) );
+    houseJson.push();
 }
 

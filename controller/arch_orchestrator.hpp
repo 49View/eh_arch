@@ -38,8 +38,8 @@ public:
     void saveHouse();
     void setHouse( const std::shared_ptr<HouseBSData>& _houseJson );
     void pushHouseChange();
-    HouseBSData* undoHouseChange();
-    HouseBSData* redoHouseChange();
+    void undoHouseChange();
+    void redoHouseChange();
 
     void onEvent(ArchIOEvents event);
     bool hasEvent(ArchIOEvents event) const;

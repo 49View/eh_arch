@@ -96,7 +96,7 @@ public:
 
     const ArchSelectionElement *find( const ArchBase *_elem, float timeGap = 0.0f ) const {
         for ( const auto& it : selection ) {
-            if ( it.asf.elem == _elem && ( timeGap == 0.0f || it.timeStamp == 0.0f || GameTime::getCurrTimeStamp() - it.timeStamp > timeGap ) ) {
+            if ( it.asf.elem == _elem && it.asf.feature == ArchStructuralFeature::ASF_Poly && ( timeGap == 0.0f || it.timeStamp == 0.0f || GameTime::getCurrTimeStamp() - it.timeStamp > timeGap ) ) {
                 return &it;
             }
         }
