@@ -24,7 +24,7 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2001;
+static const uint64_t SHouseJSONVersion = 2121;
 static const float defaltToBeOverwritten = 7543859749023.0f;
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
