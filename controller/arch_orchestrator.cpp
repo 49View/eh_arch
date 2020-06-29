@@ -97,6 +97,7 @@ Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( float screenRatio, 
     m.scale(V3f{ vr, -vr, -vr });
     m.translate(V3f{ getScreenAspectRatio - screenFloorplanRatio - screenPadding, screenFloorplanRatio,
                       screenFloorplanRatio });
+    floorplanNavigationMatrix = m;
     return m;
 }
 
@@ -133,6 +134,7 @@ void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCa
     Http::getNoCache(Url{ "/propertybim/" + _pid }, [&,ccf]( HttpResponeParams params ) {
         if ( !params.BufferString().empty() ) {
             houseJson.reset(std::make_shared<HouseBSData>(params.BufferString()));
+            setViewingMode(AVM_Hidden);
             if ( ccf ) ccf();
         } else {
             if ( ccfailure ) ccfailure();
@@ -197,21 +199,30 @@ void ArchOrchestrator::setTourView() {
 void ArchOrchestrator::setAssistedView() {
 
 }
-void ArchOrchestrator::setWalkView() {
+void ArchOrchestrator::setWalkView( float animationSpeed ) {
     arc.setViewingMode(ArchViewingMode::AVM_Walk);
     rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
     rsg.setRigCameraController(CameraControlType::Walk);
     rsg.useSkybox(true);
+    arc.pm(RDSPreMult(calcFloorplanNavigationTransform(3.5f, 0.02f)));
+    arc.renderMode(FloorPlanRenderMode::Normal2d);
+    HouseRender::IMHouseRender(rsg.RR(), sg, H(), arc);
     V3f pos = V3f::ZERO;
     V3f quatAngles = V3f::ZERO;
     HouseService::bestStartingPositionAndAngle(H(), pos, quatAngles);
     auto quat = quatCompose(quatAngles);
     rsg.DC()->setIncrementQuatAngles(quatAngles);
-    Timeline::play(rsg.DC()->PosAnim(), 0,
-                   KeyFramePair{ 0.9f, pos });
-    Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
+    if ( animationSpeed > 0.0f ) {
+        Timeline::play(rsg.DC()->PosAnim(), 0,
+                       KeyFramePair{ 0.9f * animationSpeed, pos });
+        Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f * animationSpeed, quat });
+    } else {
+        rsg.DC()->setPosition(pos);
+        rsg.DC()->setQuat(quat);
+    }
     rsg.RR().setVisibilityOnTags(ArchType::CeilingT, true);
-    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
     sg.setCollisionEnabled(true);
@@ -222,6 +233,7 @@ void ArchOrchestrator::setTopDownView() {
     rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
     rsg.setRigCameraController(CameraControlType::Edit2d);
     rsg.DC()->LockAtWalkingHeight(false);
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
     rsg.DC()->setIncrementQuatAngles(quatAngles);
     rsg.useSkybox(false);
@@ -232,6 +244,7 @@ void ArchOrchestrator::setTopDownView() {
     centerCameraMiddleOfHouse(2.0f);
     rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
     sg.setCollisionEnabled(false);
@@ -241,6 +254,7 @@ void ArchOrchestrator::setDollHouseView() {
     arc.setViewingMode(ArchViewingMode::AVM_DollHouse);
     rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
     rsg.setRigCameraController(CameraControlType::Fly);
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
     rsg.useSkybox(true);
     V3f pos = V3f::ZERO;
     V3f quatAngles = V3f::ZERO;
@@ -250,6 +264,7 @@ void ArchOrchestrator::setDollHouseView() {
     Timeline::play(rsg.DC()->PosAnim(), 0, KeyFramePair{ 0.9f, pos });
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
     rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
@@ -261,6 +276,9 @@ void ArchOrchestrator::setFloorPlanView() {
     rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
     rsg.setRigCameraController(CameraControlType::Edit2d);
     rsg.DC()->LockAtWalkingHeight(false);
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    arc.renderMode(FloorPlanRenderMode::Debug3d);
+    HouseRender::IMHouseRender(rsg.RR(), sg, H(), arc);
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
     rsg.DC()->setIncrementQuatAngles(quatAngles);
     rsg.useSkybox(false);
@@ -272,6 +290,7 @@ void ArchOrchestrator::setFloorPlanView() {
         showIMHouse();
     }
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
     sg.setCollisionEnabled(false);
@@ -281,6 +300,8 @@ void ArchOrchestrator::setFloorPlanView() {
 void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
 
     switch ( _wm ) {
+        case AVM_Hidden:
+            break;
         case AVM_Tour:
             setTourView();
             break;
@@ -302,4 +323,15 @@ void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
     }
 }
 
-
+void ArchOrchestrator::updateViewingModes() {
+    if ( H() && arc.getViewingMode() == AVM_Walk ) {
+        auto camPos = rsg.DC()->getPosition() * V3f::MASK_Y_OUT;
+        auto camDir = -rsg.DC()->getDirection() * 0.7f;
+        auto sm = DShaderMatrix{ DShaderMatrixValue2dColor };
+        rsg.RR().clearBucket(CommandBufferLimits::CameraLocator);
+        rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, camPos, V4f::DARK_RED, 0.4f, RDSPreMult(floorplanNavigationMatrix),
+                                     sm, std::string{"CameraOminoKey"});
+        rsg.RR().draw<DArrow>(CommandBufferLimits::CameraLocator, V3fVector{ camPos, camPos + camDir }, RDSArrowAngle(0.45f),
+                              RDSArrowLength(0.6f), V4f::RED, 0.004f, sm, RDSPreMult(floorplanNavigationMatrix), std::string{"CameraOminoKeyDirection1"});
+    }
+}

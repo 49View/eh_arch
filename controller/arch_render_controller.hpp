@@ -146,9 +146,10 @@ public:
     void setViewingMode( ArchViewingMode _viewingMode );
 private:
     ArchSelection selection;
-    ArchViewingMode viewingMode = ArchViewingMode::AVM_Walk;
+    ArchViewingMode viewingMode = ArchViewingMode::AVM_Hidden;
     RDSPreMult mPm{ Matrix4f::MIDENTITY() };
     FloorPlanRenderMode mRenderMode = FloorPlanRenderMode::Normal2d;
+    Matrix4f floorplanNavigationMatrix = Matrix4f::MIDENTITY();
     C4f selectedColor = C4f::ORANGE_SCHEME1_1;
     float floorPlanTransparencyFactor = 0.5f;
 };

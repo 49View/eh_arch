@@ -20,7 +20,7 @@
 
 struct RoomPreData;
 class FurnitureMapStorage;
-class RoomPreDataResult;
+struct RoomPreDataResult;
 
 struct DebugUShapeIntersection {
     UShape *s1 = nullptr;

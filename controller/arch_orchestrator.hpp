@@ -45,10 +45,11 @@ public:
 
     void setTourView();
     void setAssistedView();
-    void setWalkView();
+    void setWalkView( float animationSpeed = 1.0f );
     void setFloorPlanView();
     void setTopDownView();
     void setDollHouseView();
+    void updateViewingModes();
 
 protected:
     SceneGraph& sg;
@@ -59,4 +60,5 @@ protected:
     HouseRenderContainer hrc;
     FurnitureMapStorage furnitureMap;
     bool loadingMutex = false;
+    Matrix4f floorplanNavigationMatrix{Matrix4f::MIDENTITY()};
 };
