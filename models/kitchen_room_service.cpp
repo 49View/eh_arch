@@ -341,9 +341,11 @@ namespace KitchenRoomService {
             setNextMainWorktopIndexCandidate(w);
         }
         auto ls = RoomService::segmentAtIndex(w, kd.kitchenIndexMainWorktop);
-        ls->wallMaterial = kd.backSplashMaterial;
-        addWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
-        addTopWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
+        if ( ls ) {
+            ls->wallMaterial = kd.backSplashMaterial;
+            addWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
+            addTopWorktopSegment(f, w, furns, kd, ls->p1, ls->p2, ls->normal, true);
+        }
     }
 
     void createKitchen( FloorBSData *f, RoomBSData *w, FurnitureMapStorage& furns ) {
@@ -363,9 +365,11 @@ namespace KitchenRoomService {
                 break;
         }
 
-        KitchenRoomService::createWorktopAppliancies(f, w, furns);
-        KitchenRoomService::createUnits(f, w, furns);
-        KitchenRoomService::createTopUnits(f, w, furns);
+        if( !kd.kitchenWorktopPath.empty() ) {
+            KitchenRoomService::createWorktopAppliancies(f, w, furns);
+            KitchenRoomService::createUnits(f, w, furns);
+            KitchenRoomService::createTopUnits(f, w, furns);
+        }
     }
 
     void clear( RoomBSData *w ) {
