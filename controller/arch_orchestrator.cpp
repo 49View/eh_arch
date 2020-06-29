@@ -20,9 +20,12 @@
 #include <graphics/shader_manager.h>
 #include <poly/collision_mesh.hpp>
 #include <poly/scene_graph.h>
+
 #include <eh_arch/models/house_bsdata.hpp>
-#include <eh_arch/render/house_render.hpp>
 #include <eh_arch/models/house_service.hpp>
+#include <eh_arch/render/house_render.hpp>
+
+#include <eh_arch/controller/arch_render_controller.hpp>
 
 ArchOrchestrator::ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg, ArchRenderController& _arc ) : sg(_sg), rsg(_rsg), arc(_arc) {
 }
@@ -187,4 +190,116 @@ void ArchOrchestrator::redoHouseChange() {
 void ArchOrchestrator::pushHouseChange() {
     houseJson.push();
 }
+
+void ArchOrchestrator::setTourView() {
+}
+
+void ArchOrchestrator::setAssistedView() {
+
+}
+void ArchOrchestrator::setWalkView() {
+    arc.setViewingMode(ArchViewingMode::AVM_Walk);
+    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
+    rsg.setRigCameraController(CameraControlType::Walk);
+    rsg.useSkybox(true);
+    V3f pos = V3f::ZERO;
+    V3f quatAngles = V3f::ZERO;
+    HouseService::bestStartingPositionAndAngle(H(), pos, quatAngles);
+    auto quat = quatCompose(quatAngles);
+    rsg.DC()->setIncrementQuatAngles(quatAngles);
+    Timeline::play(rsg.DC()->PosAnim(), 0,
+                   KeyFramePair{ 0.9f, pos });
+    Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
+    rsg.RR().setVisibilityOnTags(ArchType::CeilingT, true);
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
+    sg.setCollisionEnabled(true);
+}
+
+void ArchOrchestrator::setTopDownView() {
+    arc.setViewingMode(ArchViewingMode::AVM_TopDown);
+    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
+    rsg.setRigCameraController(CameraControlType::Edit2d);
+    rsg.DC()->LockAtWalkingHeight(false);
+    auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
+    rsg.DC()->setIncrementQuatAngles(quatAngles);
+    rsg.useSkybox(false);
+    arc.setFloorPlanTransparencyFactor(0.0f);
+    showIMHouse();
+    auto quat = quatCompose(quatAngles);
+    Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
+    centerCameraMiddleOfHouse(2.0f);
+    rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
+    sg.setCollisionEnabled(false);
+}
+
+void ArchOrchestrator::setDollHouseView() {
+    arc.setViewingMode(ArchViewingMode::AVM_DollHouse);
+    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
+    rsg.setRigCameraController(CameraControlType::Fly);
+    rsg.useSkybox(true);
+    V3f pos = V3f::ZERO;
+    V3f quatAngles = V3f::ZERO;
+    HouseService::bestDollyPositionAndAngle(H(), pos, quatAngles);
+    auto quat = quatCompose(quatAngles);
+    rsg.DC()->setIncrementQuatAngles(quatAngles);
+    Timeline::play(rsg.DC()->PosAnim(), 0, KeyFramePair{ 0.9f, pos });
+    Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
+    rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
+    sg.setCollisionEnabled(false);
+}
+
+void ArchOrchestrator::setFloorPlanView() {
+    arc.setViewingMode(ArchViewingMode::AVM_FloorPlan);
+    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
+    rsg.setRigCameraController(CameraControlType::Edit2d);
+    rsg.DC()->LockAtWalkingHeight(false);
+    auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
+    rsg.DC()->setIncrementQuatAngles(quatAngles);
+    rsg.useSkybox(false);
+    if ( H() ) {
+        auto quat = quatCompose(quatAngles);
+        Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
+        centerCameraMiddleOfHouse();
+        arc.setFloorPlanTransparencyFactor(0.5f);
+        showIMHouse();
+    }
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
+    sg.setCollisionEnabled(false);
+}
+
+
+void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
+
+    switch ( _wm ) {
+        case AVM_Tour:
+            setTourView();
+            break;
+        case AVM_Assisted:
+            setAssistedView();
+            break;
+        case AVM_Walk:
+            setWalkView();
+            break;
+        case AVM_FloorPlan:
+            setFloorPlanView();
+            break;
+        case AVM_TopDown:
+            setTopDownView();
+            break;
+        case AVM_DollHouse:
+            setDollHouseView();
+            break;
+    }
+}
+
 

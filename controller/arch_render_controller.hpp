@@ -4,27 +4,15 @@
 
 #pragma once
 
-#include <eh_arch/models/house_bsdata.hpp>
-#include <graphics/renderer.h>
 #include <core/game_time.h>
+#include <graphics/renderer.h>
+
+#include <eh_arch/models/house_bsdata.hpp>
+
 #include "arch_selection.hpp"
+#include "htypes.hpp"
 
 struct HouseBSData;
-
-enum class ArchViewingMode {
-    AVM_TopDown2d,
-    AVM_TopDown3d,
-    AVM_Walk,
-    AVM_DollHouse
-};
-
-enum class FloorPlanRenderMode {
-    Normal2d,
-    Normal3d,
-    Debug2d,
-    Debug3d,
-    Debug3dSelection
-};
 
 template<typename T>
 bool isFloorPlanRenderModeDebug( T _flag ) {

@@ -4,25 +4,17 @@
 
 #pragma once
 
-#include "../models/house_bsdata.hpp"
-#include "../models/room_service_furniture.hpp"
 #include <core/memento.hpp>
 #include <core/resources/resource_utils.hpp>
 #include <core/resources/resource_manager.hpp>
+
 #include <eh_arch/render/house_render.hpp>
+#include <eh_arch/models/house_bsdata.hpp>
+#include <eh_arch/models/room_service_furniture.hpp>
+#include "htypes.hpp"
 
 class SceneGraph;
-
 class RenderOrchestrator;
-
-using PostHouseLoadCallback = std::function<void()>;
-using PostHouse3dResolvedCallback = std::function<void()>;
-
-enum class ArchIOEvents {
-    AIOE_None,
-    AIOE_OnLoad,
-    AIOE_OnLoadComplete,
-};
 
 class ArchOrchestrator {
 public:
@@ -41,6 +33,8 @@ public:
     void undoHouseChange();
     void redoHouseChange();
 
+    void setViewingMode( ArchViewingMode _wm );
+
     void onEvent(ArchIOEvents event);
     bool hasEvent(ArchIOEvents event) const;
     Matrix4f calcFloorplanNavigationTransform( float screenRatio, float screenPadding );
@@ -48,6 +42,13 @@ public:
     void centerCameraMiddleOfHouse( float slack = 0.0f );
     HouseRenderContainer& HRC();
     HouseBSData *H();
+
+    void setTourView();
+    void setAssistedView();
+    void setWalkView();
+    void setFloorPlanView();
+    void setTopDownView();
+    void setDollHouseView();
 
 protected:
     SceneGraph& sg;
