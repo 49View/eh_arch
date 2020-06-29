@@ -118,7 +118,6 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
             if ( ccf ) ccf();
             rsg.RR().setLoadingFlag( false );
             rsg.setProbePosition( HouseService::centerOfBiggestRoom( H() ));
-            rsg.useSkybox(true);
             loadingMutex = false;
         });
     }

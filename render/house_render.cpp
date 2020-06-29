@@ -34,10 +34,10 @@ namespace HouseRender {
         if ( sourceImage && !isFloorPlanRenderMode2d(arc.renderMode()) ) {
             // 1)
             auto color1 = C4f::WHITE.A(arc.getFloorPlanTransparencyFactor());
-            auto floorPlanBBox = Rect2f{V2fc::ZERO, V2f{sourceImage->width, sourceImage->height} * data->sourceData.rescaleFactor};
+            auto floorPlanBBox = Rect2f{ V2fc::ZERO, V2f{ sourceImage->width, sourceImage->height } *
+                                                     data->sourceData.rescaleFactor };
             auto nameKey = data->propertyId + std::to_string(data->sourceData.rescaleFactor) + color1.toString();
-            rr.draw<DRect>(floorPlanBBox, color1, RDSImage(data->propertyId),
-                           RDSRectAxis::XZ, nameKey);
+            rr.draw<DRect>(floorPlanBBox, color1, RDSImage(data->propertyId), RDSRectAxis::XZ, nameKey);
         } else if ( isFloorPlanRenderMode2d(arc.renderMode()) ) {
             // 2)
             auto rm = arc.floorPlanShader();
@@ -51,7 +51,7 @@ namespace HouseRender {
         }
 
         for ( const auto& f : data->mFloors ) {
-            FloorRender::IMHouseRender( rr, sg, f.get(), arc );
+            FloorRender::IMHouseRender(rr, sg, f.get(), arc);
         }
     }
 
@@ -63,7 +63,7 @@ namespace HouseRender {
         // If no data clearly early exit with just clear of buckets performed
         if ( !data ) return HouseRenderContainer{};
 
-        HouseRenderContainer ret{data->propertyId};
+        HouseRenderContainer ret{ data->propertyId };
 
         sg.addSkybox(data->defaultSkybox);
 
