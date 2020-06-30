@@ -21,6 +21,7 @@
 #include <core/resources/material_and_color_property.hpp>
 #include <core/serialization.hpp>
 #include <core/names.hpp>
+#include <core/math/camera_spatials.hpp>
 
 #include "htypes.hpp"
 
@@ -522,14 +523,8 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, heig
     MaterialAndColorProperty defaultBathroomWallMaterial = "yule,weave,tiles";
     Color4f defaultWallColor = Color4f::WHITE;
     subdivisionAccuray accuracy = accuracyNone;
+    std::vector<CameraPath> tourPaths;
     std::vector<std::shared_ptr<FloorBSData>> mFloors;
     inline constexpr static uint64_t Version() { return SHouseJSONVersion; }
 };
 
-namespace HouseHints {
-
-    struct WallHints {
-        std::vector<const UShape *> uShapesHints{};
-        float wallWidthHint = 0.0f;
-    };
-}

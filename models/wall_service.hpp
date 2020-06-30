@@ -13,11 +13,6 @@
 struct ArchStructuralFeatureDescriptor;
 
 namespace WallService {
-    std::shared_ptr<WallBSData> createWall( const std::vector<Vector2f>& epts, float _height,
-                                            WallLastPointWrapT wlpw = WallLastPointWrap::Yes,
-                                            float _z = 0.0f,
-                                            uint32_t wf = WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving,
-                                            const HouseHints::WallHints& uShapesHints = {} );
     std::shared_ptr<WallBSData> createWall2( const std::vector<Vector2f>& epts, float _height,
                                              WallLastPointWrapT wlpw = WallLastPointWrap::Yes,
                                              float _z = 0.0f,

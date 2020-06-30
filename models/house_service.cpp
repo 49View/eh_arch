@@ -428,3 +428,24 @@ void HouseService::reevaluateDoorsAndWindowsAfterRoomChange( HouseBSData* house 
         FloorService::reevaluateDoorsAndWindowsAfterRoomChange( floor.get() );
     }
 }
+
+///
+/// \param _house
+/// \param csk
+/// we add an initial keyframe just to avoid having to do an push + add in two separate calls
+
+void HouseService::pushTourPath( HouseBSData *house, const CameraSpatialsKeyFrame& csk ) {
+    CameraPath newPath{};
+    newPath.path.emplace_back(csk);
+    house->tourPaths.emplace_back(newPath);
+}
+
+void HouseService::pushKeyFrameTourPath( HouseBSData *house, const CameraSpatialsKeyFrame& csk ) {
+    auto incrementalCSK = csk;
+    incrementalCSK.timestamp += house->tourPaths[house->tourPaths.size()-1].path.back().timestamp;
+    house->tourPaths[house->tourPaths.size()-1].path.emplace_back(incrementalCSK);
+}
+
+void HouseService::popTourPath( HouseBSData *_house ) {
+    _house->tourPaths.pop_back();
+}

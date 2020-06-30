@@ -27,6 +27,9 @@ namespace HouseService {
     // Create
     std::shared_ptr<FloorBSData> addFloorFromData( HouseBSData *_house, const JMATH::Rect2f& _rect );
     std::shared_ptr<CollisionMesh> createCollisionMesh( const HouseBSData *_house );
+    void pushTourPath( HouseBSData *_house, const CameraSpatialsKeyFrame& csk );
+    void pushKeyFrameTourPath( HouseBSData *_house, const CameraSpatialsKeyFrame& csk );
+    void popTourPath( HouseBSData *_house );
 
     // Update
     void rescale( HouseBSData *house, float scale );

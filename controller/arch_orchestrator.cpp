@@ -193,12 +193,75 @@ void ArchOrchestrator::pushHouseChange() {
     houseJson.push();
 }
 
+struct TourPlayback {
+    void addKeyFrame( const CameraSpatialsKeyFrame& path ) {
+        positions.emplace_back(path.timestamp+currTimeLineStamp, path.pos);
+        quats.emplace_back(path.timestamp+currTimeLineStamp, path.qangle);
+        fovs.emplace_back(path.timestamp+currTimeLineStamp, path.fov);
+    }
+
+    void playBack( std::shared_ptr<Camera> cam) {
+        Timeline::play(cam->PosAnim(), 0, positions);
+        Timeline::play(cam->QAngleAnim(), 0, quats);
+        Timeline::play(cam->FoVAnim(), 0, fovs);
+    }
+
+    void beginPath( const std::vector<CameraSpatialsKeyFrame>& path ) {
+        addKeyFrame(path.front());
+        currTimeLineStamp+=0.001f;
+        addKeyFrame(path.front());
+        currTimeLineStamp+=0.001f;
+    }
+
+    void endPath( const std::vector<CameraSpatialsKeyFrame>& path ) {
+        currTimeLineStamp+=0.001f;
+        addKeyFrame(path.back());
+        currTimeLineStamp+=0.001f;
+        addKeyFrame(path.back());
+        currTimeLineStamp += path.back().timestamp;
+    }
+
+    std::vector<KeyFramePair<V3f>> positions{};
+    std::vector<KeyFramePair<Quaternion>> quats{};
+    std::vector<KeyFramePair<float>> fovs{};
+    float currTimeLineStamp = 0.0f;
+};
+
 void ArchOrchestrator::setTourView() {
+    arc.setViewingMode(ArchViewingMode::AVM_DollHouse);
+    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
+    rsg.setRigCameraController(CameraControlType::Walk);
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    rsg.useSkybox(true);
+
+    if ( !H()->tourPaths.empty() ) {
+        TourPlayback tpb{};
+        for ( const auto& tour : H()->tourPaths ) {
+            tpb.beginPath( tour.path );
+            for ( const auto& path : tour.path ) {
+                tpb.addKeyFrame(path);
+            }
+            tpb.endPath( tour.path );
+        }
+        tpb.playBack(rsg.DC());
+    } else {
+        V3f pos = V3f::ZERO;
+        V3f quat = V3f::ZERO;
+        HouseService::bestStartingPositionAndAngle(H(), pos, quat);
+        rsg.DC()->setPosition(pos);
+        rsg.DC()->setQuat(quat);
+    }
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
+    rsg.RR().setVisibilityOnTags(ArchType::CeilingT, true);
+    sg.setCollisionEnabled(false);
 }
 
 void ArchOrchestrator::setAssistedView() {
-
 }
+
 void ArchOrchestrator::setWalkView( float animationSpeed ) {
     arc.setViewingMode(ArchViewingMode::AVM_Walk);
     rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
