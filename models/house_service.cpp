@@ -446,6 +446,12 @@ void HouseService::pushKeyFrameTourPath( HouseBSData *house, const CameraSpatial
     house->tourPaths[house->tourPaths.size()-1].path.emplace_back(incrementalCSK);
 }
 
-void HouseService::popTourPath( HouseBSData *_house ) {
-    _house->tourPaths.pop_back();
+void HouseService::popTourPath( HouseBSData *_house, int i ) {
+    if ( i == -1 ) {
+        _house->tourPaths.pop_back();
+    } else {
+        if ( i>=0 && i < static_cast<int>(_house->tourPaths.size()) ) {
+            _house->tourPaths.erase(_house->tourPaths.begin()+i);
+        }
+    }
 }

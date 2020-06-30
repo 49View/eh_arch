@@ -29,7 +29,7 @@ namespace HouseService {
     std::shared_ptr<CollisionMesh> createCollisionMesh( const HouseBSData *_house );
     void pushTourPath( HouseBSData *_house, const CameraSpatialsKeyFrame& csk );
     void pushKeyFrameTourPath( HouseBSData *_house, const CameraSpatialsKeyFrame& csk );
-    void popTourPath( HouseBSData *_house );
+    void popTourPath( HouseBSData *_house, int i );
 
     // Update
     void rescale( HouseBSData *house, float scale );
