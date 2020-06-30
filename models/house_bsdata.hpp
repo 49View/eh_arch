@@ -495,7 +495,7 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, heig
              sourceData, bestInternalViewingPosition, bestInternalViewingAngle, walkableArea,
              doorHeight, defaultWindowHeight, defaultWindowBaseOffset, defaultCeilingHeight, windowsillExpansion,
              windowFrameThickness, defaultGroundHeight, worktopHeight, bathRoomSinkHeight, defaultWallColor, accuracy,
-             mFloors)
+             tourPaths, mFloors)
     uint64_t version = SHouseJSONVersion;
     std::string propertyId;
     std::string name = "";

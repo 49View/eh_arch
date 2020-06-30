@@ -49,6 +49,7 @@ namespace HouseService {
     void clearHouseExcludingFloorsAndWalls( HouseBSData *house );
 
     // Query
+    [[nodiscard]] bool hasTour(const HouseBSData *_house);
     float area( const HouseBSData *_house );
     V2f centerOfBiggestRoom( const HouseBSData *house );
     void bestStartingPositionAndAngle( const HouseBSData *house, V3f& pos, V3f& rot );
