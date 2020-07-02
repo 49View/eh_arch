@@ -27,12 +27,14 @@ void TourPlayback::stopPlayBack( std::shared_ptr <Camera> cam ) {
         animUUIDs.clear();
     }
 }
+
 void TourPlayback::beginPath( const std::vector <CameraSpatialsKeyFrame>& path ) {
     addKeyFrame(path.front());
     currTimeLineStamp += 0.001f;
     addKeyFrame(path.front());
     currTimeLineStamp += 0.001f;
 }
+
 void TourPlayback::endPath( const std::vector <CameraSpatialsKeyFrame>& path ) {
     currTimeLineStamp += 0.001f;
     addKeyFrame(path.back());
