@@ -14,9 +14,9 @@ void TourPlayback::addKeyFrame( const CameraSpatialsKeyFrame& path ) {
 
 void TourPlayback::playBack( std::shared_ptr <Camera> cam ) {
     animUUIDs.clear();
-    animUUIDs.emplace_back(Timeline::play(cam->PosAnim(), 0, positions));
-    animUUIDs.emplace_back(Timeline::play(cam->QAngleAnim(), 0, quats));
-    animUUIDs.emplace_back(Timeline::play(cam->FoVAnim(), 0, fovs));
+    animUUIDs.emplace_back(Timeline::play(cam->PosAnim(), 0, positions, AnimLoopType::Loop));
+    animUUIDs.emplace_back(Timeline::play(cam->QAngleAnim(), 0, quats, AnimLoopType::Loop));
+    animUUIDs.emplace_back(Timeline::play(cam->FoVAnim(), 0, fovs, AnimLoopType::Loop));
 }
 
 void TourPlayback::stopPlayBack( std::shared_ptr <Camera> cam ) {
