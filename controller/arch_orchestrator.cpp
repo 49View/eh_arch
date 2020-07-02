@@ -236,6 +236,8 @@ void ArchOrchestrator::setTourView() {
         rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
         fader(0.001f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
     }
+    Timeline::play( rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f});
+
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
@@ -277,6 +279,8 @@ void ArchOrchestrator::setWalkView( float animationSpeed ) {
         rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
         fader(0.001f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
     }
+    Timeline::play( rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f});
+
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
@@ -307,10 +311,12 @@ void ArchOrchestrator::setFloorPlanView() {
     if ( H() ) {
         auto quat = quatCompose(quatAngles);
         Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
-        centerCameraMiddleOfHouseWithFloorplanInfoOffset(0.0f, 0.0f); //1.3f, 0.2f;
+        centerCameraMiddleOfHouseWithFloorplanInfoOffset(1.3f, 0.2f); ;
         arc.setFloorPlanTransparencyFactor(0.5f);
         showIMHouse();
     }
+
+    Timeline::play( rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 1.0f});
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
@@ -336,8 +342,8 @@ void ArchOrchestrator::setTopDownView() {
     showIMHouse();
     auto quat = quatCompose(quatAngles);
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
-    centerCameraMiddleOfHouse(2.45f);
-//    rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
+    Timeline::play( rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f});
+    centerCameraMiddleOfHouse(H()->bbox3d.calcDepth()+0.3f);
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
@@ -372,6 +378,7 @@ void ArchOrchestrator::setDollHouseView() {
     rsg.DC()->setIncrementQuatAngles(quatAngles);
     Timeline::play(rsg.DC()->PosAnim(), 0, KeyFramePair{ 0.9f, pos });
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
+    Timeline::play( rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f});
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
