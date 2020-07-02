@@ -11,10 +11,12 @@
 #include <eh_arch/render/house_render.hpp>
 #include <eh_arch/models/house_bsdata.hpp>
 #include <eh_arch/models/room_service_furniture.hpp>
+#include <eh_arch/controller/arch_tour.hpp>
 #include "htypes.hpp"
 
 class SceneGraph;
 class RenderOrchestrator;
+
 
 class ArchOrchestrator {
 public:
@@ -40,6 +42,7 @@ public:
     Matrix4f calcFloorplanNavigationTransform( float screenRatio, float screenPadding );
 
     void centerCameraMiddleOfHouse( float slack = 0.0f );
+    void centerCameraMiddleOfHouseWithFloorplanInfoOffset( float floorplanOffset, float slack = 0.0f);
     HouseRenderContainer& HRC();
     HouseBSData *H();
 
@@ -61,4 +64,5 @@ protected:
     FurnitureMapStorage furnitureMap;
     bool loadingMutex = false;
     Matrix4f floorplanNavigationMatrix{Matrix4f::MIDENTITY()};
+    TourPlayback tourPlayback;
 };

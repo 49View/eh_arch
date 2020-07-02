@@ -66,7 +66,7 @@ namespace DoorRender {
         }
 
         vLists.emplace_back(p1);
-        rr.draw<DLine>(vLists, color, lineWidth, false, sm, arc.pm(), door->hashFeature("singleDoor2d"+color.toString(), 0));
+        rr.draw<DLine>(vLists, color, lineWidth, false, sm, arc.pm(), door->hashFeature("singleDoor2d"+color.toString()+sm.hash(), 0));
     }
 
     void drawDoubleDoor2d();

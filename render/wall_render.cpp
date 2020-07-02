@@ -22,7 +22,7 @@ namespace WallRender {
 
     void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const ArchRenderController& arc ) {
         auto color = arc.getFillColor(wall, C4f::BLACK);
-        rr.draw<DPoly>(sm, wall->mTriangles2d, color, arc.pm(), wall->hashFeature("poly"+color.toString(), 0));
+        rr.draw<DPoly>(sm, wall->mTriangles2d, color, arc.pm(), wall->hashFeature("poly"+color.toString()+sm.hash(), 0));
     }
 
 //    void drawIncrementalAlphaWalls2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
@@ -49,7 +49,7 @@ namespace WallRender {
 //            for ( int t = 0; t < 3; t++ ) {
 //                rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], lineWidth, sm, arc.pm());
 //            }
-            rr.draw<DCircleFilled>(us.middle, Color4f::DARK_BLUE, 0.035f, sm, arc.pm(), wall->hashFeature("w2dUShape",uShapeRC));
+            rr.draw<DCircleFilled>(us.middle, Color4f::DARK_BLUE, 0.035f, sm, arc.pm(), wall->hashFeature("w2dUShape"+sm.hash(),uShapeRC));
         }
     }
 
@@ -60,7 +60,7 @@ namespace WallRender {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t + 1, wps)];
             auto pm = lerp(0.5f, p1, p2);
-            rr.draw<DLine>(pm, pm + wall->enormals[t] * 0.15f, Color4f::PASTEL_CYAN, width, sm, true, arc.pm(), wall->hashFeature("w2dNormal",t));
+            rr.draw<DLine>(pm, pm + wall->enormals[t] * 0.15f, Color4f::PASTEL_CYAN, width, sm, true, arc.pm(), wall->hashFeature("w2dNormal"+sm.hash(),t));
         }
     }
 
@@ -70,7 +70,7 @@ namespace WallRender {
             auto p1 = wall->epoints[t];
 //            ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Point, t, wall };
             auto color = arc.getFillColor(ArchStructuralFeature::ASF_Point, t, wall, C4f::RED);
-            rr.draw<DCircleFilled>(p1, color, width, sm, arc.pm(), wall->hashFeature("w2dPoint"+color.toString(),t));
+            rr.draw<DCircleFilled>(p1, color, width, sm, arc.pm(), wall->hashFeature("w2dPoint"+color.toString()+sm.hash(),t));
         }
     }
 
@@ -80,7 +80,7 @@ namespace WallRender {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t+1, wall->epoints.size())];
             auto color = arc.getFillColor(ArchStructuralFeature::ASF_Edge, t, wall, Color4f::PASTEL_GREEN);
-            rr.draw<DLine>(p1, p2, color, width*3.f, sm, arc.pm(), wall->hashFeature("w2dEdge"+color.toString(),t));
+            rr.draw<DLine>(p1, p2, color, width*3.f, sm, arc.pm(), wall->hashFeature("w2dEdge"+color.toString()+sm.hash(),t));
         }
 //        if ( wall->wrapLastPoint ) vlist.emplace_back(wall->epoints[0]);
     }

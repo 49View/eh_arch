@@ -24,15 +24,15 @@ namespace FloorRender {
 
     void IMHouseRender( Renderer &rr, SceneGraph &sg, const FloorBSData *f, const ArchRenderController& arc ) {
         bool drawDebug = isFloorPlanRenderModeDebug(arc.renderMode());
-        auto rm = arc.floorPlanShader();
+        auto sm = arc.floorPlanShader();
 
         if ( drawDebug ) {
             int ousc = 0;
             for ( const auto& seg : f->orphanedUShapes ) {
-                rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, rm, 0.075f, arc.pm(), seg.hashFeature("orphanedUshape", ousc++));
+                rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, sm, 0.075f, arc.pm(), seg.hashFeature("orphanedUshape"+sm.hash(), ousc++));
             }
             for ( const auto& seg : f->orphanedWallSegments ) {
-                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), Color4f::RED, rm, 0.075f, arc.pm(), f->hashFeature("orphanedWallSegments", ousc++));
+                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), Color4f::RED, sm, 0.075f, arc.pm(), f->hashFeature("orphanedWallSegments"+sm.hash(), ousc++));
             }
         }
 
