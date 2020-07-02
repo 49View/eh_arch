@@ -358,9 +358,6 @@ void ArchOrchestrator::setTopDownView() {
     }
     fader(0.9f, 1.0f, rsg.RR().CLIExcludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
 
-//    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart), AnimEndCallback{ [&]() {
-//        fader(0.2f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
-//    } });
     sg.setCollisionEnabled(false);
 }
 
