@@ -12,11 +12,12 @@
 #include <memory>
 
 #include "house_bsdata.hpp"
+#include <core/math/vector_util.hpp>
 #include "arch_structural_service.hpp"
 
 class FurnitureMapStorage;
-
 class CollisionMesh;
+class FeatureIntersection;
 
 struct IsNear {
 };
@@ -60,7 +61,8 @@ namespace HouseService {
     bool isLastFloor( std::shared_ptr<HouseBSData> _house, int floorNumber );
     std::pair<uint64_t, uint64_t> getFloorWallPairFor( std::shared_ptr<HouseBSData> _house, const int64_t _hash );
     std::shared_ptr<ArchStructural>
-    rayIntersect( std::shared_ptr<HouseBSData> _house, const Vector3f& origin, const Vector3f& dir );
+    rayIntersect( const HouseBSData* _house, const Vector3f& origin, const Vector3f& dir );
+    FeatureIntersection rayFeatureIntersect( const HouseBSData* house, const RayPair3& rayPair );
     bool findFloorOrRoomAt( std::shared_ptr<HouseBSData> _house, const Vector2f& pos, int& floorIndex );
     FloorBSData* findFloorOf( HouseBSData* _house, const int64_t _hash );
     bool areThereStairsAtFloorNumber( std::shared_ptr<HouseBSData> _house, int floorNumber );

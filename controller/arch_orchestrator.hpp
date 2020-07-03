@@ -52,7 +52,7 @@ public:
     void setFloorPlanView();
     void setTopDownView();
     void setDollHouseView();
-    void updateViewingModes();
+    void updateViewingModes( const V3f& mouseFloorPoint );
 
 protected:
     SceneGraph& sg;

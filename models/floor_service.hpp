@@ -9,6 +9,7 @@
 #pragma once
 
 #include "house_bsdata.hpp"
+#include <core/math/vector_util.hpp>
 
 #include <poly/polyclipping/clipper.hpp>
 
@@ -19,8 +20,9 @@
 //}
 
 struct RoomPreData;
-class FurnitureMapStorage;
 struct RoomPreDataResult;
+class FurnitureMapStorage;
+class FeatureIntersection;
 
 struct DebugUShapeIntersection {
     UShape *s1 = nullptr;
@@ -127,8 +129,9 @@ namespace FloorService {
 
     // Query
     bool hasAnyWall( const FloorBSData *f );
-
     std::vector<Vector2f> allFloorePoints( const FloorBSData *f );
+
+    void rayFeatureIntersect( const FloorBSData* f, const RayPair3& rayPair, FeatureIntersection& fd );
     bool intersectLine2d( const FloorBSData *f, Vector2f const& p0, Vector2f const& p1, Vector2f& i );
     ArchIntersection
     intersectLine2dMin( const FloorBSData *f, Vector2f const& p0, Vector2f const& p1, Vector2f& i,

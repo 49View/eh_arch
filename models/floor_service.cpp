@@ -1164,3 +1164,7 @@ FloorService::findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind
 
     return std::nullopt;
 }
+
+void FloorService::rayFeatureIntersect( const FloorBSData* house, const RayPair3& rayPair, FeatureIntersection& fd ) {
+
+}

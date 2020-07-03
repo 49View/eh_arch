@@ -419,7 +419,7 @@ void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
     }
 }
 
-void ArchOrchestrator::updateViewingModes() {
+void ArchOrchestrator::updateViewingModes( const V3f& mouseFloorPoint ) {
     if ( H() && arc.getViewingMode() == AVM_Walk ) {
         auto camPos = rsg.DC()->getPosition() * V3f::MASK_Y_OUT;
         auto camDir = -rsg.DC()->getDirection() * 0.7f;
@@ -432,5 +432,8 @@ void ArchOrchestrator::updateViewingModes() {
                               RDSArrowAngle(0.45f),
                               RDSArrowLength(0.6f), V4f::RED, 0.004f, sm, RDSPreMult(floorplanNavigationMatrix),
                               std::string{ "CameraOminoKeyDirection1" });
+
+        auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
+        rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, mouseFloorPoint, V4f::SKY_BLUE.A(1.0f), 0.1f, sm3, "mouseFloorPoint");
     }
 }

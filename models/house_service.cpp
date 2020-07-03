@@ -9,6 +9,7 @@
 #include "house_service.hpp"
 
 #include <core/util.h>
+#include <core/math/vector_util.hpp>
 #include "core/file_manager.h"
 #include "poly/collision_mesh.hpp"
 
@@ -78,7 +79,7 @@ std::shared_ptr<CollisionMesh> HouseService::createCollisionMesh( const HouseBSD
 }
 
 template <typename T>
-bool rayIntersectInternal( std::shared_ptr<HouseBSData> _house, const std::vector<std::shared_ptr<T>>& archs, const Vector3f& origin, const Vector3f& dir, float& minNear, std::shared_ptr<ArchStructural> found ) {
+bool rayIntersectInternal( const HouseBSData* _house, const std::vector<std::shared_ptr<T>>& archs, const Vector3f& origin, const Vector3f& dir, float& minNear, std::shared_ptr<ArchStructural> found ) {
     bool bHasBeenFound = false;
 
     for ( const auto& e : archs ) {
@@ -230,22 +231,31 @@ int HouseService::getNumberOfWallSegments( std::shared_ptr<HouseBSData> _house )
 	return ret;
 }
 
-std::shared_ptr<ArchStructural> HouseService::rayIntersect( std::shared_ptr<HouseBSData> _house, const Vector3f& origin, const Vector3f& dir ) {
-	float minNear = std::numeric_limits<float>::max();
-	std::shared_ptr<ArchStructural> found;
+std::shared_ptr<ArchStructural> HouseService::rayIntersect( const HouseBSData* _house, const Vector3f& origin, const Vector3f& dir ) {
+	std::shared_ptr<ArchStructural> found = nullptr;
+    float nearV = std::numeric_limits<float>::max();
 
 	for ( uint64_t t = 0; t < _house->mFloors.size(); t++ ) {
 		auto& floor = _house->mFloors[t];
-		float nearV = 0.0f;
-		if ( ArchStructuralService::intersectLine( floor.get(), origin, dir, nearV ) ) {
-			rayIntersectInternal( _house, floor->walls, origin, dir, minNear, found );
-			rayIntersectInternal( _house, floor->doors, origin, dir, minNear, found );
-			rayIntersectInternal( _house, floor->windows, origin, dir, minNear, found );
-			rayIntersectInternal( _house, floor->stairs, origin, dir, minNear, found );
+        if ( ArchStructuralService::intersectLine( floor.get(), origin, dir, nearV ) ) {
+			rayIntersectInternal( _house, floor->walls, origin, dir, nearV, found );
+			rayIntersectInternal( _house, floor->doors, origin, dir, nearV, found );
+			rayIntersectInternal( _house, floor->windows, origin, dir, nearV, found );
+			rayIntersectInternal( _house, floor->stairs, origin, dir, nearV, found );
 		}
 	}
 	return found;
 }
+
+FeatureIntersection HouseService::rayFeatureIntersect( const HouseBSData* house, const RayPair3& rayPair ) {
+    FeatureIntersection fd{};
+
+    for ( const auto& f : house->mFloors ) {
+        FloorService::rayFeatureIntersect( f.get(), rayPair, fd );
+    }
+    return fd;
+}
+
 
 bool HouseService::isLastFloor( std::shared_ptr<HouseBSData> _house, int floorNumber ) {
 	return ( static_cast<size_t>(floorNumber) == _house->mFloors.size() - 1 );
