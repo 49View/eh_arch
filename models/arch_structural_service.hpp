@@ -1,6 +1,8 @@
 #pragma once
 
-#include "house_bsdata.hpp"
+#include <eh_arch/models/htypes.hpp>
+#include <core/math/vector3f.h>
+#include <core/math/htypes.hpp>
 
 float metersToCentimeters( float valueInMeter );
 float centimetersToMeters( float valueInCM );
@@ -60,10 +62,13 @@ public:
     static bool typeIsFittedFurniture( const ArchStructural *a );
     static bool isPointInside( const ArchStructural *a, const Vector2f& _pos );
     static bool isPointInside( const ArchStructural *a, const Vector3f& _pos );
-    static bool isPointNear( const ArchStructural *a, const Vector2f& _pos, float radius );
+    static bool isPointInside2d( const ArchStructural *a, const Vector2f& _pos );
+    static bool isPointNear2d( const ArchStructural *a, const Vector2f& _pos, float radius );
     static void rescale( ArchStructural *a, float _scale );
     static bool
     intersectLine( const ArchStructural *a, const Vector3f& linePos, const Vector3f& lineDir, float& tNear );
+    static bool intersectRay( const ArchStructural *a, const RayPair3& rayPair );
+    static bool intersectRayMin( const ArchStructural *a, const RayPair3& rayPair, float& tNear );
 };
 
 template<typename T>

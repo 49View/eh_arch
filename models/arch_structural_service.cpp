@@ -3,6 +3,8 @@
 ////
 
 #include "arch_structural_service.hpp"
+#include <core/math/vector_util.hpp>
+#include <eh_arch/models/house_bsdata.hpp>
 
 float metersToCentimeters(float valueInMeter) {
     return valueInMeter*0.01f;
@@ -45,12 +47,15 @@ bool ArchStructuralService::isPointInside( const ArchStructural *a, const Vector
     return false;
 }
 
-bool ArchStructuralService::isPointInside( const ArchStructural *a, const Vector3f& _pos ) {
-    V3f pointOnXYPlane = XZY::C(_pos);
-    return isPointInside(a, pointOnXYPlane.xy()) && a->bbox3d.containsZ(pointOnXYPlane.z());
+bool ArchStructuralService::isPointInside2d( const ArchStructural *a, const Vector2f& _pos ) {
+    return isPointInside(a, _pos);
 }
 
-bool ArchStructuralService::isPointNear( const ArchStructural *a, const Vector2f& _pos, float radius ) {
+bool ArchStructuralService::isPointInside( const ArchStructural *a, const Vector3f& _pos ) {
+    return isPointInside(a, _pos.xy()) && a->bbox3d.containsZ(_pos.z());
+}
+
+bool ArchStructuralService::isPointNear2d( const ArchStructural *a, const Vector2f& _pos, float radius ) {
     // We squared the circle here because it's faster to compute bbox interesection of 2 boses rather than a sphere and a box
     Rect2f squaredCircle = Rect2f{};
     squaredCircle.setCenterAndSize(_pos, V2f{ radius });
@@ -90,4 +95,22 @@ bool ArchStructuralService::intersectLine( const ArchStructural *a, const Vector
                                            float& tNear ) {
     float farV = std::numeric_limits<float>::max();
     return a->bbox3d.intersectLine(linePos, lineDir, tNear, farV);
+}
+
+bool ArchStructuralService::intersectRay( const ArchStructural *a, const RayPair3& rayPair ) {
+    float farV = std::numeric_limits<float>::max();
+    float vNear = 0.0f;
+    return a->bbox3d.intersectLine( XZY::C(rayPair.origin), XZY::C(rayPair.dir), vNear, farV);
+}
+
+bool ArchStructuralService::intersectRayMin( const ArchStructural *a, const RayPair3& rayPair, float& tNear ) {
+    float farV = std::numeric_limits<float>::max();
+    float vNear = 0.0f;
+    if ( a->bbox3d.intersectLine( XZY::C(rayPair.origin), XZY::C(rayPair.dir), vNear, farV) ) {
+        if ( vNear < tNear ) {
+            tNear = vNear;
+            return true;
+        }
+    }
+    return false;
 }

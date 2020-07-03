@@ -10,13 +10,12 @@
 
 #include <core/util.h>
 #include <core/math/vector_util.hpp>
-#include "core/file_manager.h"
-#include "poly/collision_mesh.hpp"
+#include <core/file_manager.h>
+#include <poly/collision_mesh.hpp>
 
 #include "floor_service.hpp"
 #include "arch_structural_service.hpp"
 #include "room_service.hpp"
-
 #include "wall_service.hpp"
 
 

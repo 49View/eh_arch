@@ -14,6 +14,8 @@
 #include <core/util_follower.hpp>
 #include <core/math/poly_utils.hpp>
 #include <core/math/triangulator.hpp>
+#include <poly/polyclipping/clipper.hpp>
+#include <core/math/vector_util.hpp>
 
 #include "room_service.hpp"
 #include "wall_service.hpp"
@@ -1165,6 +1167,14 @@ FloorService::findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind
     return std::nullopt;
 }
 
-void FloorService::rayFeatureIntersect( const FloorBSData* house, const RayPair3& rayPair, FeatureIntersection& fd ) {
+void FloorService::rayFeatureIntersect( const FloorBSData* f, const RayPair3& rayPair, FeatureIntersection& fd ) {
 
+//    float tNear = std::numeric_limits<float>::max();
+    if ( ArchStructuralService::intersectRay(f, rayPair) ) {
+        for ( const auto& room : f->rooms ) {
+            if ( ArchStructuralService::intersectRay(room.get(), rayPair) ) {
+                LOGRS("We are in room " << RoomService::roomName(room.get()));
+            }
+        }
+    }
 }

@@ -8,21 +8,13 @@
 
 #pragma once
 
-#include "house_bsdata.hpp"
-#include <core/math/vector_util.hpp>
+#include <vector>
+#include <optional>
 
-#include <poly/polyclipping/clipper.hpp>
-
-//namespace ClipperLib {
-//    struct IntPoint;
-//    typedef std::vector< IntPoint > Path;
-//    typedef std::vector< Path > Paths;
-//}
-
-struct RoomPreData;
-struct RoomPreDataResult;
-class FurnitureMapStorage;
-class FeatureIntersection;
+#include <eh_arch/models/htypes.hpp>
+#include <core/htypes_shared.hpp>
+#include <core/math/htypes.hpp>
+#include <poly/htypes.hpp>
 
 struct DebugUShapeIntersection {
     UShape *s1 = nullptr;

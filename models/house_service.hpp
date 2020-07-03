@@ -11,13 +11,12 @@
 #include <string>
 #include <memory>
 
-#include "house_bsdata.hpp"
-#include <core/math/vector_util.hpp>
-#include "arch_structural_service.hpp"
-
-class FurnitureMapStorage;
-class CollisionMesh;
-class FeatureIntersection;
+#include <eh_arch/models/htypes.hpp>
+#include <eh_arch/models/house_bsdata.hpp>
+#include <eh_arch/models/arch_structural_service.hpp>
+#include <core/htypes_shared.hpp>
+#include <core/math/htypes.hpp>
+#include <poly/htypes.hpp>
 
 struct IsNear {
 };
@@ -120,16 +119,16 @@ namespace HouseService {
     }
 
     template<typename T, typename NI>
-    std::shared_ptr<T> point( const HouseBSData *_house, const Vector3f& point, float radius = 0.01f ) {
+    std::shared_ptr<T> point2d( const HouseBSData *_house, const Vector2f& point, float radius = 0.01f ) {
         std::shared_ptr<T> found;
 
         auto checkNearOrInside = [&]( auto *w ) {
             bool isNearInside1 = false;
             if constexpr ( std::is_same_v<NI, IsNear> ) {
-                isNearInside1 = ArchStructuralService::isPointNear(w, point, radius);
+                isNearInside1 = ArchStructuralService::isPointNear2d(w, point, radius);
             }
             if constexpr ( std::is_same_v<NI, IsInside> ) {
-                isNearInside1 = ArchStructuralService::isPointInside(w, point);
+                isNearInside1 = ArchStructuralService::isPointInside2d(w, point);
             }
             return isNearInside1;
         };

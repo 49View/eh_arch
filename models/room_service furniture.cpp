@@ -13,6 +13,7 @@
 #include <core/math/triangulator.hpp>
 #include <core/service_factory.h>
 #include <poly/scene_graph.h>
+#include <poly/polyclipping/clipper.hpp>
 
 #include "floor_service.hpp"
 #include "arch_segment_service.hpp"

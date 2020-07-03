@@ -15,13 +15,24 @@
 #include <tuple>
 #include <core/math/vector2f.h>
 
-constexpr float inch = 2.54f;
-constexpr float inch1o = 1.0f / 2.54f;
+struct ArchBase;
 struct ArchStructural;
 struct FloorBSData;
+struct WallBSData;
+struct WindowBSData;
 struct UShape;
+struct ArchSegment;
+struct RoomBSData;
+struct HouseBSData;
+struct RoomPreData;
+struct RoomPreDataResult;
+class FurnitureMapStorage;
+class FeatureIntersection;
 
 using GenericCallback = std::function<void()>;
+
+constexpr float inch = 2.54f;
+constexpr float inch1o = 1.0f / 2.54f;
 
 enum class MeasureUnitType {
 	Inch = 0,
@@ -209,35 +220,35 @@ using ArchSubTypeT = int64_t;
 // Warning: any changes here needs to update **GHTypeToString**
 // ************************************************************
 namespace GHType {
-	constexpr uint64_t None = 0;
-	constexpr uint64_t Generic = 1;
-	constexpr uint64_t Wall = 1 << 1;
-	constexpr uint64_t Floor = 1 << 2;
-	constexpr uint64_t Stairs = 1 << 3;
-	constexpr uint64_t Window = 1 << 4;
-	constexpr uint64_t Door = 1 << 5;
-	constexpr uint64_t DoorRect = 1 << 6;
-	constexpr uint64_t DoorFrame = 1 << 15;
-	constexpr uint64_t Ceiling = 1 << 7;
-	constexpr uint64_t Ground = 1 << 8;
-	constexpr uint64_t Skirting = 1 << 9;
-	constexpr uint64_t Coving = 1 << 10;
-	constexpr uint64_t WallPlaster = 1 << 11;
-	constexpr uint64_t WallPlasterUShape = 1 << 12;
-	constexpr uint64_t WallPlasterExternal = 1 << 13;
-	constexpr uint64_t WallPlasterInternal = 1 << 14;
-	constexpr uint64_t WallTilesInternal = 1 << 16;
-	constexpr uint64_t KitchenWorktop = 1 << 17;
-	constexpr uint64_t KitchenCabinet = 1 << 18;
-	constexpr uint64_t KitchenSink = 1 << 19;
-	constexpr uint64_t KitchenOven = 1 << 20;
-	constexpr uint64_t KitchenHob = 1 << 21;
-	constexpr uint64_t LightFitting = 1 << 22;
-	constexpr uint64_t Locator = 1 << 23;
-	constexpr uint64_t PowerSocket = 1 << 24;
-	constexpr uint64_t LightSwitch = 1 << 25;
-	constexpr uint64_t Room = 1 << 26;
-    constexpr uint64_t KitchenBackSplash = 1 << 27;
+	constexpr uint64_t None = 0u;
+	constexpr uint64_t Generic = 1u;
+	constexpr uint64_t Wall = 1u << 1u;
+	constexpr uint64_t Floor = 1u << 2u;
+	constexpr uint64_t Stairs = 1u << 3u;
+	constexpr uint64_t Window = 1u << 4u;
+	constexpr uint64_t Door = 1u << 5u;
+	constexpr uint64_t DoorRect = 1u << 6u;
+	constexpr uint64_t DoorFrame = 1u << 15u;
+	constexpr uint64_t Ceiling = 1u << 7u;
+	constexpr uint64_t Ground = 1u << 8u;
+	constexpr uint64_t Skirting = 1u << 9u;
+	constexpr uint64_t Coving = 1u << 10u;
+	constexpr uint64_t WallPlaster = 1u << 11u;
+	constexpr uint64_t WallPlasterUShape = 1u << 12u;
+	constexpr uint64_t WallPlasterExternal = 1u << 13u;
+	constexpr uint64_t WallPlasterInternal = 1u << 14u;
+	constexpr uint64_t WallTilesInternal = 1u << 16u;
+	constexpr uint64_t KitchenWorktop = 1u << 17u;
+	constexpr uint64_t KitchenCabinet = 1u << 18u;
+	constexpr uint64_t KitchenSink = 1u << 19u;
+	constexpr uint64_t KitchenOven = 1u << 20u;
+	constexpr uint64_t KitchenHob = 1u << 21u;
+	constexpr uint64_t LightFitting = 1u << 22u;
+	constexpr uint64_t Locator = 1u << 23u;
+	constexpr uint64_t PowerSocket = 1u << 24u;
+	constexpr uint64_t LightSwitch = 1u << 25u;
+	constexpr uint64_t Room = 1u << 26u;
+    constexpr uint64_t KitchenBackSplash = 1u << 27u;
 };
 // ************************************************************
 // Warning: any changes here needs to update **GHTypeToString**
