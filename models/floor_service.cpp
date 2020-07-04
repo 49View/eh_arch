@@ -1174,28 +1174,21 @@ FloorService::findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind
 
 void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& rayPair, FeatureIntersection& fd ) {
 
-//    float tNear = std::numeric_limits<float>::max();
     if ( ArchStructuralService::intersectRay(f, rayPair) ) {
         for ( const auto& room : f->rooms ) {
             if ( ArchStructuralService::intersectRay(room.get(), rayPair) ) {
+                // Floors
+                V3f a = XZY::C(std::get<0>(room->mTriangles2d[0]), f->z);
+                V3f b = XZY::C(std::get<2>(room->mTriangles2d[0]), f->z);
+                V3f c = XZY::C(std::get<1>(room->mTriangles2d[0]), f->z);
+                Plane3f planeFloor{ a, b, c };
+                planeFloor.intersectRayOnTriangles2dMin(rayPair, room->mTriangles2d, f->z, fd.nearV);
+
                 for ( const auto& wd : room->mWallSegmentsSorted ) {
+                    // Walls
                     for ( const auto& quad : wd.quads ) {
-                        Plane3f plane{quad[0],quad[2],quad[1]};
-                        V3f i{V3f::ZERO};
-                        float bu = 0.0f;
-                        float bv = 0.0f;
-                        if ( plane.intersectRayOnTriangle( rayPair.origin, rayPair.dir, quad[0], quad[1], quad[2], i, bu, bv) ) {
-                            float dist = distance( rayPair.origin, i);
-                            if ( dist < fd.nearV ) {
-                                fd.nearV = dist;
-                            }
-                        }
-                        if ( plane.intersectRayOnTriangle( rayPair.origin, rayPair.dir, quad[0], quad[2], quad[3], i, bu, bv) ) {
-                            float dist = distance( rayPair.origin, i);
-                            if ( dist < fd.nearV ) {
-                                fd.nearV = dist;
-                            }
-                        }
+                        Plane3f plane{ quad[0], quad[2], quad[1] };
+                        plane.intersectRayOnQuadMin(rayPair, quad, fd.nearV);
                     }
                 }
 //                LOGRS("We are in room " << RoomService::roomName(room.get()));
