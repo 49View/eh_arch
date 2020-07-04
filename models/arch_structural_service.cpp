@@ -114,3 +114,11 @@ bool ArchStructuralService::intersectRayMin( const ArchStructural *a, const RayP
     }
     return false;
 }
+
+FeatureIntersection::FeatureIntersection() {
+    nearV = std::numeric_limits<float>::max();
+}
+
+bool FeatureIntersection::hasHit() const {
+    return nearV != std::numeric_limits<float>::max();
+}

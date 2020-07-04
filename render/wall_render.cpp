@@ -133,12 +133,7 @@ namespace WallRender {
     WallMapper createArchSegmentQuads( const std::vector<ArchSegment>& wss, const MaterialAndColorProperty &wallMaterial ) {
         WallMapper wallQuads;
         for ( const auto& ws : wss ) {
-            for ( const auto zh : ws.zHeights ) {
-                V3f v1 = XZY::C(ws.p1, zh.x());
-                V3f v2 = XZY::C(ws.p2, zh.x());
-                V3f v3 = v1 + V3f::UP_AXIS * zh.y();
-                V3f v4 = v2 + V3f::UP_AXIS * zh.y();
-                auto quad = QuadVector3f{ { v1, v2, v4, v3 } };
+            for ( const auto& quad: ws.quads ) {
                 auto wallMat = ws.wallMaterial.materialHash.empty() ? wallMaterial : ws.wallMaterial;
                 wallQuads[wallMat].emplace_back(QuadVector3fNormal{ quad, XZY::C(ws.normal, 0.0f) });
             }

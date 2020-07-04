@@ -16,6 +16,7 @@
 #include <core/math/triangulator.hpp>
 #include <poly/polyclipping/clipper.hpp>
 #include <core/math/vector_util.hpp>
+#include <core/math/plane3f.h>
 
 #include "room_service.hpp"
 #include "wall_service.hpp"
@@ -43,7 +44,7 @@ void FloorService::addWallsFromData( FloorBSData *f, const V2fVectorOfVector& fl
     calcBBox(f);
 }
 
-void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData* house, const std::vector<RoomPreData>& rds ) {
+void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData *house, const std::vector<RoomPreData>& rds ) {
     // finally insert in floor
     for ( auto& r : rds ) {
         auto newRoom = RoomService::createRoom(r, f->height, f->z, house);
@@ -489,7 +490,7 @@ RoomPreDataResult addRDSRooms( FloorBSData *f, std::vector<ArchSegment>& ws ) {
     RoomPreDataResult ret;
 
     if ( ws.empty() ) {
-        return RoomPreDataResult{false};
+        return RoomPreDataResult{ false };
     }
 
     // Add rooms
@@ -556,6 +557,10 @@ float FloorService::updatePerimeter( FloorBSData *f, const std::vector<ArchSegme
     removeCollinear(f->mPerimeterSegments, 0.001f);
     f->perimeterArchSegments = singleRoomSegmentsExternal;
 
+//    for ( auto& ps : f->perimeterArchSegments ) {
+//        ps.quads.emplace_back( makeQuadV3f(XZY::C(ps.p1, f->z), XZY::C(ps.p2, f->z), f->height) );
+//    }
+
     return lPerimeter;
 }
 
@@ -577,7 +582,7 @@ RoomPreDataResult FloorService::roomRecognition( FloorBSData *f ) {
     FloorServiceIntermediateData::WSGE() = wse;
     FloorServiceIntermediateData::WSG() = ws;
 
-    rds = addRDSRooms(f, ws );
+    rds = addRDSRooms(f, ws);
 
     if ( rds.isValidPreRoom ) {
         // External floor Perimeter
@@ -616,7 +621,7 @@ std::vector<RoomBSData *> FloorService::roomsIntersectingBBox( FloorBSData *f, c
     return ret;
 }
 
-void FloorService::reevaluateDoorsAndWindowsAfterRoomChange( FloorBSData* f ) {
+void FloorService::reevaluateDoorsAndWindowsAfterRoomChange( FloorBSData *f ) {
     for ( auto& d : f->doors ) {
         DoorService::reevaluate(d.get(), f);
     }
@@ -749,7 +754,7 @@ void FloorService::removeArch( FloorBSData *f, int64_t hashToRemove ) {
     }
 }
 
-void FloorService::moveArch( FloorBSData *f, ArchStructural* elem, const V2f& offset2d ) {
+void FloorService::moveArch( FloorBSData *f, ArchStructural *elem, const V2f& offset2d ) {
     // First check what type it is, in case we need to do cross-checking with other elements
     if ( elem == nullptr ) return;
 
@@ -761,7 +766,7 @@ void FloorService::moveArch( FloorBSData *f, ArchStructural* elem, const V2f& of
             for ( auto& ff : room->mFittedFurniture ) {
                 if ( ff.get() == elem ) {
                     ff->position3d += XZY::C(offset2d, 0.0f);
-                    RoomService::calculateFurnitureBBox( ff.get() );
+                    RoomService::calculateFurnitureBBox(ff.get());
                 }
             }
         }
@@ -844,7 +849,7 @@ void FloorService::rescale( FloorBSData *f, float _scale ) {
         v *= _scale;
     }
     for ( auto& v : f->perimeterArchSegments ) {
-        v.scale(_scale);
+        ArchSegmentService::rescale(v, _scale);
     }
 
     for ( auto& i : f->windows ) WindowService::rescale(i.get(), _scale);
@@ -1079,7 +1084,7 @@ bool FloorService::findRoomAt( const FloorBSData *f, const Vector2f& matPos, std
     return hasBeenFound;
 }
 
-std::optional<RoomBSData*> FloorService::whichRoomAmI( const FloorBSData *f, const Vector2f& _pos ) {
+std::optional<RoomBSData *> FloorService::whichRoomAmI( const FloorBSData *f, const Vector2f& _pos ) {
     for ( const auto& r : f->rooms ) {
         bool isInHere = ArchStructuralService::isPointInside(r.get(), _pos);
         if ( isInHere ) {
@@ -1167,13 +1172,33 @@ FloorService::findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind
     return std::nullopt;
 }
 
-void FloorService::rayFeatureIntersect( const FloorBSData* f, const RayPair3& rayPair, FeatureIntersection& fd ) {
+void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& rayPair, FeatureIntersection& fd ) {
 
 //    float tNear = std::numeric_limits<float>::max();
     if ( ArchStructuralService::intersectRay(f, rayPair) ) {
         for ( const auto& room : f->rooms ) {
             if ( ArchStructuralService::intersectRay(room.get(), rayPair) ) {
-                LOGRS("We are in room " << RoomService::roomName(room.get()));
+                for ( const auto& wd : room->mWallSegmentsSorted ) {
+                    for ( const auto& quad : wd.quads ) {
+                        Plane3f plane{quad[0],quad[2],quad[1]};
+                        V3f i{V3f::ZERO};
+                        float bu = 0.0f;
+                        float bv = 0.0f;
+                        if ( plane.intersectRayOnTriangle( rayPair.origin, rayPair.dir, quad[0], quad[1], quad[2], i, bu, bv) ) {
+                            float dist = distance( rayPair.origin, i);
+                            if ( dist < fd.nearV ) {
+                                fd.nearV = dist;
+                            }
+                        }
+                        if ( plane.intersectRayOnTriangle( rayPair.origin, rayPair.dir, quad[0], quad[2], quad[3], i, bu, bv) ) {
+                            float dist = distance( rayPair.origin, i);
+                            if ( dist < fd.nearV ) {
+                                fd.nearV = dist;
+                            }
+                        }
+                    }
+                }
+//                LOGRS("We are in room " << RoomService::roomName(room.get()));
             }
         }
     }

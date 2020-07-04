@@ -9,9 +9,8 @@ float centimetersToMeters( float valueInCM );
 
 class FeatureIntersection {
 public:
-    [[nodiscard]] bool hasHit() const {
-        return arch != nullptr;
-    }
+    FeatureIntersection();
+    [[nodiscard]] bool hasHit() const;
 
     ArchStructural* arch = nullptr;
     float nearV = 0.0f;

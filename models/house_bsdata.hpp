@@ -117,7 +117,7 @@ struct TwoUShapesBased : public ArchStructural {
 };
 
 JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, crossNormal, color, tag, sequencePart,
-         zHeights, wallMaterial)
+         quads, wallMaterial)
     int32_t iFloor = 0;
     int32_t iWall = 0;
     int32_t iIndex = 0;
@@ -132,14 +132,14 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     C4f color = C4f::WHITE;
     uint64_t tag = 0;
     SequencePart sequencePart = 0;
-    std::vector<V2f> zHeights;
+    std::vector<QuadVector3f> quads;
     MaterialAndColorProperty wallMaterial{};
 
     friend std::ostream& operator<<( std::ostream& os, const ArchSegment& segment ) {
         os << "iFloor: " << segment.iFloor << " iWall: " << segment.iWall << " iIndex: " << segment.iIndex
            << " wallHash: " << segment.wallHash << " p1: " << segment.p1 << " p2: " << segment.p2 << " middle: "
            << segment.middle << " normal: " << segment.normal << " crossNormal: " << segment.crossNormal << " tag: "
-           << segment.tag << " sequencePart: " << segment.sequencePart << " zHeights: " << segment.zHeights.size();
+           << segment.tag << " sequencePart: " << segment.sequencePart << " zHeights: " << segment.quads.size();
         return os;
     }
 
@@ -154,18 +154,12 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
                normal == rhs.normal &&
                crossNormal == rhs.crossNormal &&
                tag == rhs.tag &&
-               zHeights == rhs.zHeights &&
+               quads == rhs.quads &&
                sequencePart == rhs.sequencePart;
     }
 
     bool operator!=( const ArchSegment& rhs ) const {
         return !( rhs == *this );
-    }
-
-    void scale( float _factor ) {
-        p1 *= _factor;
-        p2 *= _factor;
-        middle = lerp(0.5f, p1, p2);
     }
 
     [[nodiscard]] float length() const {
