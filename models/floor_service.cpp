@@ -1182,13 +1182,17 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                 V3f b = XZY::C(std::get<2>(room->mTriangles2d[0]), f->z);
                 V3f c = XZY::C(std::get<1>(room->mTriangles2d[0]), f->z);
                 Plane3f planeFloor{ a, b, c };
-                planeFloor.intersectRayOnTriangles2dMin(rayPair, room->mTriangles2d, f->z, fd.nearV);
+                if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->mTriangles2d, f->z, fd.nearV) ) {
+                    fd.normal = planeFloor.n;
+                }
 
                 for ( const auto& wd : room->mWallSegmentsSorted ) {
                     // Walls
                     for ( const auto& quad : wd.quads ) {
                         Plane3f plane{ quad[0], quad[2], quad[1] };
-                        plane.intersectRayOnQuadMin(rayPair, quad, fd.nearV);
+                        if ( plane.intersectRayOnQuadMin(rayPair, quad, fd.nearV) ) {
+                            fd.normal = plane.n;
+                        }
                     }
                 }
 //                LOGRS("We are in room " << RoomService::roomName(room.get()));

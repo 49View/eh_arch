@@ -444,7 +444,7 @@ void ArchOrchestrator::updateViewingModes( const AggregatedInputData& _aid ) {
             V3f ic = rsg.DC()->getPosition() + ( dir * safeDist );
 
             auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
-            rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, ic, V4f::SKY_BLUE.A(1.0f), 0.1f, sm3, "mouseFloorPoint");
+            rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, ic, V4f::SKY_BLUE.A(1.0f), 0.1f, sm3, RDSRotationNormalAxis{fd.normal}, "mouseFloorPoint");
 
             ic.setY(rsg.DC()->getPosition().y());
 
