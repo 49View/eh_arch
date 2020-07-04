@@ -16,7 +16,7 @@
 
 class SceneGraph;
 class RenderOrchestrator;
-
+class AggregatedInputData;
 
 class ArchOrchestrator {
 public:
@@ -52,7 +52,7 @@ public:
     void setFloorPlanView();
     void setTopDownView();
     void setDollHouseView();
-    void updateViewingModes( const V3f& mouseFloorPoint );
+    void updateViewingModes( const AggregatedInputData& _aid );
 
 protected:
     SceneGraph& sg;

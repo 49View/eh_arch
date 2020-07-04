@@ -15,6 +15,7 @@
 #include <core/math/vector_util.hpp>
 #include <core/lightmap_exchange_format.h>
 #include <graphics/renderer.h>
+#include <graphics/mouse_input.hpp>
 #include <graphics/lightmap_manager.hpp>
 #include <graphics/render_light_manager.h>
 #include <graphics/shader_manager.h>
@@ -419,8 +420,9 @@ void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
     }
 }
 
-void ArchOrchestrator::updateViewingModes( const V3f& mouseFloorPoint ) {
+void ArchOrchestrator::updateViewingModes( const AggregatedInputData& _aid ) {
     if ( H() && arc.getViewingMode() == AVM_Walk ) {
+        // Omino
         auto camPos = rsg.DC()->getPosition() * V3f::MASK_Y_OUT;
         auto camDir = -rsg.DC()->getDirection() * 0.7f;
         auto sm = DShaderMatrix{ DShaderMatrixValue2dColor };
@@ -433,7 +435,22 @@ void ArchOrchestrator::updateViewingModes( const V3f& mouseFloorPoint ) {
                               RDSArrowLength(0.6f), V4f::RED, 0.004f, sm, RDSPreMult(floorplanNavigationMatrix),
                               std::string{ "CameraOminoKeyDirection1" });
 
-        auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
-        rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, mouseFloorPoint, V4f::SKY_BLUE.A(1.0f), 0.1f, sm3, "mouseFloorPoint");
+        // Positional dot
+        auto dir = _aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC());
+
+        auto fd = HouseService::rayFeatureIntersect(H(), RayPair3{ rsg.DC()->getPosition(), dir });
+        if ( fd.hasHit() ) {
+            float safeDist = fd.nearV > 0.25f ? fd.nearV - 0.25f : 0.0f;
+            V3f ic = rsg.DC()->getPosition() + ( dir * safeDist );
+
+            auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
+            rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, ic, V4f::SKY_BLUE.A(1.0f), 0.1f, sm3, "mouseFloorPoint");
+
+            ic.setY(rsg.DC()->getPosition().y());
+
+            if ( _aid.isMouseSingleTap(TOUCH_ZERO) ) {
+                Timeline::play(rsg.DC()->PosAnim(), 0, KeyFramePair{ 0.5f, ic });
+            }
+        }
     }
 }
