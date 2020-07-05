@@ -225,7 +225,7 @@ void ArchOrchestrator::setTourView() {
         tourPlayback.playBack(rsg.DC());
     } else {
         V3f pos = V3f::ZERO;
-        V3f quat = V3f::ZERO;
+        Quaternion quat{M_PI, V3f::UP_AXIS};
         HouseService::bestStartingPositionAndAngle(H(), pos, quat);
         rsg.DC()->setPosition(pos);
         rsg.DC()->setQuat(quat);
@@ -258,10 +258,8 @@ void ArchOrchestrator::setWalkView( float animationSpeed ) {
     rsg.setRigCameraController(CameraControlType::Walk);
     rsg.useSkybox(true);
     V3f pos = V3f::ZERO;
-    V3f quatAngles = V3f::ZERO;
-    HouseService::bestStartingPositionAndAngle(H(), pos, quatAngles);
-    auto quat = quatCompose(quatAngles);
-    rsg.DC()->setIncrementQuatAngles(quatAngles);
+    Quaternion quat;
+    HouseService::bestStartingPositionAndAngle(H(), pos, quat);
     if ( animationSpeed > 0.0f ) {
         Timeline::play(rsg.DC()->PosAnim(), 0,
                        KeyFramePair{ 0.9f * animationSpeed, pos });
@@ -304,7 +302,6 @@ void ArchOrchestrator::setFloorPlanView() {
     arc.renderMode(FloorPlanRenderMode::Normal3d);
     HouseRender::IMHouseRender(rsg.RR(), sg, H(), arc);
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
-    rsg.DC()->setIncrementQuatAngles(quatAngles);
     rsg.useSkybox(false);
     if ( H() ) {
         auto quat = quatCompose(quatAngles);
@@ -334,7 +331,7 @@ void ArchOrchestrator::setTopDownView() {
     rsg.DC()->LockAtWalkingHeight(false);
     arc.pm(RDSPreMult(Matrix4f::IDENTITY));
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
-    rsg.DC()->setIncrementQuatAngles(quatAngles);
+    rsg.DC()->setQuat( quatCompose(quatAngles));
     rsg.useSkybox(false);
     arc.setFloorPlanTransparencyFactor(0.0f);
     showIMHouse();
@@ -367,10 +364,8 @@ void ArchOrchestrator::setDollHouseView() {
     arc.pm(RDSPreMult(Matrix4f::IDENTITY));
     rsg.useSkybox(true);
     V3f pos = V3f::ZERO;
-    V3f quatAngles = V3f::ZERO;
-    HouseService::bestDollyPositionAndAngle(H(), pos, quatAngles);
-    auto quat = quatCompose(quatAngles);
-    rsg.DC()->setIncrementQuatAngles(quatAngles);
+    Quaternion quat{};
+    HouseService::bestDollyPositionAndAngle(H(), pos, quat);
     Timeline::play(rsg.DC()->PosAnim(), 0, KeyFramePair{ 0.9f, pos });
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });

@@ -410,19 +410,19 @@ std::optional<uint64_t> HouseService::findRoomArchSegmentWithWallHash( HouseBSDa
     return std::nullopt;
 }
 
-void HouseService::bestStartingPositionAndAngle( const HouseBSData *house, V3f& pos, V3f& rot ) {
+void HouseService::bestStartingPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot ) {
     if ( house->bestInternalViewingPosition == V3f::ZERO ) {
         pos = XZY::C(HouseService::centerOfBiggestRoom(house), 1.48f);
-        rot = V3f{ 0.08f, -0.70f, 0.0f };
+        rot = quatCompose( V3f{ 0.08f, -0.70f, 0.0f } );
     } else {
         pos = house->bestInternalViewingPosition;
         rot = house->bestInternalViewingAngle;
     }
 }
 
-void HouseService::bestDollyPositionAndAngle( const HouseBSData *house, V3f& pos, V3f& rot ) {
+void HouseService::bestDollyPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot ) {
     if ( house->bestDollyViewingPosition == V3f::ZERO ) {
-        rot = V3f{ 1.0f, -0.75f, 0.0f };
+        rot = quatCompose( V3f{ 1.0f, -0.75f, 0.0f } );
         pos = V3f{ house->bbox.bottomRight().x(), house->depth * 3.0f,
                        house->bbox.bottomRight().y() } ;
     } else {
