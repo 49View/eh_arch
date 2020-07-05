@@ -4,26 +4,25 @@
 
 #include "arch_orchestrator.hpp"
 #include <core/resources/resource_builder.hpp>
-#include <core/math/plane3f.h>
-#include <core/raw_image.h>
 #include <core/TTF.h>
 #include <core/camera.h>
 #include <core/resources/profile.hpp>
-#include <core/resources/material.h>
 #include <render_scene_graph/render_orchestrator.h>
-#include <core/resources/resource_builder.hpp>
 #include <core/math/vector_util.hpp>
 #include <core/lightmap_exchange_format.h>
+
 #include <graphics/renderer.h>
 #include <graphics/mouse_input.hpp>
-#include <graphics/lightmap_manager.hpp>
 #include <graphics/render_light_manager.h>
 #include <graphics/shader_manager.h>
+#include <graphics/vertex_processing_anim.h>
+
 #include <poly/collision_mesh.hpp>
 #include <poly/scene_graph.h>
 
 #include <eh_arch/models/house_bsdata.hpp>
 #include <eh_arch/models/house_service.hpp>
+
 #include <eh_arch/render/house_render.hpp>
 
 #include <eh_arch/controller/arch_render_controller.hpp>

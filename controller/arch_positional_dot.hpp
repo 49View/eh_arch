@@ -24,6 +24,8 @@ private:
     bool positionChangedIn = false;
     bool positionChangedOut = false;
     bool currentHit = false;
+    bool isFlying = false;
+    bool antiWallRotation = false;
     FeatureIntersection fd{};
 };
 
