@@ -1177,6 +1177,7 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
     if ( ArchStructuralService::intersectRay(f, rayPair) ) {
         for ( const auto& room : f->rooms ) {
             if ( ArchStructuralService::intersectRay(room.get(), rayPair) ) {
+
                 // Floors
                 V3f a = XZY::C(std::get<0>(room->mTriangles2d[0]), f->z);
                 V3f b = XZY::C(std::get<2>(room->mTriangles2d[0]), f->z);
@@ -1186,8 +1187,8 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                     fd.normal = planeFloor.n;
                 }
 
+                // Walls
                 for ( const auto& wd : room->mWallSegmentsSorted ) {
-                    // Walls
                     for ( const auto& quad : wd.quads ) {
                         Plane3f plane{ quad[0], quad[2], quad[1] };
                         if ( plane.intersectRayOnQuadMin(rayPair, quad, fd.nearV) ) {
@@ -1195,7 +1196,6 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                         }
                     }
                 }
-//                LOGRS("We are in room " << RoomService::roomName(room.get()));
             }
         }
     }

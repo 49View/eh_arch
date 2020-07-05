@@ -237,7 +237,7 @@ void ArchOrchestrator::setTourView() {
         rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
         fader(0.001f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
     }
-    Timeline::play( rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f});
+    Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
 
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
@@ -280,7 +280,7 @@ void ArchOrchestrator::setWalkView( float animationSpeed ) {
         rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
         fader(0.001f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
     }
-    Timeline::play( rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f});
+    Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
 
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
@@ -312,12 +312,12 @@ void ArchOrchestrator::setFloorPlanView() {
     if ( H() ) {
         auto quat = quatCompose(quatAngles);
         Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
-        centerCameraMiddleOfHouseWithFloorplanInfoOffset(1.3f, 0.2f); ;
+        centerCameraMiddleOfHouseWithFloorplanInfoOffset(1.3f, 0.2f);;
         arc.setFloorPlanTransparencyFactor(0.5f);
         showIMHouse();
     }
 
-    Timeline::play( rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 1.0f});
+    Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 1.0f });
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
@@ -343,8 +343,8 @@ void ArchOrchestrator::setTopDownView() {
     showIMHouse();
     auto quat = quatCompose(quatAngles);
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
-    Timeline::play( rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f});
-    centerCameraMiddleOfHouse(H()->bbox3d.calcDepth()+0.3f);
+    Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
+    centerCameraMiddleOfHouse(H()->bbox3d.calcDepth() + 0.3f);
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
@@ -376,7 +376,7 @@ void ArchOrchestrator::setDollHouseView() {
     rsg.DC()->setIncrementQuatAngles(quatAngles);
     Timeline::play(rsg.DC()->PosAnim(), 0, KeyFramePair{ 0.9f, pos });
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
-    Timeline::play( rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f});
+    Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
@@ -420,37 +420,33 @@ void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
     }
 }
 
+void ArchOrchestrator::updateRenderCameraLocator() {
+    // Omino
+    auto camPos = rsg.DC()->getPosition() * V3f::MASK_Y_OUT;
+    auto camDir = -rsg.DC()->getDirection() * 0.7f;
+    auto sm = DShaderMatrix{ DShaderMatrixValue2dColor };
+    rsg.RR().clearBucket(CommandBufferLimits::CameraLocator);
+    rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, camPos, V4f::DARK_RED, 0.4f,
+                                 RDSPreMult(floorplanNavigationMatrix),
+                                 sm, std::string{ "CameraOminoKey" });
+    rsg.RR().draw<DArrow>(CommandBufferLimits::CameraLocator, V3fVector{ camPos, camPos + camDir },
+                          RDSArrowAngle(0.45f),
+                          RDSArrowLength(0.6f), V4f::RED, 0.004f, sm, RDSPreMult(floorplanNavigationMatrix),
+                          std::string{ "CameraOminoKeyDirection1" });
+}
+
+void ArchOrchestrator::updateWalkView( const AggregatedInputData& _aid ) {
+
+    updateRenderCameraLocator();
+    positionalDot.update(H(), _aid, rsg);
+}
+
 void ArchOrchestrator::updateViewingModes( const AggregatedInputData& _aid ) {
-    if ( H() && arc.getViewingMode() == AVM_Walk ) {
-        // Omino
-        auto camPos = rsg.DC()->getPosition() * V3f::MASK_Y_OUT;
-        auto camDir = -rsg.DC()->getDirection() * 0.7f;
-        auto sm = DShaderMatrix{ DShaderMatrixValue2dColor };
-        rsg.RR().clearBucket(CommandBufferLimits::CameraLocator);
-        rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, camPos, V4f::DARK_RED, 0.4f,
-                                     RDSPreMult(floorplanNavigationMatrix),
-                                     sm, std::string{ "CameraOminoKey" });
-        rsg.RR().draw<DArrow>(CommandBufferLimits::CameraLocator, V3fVector{ camPos, camPos + camDir },
-                              RDSArrowAngle(0.45f),
-                              RDSArrowLength(0.6f), V4f::RED, 0.004f, sm, RDSPreMult(floorplanNavigationMatrix),
-                              std::string{ "CameraOminoKeyDirection1" });
-
-        // Positional dot
-        auto dir = _aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC());
-
-        auto fd = HouseService::rayFeatureIntersect(H(), RayPair3{ rsg.DC()->getPosition(), dir });
-        if ( fd.hasHit() ) {
-            float safeDist = fd.nearV > 0.25f ? fd.nearV - 0.25f : 0.0f;
-            V3f ic = rsg.DC()->getPosition() + ( dir * safeDist );
-
-            auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
-            rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, ic, V4f::SKY_BLUE.A(1.0f), 0.1f, sm3, RDSRotationNormalAxis{fd.normal}, "mouseFloorPoint");
-
-            ic.setY(rsg.DC()->getPosition().y());
-
-            if ( _aid.isMouseSingleTap(TOUCH_ZERO) ) {
-                Timeline::play(rsg.DC()->PosAnim(), 0, KeyFramePair{ 0.5f, ic });
-            }
-        }
+    switch ( arc.getViewingMode() ) {
+        case AVM_Walk:
+            updateWalkView(_aid);
+            break;
+        default:
+            break;
     }
 }

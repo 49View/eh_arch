@@ -12,6 +12,7 @@
 #include <eh_arch/models/house_bsdata.hpp>
 #include <eh_arch/models/room_service_furniture.hpp>
 #include <eh_arch/controller/arch_tour.hpp>
+#include <eh_arch/controller/arch_positional_dot.hpp>
 #include "htypes.hpp"
 
 class SceneGraph;
@@ -52,7 +53,12 @@ public:
     void setFloorPlanView();
     void setTopDownView();
     void setDollHouseView();
+
+    // Updates (these are run every frame)
     void updateViewingModes( const AggregatedInputData& _aid );
+protected:
+    void updateWalkView( const AggregatedInputData& _aid );
+    void updateRenderCameraLocator();
 
 protected:
     SceneGraph& sg;
@@ -64,5 +70,6 @@ protected:
     FurnitureMapStorage furnitureMap;
     bool loadingMutex = false;
     Matrix4f floorplanNavigationMatrix{Matrix4f::MIDENTITY()};
+    ArchPositionalDot positionalDot;
     TourPlayback tourPlayback;
 };
