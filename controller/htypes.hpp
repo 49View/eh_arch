@@ -16,7 +16,6 @@ enum class ArchIOEvents {
 enum ArchViewingMode {
     AVM_Hidden = -1,
     AVM_Tour = 0,
-    AVM_Assisted,
     AVM_Walk,
     AVM_FloorPlan,
     AVM_TopDown,

@@ -6,10 +6,11 @@
 
 #include <string>
 #include <core/math/anim_type.hpp>
+#include <eh_arch/models/arch_structural_service.hpp>
 
-class AggregatedInputData;
 class RenderOrchestrator;
 struct HouseBSData;
+struct AggregatedInputData;
 
 class ArchPositionalDot {
 public:
@@ -23,7 +24,7 @@ private:
     bool positionChangedIn = false;
     bool positionChangedOut = false;
     bool currentHit = false;
-
+    FeatureIntersection fd{};
 };
 
 

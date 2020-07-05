@@ -251,9 +251,6 @@ void ArchOrchestrator::setTourView() {
     sg.setCollisionEnabled(false);
 }
 
-void ArchOrchestrator::setAssistedView() {
-}
-
 void ArchOrchestrator::setWalkView( float animationSpeed ) {
     auto comingFromMode = arc.getViewingMode();
     arc.setViewingMode(ArchViewingMode::AVM_Walk);
@@ -401,9 +398,6 @@ void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
             break;
         case AVM_Tour:
             setTourView();
-            break;
-        case AVM_Assisted:
-            setAssistedView();
             break;
         case AVM_Walk:
             setWalkView();

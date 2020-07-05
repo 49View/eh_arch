@@ -17,7 +17,7 @@
 
 class SceneGraph;
 class RenderOrchestrator;
-class AggregatedInputData;
+struct AggregatedInputData;
 
 class ArchOrchestrator {
 public:
@@ -48,7 +48,6 @@ public:
     HouseBSData *H();
 
     void setTourView();
-    void setAssistedView();
     void setWalkView( float animationSpeed = 1.0f );
     void setFloorPlanView();
     void setTopDownView();

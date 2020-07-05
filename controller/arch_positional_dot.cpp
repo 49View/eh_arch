@@ -31,7 +31,7 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
     constexpr float fadeOutNearDistance = 1.0f; // If dot is closer than this from the camera, linearly fade it out.
     constexpr float minSafeDistance = 0.25f; // Deduct this distance from clicked dot position to avoid being to close to walls/objects
     auto dir = _aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC());
-    auto fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir });
+    fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir });
     if ( _aid.isMouseTouchedDownFirstTime(TOUCH_ZERO) || positionChangedOut ) {
         Timeline::stop(positionalDotAlphaAnim, positionalDotAlphaFadeInAnimKey, positionalDotAlphaAnim->value);
         positionalDotAlphaFadeOutAnimKey = Timeline::play(positionalDotAlphaAnim, 0,
@@ -69,6 +69,11 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
 
         if ( _aid.isMouseSingleTap(TOUCH_ZERO) ) {
             Timeline::play(rsg.DC()->PosAnim(), 0, KeyFramePair{ gotoAndFadeTime, ic });
+//            auto quatr = rsg.DC()->quatAngle();
+//            quatr = quatr * Quaternion{M_PI, V3f::UP_AXIS};
+//            Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ gotoAndFadeTime, quatr }, AnimEndCallback{[&](){
+//                rsg.DC()->setIncrementQuatAngles(rsg.DC()->quatAngle().euler());
+//            }});
         }
     } else {
         if ( currentHit ) positionChangedOut = true;
