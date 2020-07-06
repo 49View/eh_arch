@@ -5,11 +5,26 @@
 #pragma once
 
 #include <core/math/vector2f.h>
-#include <eh_arch/state_machine/arch_sm_events.hpp>
+#include <eh_arch/models/property_list.hpp>
+
+struct OnWhichRoomAmIEvent{};
+struct OnPushTourPathEvent{};
+struct OnPushKeyFrameTourPathEvent {
+    float timestamp = 5.0f;
+};
+struct OnPopTourPathEvent {
+    int popIndex = -1;
+};
 
 struct OnActivateEvent {
+    OnActivateEvent() = default;
+    OnActivateEvent( const std::function<void()>& ccf ) : ccf(ccf) {}
+    OnActivateEvent( FloorPlanRenderMode fprm ) : fprm(fprm) {}
+
     std::function<void()> ccf = nullptr;
+    FloorPlanRenderMode fprm = FloorPlanRenderMode::Normal3d;
 };
+
 struct OnAltPressedEvent {};
 struct OnClearEvent {};
 struct OnDoubleTapEvent {};
@@ -36,6 +51,7 @@ struct OnHouseMakerToggleEvent{};
 struct OnTourToggleEvent{};
 struct OnExploreToggleEvent{};
 struct OnTopDownToggleEvent{};
+struct OnFlorPlanViewToggleEvent{};
 struct OnDollyHouseToggleEvent{};
 
 struct OnFirstTimeTouchDownEvent {

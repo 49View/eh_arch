@@ -62,11 +62,11 @@ using HouseStrategyResult = std::tuple<std::shared_ptr<HouseBSData>, RoomPreData
 namespace HouseMakerBitmap {
     const SourceImages& getSourceImages();
     const SourceImages& prepareImages( HouseBSData *newHouse, const RawImage& sourceImage );
-    void rescale( HouseBSData *house, float rescaleFactor, float floorPlanRescaleFactor );
     std::shared_ptr<HouseBSData> makeEmpty( const PropertyListing& property, const RawImage& sourceImage );
     std::shared_ptr<HouseBSData> make( HouseBSData* sourceHouse, const SourceImages& sourceImages, FurnitureMapStorage& furnitureMap );
     std::shared_ptr<HouseBSData> make( HouseBSData*, const RawImage&, FurnitureMapStorage& );
     void makeFromWalls( HouseBSData *house );
+    void makeFromWallsWindowsDoors( HouseBSData *house );
     void makeAddDoor( HouseBSData *house, const FloorUShapesPair& fus );
     void makeFromSwapDoorOrWindow( HouseBSData *house, HashEH hash );
 };

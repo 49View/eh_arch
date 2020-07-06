@@ -147,7 +147,6 @@ void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCa
     Http::getNoCache(Url{ "/propertybim/" + _pid }, [&, ccf]( HttpResponeParams params ) {
         if ( !params.BufferString().empty() ) {
             houseJson.reset(std::make_shared<HouseBSData>(params.BufferString()));
-            setViewingMode(AVM_Hidden);
             if ( ccf ) ccf();
         } else {
             if ( ccfailure ) ccfailure();
@@ -206,6 +205,29 @@ void ArchOrchestrator::pushHouseChange() {
     houseJson.push();
 }
 
+void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
+
+    switch ( _wm ) {
+        case AVM_Hidden:
+            break;
+        case AVM_Tour:
+            setTourView();
+            break;
+        case AVM_Walk:
+            setWalkView();
+            break;
+        case AVM_FloorPlan:
+            setFloorPlanView(lastKnownGoodFloorPlanRenderMode);
+            break;
+        case AVM_TopDown:
+            setTopDownView();
+            break;
+        case AVM_DollHouse:
+            setDollHouseView();
+            break;
+    }
+}
+
 void ArchOrchestrator::setTourView() {
 //    auto comingFromMode = arc.getViewingMode();
     arc.setViewingMode(ArchViewingMode::AVM_Tour);
@@ -224,14 +246,14 @@ void ArchOrchestrator::setTourView() {
         tourPlayback.playBack(rsg.DC());
     } else {
         V3f pos = V3f::ZERO;
-        Quaternion quat{M_PI, V3f::UP_AXIS};
+        Quaternion quat{ M_PI, V3f::UP_AXIS };
         HouseService::bestStartingPositionAndAngle(H(), pos, quat);
         rsg.DC()->setPosition(pos);
         rsg.DC()->setQuat(quat);
     }
 
 //    if ( comingFromMode == ArchViewingMode::AVM_FloorPlan ) {
-        rsg.RR().showBucket(CommandBufferLimits::PBRStart, true);
+    rsg.RR().showBucket(CommandBufferLimits::PBRStart, true);
 //    }
 //    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
 //    if ( comingFromMode == ArchViewingMode::AVM_FloorPlan || comingFromMode == ArchViewingMode::AVM_DollHouse ||
@@ -293,7 +315,7 @@ void ArchOrchestrator::setWalkView( float animationSpeed ) {
           } });
 }
 
-void ArchOrchestrator::setFloorPlanView() {
+void ArchOrchestrator::setFloorPlanView( FloorPlanRenderMode fprm ) {
 //    auto comingFromMode = arc.getViewingMode();
     arc.setViewingMode(ArchViewingMode::AVM_FloorPlan);
     // NDDado: we stop tourPlayback _before_ changing camera controller because camera controller sets a new FoV
@@ -301,7 +323,8 @@ void ArchOrchestrator::setFloorPlanView() {
     rsg.setRigCameraController(CameraControlType::Edit2d);
     rsg.DC()->LockAtWalkingHeight(false);
     arc.pm(RDSPreMult(Matrix4f::IDENTITY));
-    arc.renderMode(FloorPlanRenderMode::Normal3d);
+    lastKnownGoodFloorPlanRenderMode = fprm;
+    arc.renderMode(fprm);
     HouseRender::IMHouseRender(rsg.RR(), sg, H(), arc);
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
     rsg.useSkybox(false);
@@ -386,29 +409,6 @@ void ArchOrchestrator::setDollHouseView() {
     fader(0.9f, 1.0f, rsg.RR().CLIExcludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
 
     sg.setCollisionEnabled(false);
-}
-
-void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
-
-    switch ( _wm ) {
-        case AVM_Hidden:
-            break;
-        case AVM_Tour:
-            setTourView();
-            break;
-        case AVM_Walk:
-            setWalkView();
-            break;
-        case AVM_FloorPlan:
-            setFloorPlanView();
-            break;
-        case AVM_TopDown:
-            setTopDownView();
-            break;
-        case AVM_DollHouse:
-            setDollHouseView();
-            break;
-    }
 }
 
 void ArchOrchestrator::updateRenderCameraLocator() {

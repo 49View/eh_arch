@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "house_maker/sources/house_maker_statemachine.h"
-
 struct ClearEverthing {
     void operator()( RoomBuilder *rb, ArchOrchestrator& asg ) noexcept {
         rb->clear();
@@ -13,70 +11,6 @@ struct ClearEverthing {
         asg.showIMHouse();
     }
 };
-
-struct InitializeHouseMaker {
-    void operator()( SceneGraph& sg, ArchRenderController& arc, RenderOrchestrator& rsg, ArchOrchestrator& asg,
-                     OnActivateEvent ev ) noexcept {
-        rsg.DC()->setQuat( quatCompose(V3f{ M_PI_2, 0.0f, 0.0f }));
-        rsg.DC()->setPosition(V3f::UP_AXIS * 5.0f);
-        asg.setFloorPlanView();
-        if ( ev.ccf ) ev.ccf();
-    }
-};
-
-static inline void show3dViewInternal( ArchOrchestrator& asg, std::function<void()> callback ) {
-    if ( !asg.H() ) return;
-    if ( asg.HRC().houseId != asg.H()->propertyId ) {
-        asg.make3dHouse(callback);
-    } else {
-        callback();
-    }
-}
-
-struct ActivateFloorplanView {
-    void
-    operator()( SceneGraph& sg, ArchRenderController& arc, RenderOrchestrator& rsg, ArchOrchestrator& asg ) noexcept {
-        asg.setFloorPlanView();
-    }
-};
-
-struct ActivateTourView {
-    void
-    operator()( SceneGraph& sg, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
-        show3dViewInternal( asg, [&]() {
-            asg.setTourView();
-        } );
-    }
-};
-
-struct ActivateTopDownView {
-    void
-    operator()( SceneGraph& sg, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
-        show3dViewInternal( asg, [&]() {
-            asg.setTopDownView();
-        } );
-    }
-};
-
-struct ActivateWalkView {
-    void
-    operator()( SceneGraph& sg, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
-        LOGRS("Switching to Walk View")
-        show3dViewInternal( asg, [&]() {
-            asg.setWalkView();
-        } );
-    }
-};
-
-struct ActivateDollyHouseView {
-    void
-    operator()( SceneGraph& sg, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
-        show3dViewInternal( asg, [&]() {
-            asg.setDollHouseView();
-        } );
-    }
-};
-
 
 struct KeyToggleHouseMaker {
     void operator()( ArchOrchestrator& asg, HouseMakerStateMachine& hm, OnKeyToggleEvent keyEvent,
@@ -184,32 +118,10 @@ struct LoadFloorPlan {
     }
 };
 
-struct MakeHouse3d {
-    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
-        asg.make3dHouse([&]() {
-            rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
-            rsg.useSkybox(arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
-            if ( arc.getViewingMode() == ArchViewingMode::AVM_DollHouse ||
-                 arc.getViewingMode() == ArchViewingMode::AVM_TopDown ) {
-                rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
-            }
-        });
-    }
-};
-
 struct ElaborateHouseBitmap {
     void operator()( SceneGraph& sg, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         auto newHouse = HouseMakerBitmap::make(asg.H(), *sg.get<RawImage>(asg.H()->propertyId), asg.FurnitureMap());
         asg.setHouse(newHouse);
-        asg.showIMHouse();
-        asg.pushHouseChange();
-    }
-};
-
-struct FurnishHouse {
-    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
-        HouseService::guessFittings(asg.H(), asg.FurnitureMap());
-        MakeHouse3d{}(asg, rsg, arc);
         asg.showIMHouse();
         asg.pushHouseChange();
     }
@@ -225,10 +137,9 @@ struct GlobalRescale {
             // The reason why we need to do 2 rescale is that we do not have a "1.0" scale factor as that depends
             // on the result of the ocr scan of the floorplan, so first we need to invert the current scale
             // then apply the new scale. It's a bit awkard but works.
-            HouseMakerBitmap::rescale(asg.H(), 1.0f / oldScaleFactor, metersToCentimeters(1.0f / oldScaleFactor));
+            HouseService::rescale(asg.H(), 1.0f / oldScaleFactor);
             asg.H()->sourceData.rescaleFactor = metersToCentimeters(currentScaleFactorMeters);
-            HouseMakerBitmap::rescale(asg.H(), asg.H()->sourceData.rescaleFactor,
-                                      centimetersToMeters(asg.H()->sourceData.rescaleFactor));
+            HouseService::rescale(asg.H(), asg.H()->sourceData.rescaleFactor);
             // We need a full rebuild of the fittings because scaling doesn't go well with furnitures, IE we cannot
             // scale a sofa, hence only scaling the position will move the sofa away from it's desired location
             // which for example would be "against a wall". So because we cannot apply "scale" to furnitures we need
@@ -238,5 +149,59 @@ struct GlobalRescale {
             asg.centerCameraMiddleOfHouse();
             asg.pushHouseChange();
         }
+    }
+};
+
+struct SpecialSpaceToggleFeatureManipulation {
+    bool operator()( ArchRenderController& arc, HouseMakerStateMachine& hm, ArchOrchestrator& asg ) noexcept {
+        arc.toggleElementsOnSelectionList([&]( const ArchStructuralFeatureDescriptor& asf ) {
+            HouseMakerBitmap::makeFromSwapDoorOrWindow(asg.H(), asf.elem->hash);
+            asg.pushHouseChange();
+        });
+        return true;
+    }
+};
+
+
+struct KeyToggleFeatureManipulation {
+    bool operator()( ArchRenderController& arc, ArchOrchestrator& asg, OnKeyToggleEvent keyEvent ) noexcept {
+        if ( keyEvent.keyCode == GMK_A ) {
+            arc.splitFirstEdgeOnSelectionList([&]( const ArchStructuralFeatureDescriptor& asf, const V2f& offset ) {
+                WallService::splitEdgeAndAddPointInTheMiddle(asf, offset);
+                HouseService::recalculateBBox(asg.H());
+            });
+            asg.pushHouseChange();
+            arc.resetSelection();
+            return true;
+        }
+        if ( keyEvent.keyCode == GMK_D ) {
+            auto fus = WallService::createTwoShapeAt(asg.H(), keyEvent.viewportPos);
+            if ( FloorService::isFloorUShapeValid(fus) ) {
+                HouseMakerBitmap::makeAddDoor(asg.H(), fus);
+            }
+            asg.pushHouseChange();
+            return true;
+        }
+        return false;
+    }
+};
+
+struct TouchMoveFeatureManipulation {
+    bool operator()( const OnTouchMoveViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg,
+                     ArchRenderController& arc ) noexcept {
+        auto is = mouseEvent.viewportPos;
+        arc.moveSelectionList(is, [&]( const ArchStructuralFeatureDescriptor& asf, const V2f& offset ) {
+            if ( asf.feature == ArchStructuralFeature::ASF_Poly ) {
+                HouseService::moveArch(asg.H(), dynamic_cast<ArchStructural*>(asf.elem), offset);
+                asg.pushHouseChange();
+            } else {
+                WallService::moveFeature( asf, offset, false);
+                HouseService::recalculateBBox(asg.H());
+                HouseMakerBitmap::makeFromWalls(asg.H());
+                asg.pushHouseChange();
+            }
+        });
+        asg.showIMHouse();
+        return true;
     }
 };

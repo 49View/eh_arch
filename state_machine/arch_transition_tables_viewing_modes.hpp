@@ -16,6 +16,14 @@ struct TourStateMachine {
     }
 };
 
+struct FloorPlanViewStateMachine {
+    auto operator()() const noexcept {
+        return make_transition_table(
+            *state<class Initial> / []{} = state<class FloorPlanViewState>
+        );
+    }
+};
+
 struct ExploreStateMachine {
     auto operator()() const noexcept {
         return make_transition_table(

@@ -36,8 +36,6 @@ public:
     void undoHouseChange();
     void redoHouseChange();
 
-    void setViewingMode( ArchViewingMode _wm );
-
     void onEvent(ArchIOEvents event);
     bool hasEvent(ArchIOEvents event) const;
     Matrix4f calcFloorplanNavigationTransform( float screenRatio, float screenPadding );
@@ -47,9 +45,10 @@ public:
     HouseRenderContainer& HRC();
     HouseBSData *H();
 
+    void setViewingMode( ArchViewingMode _wm );
     void setTourView();
     void setWalkView( float animationSpeed = 1.0f );
-    void setFloorPlanView();
+    void setFloorPlanView( FloorPlanRenderMode fprm );
     void setTopDownView();
     void setDollHouseView();
 
@@ -68,6 +67,7 @@ protected:
     HouseRenderContainer hrc;
     FurnitureMapStorage furnitureMap;
     bool loadingMutex = false;
+    FloorPlanRenderMode lastKnownGoodFloorPlanRenderMode = FloorPlanRenderMode::Normal3d;
     Matrix4f floorplanNavigationMatrix{Matrix4f::MIDENTITY()};
     ArchPositionalDot positionalDot;
     TourPlayback tourPlayback;

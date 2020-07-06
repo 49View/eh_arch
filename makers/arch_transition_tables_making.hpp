@@ -6,7 +6,8 @@
 
 #include <core/state_machine_helper.hpp>
 #include <eh_arch/state_machine/arch_sm_events__fsm.hpp>
-#include <eh_arch/state_machine/arch_sm_actions__fsm.hpp>
+#include <eh_arch/makers/arch_sm_actions_bespoke_builder.hpp>
+#include <eh_arch/makers/arch_sm_actions_maker_builder.hpp>
 
 struct MakerStateMachine {
     auto operator()() const noexcept {
@@ -14,7 +15,7 @@ struct MakerStateMachine {
             *state<class Initial> / [] {} = state<class HouseMaker>,
             state<class HouseMaker> + event<OnGlobalRescaleEvent> / GlobalRescale{},
             state<class HouseMaker> + event<OnClearEvent> / ClearEverthing{},
-            state<class HouseMaker> + event<OnHouseMakerToggleEvent> / ActivateFloorplanView{},
+            state<class HouseMaker> + event<OnHouseMakerToggleEvent> / ActivateFloorplanView{FloorPlanRenderMode::Debug3d},
             state<class HouseMaker> + event<OnLoadFloorPlanEvent> / LoadFloorPlan{}, state<class HouseMaker> +
                                                                                      event<OnCreateNewPropertyFromFloorplanImageEvent> /
                                                                                      CreateNewPropertyFromFloorplanImage{},

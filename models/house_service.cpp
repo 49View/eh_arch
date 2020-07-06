@@ -372,6 +372,13 @@ void HouseService::rescale( HouseBSData *house, float scale ) {
     }
     recalculateBBox( house );
     house->walkableArea = HouseService::area(house);
+
+    // Post rescaling we might need to get feature with accurate values in cm, so this is a chance to do it
+    for ( auto& f : house->mFloors ) {
+        for ( auto& r : f->rooms ) {
+            RoomService::calcSkirtingSegments(r.get());
+        }
+    }
 }
 
 void HouseService::recalculateBBox( HouseBSData *house ) {

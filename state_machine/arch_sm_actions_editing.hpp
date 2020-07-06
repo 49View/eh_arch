@@ -8,6 +8,19 @@
 #include <eh_arch/models/wall_service.hpp>
 #include <eh_arch/models/door_service.hpp>
 
+struct MakeHouse3d {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        asg.make3dHouse([&]() {
+            rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
+            rsg.useSkybox(arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
+            if ( arc.getViewingMode() == ArchViewingMode::AVM_DollHouse ||
+                 arc.getViewingMode() == ArchViewingMode::AVM_TopDown ) {
+                rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
+            }
+        });
+    }
+};
+
 struct EnterFeatureManipulation {
     void operator()( ArchOrchestrator& asg ) noexcept {
         asg.showIMHouse();
@@ -127,23 +140,6 @@ struct TouchedDownFirstTimeFittedFurnitureGuard {
     }
 };
 
-struct TouchMoveFeatureManipulation {
-    bool operator()( const OnTouchMoveViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg,
-                     ArchRenderController& arc ) noexcept {
-        auto is = mouseEvent.viewportPos;
-        arc.moveSelectionList(is, [&]( const ArchStructuralFeatureDescriptor& asf, const V2f& offset ) {
-            if ( asf.feature == ArchStructuralFeature::ASF_Poly ) {
-                HouseService::moveArch(asg.H(), dynamic_cast<ArchStructural*>(asf.elem), offset);
-            } else {
-                WallService::moveFeature( asf, offset, false);
-                HouseService::recalculateBBox(asg.H());
-                HouseMakerBitmap::makeFromWalls(asg.H());
-            }
-        });
-        return true;
-    }
-};
-
 struct TouchUpEventFeatureManipulation {
     bool operator()( ArchRenderController& arc, ArchOrchestrator& asg, RenderOrchestrator& rsg ) noexcept {
         asg.pushHouseChange();
@@ -205,36 +201,24 @@ struct IncrementalScaleFeatureManipulation {
     }
 };
 
-struct SpecialSpaceToggleFeatureManipulation {
-    bool operator()( ArchRenderController& arc, HouseMakerStateMachine& hm, ArchOrchestrator& asg ) noexcept {
-        arc.toggleElementsOnSelectionList([&]( const ArchStructuralFeatureDescriptor& asf ) {
-            HouseMakerBitmap::makeFromSwapDoorOrWindow(asg.H(), asf.elem->hash);
-            asg.pushHouseChange();
-        });
-        return true;
+struct FurnishHouse {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        HouseService::guessFittings(asg.H(), asg.FurnitureMap());
+        MakeHouse3d{}(asg, rsg, arc);
+        asg.showIMHouse();
+        asg.pushHouseChange();
     }
 };
 
-
-struct KeyToggleFeatureManipulation {
-    bool operator()( ArchRenderController& arc, ArchOrchestrator& asg, OnKeyToggleEvent keyEvent ) noexcept {
-        if ( keyEvent.keyCode == GMK_A ) {
-            arc.splitFirstEdgeOnSelectionList([&]( const ArchStructuralFeatureDescriptor& asf, const V2f& offset ) {
-                WallService::splitEdgeAndAddPointInTheMiddle(asf, offset);
-                HouseService::recalculateBBox(asg.H());
-            });
-            asg.pushHouseChange();
-            arc.resetSelection();
-            return true;
-        }
-        if ( keyEvent.keyCode == GMK_D ) {
-            auto fus = WallService::createTwoShapeAt(asg.H(), keyEvent.viewportPos);
-            if ( FloorService::isFloorUShapeValid(fus) ) {
-                HouseMakerBitmap::makeAddDoor(asg.H(), fus);
+struct TouchMovePolyFeatureManipulation {
+    bool operator()( const OnTouchMoveViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg,
+                     ArchRenderController& arc ) noexcept {
+        auto is = mouseEvent.viewportPos;
+        arc.moveSelectionList(is, [&]( const ArchStructuralFeatureDescriptor& asf, const V2f& offset ) {
+            if ( asf.feature == ArchStructuralFeature::ASF_Poly ) {
+                HouseService::moveArch(asg.H(), dynamic_cast<ArchStructural*>(asf.elem), offset);
             }
-            asg.pushHouseChange();
-            return true;
-        }
-        return false;
+        });
+        return true;
     }
 };
