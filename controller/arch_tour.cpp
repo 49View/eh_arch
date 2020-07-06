@@ -26,6 +26,10 @@ void TourPlayback::stopPlayBack( std::shared_ptr <Camera> cam ) {
         Timeline::stop(cam->FoVAnim(), animUUIDs[2], cam->FoVAnim()->value);
         animUUIDs.clear();
     }
+    positions.clear();
+    quats.clear();
+    fovs.clear();
+    currTimeLineStamp = 0.0f;
 }
 
 void TourPlayback::beginPath( const std::vector <CameraSpatialsKeyFrame>& path ) {

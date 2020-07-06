@@ -383,8 +383,8 @@ void ArchOrchestrator::setTopDownView() {
 
 void ArchOrchestrator::setDollHouseView() {
     auto comingFromMode = arc.getViewingMode();
-    arc.setViewingMode(ArchViewingMode::AVM_DollHouse);
     tourPlayback.stopPlayBack(rsg.DC());
+    arc.setViewingMode(ArchViewingMode::AVM_DollHouse);
     rsg.setRigCameraController(CameraControlType::Fly);
     arc.pm(RDSPreMult(Matrix4f::IDENTITY));
     rsg.useSkybox(true);
