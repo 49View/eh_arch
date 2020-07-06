@@ -207,7 +207,7 @@ void ArchOrchestrator::pushHouseChange() {
 }
 
 void ArchOrchestrator::setTourView() {
-    auto comingFromMode = arc.getViewingMode();
+//    auto comingFromMode = arc.getViewingMode();
     arc.setViewingMode(ArchViewingMode::AVM_Tour);
     rsg.setRigCameraController(CameraControlType::Walk);
     arc.pm(RDSPreMult(Matrix4f::IDENTITY));
@@ -230,12 +230,15 @@ void ArchOrchestrator::setTourView() {
         rsg.DC()->setQuat(quat);
     }
 
-    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
-    if ( comingFromMode == ArchViewingMode::AVM_FloorPlan || comingFromMode == ArchViewingMode::AVM_DollHouse ||
-         comingFromMode == ArchViewingMode::AVM_TopDown ) {
-        rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
-        fader(0.001f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
-    }
+//    if ( comingFromMode == ArchViewingMode::AVM_FloorPlan ) {
+        rsg.RR().showBucket(CommandBufferLimits::PBRStart, true);
+//    }
+//    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
+//    if ( comingFromMode == ArchViewingMode::AVM_FloorPlan || comingFromMode == ArchViewingMode::AVM_DollHouse ||
+//         comingFromMode == ArchViewingMode::AVM_TopDown ) {
+//        rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
+//        fader(0.001f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
+//    }
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
 
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
@@ -325,12 +328,11 @@ void ArchOrchestrator::setTopDownView() {
     auto comingFromMode = arc.getViewingMode();
     arc.setViewingMode(ArchViewingMode::AVM_TopDown);
     tourPlayback.stopPlayBack(rsg.DC());
-    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
     rsg.setRigCameraController(CameraControlType::Edit2d);
     rsg.DC()->LockAtWalkingHeight(false);
     arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    arc.renderMode(FloorPlanRenderMode::Normal3d);
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
-    rsg.DC()->setQuat( quatCompose(quatAngles));
     rsg.useSkybox(false);
     arc.setFloorPlanTransparencyFactor(0.0f);
     showIMHouse();
@@ -342,6 +344,7 @@ void ArchOrchestrator::setTopDownView() {
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
 
+    rsg.RR().showBucket(CommandBufferLimits::PBRStart, true);
     if ( comingFromMode != ArchViewingMode::AVM_FloorPlan && comingFromMode != ArchViewingMode::AVM_DollHouse ) {
         fader(0.1f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT),
               AnimEndCallback{ [&]() {
