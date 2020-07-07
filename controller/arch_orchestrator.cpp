@@ -286,6 +286,7 @@ void ArchOrchestrator::setWalkView( float animationSpeed ) {
           AnimEndCallback{ [&]() {
               fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
               sg.setCollisionEnabled(true);
+              fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
               arc.pm(RDSPreMult(calcFloorplanNavigationTransform(3.5f, 0.02f)));
               arc.renderMode(FloorPlanRenderMode::Normal2d);
               HouseRender::IMHouseRender(rsg.RR(), sg, H(), arc);
