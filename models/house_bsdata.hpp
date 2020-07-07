@@ -25,7 +25,7 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2121;
+static const uint64_t SHouseJSONVersion = 2131;
 static const float defaltToBeOverwritten = 7543859749023.0f;
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
@@ -486,10 +486,10 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height
 
 JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center,
              linkedHash, sequencePart, mTriangles2d, version, propertyId, name, source, declaredSQm, defaultSkybox,
-             sourceData, bestInternalViewingPosition, bestInternalViewingAngle, walkableArea,
-             doorHeight, defaultWindowHeight, defaultWindowBaseOffset, defaultCeilingHeight, windowsillExpansion,
-             windowFrameThickness, defaultGroundHeight, worktopHeight, bathRoomSinkHeight, defaultWallColor, accuracy,
-             tourPaths, mFloors)
+             sourceData, bestInternalViewingPosition, bestInternalViewingAngle, bestDollyViewingPosition,
+             bestDollyViewingAngle, walkableArea, doorHeight, defaultWindowHeight, defaultWindowBaseOffset,
+             defaultCeilingHeight, windowsillExpansion, windowFrameThickness, defaultGroundHeight, worktopHeight,
+             bathRoomSinkHeight, defaultWallColor, accuracy, tourPaths, mFloors)
     uint64_t version = SHouseJSONVersion;
     std::string propertyId;
     std::string name = "";
