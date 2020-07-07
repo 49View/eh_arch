@@ -847,7 +847,7 @@ namespace HouseMakerBitmap {
     std::shared_ptr<HouseBSData> makeEmpty( const PropertyListing& property, const RawImage& sourceImage ) {
         std::shared_ptr<HouseBSData> newHouse = std::make_shared<HouseBSData>();
         newHouse->propertyId = property._id;
-        newHouse->name = property.addressLine1 + property.addressLine2 + property.name;
+        newHouse->name = property.addressLine1 + " " + property.addressLine2 + " " + property.name;
         auto floorPlanBBox = Rect2f{ V2fc::ZERO, V2f{ sourceImage.width, sourceImage.height } *
                                                  newHouse->sourceData.rescaleFactor };
         newHouse->bbox = floorPlanBBox;

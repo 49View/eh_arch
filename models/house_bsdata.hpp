@@ -437,7 +437,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height,
     float defaultCeilingThickness = 0.02f;
     MaterialAndColorProperty wallsMaterial{ "plaster_ultra_fine_spray", C4f{ 0.93f, 0.91f, 0.89f, 1.0f } };
     MaterialAndColorProperty floorMaterial{ "european,ash" };
-    MaterialAndColorProperty ceilingMaterial{ "plaster_ultra_fine_spray", C4f{ 0.99f, 0.99f, 0.99f, 0.99f } };
+    MaterialAndColorProperty ceilingMaterial{ "plaster_ultra_fine_spray", C4f{ 0.99f, 0.99f, 0.99f, 1.0f } };
     MaterialAndColorProperty skirtingMaterial{ S::WHITE_PBR, C4f::WHITE };
     MaterialAndColorProperty covingMaterial{ S::WHITE_PBR, C4f::PASTEL_GRAYLIGHT };
     std::string covingProfile = "coving,model1";
