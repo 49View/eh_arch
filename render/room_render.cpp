@@ -157,11 +157,6 @@ namespace RoomRender {
                                        w->floorMaterial,
                                        GT::Tag(ArchType::FloorT));
 
-        ret.ceiling = sg.GB<GT::Extrude>(outline,
-                                       V3f{ V3f::UP_AXIS * (w->height - zPull) },
-                                       w->ceilingMaterial,
-                                       GT::Tag(ArchType::CeilingT));
-
         for ( const auto& lf : w->mLightFittingsLocators ) {
             auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, XZY::C(lf) + V3f::UP_AXIS * 0.023f);
             auto lKey = ResourceGroup::Light + lf.toString();
@@ -184,5 +179,10 @@ namespace RoomRender {
         if ( RoomService::hasRoomType(w, ASType::Kitchen) ) {
             KitchenRender::render(sg, w, ret);
         }
+
+        ret.ceiling = sg.GB<GT::Extrude>(outline,
+                                         V3f{ V3f::UP_AXIS * (w->height - zPull) },
+                                         w->ceilingMaterial,
+                                         GT::Tag(ArchType::CeilingT));
     }
 }

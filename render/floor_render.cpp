@@ -61,9 +61,6 @@ namespace FloorRender {
 //                                          f->defaultCeilingColor,
 //                                          GT::Tag( ArchType::CeilingT ));
 
-        for ( const auto &w : f->rooms ) {
-            RoomRender::make3dGeometry( sg, w.get(), ret );
-        }
         for ( const auto &w : f->windows ) {
             auto ws = WindowRender::make3dGeometry( sg, w.get());
             ret.windowsGB.insert( ret.windowsGB.end(), ws.begin(), ws.end());
@@ -71,6 +68,9 @@ namespace FloorRender {
         for ( const auto &w : f->doors ) {
             auto ws = DoorRender::make3dGeometry( sg, w.get());
             ret.doorsGB.insert( ret.doorsGB.end(), ws.begin(), ws.end());
+        }
+        for ( const auto &w : f->rooms ) {
+            RoomRender::make3dGeometry( sg, w.get(), ret );
         }
     }
 }

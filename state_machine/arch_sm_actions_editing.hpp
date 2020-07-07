@@ -11,12 +11,7 @@
 struct MakeHouse3d {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         asg.make3dHouse([&]() {
-            rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
-            rsg.useSkybox(arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
-            if ( arc.getViewingMode() == ArchViewingMode::AVM_DollHouse ||
-                 arc.getViewingMode() == ArchViewingMode::AVM_TopDown ) {
-                rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
-            }
+            LOGRS("Spawn an house")
         });
     }
 };

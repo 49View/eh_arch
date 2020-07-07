@@ -229,7 +229,6 @@ void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
 }
 
 void ArchOrchestrator::setTourView() {
-//    auto comingFromMode = arc.getViewingMode();
     arc.setViewingMode(ArchViewingMode::AVM_Tour);
     rsg.setRigCameraController(CameraControlType::Walk);
     arc.pm(RDSPreMult(Matrix4f::IDENTITY));
@@ -252,31 +251,17 @@ void ArchOrchestrator::setTourView() {
         rsg.DC()->setQuat(quat);
     }
 
-//    if ( comingFromMode == ArchViewingMode::AVM_FloorPlan ) {
-    rsg.RR().showBucket(CommandBufferLimits::PBRStart, true);
-//    }
-//    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
-//    if ( comingFromMode == ArchViewingMode::AVM_FloorPlan || comingFromMode == ArchViewingMode::AVM_DollHouse ||
-//         comingFromMode == ArchViewingMode::AVM_TopDown ) {
-//        rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
-//        fader(0.001f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
-//    }
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
 
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
-    fader(0.9f, 1.0f, rsg.RR().CLIExcludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT),
-          AnimEndCallback{ [&]() {
-              rsg.RR().setVisibilityOnTags(ArchType::CeilingT, true);
-              fader(0.2f, 1.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
-          } });
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
 
     sg.setCollisionEnabled(false);
 }
 
 void ArchOrchestrator::setWalkView( float animationSpeed ) {
-    auto comingFromMode = arc.getViewingMode();
     arc.setViewingMode(ArchViewingMode::AVM_Walk);
     tourPlayback.stopPlayBack(rsg.DC());
     rsg.setRigCameraController(CameraControlType::Walk);
@@ -293,21 +278,13 @@ void ArchOrchestrator::setWalkView( float animationSpeed ) {
         rsg.DC()->setQuat(quat);
     }
 
-    rsg.RR().showBucket(CommandBufferLimits::PBRStart, arc.getViewingMode() != ArchViewingMode::AVM_FloorPlan);
-    if ( comingFromMode == ArchViewingMode::AVM_FloorPlan || comingFromMode == ArchViewingMode::AVM_DollHouse ||
-         comingFromMode == ArchViewingMode::AVM_TopDown ) {
-        rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
-        fader(0.001f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
-    }
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
 
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
-    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
-    fader(0.9f, 1.0f, rsg.RR().CLIExcludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT),
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart),
           AnimEndCallback{ [&]() {
-              rsg.RR().setVisibilityOnTags(ArchType::CeilingT, true);
-              fader(0.2f, 1.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT));
+              fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
               sg.setCollisionEnabled(true);
               arc.pm(RDSPreMult(calcFloorplanNavigationTransform(3.5f, 0.02f)));
               arc.renderMode(FloorPlanRenderMode::Normal2d);
@@ -340,15 +317,13 @@ void ArchOrchestrator::setFloorPlanView( FloorPlanRenderMode fprm ) {
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
-    fader(0.9f, 0.0f, AnimEndCallback{ [&]() {
-        rsg.RR().showBucket(CommandBufferLimits::PBRStart, false);
-    } }, rsg.RR().CLI(CommandBufferLimits::PBRStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
 
     sg.setCollisionEnabled(false);
 }
 
 void ArchOrchestrator::setTopDownView() {
-    auto comingFromMode = arc.getViewingMode();
+//    auto comingFromMode = arc.getViewingMode();
     arc.setViewingMode(ArchViewingMode::AVM_TopDown);
     tourPlayback.stopPlayBack(rsg.DC());
     rsg.setRigCameraController(CameraControlType::Edit2d);
@@ -356,33 +331,24 @@ void ArchOrchestrator::setTopDownView() {
     arc.pm(RDSPreMult(Matrix4f::IDENTITY));
     arc.renderMode(FloorPlanRenderMode::Normal3d);
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
-    rsg.useSkybox(false);
+    rsg.useSkybox(true);
     arc.setFloorPlanTransparencyFactor(0.0f);
     showIMHouse();
     auto quat = quatCompose(quatAngles);
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
-    Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
     centerCameraMiddleOfHouse(H()->bbox3d.calcDepth() + 0.3f);
+    Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
-
-    rsg.RR().showBucket(CommandBufferLimits::PBRStart, true);
-    if ( comingFromMode != ArchViewingMode::AVM_FloorPlan && comingFromMode != ArchViewingMode::AVM_DollHouse ) {
-        fader(0.1f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT),
-              AnimEndCallback{ [&]() {
-                  rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
-              } });
-    } else {
-        rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
-    }
+    fader(0.9f, 0.0f, rsg.RR().CLIIncludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
     fader(0.9f, 1.0f, rsg.RR().CLIExcludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
 
     sg.setCollisionEnabled(false);
 }
 
 void ArchOrchestrator::setDollHouseView() {
-    auto comingFromMode = arc.getViewingMode();
+//    auto comingFromMode = arc.getViewingMode();
     tourPlayback.stopPlayBack(rsg.DC());
     arc.setViewingMode(ArchViewingMode::AVM_DollHouse);
     rsg.setRigCameraController(CameraControlType::Fly);
@@ -397,15 +363,7 @@ void ArchOrchestrator::setDollHouseView() {
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
-    rsg.RR().showBucket(CommandBufferLimits::PBRStart, true);
-    if ( comingFromMode != ArchViewingMode::AVM_FloorPlan && comingFromMode != ArchViewingMode::AVM_TopDown ) {
-        fader(0.2f, 0.0f, rsg.RR().getVPListWithTags(ArchType::CeilingT),
-              AnimEndCallback{ [&]() {
-                  rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
-              } });
-    } else {
-        rsg.RR().setVisibilityOnTags(ArchType::CeilingT, false);
-    }
+    fader(0.9f, 0.0f, rsg.RR().CLIIncludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
     fader(0.9f, 1.0f, rsg.RR().CLIExcludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
 
     sg.setCollisionEnabled(false);
