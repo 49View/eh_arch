@@ -872,7 +872,7 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     std::string coffeeTable = "noguchi";
     std::string diningTable = "ktc,table,round";
     std::string sideBoard = "gallotti,radice,tama";
-    std::string tv = "smart,tv";
+    std::string tv = "smart,tv,with,stand";
     std::string plant1 = "plant,spider";
     std::string coffeeMachine = "coffee,machine";
 

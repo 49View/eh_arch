@@ -25,7 +25,7 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2131;
+static const uint64_t SHouseJSONVersion = 2132;
 static const float defaltToBeOverwritten = 7543859749023.0f;
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
@@ -400,7 +400,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height,
            mMaxEnclsingBoundingBox, mLightFittingsLocators, mSocketLocators, mSwichesLocators, maxSizeEnclosedHP1,
            maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite,
            mLongestWallOppositePoint, mPerimeter, area, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth,
-           defaultCeilingThickness, wallsMaterial, floorMaterial, ceilingMaterial, covingProfile,
+           defaultCeilingThickness, spotLightYOffset, wallsMaterial, floorMaterial, ceilingMaterial, covingProfile,
            skirtingProfile, skirtingMaterial, covingMaterial, spotlightGeom, kitchenData)
     std::vector<ASTypeT> roomTypes{};
     std::vector<int64_t> windows;
@@ -435,6 +435,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height,
     float minLightFittingDistance = 2.0f;
     float mArchiTravesWidth = 0.1f;
     float defaultCeilingThickness = 0.02f;
+    float spotLightYOffset = 0.5f;
     MaterialAndColorProperty wallsMaterial{ "plaster_ultra_fine_spray", C4f{ 0.93f, 0.91f, 0.89f, 1.0f } };
     MaterialAndColorProperty floorMaterial{ "european,ash" };
     MaterialAndColorProperty ceilingMaterial{ "plaster_ultra_fine_spray", C4f{ 0.99f, 0.99f, 0.99f, 1.0f } };

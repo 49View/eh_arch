@@ -53,12 +53,13 @@ namespace RoomService {
         bool bCenterRoomOnly = false;
 
         r->mLightFittingsLocators.clear();
+        float lightYOffset = r->defaultCeilingThickness;// + r->spotLightYOffset;
 
         int numX = static_cast<int>( bs.x() / r->minLightFittingDistance );
         int numY = static_cast<int>( bs.y() / r->minLightFittingDistance );
 
         if ( numX == 0 || numY == 0 || bCenterRoomOnly ) {
-            r->mLightFittingsLocators.emplace_back(br.centre(), r->height - r->defaultCeilingThickness);
+            r->mLightFittingsLocators.emplace_back(br.centre(), r->height - lightYOffset);
             return;
         }
 
@@ -70,7 +71,7 @@ namespace RoomService {
             for ( auto m = 1; m < numX + 1; m++ ) {
                 float lx = static_cast<float>( m ) / static_cast<float>( numX + 1 );
                 Vector2f i = lerp(lx, lv1, lv2);
-                r->mLightFittingsLocators.emplace_back(i, r->height - r->defaultCeilingThickness);
+                r->mLightFittingsLocators.emplace_back(i, r->height - lightYOffset);
             }
         }
     }

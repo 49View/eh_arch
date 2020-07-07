@@ -161,7 +161,7 @@ namespace RoomRender {
             auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, XZY::C(lf) + V3f::UP_AXIS * 0.023f);
             auto lKey = ResourceGroup::Light + lf.toString();
             sg.add<Light>(lKey,
-                          Light{ LightType_Point, w->spotlightGeom, XZY::C(lf) + V3f::UP_AXIS_NEG * 0.1f,
+                          Light{ LightType_Point, w->spotlightGeom, XZY::C(lf) + V3f::UP_AXIS_NEG * w->spotLightYOffset*2.0f,
                                  3.5f, 1.0f, V3f::Y_AXIS * .5f });
         }
         for ( const auto& lf : w->mSwichesLocators ) {
