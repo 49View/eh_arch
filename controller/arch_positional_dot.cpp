@@ -60,17 +60,21 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
 
         float alphaDistanceAttenuation = min(distance(ic, rsg.DC()->getPosition()), fadeOutNearDistance);
         float finalAlphaValue = positionalDotAlphaAnim->value * alphaDistanceAttenuation;
-        C4f outerDotColor = (isNewPositionWalkingOnFloor || !antiWallRotation) ? V4f::SKY_BLUE.A(finalAlphaValue) : V4f::SPRING_GREEN.A(
+        bool isBlueDot = (isNewPositionWalkingOnFloor || !antiWallRotation);
+        C4f outerDotColor = isBlueDot ? V4f::SKY_BLUE.A(finalAlphaValue) : V4f::SPRING_GREEN.A(
                 finalAlphaValue);
         auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
+        std::stringstream stream;
+        stream << std::fixed << std::setprecision( 2 ) << finalAlphaValue;
+        std::string nameTag = stream.str() + (isBlueDot ? "1" : "0");
         rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, ic, V4f::WHITE.A(finalAlphaValue),
                                      outerDotSize + outerDotBorderSize, sm3, RDSRotationNormalAxis{ fd.normal },
-                                     RDSArchSegments{ 36 });
+                                     RDSArchSegments{ 36 }, "d1"+nameTag);
         rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, ic, outerDotColor,
-                                     outerDotSize, sm3, RDSRotationNormalAxis{ fd.normal }, RDSArchSegments{ 36 });
+                                     outerDotSize, sm3, RDSRotationNormalAxis{ fd.normal }, RDSArchSegments{ 36 }, "d2"+nameTag);
         rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, ic, V4f::WHITE.A(finalAlphaValue),
                                      outerDotSize * smallDotRatio, sm3, RDSRotationNormalAxis{ fd.normal },
-                                     RDSArchSegments{ 36 });
+                                     RDSArchSegments{ 36 }, "d3"+nameTag);
 
         ic.setY(rsg.DC()->getPosition().y());
 
