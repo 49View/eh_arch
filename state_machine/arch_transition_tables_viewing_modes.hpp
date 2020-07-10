@@ -33,6 +33,7 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnPushKeyFrameTourPathEvent> / PushKeyFrameTourPath{}
             ,state<class ExploreState> + event<OnPopTourPathEvent> / PopTourPath{}
             ,state<class ExploreState> + event<OnMakeHouse3dEvent> / MakeHouse3d{}
+            ,state<class ExploreState> + event<OnAddFurnitureSingleEvent> / AddFurnitureSingle{}
         );
     }
 };

@@ -205,6 +205,18 @@ struct FurnishHouse {
     }
 };
 
+struct AddFurnitureSingle {
+    void operator()( const OnAddFurnitureSingleEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        RoomServiceFurniture::addFurnitureSingle( HouseService::findFloorOf(asg.H(), event.room->hash), event.room, asg.FurnitureMap(), event.ft );
+
+        MakeHouse3d{}(asg, rsg, arc);
+        asg.showIMHouse();
+        asg.pushHouseChange();
+    }
+};
+
+
+
 struct TouchMovePolyFeatureManipulation {
     bool operator()( const OnTouchMoveViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg,
                      ArchRenderController& arc ) noexcept {

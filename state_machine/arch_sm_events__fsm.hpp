@@ -46,6 +46,10 @@ struct OnUpdateHMBEvent {};
 struct OnMakeHouse3dEvent {};
 struct OnElaborateHouseBitmapEvent {};
 struct OnRecalculateFurnitureEvent {};
+struct OnAddFurnitureSingleEvent {
+    RoomBSData* room;
+    FurnitureTypeHandler::Type ft;
+};
 
 struct OnHouseMakerToggleEvent{};
 struct OnTourToggleEvent{};

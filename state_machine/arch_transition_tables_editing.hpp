@@ -23,6 +23,7 @@ struct EditStateMachine {
             ,state<class EditState> + event<OnIncrementalScaleEvent> / IncrementalScaleFeatureManipulation{}
             ,state<class EditState> + event<OnSpaceEvent>[SpaceToggleFeatureManipulation{}] / UpdateFeatureManipulationIm{}
             ,state<class EditState> + event<OnDeleteEvent>[DeleteFeatureManipulation{}] / ExitFeatureManipulation{}
+            ,state<class EditState> + event<OnAddFurnitureSingleEvent> / AddFurnitureSingle{}
 
             ,state<class EditState> + event<OnFirstTimeTouchDownViewportSpaceEvent>[TouchedDownFirstTimeFittedFurnitureGuard{}] / UpdateFeatureManipulationIm{}
             ,state<class EditState> + event<OnTouchUpViewportSpaceEvent>[TouchUpEventFeatureManipulation{}] / UpdateFeatureManipulationIm{}

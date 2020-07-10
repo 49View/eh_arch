@@ -574,7 +574,7 @@ RoomPreDataResult FloorService::roomRecognition( FloorBSData *f ) {
     externalRaysIntoWalls(f, ws, wse);
 
     if ( ws.empty() ) {
-        LOGRS("[ERROR] externalRaysIntoWalls returned zero array");
+        LOGRS("[ERROR] externalRaysIntoWalls returned zero array")
         rds.isValidPreRoom = false;
         return rds;
     }
@@ -591,14 +591,14 @@ RoomPreDataResult FloorService::roomRecognition( FloorBSData *f ) {
         addRoomSegmentsCore(externalFloorSegments, wse, rbboxExternal);
         FloorService::updatePerimeter(f, externalFloorSegments);
         if ( !ArchSegmentService::doSegmentsEndsMeet(externalFloorSegments) ) {
-            LOGRS("[ERROR] Cannot close external perimeter of the house");
+            LOGRS("[ERROR] Cannot close external perimeter of the house")
             rds.isValidPreRoom = false;
             return rds;
         }
     }
 
     if ( !rds.isValidPreRoom ) {
-        LOGRS("[ERROR] Rooms have not been detected");
+        LOGRS("[ERROR] Rooms have not been detected")
     }
 
     return rds;
@@ -1196,6 +1196,11 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                         }
                     }
                 }
+
+                // Furniture
+//                for ( const auto& ff : room->mFittedFurniture ) {
+//                    ArchStructuralService::intersectRayMin(ff.get(), rayPair, fd.nearV);
+//                }
             }
         }
     }
