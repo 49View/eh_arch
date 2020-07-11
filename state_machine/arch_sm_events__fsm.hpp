@@ -19,10 +19,10 @@ struct OnPopTourPathEvent {
 struct OnActivateEvent {
     OnActivateEvent() = default;
     OnActivateEvent( const std::function<void()>& ccf ) : ccf(ccf) {}
-    OnActivateEvent( FloorPlanRenderMode fprm ) : fprm(fprm) {}
+    OnActivateEvent( FloorPlanRenderMode _floorPlanRenderMode ) : floorPlanRenderMode(_floorPlanRenderMode) {}
 
     std::function<void()> ccf = nullptr;
-    FloorPlanRenderMode fprm = FloorPlanRenderMode::Normal3d;
+    FloorPlanRenderMode floorPlanRenderMode = FloorPlanRenderMode::Normal3d;
 };
 
 struct OnAltPressedEvent {};
@@ -48,6 +48,7 @@ struct OnElaborateHouseBitmapEvent {};
 struct OnRecalculateFurnitureEvent {};
 struct OnAddFurnitureSingleEvent {
     RoomBSData* room;
+    std::string furnitureHash;
     FurnitureTypeHandler::Type ft;
 };
 

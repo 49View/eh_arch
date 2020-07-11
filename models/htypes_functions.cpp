@@ -38,6 +38,9 @@ std::string GHTypeToString( uint64_t elem ) {
     if ( checkBitWiseFlag(elem, GHType::PowerSocket) ) ret+="PowerSocket";
     if ( checkBitWiseFlag(elem, GHType::LightSwitch) ) ret+="LightSwitch";
     if ( checkBitWiseFlag(elem, GHType::Room) ) ret+="Room";
+    if ( checkBitWiseFlag(elem, GHType::KitchenBackSplash) ) ret+="KitchenBackSplash";
+    if ( checkBitWiseFlag(elem, GHType::Furniture) ) ret+="Furniture";
+    if ( checkBitWiseFlag(elem, GHType::Fitting) ) ret+="Fitting";
 
     return ret;
 }

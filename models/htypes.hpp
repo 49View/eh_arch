@@ -249,6 +249,8 @@ namespace GHType {
 	constexpr uint64_t LightSwitch = 1u << 25u;
 	constexpr uint64_t Room = 1u << 26u;
     constexpr uint64_t KitchenBackSplash = 1u << 27u;
+    constexpr uint64_t Furniture = 1u << 28u;
+    constexpr uint64_t Fitting = 1u << 29u;
 };
 // ************************************************************
 // Warning: any changes here needs to update **GHTypeToString**
