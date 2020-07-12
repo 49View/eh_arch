@@ -48,8 +48,7 @@ struct OnElaborateHouseBitmapEvent {};
 struct OnRecalculateFurnitureEvent {};
 struct OnAddFurnitureSingleEvent {
     RoomBSData* room;
-    std::string furnitureHash;
-    FurnitureTypeHandler::Type ft;
+    FurnitureSet furnitureSet;
 };
 
 struct OnHouseMakerToggleEvent{};

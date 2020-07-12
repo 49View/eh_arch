@@ -243,6 +243,17 @@ using FurnitureRuleIndex = int;
 using FurnitureRuleFunction = std::function<bool( FloorBSData *, RoomBSData *, FurnitureMapStorage&,
                                                   const FurniturePlacementRule& )>;
 using FurnitureRuleFunctionContainer = std::vector<FurnitureRuleFunction>;
+using FurnitureMultiMap = std::unordered_multimap<FT, FittedFurniture>;
+using FurnitureMap = std::unordered_map<FT, FittedFurniture>;
+
+class FurnitureTypePair {
+public:
+    FurnitureTypePair() = default;
+    FurnitureTypePair( FT type, const FittedFurniture& ff ) : type(type), ff(ff) {}
+private:
+    FT type = FT::FT_Invalid;
+    FittedFurniture ff;
+};
 
 namespace FurnitureRuleFlags {
     constexpr uint64_t None = 0;
@@ -306,6 +317,11 @@ public:
             flags |= FurnitureRuleFlags::DoNotClipAgainstRoom;
             return;
         }
+        if constexpr ( std::is_same_v<D, FurnitureTypePair> ) {
+            furnitureTypePair = _data;
+            return;
+        }
+
         LOGR("Houston we have a problem, furniture set rule is bonkers");
     }
 
@@ -416,6 +432,7 @@ public:
 private:
     FurnitureRuleIndex ruleFunctionIndex = 0;
     FurnitureRefs furnitureRefs{};
+    FurnitureTypePair furnitureTypePair;
     WallSegmentIdentifier wallSegmentId{ WSLOH::Longest() };
     FurnitureSlacks slack{};
     FurnitureRuleFlagsT flags = FurnitureRuleFlags::None;
@@ -456,7 +473,7 @@ struct FRPFurnitureRuleFlags {
 
 struct FurnitureRuleParams {
     template<typename ...Args>
-    FurnitureRuleParams( Args&& ...args ) {
+    explicit FurnitureRuleParams( Args&& ...args ) {
         (initParams( std::forward<Args>( args )), ...); // Fold expression (c++17)
     }
 
@@ -682,7 +699,6 @@ namespace RoomService {
     const ArchSegment *secondShortestSegment( const RoomBSData *r );
     const ArchSegment *thirdLongestSegment( const RoomBSData *r );
     const ArchSegment *shortestSegment( const RoomBSData *r );
-    const ArchSegment *secondShortestSegment( const RoomBSData *r );
     const ArchSegment *segmentAtIndex( const RoomBSData *r, uint32_t _index );
     const ArchSegment *segmentAt( const RoomBSData *r, roomTypeIndex rdi );
     const ArchSegment *walkSegment( const RoomBSData *r, const ArchSegment *ls, WalkSegmentDirection wsd );

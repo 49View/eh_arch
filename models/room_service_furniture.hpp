@@ -6,8 +6,6 @@
 
 #include "room_service.hpp"
 
-using FurnitureMultiMap = std::unordered_multimap<FT, FittedFurniture>;
-using FurnitureMap = std::unordered_map<FT, FittedFurniture>;
 class SceneGraph;
 
 JSONDATA( FurnitureSet, ftype, name, bboxSize, symbol )
@@ -28,18 +26,18 @@ class FurnitureMapStorage {
 public:
     FurnitureMapStorage() = default;
 
-    void addIndex( const FurnitureSet& _fs );
-    void addIndex( FT _ft, FittedFurniture& _ff );
+    FurnitureTypePair addIndex( const FurnitureSet& _fs );
+    FurnitureTypePair addIndex( FT _ft, FittedFurniture& _ff );
 
     std::shared_ptr<FittedFurniture> spawn( FT ft );
 private:
     FurnitureMultiMap storage{};
-    FurnitureMap index{};
+    FurnitureMultiMap index{};
 };
 
 namespace RoomServiceFurniture {
     void addDefaultFurnitureSet( const std::string& _name );
-    void addFurnitureSingle( FloorBSData* f, RoomBSData* room, FurnitureMapStorage& furn, FT ftype );
+    void addFurnitureSingle( FloorBSData* f, RoomBSData* room, FurnitureMapStorage& furn, const FurnitureSet& _fSet );
     void rotateFurniture( FittedFurniture* ff );
     void scaleIncrementalFurniture( FittedFurniture* ff, float scale );
 }

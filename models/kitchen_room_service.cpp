@@ -175,7 +175,7 @@ namespace KitchenRoomService {
         auto rot = Quaternion{ RoomService::furnitureAngleFromNormal(kwp.normal), V3f::UP_AXIS };
         V2f pos = kwp.p1 + (kwp.crossNormal * coffeeMachine->size.x());
         float height = kd.kitchenWorktopHeight + kd.worktopThickness;
-        RS::placeManually({ f, w, coffeeMachine, pos, rot,
+        RS::placeManually(FurnitureRuleParams{ f, w, coffeeMachine, pos, rot,
                             height,
                             FRPWidthNormal{ kwp.crossNormal },
                             FRPDepthNormal{ kwp.normal },
@@ -278,7 +278,7 @@ namespace KitchenRoomService {
                                                               hittingPoint, IncludeWindowsOrDoors::None);
             if ( hit ) {
                 auto rot = Quaternion{ RoomService::furnitureAngleFromNormal(normal), V3f::UP_AXIS };
-                RS::placeManually({ f, w, fridge, hittingPoint + ( normal * fridgeDepth * 0.5f ), rot,
+                RS::placeManually(FurnitureRuleParams{ f, w, fridge, hittingPoint + ( normal * fridgeDepth * 0.5f ), rot,
                                     FRPWidthNormal{ crossNormal },
                                     FRPDepthNormal{ normal } });
                 return mp - ( crossNormal * ( fridgeWidth * 0.5f ) );
