@@ -30,6 +30,9 @@ struct OnClearEvent {};
 struct OnDoubleTapEvent {};
 struct OnUndoEvent {};
 struct OnRedoEvent {};
+struct OnTakeScreenShotEvent {
+    std::function<void(const SerializableContainer&)> screenShotCallback = nullptr;
+};
 
 struct OnLoadFloorPlanEvent {
     PropertyListing property;

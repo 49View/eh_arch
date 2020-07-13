@@ -12,6 +12,7 @@ struct TourStateMachine {
     auto operator()() const noexcept {
         return make_transition_table(
             *state<class Initial> / []{} = state<class TourState>
+            ,state<class TourState> + event<OnTakeScreenShotEvent> / TakeScreenShot{}
         );
     }
 };
@@ -34,6 +35,7 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnPopTourPathEvent> / PopTourPath{}
             ,state<class ExploreState> + event<OnMakeHouse3dEvent> / MakeHouse3d{}
             ,state<class ExploreState> + event<OnAddFurnitureSingleEvent> / AddFurnitureSingle{}
+            ,state<class ExploreState> + event<OnTakeScreenShotEvent> / TakeScreenShot{}
         );
     }
 };

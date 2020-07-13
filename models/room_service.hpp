@@ -249,9 +249,10 @@ using FurnitureMap = std::unordered_map<FT, FittedFurniture>;
 class FurnitureTypePair {
 public:
     FurnitureTypePair() = default;
-    FurnitureTypePair( FT type, const FittedFurniture& ff ) : type(type), ff(ff) {}
+//    FurnitureTypePair( FT type, const FittedFurniture& ff ) : type(type), ff(ff) {}
+    FurnitureTypePair( FT type, const FittedFurniture& ff ) : ff(ff) {}
 private:
-    FT type = FT::FT_Invalid;
+//    FT type = FT::FT_Invalid;
     FittedFurniture ff;
 };
 

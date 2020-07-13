@@ -215,6 +215,12 @@ struct AddFurnitureSingle {
     }
 };
 
+struct TakeScreenShot {
+    void operator()( const OnTakeScreenShotEvent& event, RenderOrchestrator& rsg ) {
+        rsg.takeScreenShot(event.screenShotCallback);
+    }
+};
+
 
 
 struct TouchMovePolyFeatureManipulation {
