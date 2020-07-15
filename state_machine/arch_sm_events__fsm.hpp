@@ -56,6 +56,7 @@ struct OnAddFurnitureSingleEvent {
 
 struct OnHouseMakerToggleEvent{};
 struct OnTourToggleEvent{};
+struct OnOrbitModeEvent{};
 struct OnExploreToggleEvent{};
 struct OnTopDownToggleEvent{};
 struct OnFlorPlanViewToggleEvent{};

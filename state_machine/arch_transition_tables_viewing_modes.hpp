@@ -55,3 +55,11 @@ struct TopDownStateMachine {
         );
     }
 };
+
+struct OrbitModeStateMachine {
+    auto operator()() const noexcept {
+        return make_transition_table(
+                *state<class Initial> / []{} = state<class OrbitModeState>
+        );
+    }
+};
