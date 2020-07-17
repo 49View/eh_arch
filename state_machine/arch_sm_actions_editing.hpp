@@ -207,7 +207,21 @@ struct FurnishHouse {
 
 struct AddFurnitureSingle {
     void operator()( const OnAddFurnitureSingleEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
-        RoomServiceFurniture::addFurnitureSingle( HouseService::findFloorOf(asg.H(), event.room->hash), event.room, asg.FurnitureMap(), event.furnitureSet );
+        auto ff = FittedFurniture{{ event.furnitureSet.name, event.furnitureSet.bboxSize }, event.furnitureSet.symbol };
+        auto coffeeMachine = EntityFactory::cloneHashed(ff);
+        V2f pos = RS::maxEnclsingBoundingBoxCenter(event.room);
+        float height = 0.0f;
+        auto f = HouseService::findFloorOf(asg.H(), event.room->hash);
+        RS::placeManually(FurnitureRuleParams{ f, event.room, coffeeMachine, pos, Quaternion{},
+                                               height,
+                                               FRPWidthNormal{V2fc::X_AXIS},
+                                               FRPDepthNormal{V2fc::Y_AXIS},
+                                               FRPFurnitureRuleFlags{
+                                                       FurnitureRuleFlags::IgnoreDoorClipping | FurnitureRuleFlags::ForceCanOverlap |
+                                                       FurnitureRuleFlags::DoNotClipAgainstRoom }
+        });
+
+//        RoomServiceFurniture::addFurnitureSingle( f, event.room, asg.FurnitureMap(), event.furnitureSet );
 
         MakeHouse3d{}(asg, rsg, arc);
         asg.showIMHouse();

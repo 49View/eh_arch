@@ -590,7 +590,6 @@ namespace RoomService {
     bool
     cplaceMiddleOfRoom( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd ) {
         auto center = RS::maxEnclsingBoundingBoxCenter(r);
-
         auto ff = furns.spawn(fpd.getBase(0));
         return placeMiddle(FurnitureRuleParams{f, r, ff, center, FRPFurnitureRuleFlags{fpd.getFlags()}});
     }
@@ -839,15 +838,14 @@ void initializeDefaultFurnituresFlags( FT _ft, FittedFurniture& _ff ) {
     }
 }
 
-FurnitureTypePair FurnitureMapStorage::addIndex( FT _ft, FittedFurniture& _ff ) {
+void FurnitureMapStorage::addIndex( FT _ft, FittedFurniture& _ff ) {
     initializeDefaultFurnituresFlags(_ft, _ff);
-    auto ret = index.emplace(_ft, _ff);
-    return FurnitureTypePair{ret->first, ret->second};
+    index.emplace(_ft, _ff);
 }
 
-FurnitureTypePair FurnitureMapStorage::addIndex( const FurnitureSet& f ) {
+void FurnitureMapStorage::addIndex( const FurnitureSet& f ) {
     auto ff = FittedFurniture{{ f.name, f.bboxSize }, f.symbol };
-    return this->addIndex(FT(f.ftype), ff);
+    this->addIndex(FT(f.ftype), ff);
 }
 
 FurniturePlacementRule FurniturePlacementRule::randomGeneration() {
@@ -946,13 +944,6 @@ void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff ) {
     ff->rotation = ff->rotation * quarterRotation;
     ff->rotation.normalise();
     RS::calculateFurnitureBBox(ff);
-}
-
-void RoomServiceFurniture::addFurnitureSingle( FloorBSData*f, RoomBSData *room, FurnitureMapStorage& furns, const FurnitureSet& _fSet ) {
-    FurnitureRuleScript ruleScript;
-    FurnitureTypePair furnPair = furns.addIndex(_fSet);
-    ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::MiddleOfRoom), furnPair, FurnitureRuleIgnoreDoorClipping{}, FurnitureRuleForceCanOverlap{}, FurnitureRuleDoNotClipAgainstRoom{} });
-    RS::runRuleScript(f, room, furns, ruleScript);
 }
 
 void RoomServiceFurniture::scaleIncrementalFurniture( FittedFurniture *ff, float scale ) {

@@ -246,16 +246,6 @@ using FurnitureRuleFunctionContainer = std::vector<FurnitureRuleFunction>;
 using FurnitureMultiMap = std::unordered_multimap<FT, FittedFurniture>;
 using FurnitureMap = std::unordered_map<FT, FittedFurniture>;
 
-class FurnitureTypePair {
-public:
-    FurnitureTypePair() = default;
-//    FurnitureTypePair( FT type, const FittedFurniture& ff ) : type(type), ff(ff) {}
-    FurnitureTypePair( FT type, const FittedFurniture& ff ) : ff(ff) {}
-private:
-//    FT type = FT::FT_Invalid;
-    FittedFurniture ff;
-};
-
 namespace FurnitureRuleFlags {
     constexpr uint64_t None = 0;
     constexpr uint64_t IgnoreDoorClipping = 1u << 0u;
@@ -316,10 +306,6 @@ public:
         }
         if constexpr ( std::is_same_v<D, FurnitureRuleDoNotClipAgainstRoom> ) {
             flags |= FurnitureRuleFlags::DoNotClipAgainstRoom;
-            return;
-        }
-        if constexpr ( std::is_same_v<D, FurnitureTypePair> ) {
-            furnitureTypePair = _data;
             return;
         }
 
@@ -433,7 +419,6 @@ public:
 private:
     FurnitureRuleIndex ruleFunctionIndex = 0;
     FurnitureRefs furnitureRefs{};
-    FurnitureTypePair furnitureTypePair;
     WallSegmentIdentifier wallSegmentId{ WSLOH::Longest() };
     FurnitureSlacks slack{};
     FurnitureRuleFlagsT flags = FurnitureRuleFlags::None;

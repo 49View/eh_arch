@@ -26,8 +26,8 @@ class FurnitureMapStorage {
 public:
     FurnitureMapStorage() = default;
 
-    FurnitureTypePair addIndex( const FurnitureSet& _fs );
-    FurnitureTypePair addIndex( FT _ft, FittedFurniture& _ff );
+    void addIndex( const FurnitureSet& _fs );
+    void addIndex( FT _ft, FittedFurniture& _ff );
 
     std::shared_ptr<FittedFurniture> spawn( FT ft );
 private:
@@ -37,7 +37,6 @@ private:
 
 namespace RoomServiceFurniture {
     void addDefaultFurnitureSet( const std::string& _name );
-    void addFurnitureSingle( FloorBSData* f, RoomBSData* room, FurnitureMapStorage& furn, const FurnitureSet& _fSet );
     void rotateFurniture( FittedFurniture* ff );
     void scaleIncrementalFurniture( FittedFurniture* ff, float scale );
 }
