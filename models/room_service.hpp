@@ -457,6 +457,9 @@ struct FRPFurnitureRuleFlags {
     FurnitureRuleFlagsT flags = FurnitureRuleFlags::None;
 };
 
+static constexpr FurnitureRuleFlagsT forceManualFurnitureFlags = FurnitureRuleFlags::IgnoreDoorClipping | FurnitureRuleFlags::ForceCanOverlap |
+                                             FurnitureRuleFlags::DoNotClipAgainstRoom;
+
 struct FurnitureRuleParams {
     template<typename ...Args>
     explicit FurnitureRuleParams( Args&& ...args ) {
@@ -527,8 +530,8 @@ struct FurnitureRuleParams {
     std::shared_ptr<FittedFurniture> source;
     V2f pos = V2fc::ZERO;
     Quaternion rot{};
-    V2f widthNormal = V2fc::ZERO;
-    V2f depthNormal = V2fc::ZERO;
+    V2f widthNormal = V2fc::X_AXIS;
+    V2f depthNormal = V2fc::Y_AXIS;
     const ArchSegment *ls = nullptr;
     V2f slack = V2fc::ZERO;
     float slackScalar = 0.0f;

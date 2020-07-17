@@ -179,9 +179,7 @@ namespace KitchenRoomService {
                             height,
                             FRPWidthNormal{ kwp.crossNormal },
                             FRPDepthNormal{ kwp.normal },
-                            FRPFurnitureRuleFlags{
-                                    FurnitureRuleFlags::IgnoreDoorClipping | FurnitureRuleFlags::ForceCanOverlap |
-                                    FurnitureRuleFlags::DoNotClipAgainstRoom }
+                            FRPFurnitureRuleFlags{forceManualFurnitureFlags}
                           });
     }
 

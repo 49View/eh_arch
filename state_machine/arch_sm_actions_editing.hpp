@@ -62,7 +62,8 @@ enum class TouchedSelectionFlag {
     Toggle
 };
 
-static inline bool touchSelection( const V2f& is, TouchedSelectionFlag tsf, ArchOrchestrator& asg, ArchRenderController& arc) {
+static inline bool
+touchSelection( const V2f& is, TouchedSelectionFlag tsf, ArchOrchestrator& asg, ArchRenderController& arc ) {
     if ( !asg.H() ) return false;
     float aroundDistance = 0.05f;
     auto afs = WallService::getNearestFeatureToPoint(asg.H(), is, aroundDistance);
@@ -108,28 +109,30 @@ static inline bool touchSelection( const V2f& is, TouchedSelectionFlag tsf, Arch
 struct SingleTapViewportHouseMakerManipulationGuard {
     bool operator()( const OnSingleTapViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg,
                      ArchRenderController& arc ) noexcept {
-        return touchSelection( mouseEvent.viewportPos, TouchedSelectionFlag::Toggle, asg, arc );
+        return touchSelection(mouseEvent.viewportPos, TouchedSelectionFlag::Toggle, asg, arc);
     }
 };
 
 struct SingleTapViewportSpaceFeatureManipulationGuard {
     bool operator()( const OnSingleTapViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg,
                      ArchRenderController& arc ) noexcept {
-        return !touchSelection( mouseEvent.viewportPos, TouchedSelectionFlag::Toggle, asg, arc );
+        return !touchSelection(mouseEvent.viewportPos, TouchedSelectionFlag::Toggle, asg, arc);
     }
 };
 
 struct TouchedDownFirstTimeFeatureManipulationGuard {
-    bool operator()( const OnFirstTimeTouchDownViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
-        bool res = touchSelection( mouseEvent.viewportPos, TouchedSelectionFlag::Keep, asg, arc );
+    bool operator()( const OnFirstTimeTouchDownViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg,
+                     RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
+        bool res = touchSelection(mouseEvent.viewportPos, TouchedSelectionFlag::Keep, asg, arc);
         UpdateFeatureManipulationIm()(asg, rsg, arc);
         return res;
     }
 };
 
 struct TouchedDownFirstTimeFittedFurnitureGuard {
-    bool operator()( const OnFirstTimeTouchDownViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
-        bool res = touchSelection( mouseEvent.viewportPos, TouchedSelectionFlag::Keep, asg, arc );
+    bool operator()( const OnFirstTimeTouchDownViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg,
+                     RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
+        bool res = touchSelection(mouseEvent.viewportPos, TouchedSelectionFlag::Keep, asg, arc);
         UpdateFeatureManipulationIm()(asg, rsg, arc);
         return !res;
     }
@@ -166,10 +169,10 @@ struct SpaceToggleFeatureManipulation {
         arc.toggleElementsOnSelectionList([&]( const ArchStructuralFeatureDescriptor& asf ) {
             switch ( asf.elem->type ) {
                 case DoorT:
-                    DoorService::toggleOrientations(dynamic_cast<DoorBSData*>(asf.elem));
+                    DoorService::toggleOrientations(dynamic_cast<DoorBSData *>(asf.elem));
                     break;
                 case FittedFurnitureT:
-                    RoomServiceFurniture::rotateFurniture(dynamic_cast<FittedFurniture*>(asf.elem));
+                    RoomServiceFurniture::rotateFurniture(dynamic_cast<FittedFurniture *>(asf.elem));
                     break;
                 default:
                     break;
@@ -185,7 +188,8 @@ struct IncrementalScaleFeatureManipulation {
         arc.toggleElementsOnSelectionList([&]( const ArchStructuralFeatureDescriptor& asf ) {
             switch ( asf.elem->type ) {
                 case FittedFurnitureT:
-                    RoomServiceFurniture::scaleIncrementalFurniture(dynamic_cast<FittedFurniture*>(asf.elem), event.incrementalScaleFactor );
+                    RoomServiceFurniture::scaleIncrementalFurniture(dynamic_cast<FittedFurniture *>(asf.elem),
+                                                                    event.incrementalScaleFactor);
                     break;
                 default:
                     break;
@@ -206,22 +210,15 @@ struct FurnishHouse {
 };
 
 struct AddFurnitureSingle {
-    void operator()( const OnAddFurnitureSingleEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
-        auto ff = FittedFurniture{{ event.furnitureSet.name, event.furnitureSet.bboxSize }, event.furnitureSet.symbol };
-        auto coffeeMachine = EntityFactory::cloneHashed(ff);
+    void operator()( const OnAddFurnitureSingleEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg,
+                     ArchRenderController& arc ) {
+        auto ff = FittedFurniture{ { event.furnitureSet.name, event.furnitureSet.bboxSize },
+                                   event.furnitureSet.symbol };
+        auto ffs = EntityFactory::cloneHashed(ff);
         V2f pos = RS::maxEnclsingBoundingBoxCenter(event.room);
-        float height = 0.0f;
         auto f = HouseService::findFloorOf(asg.H(), event.room->hash);
-        RS::placeManually(FurnitureRuleParams{ f, event.room, coffeeMachine, pos, Quaternion{},
-                                               height,
-                                               FRPWidthNormal{V2fc::X_AXIS},
-                                               FRPDepthNormal{V2fc::Y_AXIS},
-                                               FRPFurnitureRuleFlags{
-                                                       FurnitureRuleFlags::IgnoreDoorClipping | FurnitureRuleFlags::ForceCanOverlap |
-                                                       FurnitureRuleFlags::DoNotClipAgainstRoom }
-        });
-
-//        RoomServiceFurniture::addFurnitureSingle( f, event.room, asg.FurnitureMap(), event.furnitureSet );
+        RS::placeManually(
+                FurnitureRuleParams{ f, event.room, ffs, pos, FRPFurnitureRuleFlags{ forceManualFurnitureFlags } });
 
         MakeHouse3d{}(asg, rsg, arc);
         asg.showIMHouse();
@@ -236,14 +233,13 @@ struct TakeScreenShot {
 };
 
 
-
 struct TouchMovePolyFeatureManipulation {
     bool operator()( const OnTouchMoveViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg,
                      ArchRenderController& arc ) noexcept {
         auto is = mouseEvent.viewportPos;
         arc.moveSelectionList(is, [&]( const ArchStructuralFeatureDescriptor& asf, const V2f& offset ) {
             if ( asf.feature == ArchStructuralFeature::ASF_Poly ) {
-                HouseService::moveArch(asg.H(), dynamic_cast<ArchStructural*>(asf.elem), offset);
+                HouseService::moveArch(asg.H(), dynamic_cast<ArchStructural *>(asf.elem), offset);
             }
         });
         return true;
