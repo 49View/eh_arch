@@ -1185,6 +1185,7 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                 Plane3f planeFloor{ a, b, c };
                 if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->mTriangles2d, f->z, fd.nearV) ) {
                     fd.normal = planeFloor.n;
+                    fd.arch = room.get();
                 }
 
                 // Walls
@@ -1193,14 +1194,17 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                         Plane3f plane{ quad[0], quad[2], quad[1] };
                         if ( plane.intersectRayOnQuadMin(rayPair, quad, fd.nearV) ) {
                             fd.normal = plane.n;
+                            fd.archSegment = &wd;
                         }
                     }
                 }
 
                 // Furniture
-//                for ( const auto& ff : room->mFittedFurniture ) {
-//                    ArchStructuralService::intersectRayMin(ff.get(), rayPair, fd.nearV);
-//                }
+                for ( const auto& ff : room->mFittedFurniture ) {
+                    if ( ArchStructuralService::intersectRayMin(ff.get(), rayPair, fd.nearV) ) {
+                        fd.arch = ff.get();
+                    }
+                }
             }
         }
     }

@@ -12,7 +12,8 @@ public:
     FeatureIntersection();
     [[nodiscard]] bool hasHit() const;
 
-    ArchStructural* arch = nullptr;
+    const ArchStructural* arch = nullptr;
+    const ArchSegment* archSegment = nullptr;
     float nearV = 0.0f;
     V3f normal = V3f::ZERO;
 };

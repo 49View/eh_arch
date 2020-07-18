@@ -44,7 +44,7 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
                                                           KeyFramePair{ dotFadeTime, 0.0f, AnimVelocityType::Cosine });
         positionChangedOut = false;
     }
-    if ( ( _aid.isMouseTouchedUp(TOUCH_ZERO) || positionChangedIn ) && !singleTap && !isFlying ) {
+    if ( ( _aid.isMouseTouchedUp(TOUCH_ZERO) || (positionChangedIn && !_aid.isMouseTouchedDown(TOUCH_ZERO)) ) && !singleTap && !isFlying ) {
         Timeline::stop(positionalDotAlphaAnim, positionalDotAlphaFadeOutAnimKey, positionalDotAlphaAnim->value);
         positionalDotAlphaFadeInAnimKey = Timeline::play(positionalDotAlphaAnim, 0,
                                                          KeyFramePair{ dotFadeTime, fullDotOpacityValue,
@@ -52,6 +52,7 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
         positionChangedIn = false;
     }
     if ( fd.hasHit() ) {
+        bool bHitFurniture = dynamic_cast<const FittedFurniture*>(fd.arch) != nullptr;
         if ( !currentHit ) positionChangedIn = true;
         currentHit = true;
         bool isNewPositionWalkingOnFloor = fd.normal.dominantElement() == 1;
@@ -60,7 +61,7 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
 
         float alphaDistanceAttenuation = min(distance(ic, rsg.DC()->getPosition()), fadeOutNearDistance);
         float finalAlphaValue = positionalDotAlphaAnim->value * alphaDistanceAttenuation;
-        bool isBlueDot = (isNewPositionWalkingOnFloor || !antiWallRotation);
+        bool isBlueDot = !bHitFurniture;// (isNewPositionWalkingOnFloor || !antiWallRotation);
         C4f outerDotColor = isBlueDot ? V4f::SKY_BLUE.A(finalAlphaValue) : V4f::SPRING_GREEN.A(
                 finalAlphaValue);
         auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
