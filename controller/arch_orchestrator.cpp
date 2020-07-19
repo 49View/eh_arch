@@ -183,6 +183,7 @@ void ArchOrchestrator::loadFurnitureMapStorage( const std::string& _name ) {
         }
     });
 }
+
 FurnitureMapStorage& ArchOrchestrator::FurnitureMap() {
     return furnitureMap;
 }
@@ -388,7 +389,6 @@ void ArchOrchestrator::updateRenderCameraLocator() {
 }
 
 void ArchOrchestrator::updateWalkView( const AggregatedInputData& _aid ) {
-
     updateRenderCameraLocator();
     positionalDot.update(H(), _aid, rsg);
 }

@@ -246,11 +246,11 @@ std::shared_ptr<ArchStructural> HouseService::rayIntersect( const HouseBSData* _
 	return found;
 }
 
-FeatureIntersection HouseService::rayFeatureIntersect( const HouseBSData* house, const RayPair3& rayPair ) {
+FeatureIntersection HouseService::rayFeatureIntersect( const HouseBSData* house, const RayPair3& rayPair, FeatureIntersectionFlagsT fif ) {
     FeatureIntersection fd{};
 
     for ( const auto& f : house->mFloors ) {
-        FloorService::rayFeatureIntersect( f.get(), rayPair, fd );
+        FloorService::rayFeatureIntersect( f.get(), rayPair, fd, fif );
     }
     return fd;
 }

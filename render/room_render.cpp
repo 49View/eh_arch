@@ -172,9 +172,16 @@ namespace RoomRender {
             sg.GB<GT::Asset>("powersocket", V3f{ lf.x(), .252f, lf.y() },
                              GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
         }
-        for ( const auto& fur : w->mFittedFurniture ) {
-            auto furn = sg.GB<GT::Asset>(fur->name, fur->position3d, GT::Rotate(fur->rotation), GT::Scale(fur->scale));
-            ret.furnituresGB.emplace_back(furn);
+        for ( auto& fur : w->mFittedFurniture ) {
+            if (!fur->name.empty()) {
+                auto furn = sg.GB<GT::Asset>(fur->name, fur->position3d, GT::Rotate(fur->rotation), GT::Scale(fur->scale));
+                if ( furn ) {
+                    fur->linkedUUID = furn->UUiDCopy();
+                    ret.furnituresGB.emplace_back(furn);
+                } else {
+                    LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
+                }
+            }
         }
         if ( RoomService::hasRoomType(w, ASType::Kitchen) ) {
             KitchenRender::render(sg, w, ret);

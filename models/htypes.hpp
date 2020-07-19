@@ -65,6 +65,15 @@ enum class ArchStructuralFeature {
 
 using ASF = ArchStructuralFeature;
 
+namespace FeatureIntersectionFlags {
+    static constexpr uint64_t FIF_Floors          = 1 << 0;
+    static constexpr uint64_t FIF_Walls           = 1 << 1;
+    static constexpr uint64_t FIF_Furnitures      = 1 << 2;
+    static constexpr uint64_t FIF_All             = 0xffffffffffffffff;
+}
+
+using FeatureIntersectionFlagsT = uint64_t;
+
 struct FloorMatType {
 	static const uint64_t Wood = 0;
 	static const uint64_t Tiles = 1;

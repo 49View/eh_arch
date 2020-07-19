@@ -71,6 +71,7 @@ prepareProperty( const PropertyListing& property, ArchOrchestrator& asg, SceneGr
 
 struct CreateHouseTextures {
     void operator()( SceneGraph& sg, ArchOrchestrator& asg ) {
+        HouseMakerBitmap::prepareImages( asg.H(), *sg.get<RawImage>(asg.H()->propertyId) );
         updateSourceImagesIntoScene(sg, asg, HouseMakerBitmap::getSourceImages());
         asg.showIMHouse();
         asg.onEvent(ArchIOEvents::AIOE_OnLoadComplete);

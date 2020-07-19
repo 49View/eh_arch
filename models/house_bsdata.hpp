@@ -69,6 +69,7 @@ using SequencePart = int64_t;
 #define STRUCTURAL_ELEMENT ArchStructural, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d
 
 struct ArchStructural : public ArchBase {
+    std::string linkedUUID{}; // NB This won't get serialized as it's a runtime value only
     JMATH::Rect2f bbox = JMATH::Rect2f::IDENTITY;
     JMATH::AABB bbox3d = JMATH::AABB::IDENTITY;
     Color4f albedo = Color4f::WHITE;

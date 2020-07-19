@@ -4,6 +4,8 @@
 #include <core/math/vector3f.h>
 #include <core/math/htypes.hpp>
 
+struct FittedFurniture;
+
 float metersToCentimeters( float valueInMeter );
 float centimetersToMeters( float valueInCM );
 
@@ -12,8 +14,9 @@ public:
     FeatureIntersection();
     [[nodiscard]] bool hasHit() const;
 
-    const ArchStructural* arch = nullptr;
-    const ArchSegment* archSegment = nullptr;
+    ArchStructural* arch = nullptr;
+    ArchSegment* archSegment = nullptr;
+    FittedFurniture* furnitureSelected = nullptr;
     float nearV = 0.0f;
     V3f normal = V3f::ZERO;
 };

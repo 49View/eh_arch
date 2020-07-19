@@ -33,10 +33,35 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
     constexpr float minSafeDistance = 0.75f; // Deduct this distance from clicked dot position to avoid being to close to walls/objects
     constexpr float slowingDownTimeOnRotationFactor = 2.0f; // When we travel to walls we'll also rotate the camera M_PI to not ending up facing the wall, that rotation needs to be slower than the usual goto time.
 
+    if ( _aid.isMouseTouchedDownFirstTime(TOUCH_ONE) && bHitFurniture ) {
+        auto dir = _aid.mouseViewportDir(TouchIndex::TOUCH_ONE, rsg.DC());
+        fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir }, FeatureIntersectionFlags::FIF_Walls|FeatureIntersectionFlags::FIF_Floors);
+        prevFurnitureMovePosition = rsg.DC()->getPosition() + ( dir * fdFurniture.nearV );
+    }
+    if ( _aid.isMouseTouchedDownAndMoving(TOUCH_ONE) && bHitFurniture ) {
+        auto dir = _aid.mouseViewportDir(TouchIndex::TOUCH_ONE, rsg.DC());
+        fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir }, FeatureIntersectionFlags::FIF_Walls|FeatureIntersectionFlags::FIF_Floors);
+        V3f ic = rsg.DC()->getPosition() + ( dir * fdFurniture.nearV );
+        V3f off = ic - prevFurnitureMovePosition;
+        auto node = rsg.SG().Nodes().find( fd.furnitureSelected->linkedUUID );
+        if ( node->second ) {
+            node->second->move(off);
+        }
+        fd.furnitureSelected->position3d += off;
+        fd.furnitureSelected->bbox3d.translate(off);
+        fd.furnitureSelected->bbox.translate(XZY::C2(off));
+        prevFurnitureMovePosition = ic;
+    }
+    if ( _aid.isMouseTouchedUp(TOUCH_ONE) && bHitFurniture ) {
+        bHitFurniture = false;
+    }
+
     bool singleTap = _aid.isMouseSingleTap(TOUCH_ZERO);
     auto dir = _aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC());
-    if ( !isFlying ) {
-        fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir });
+    if ( !isFlying && !_aid.isMouseTouchedDown(TOUCH_ONE) ) {
+        fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir }, FeatureIntersectionFlags::FIF_All);
+        fd.furnitureSelected = dynamic_cast<FittedFurniture*>(fd.arch);
+        bHitFurniture = fd.furnitureSelected != nullptr;
     }
     if ( ( _aid.isMouseTouchedDownFirstTime(TOUCH_ZERO) || positionChangedOut ) && !isFlying ) {
         Timeline::stop(positionalDotAlphaAnim, positionalDotAlphaFadeInAnimKey, positionalDotAlphaAnim->value);
@@ -52,7 +77,6 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
         positionChangedIn = false;
     }
     if ( fd.hasHit() ) {
-        bool bHitFurniture = dynamic_cast<const FittedFurniture*>(fd.arch) != nullptr;
         if ( !currentHit ) positionChangedIn = true;
         currentHit = true;
         bool isNewPositionWalkingOnFloor = fd.normal.dominantElement() == 1;

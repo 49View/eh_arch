@@ -22,7 +22,7 @@ struct DebugUShapeIntersection {
     V2f p = V2fc::ZERO;
     int i = 0;
 
-    DebugUShapeIntersection( UShape *s1, UShape *s2, const V2f& p, int i ) : s1( s1 ), s2( s2 ), p( p ), i( i ) {}
+    DebugUShapeIntersection( UShape *s1, UShape *s2, const V2f& p, int i ) : s1(s1), s2(s2), p(p), i(i) {}
 };
 
 class FloorServiceIntermediateData {
@@ -68,7 +68,7 @@ struct ArchSegmentBucket {
     }
 
     bool hasSameCoords( const ArchSegmentBucket& lhr ) {
-        return isVerySimilar( lineOrigin, lhr.lineOrigin ) && isVerySimilar( lineEnd, lhr.lineEnd );
+        return isVerySimilar(lineOrigin, lhr.lineOrigin) && isVerySimilar(lineEnd, lhr.lineEnd);
     }
 
     friend std::ostream& operator<<( std::ostream& os, const ArchSegmentBucket& bucket ) {
@@ -83,23 +83,23 @@ namespace FloorService {
     RoomPreDataResult roomRecognition( FloorBSData *f );
     void guessFittings( FloorBSData *f, FurnitureMapStorage& furns );
     std::string naturalLanguageFloorNumber( int numFloor );
-    const RoomBSData* findRoomWithHash( FloorBSData *f, int64_t hash );
+    const RoomBSData *findRoomWithHash( FloorBSData *f, int64_t hash );
 
     // Create
     void
     addWallsFromData( FloorBSData *f, const V2fVectorOfVector& floorWalls,
                       WallLastPointWrapT wpw = WallLastPointWrap::No );
-    void addRoomsFromData( FloorBSData *f, const HouseBSData* house, const std::vector<RoomPreData>& rds );
+    void addRoomsFromData( FloorBSData *f, const HouseBSData *house, const std::vector<RoomPreData>& rds );
     void addDoorFromData( FloorBSData *f, float _doorHeight, const UShape& w1, const UShape& w2,
-                                 ArchSubTypeT st = ArchSubType::NotApplicable );
+                          ArchSubTypeT st = ArchSubType::NotApplicable );
     void addWindowFromData( FloorBSData *f, float _windowHeight, float _defaultWindowBaseOffset,
-                                   const UShape& w1, const UShape& w2 );
+                            const UShape& w1, const UShape& w2 );
     void addCeilingContour( FloorBSData *f, const std::vector<Vector3f>& cc );
 
     // Update
-    void assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData* house );
-    void reevaluateDoorsAndWindowsAfterRoomChange( FloorBSData* f );
-    void calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f, HouseBSData* house );
+    void assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *house );
+    void reevaluateDoorsAndWindowsAfterRoomChange( FloorBSData *f );
+    void calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f, HouseBSData *house );
     std::vector<UShape *> allUShapes( FloorBSData *f );
     void
     changeTypeOfSelectedElementTo( FloorBSData *f, ArchStructural *source, ArchType t,
@@ -113,7 +113,7 @@ namespace FloorService {
     changeUShapeType( FloorBSData *f, const UShape& sourceUShape1, const UShape& sourceUShape2,
                       ArchType _type );
     void swapWindowOrDoor( FloorBSData *f, HouseBSData *h, int64_t hashOfTwoShape );
-    void moveArch( FloorBSData *f, ArchStructural* elem, const V2f& offset2d );
+    void moveArch( FloorBSData *f, ArchStructural *elem, const V2f& offset2d );
 
     // Delete
     void removeArch( FloorBSData *f, int64_t hashToRemove );
@@ -123,15 +123,16 @@ namespace FloorService {
     bool hasAnyWall( const FloorBSData *f );
     std::vector<Vector2f> allFloorePoints( const FloorBSData *f );
 
-    void rayFeatureIntersect( const FloorBSData* f, const RayPair3& rayPair, FeatureIntersection& fd );
+    void rayFeatureIntersect( const FloorBSData *f, const RayPair3& rayPair, FeatureIntersection& fd,
+                              FeatureIntersectionFlagsT fif );
     bool intersectLine2d( const FloorBSData *f, Vector2f const& p0, Vector2f const& p1, Vector2f& i );
     ArchIntersection
     intersectLine2dMin( const FloorBSData *f, Vector2f const& p0, Vector2f const& p1, Vector2f& i,
                         uint32_t filterFlags = 0xffffffff );
     bool isInsideRoomRDS( const V2f& i, const std::vector<RoomPreData>& rds );
     bool isIndexInUShape( size_t t, WallBSData *w );
-    std::optional<RoomBSData*> whichRoomAmI( const FloorBSData *f, const Vector2f& _pos );
-    std::vector<RoomBSData*> roomsIntersectingBBox( FloorBSData *f, const Rect2f& bbox, bool earlyOut );
+    std::optional<RoomBSData *> whichRoomAmI( const FloorBSData *f, const Vector2f& _pos );
+    std::vector<RoomBSData *> roomsIntersectingBBox( FloorBSData *f, const Rect2f& bbox, bool earlyOut );
     int64_t findWallIndex( const FloorBSData *f, int64_t hash );
     bool findWallAt( const FloorBSData *f, const Vector2f& matPos, std::vector<ArchStructural *>& ret );
     bool findRoomAt( const FloorBSData *f, const Vector2f& matPos, std::vector<ArchStructural *>& ret );
@@ -142,7 +143,7 @@ namespace FloorService {
     bool
     isInsideCeilingContour( const FloorBSData *f, const Vector2f& v1, float& topZ1, int& hitLevel1 );
     void centrePointOfBiggestRoom( const FloorBSData *f, float& _currMaxArea,
-                                          Vector2f& _currCenter );
+                                   Vector2f& _currCenter );
     ClipperLib::Paths calcPlainPath( const FloorBSData *f );
     bool isFloorUShapeValid( const FloorUShapesPair& fus );
     std::optional<uint64_t> findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind, int64_t index );
@@ -150,7 +151,7 @@ namespace FloorService {
     // Update
     void calcBBox( FloorBSData *f );
     float updatePerimeter( FloorBSData *f, const std::vector<ArchSegment>& singleRoomSegmentsExternal );
-    void rollbackToCalculatedWalls( FloorBSData *f);
+    void rollbackToCalculatedWalls( FloorBSData *f );
     void mergePoints( FloorBSData *w, const V2fVectorOfVector& points, const Rect2f& pointsBBox );
 
     // Remove

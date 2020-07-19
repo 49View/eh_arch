@@ -875,7 +875,7 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     std::string sideBoard = "gallotti,radice,tama";
     std::string tv = "smart,tv,with,stand";
     std::string plant1 = "plant,spider";
-    std::string coffeeMachine = "coffee,machine";
+    std::string coffeeMachine = "coffee,cups";
 
     std::string toilet = "urby,toilet";
     std::string shower = "shower,tresse";

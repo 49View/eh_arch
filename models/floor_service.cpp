@@ -1172,39 +1172,47 @@ FloorService::findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind
     return std::nullopt;
 }
 
-void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& rayPair, FeatureIntersection& fd ) {
+void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& rayPair, FeatureIntersection& fd,
+                                        FeatureIntersectionFlagsT fif ) {
 
     if ( ArchStructuralService::intersectRay(f, rayPair) ) {
         for ( const auto& room : f->rooms ) {
             if ( ArchStructuralService::intersectRay(room.get(), rayPair) ) {
 
                 // Floors
-                V3f a = XZY::C(std::get<0>(room->mTriangles2d[0]), f->z);
-                V3f b = XZY::C(std::get<2>(room->mTriangles2d[0]), f->z);
-                V3f c = XZY::C(std::get<1>(room->mTriangles2d[0]), f->z);
-                Plane3f planeFloor{ a, b, c };
-                if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->mTriangles2d, f->z, fd.nearV) ) {
-                    fd.normal = planeFloor.n;
-                    fd.arch = room.get();
+                if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Floors) ) {
+                    V3f a = XZY::C(std::get<0>(room->mTriangles2d[0]), f->z);
+                    V3f b = XZY::C(std::get<2>(room->mTriangles2d[0]), f->z);
+                    V3f c = XZY::C(std::get<1>(room->mTriangles2d[0]), f->z);
+                    Plane3f planeFloor{ a, b, c };
+                    if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->mTriangles2d, f->z, fd.nearV) ) {
+                        fd.normal = planeFloor.n;
+                        fd.arch = room.get();
+                    }
                 }
 
                 // Walls
-                for ( const auto& wd : room->mWallSegmentsSorted ) {
-                    for ( const auto& quad : wd.quads ) {
-                        Plane3f plane{ quad[0], quad[2], quad[1] };
-                        if ( plane.intersectRayOnQuadMin(rayPair, quad, fd.nearV) ) {
-                            fd.normal = plane.n;
-                            fd.archSegment = &wd;
+                if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Walls) ) {
+                    for ( auto& wd : room->mWallSegmentsSorted ) {
+                        for ( const auto& quad : wd.quads ) {
+                            Plane3f plane{ quad[0], quad[2], quad[1] };
+                            if ( plane.intersectRayOnQuadMin(rayPair, quad, fd.nearV) ) {
+                                fd.normal = plane.n;
+                                fd.archSegment = &wd;
+                            }
                         }
                     }
                 }
 
                 // Furniture
-                for ( const auto& ff : room->mFittedFurniture ) {
-                    if ( ArchStructuralService::intersectRayMin(ff.get(), rayPair, fd.nearV) ) {
-                        fd.arch = ff.get();
+                if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Furnitures) ) {
+                    for ( const auto& ff : room->mFittedFurniture ) {
+                        if ( ArchStructuralService::intersectRayMin(ff.get(), rayPair, fd.nearV) ) {
+                            fd.arch = ff.get();
+                        }
                     }
                 }
+
             }
         }
     }
