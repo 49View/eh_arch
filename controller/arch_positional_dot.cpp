@@ -15,7 +15,7 @@
 static constexpr float fullDotOpacityValue = 0.85f;
 
 ArchPositionalDot::ArchPositionalDot() {
-    positionalDotAlphaAnim = std::make_shared<AnimType<float>>(fullDotOpacityValue, "positionalDotAlphaAnim");
+    positionalDotAlphaAnim = std::make_shared < AnimType < float >> ( fullDotOpacityValue, "positionalDotAlphaAnim" );
 }
 
 /// @brief
@@ -33,17 +33,23 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
     constexpr float minSafeDistance = 0.75f; // Deduct this distance from clicked dot position to avoid being to close to walls/objects
     constexpr float slowingDownTimeOnRotationFactor = 2.0f; // When we travel to walls we'll also rotate the camera M_PI to not ending up facing the wall, that rotation needs to be slower than the usual goto time.
 
-    if ( _aid.isMouseTouchedDownFirstTime(TOUCH_ONE) && bHitFurniture ) {
-        auto dir = _aid.mouseViewportDir(TouchIndex::TOUCH_ONE, rsg.DC());
-        fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir }, FeatureIntersectionFlags::FIF_Walls|FeatureIntersectionFlags::FIF_Floors);
+    auto dir = _aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC());
+    bool isControlKeyDown =
+            _aid.TI().checkModKeyPressed(GMK_LEFT_CONTROL) || _aid.TI().checkModKeyPressed(GMK_RIGHT_CONTROL);
+
+    if ( _aid.isMouseTouchedDownFirstTime(TOUCH_ZERO) && bHitFurniture && isControlKeyDown ) {
+        fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
+                                                        FeatureIntersectionFlags::FIF_Walls |
+                                                        FeatureIntersectionFlags::FIF_Floors);
         prevFurnitureMovePosition = rsg.DC()->getPosition() + ( dir * fdFurniture.nearV );
     }
-    if ( _aid.isMouseTouchedDownAndMoving(TOUCH_ONE) && bHitFurniture ) {
-        auto dir = _aid.mouseViewportDir(TouchIndex::TOUCH_ONE, rsg.DC());
-        fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir }, FeatureIntersectionFlags::FIF_Walls|FeatureIntersectionFlags::FIF_Floors);
+    if ( _aid.isMouseTouchedDownAndMoving(TOUCH_ZERO) && bHitFurniture && isControlKeyDown ) {
+        fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
+                                                        FeatureIntersectionFlags::FIF_Walls |
+                                                        FeatureIntersectionFlags::FIF_Floors);
         V3f ic = rsg.DC()->getPosition() + ( dir * fdFurniture.nearV );
         V3f off = ic - prevFurnitureMovePosition;
-        auto node = rsg.SG().Nodes().find( fd.furnitureSelected->linkedUUID );
+        auto node = rsg.SG().Nodes().find(fd.furnitureSelected->linkedUUID);
         if ( node->second ) {
             node->second->move(off);
         }
@@ -52,24 +58,25 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
         fd.furnitureSelected->bbox.translate(XZY::C2(off));
         prevFurnitureMovePosition = ic;
     }
-    if ( _aid.isMouseTouchedUp(TOUCH_ONE) && bHitFurniture ) {
-        bHitFurniture = false;
-    }
+//    if ( _aid.isMouseTouchedUp(TOUCH_ZERO) && bHitFurniture && isControlKeyDown ) {
+//        bHitFurniture = false;
+//    }
 
     bool singleTap = _aid.isMouseSingleTap(TOUCH_ZERO);
-    auto dir = _aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC());
-    if ( !isFlying && !_aid.isMouseTouchedDown(TOUCH_ONE) ) {
-        fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir }, FeatureIntersectionFlags::FIF_All);
-        fd.furnitureSelected = dynamic_cast<FittedFurniture*>(fd.arch);
+    if ( !isFlying && !isControlKeyDown ) {
+        fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
+                                               FeatureIntersectionFlags::FIF_All);
+        fd.furnitureSelected = dynamic_cast<FittedFurniture *>(fd.arch);
         bHitFurniture = fd.furnitureSelected != nullptr;
     }
-    if ( ( _aid.isMouseTouchedDownFirstTime(TOUCH_ZERO) || positionChangedOut ) && !isFlying ) {
+    if ( ( _aid.isMouseTouchedDownFirstTime(TOUCH_ZERO) || positionChangedOut ) && !isFlying && !isControlKeyDown) {
         Timeline::stop(positionalDotAlphaAnim, positionalDotAlphaFadeInAnimKey, positionalDotAlphaAnim->value);
         positionalDotAlphaFadeOutAnimKey = Timeline::play(positionalDotAlphaAnim, 0,
                                                           KeyFramePair{ dotFadeTime, 0.0f, AnimVelocityType::Cosine });
         positionChangedOut = false;
     }
-    if ( ( _aid.isMouseTouchedUp(TOUCH_ZERO) || (positionChangedIn && !_aid.isMouseTouchedDown(TOUCH_ZERO)) ) && !singleTap && !isFlying ) {
+    if ( ( _aid.isMouseTouchedUp(TOUCH_ZERO) || ( positionChangedIn && !_aid.isMouseTouchedDown(TOUCH_ZERO) ) ) &&
+         !singleTap && !isFlying && !isControlKeyDown ) {
         Timeline::stop(positionalDotAlphaAnim, positionalDotAlphaFadeOutAnimKey, positionalDotAlphaAnim->value);
         positionalDotAlphaFadeInAnimKey = Timeline::play(positionalDotAlphaAnim, 0,
                                                          KeyFramePair{ dotFadeTime, fullDotOpacityValue,
@@ -90,16 +97,17 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
                 finalAlphaValue);
         auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
         std::stringstream stream;
-        stream << std::fixed << std::setprecision( 2 ) << finalAlphaValue;
-        std::string nameTag = stream.str() + (isBlueDot ? "1" : "0");
+        stream << std::fixed << std::setprecision(2) << finalAlphaValue;
+        std::string nameTag = stream.str() + ( isBlueDot ? "1" : "0" );
         rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, ic, V4f::WHITE.A(finalAlphaValue),
                                      outerDotSize + outerDotBorderSize, sm3, RDSRotationNormalAxis{ fd.normal },
-                                     RDSArchSegments{ 36 }, "d1"+nameTag);
+                                     RDSArchSegments{ 36 }, "d1" + nameTag);
         rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, ic, outerDotColor,
-                                     outerDotSize, sm3, RDSRotationNormalAxis{ fd.normal }, RDSArchSegments{ 36 }, "d2"+nameTag);
+                                     outerDotSize, sm3, RDSRotationNormalAxis{ fd.normal }, RDSArchSegments{ 36 },
+                                     "d2" + nameTag);
         rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, ic, V4f::WHITE.A(finalAlphaValue),
                                      outerDotSize * smallDotRatio, sm3, RDSRotationNormalAxis{ fd.normal },
-                                     RDSArchSegments{ 36 }, "d3"+nameTag);
+                                     RDSArchSegments{ 36 }, "d3" + nameTag);
 
         ic.setY(rsg.DC()->getPosition().y());
 

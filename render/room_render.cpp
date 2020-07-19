@@ -177,6 +177,7 @@ namespace RoomRender {
                 auto furn = sg.GB<GT::Asset>(fur->name, fur->position3d, GT::Rotate(fur->rotation), GT::Scale(fur->scale));
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
+                    fur->bbox3d = furn->BBox3dCopy();
                     ret.furnituresGB.emplace_back(furn);
                 } else {
                     LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
