@@ -217,6 +217,15 @@ enum ArchType : uint64_t {
 
 using ArchTypeT = uint64_t;
 
+namespace FittedFurnitureFlags {
+    static constexpr uint64_t FF_CanOverlap = 1 << 0;
+    static constexpr uint64_t FF_CanBeHanged = 1 << 1;
+    static constexpr uint64_t FF_CanBeDecorated = 1 << 2;
+    static constexpr uint64_t FF_isDecoration = 1 << 3;
+};
+
+using FittedFurnitureFlagsT = uint64_t;
+
 struct ArchSubType {
     const static int64_t NotApplicable = -1;
     const static int64_t DoorSingle = 0;

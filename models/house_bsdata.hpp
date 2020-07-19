@@ -168,13 +168,6 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     }
 };
 
-enum FittedFurnitureFlags {
-    FF_CanOverlap = 1 << 0,
-    FF_CanBeHanged = 1 << 1,
-    FF_CanBeDecorated = 1 << 2,
-    FF_isDecoration = 1 << 3
-};
-
 JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
         name, symbolRef, size, scale, position3d, xyLocation, heightOffset, rotation, widthNormal,
          depthNormal, flags)
@@ -188,7 +181,7 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, he
     Quaternion rotation{ V3f::ZERO, 1.0f };
     V2f widthNormal = V2fc::ZERO;
     V2f depthNormal = V2fc::ZERO;
-    int flags = 0;
+    FittedFurnitureFlagsT flags = 0;
     explicit FittedFurniture( const std::tuple<std::string, V3f>& args, std::string _symbolRef ) :
             name(std::get<0>(args)), symbolRef(std::move(_symbolRef)), size(std::get<1>(args)) {
         type = ArchType::FittedFurnitureT;
@@ -196,7 +189,7 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, he
     FittedFurniture( std::string _name, const Vector3f& _size ) : name(std::move(_name)), size(_size) {
         type = ArchType::FittedFurnitureT;
     }
-    [[nodiscard]] bool checkIf( FittedFurnitureFlags _flag ) const;
+    [[nodiscard]] bool checkIf( FittedFurnitureFlagsT _flag ) const;
 };
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,

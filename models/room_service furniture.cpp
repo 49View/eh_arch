@@ -22,7 +22,7 @@
 
 auto quarterRotation = quatFromAxis(V4f{0.0f, 1.0f, 0.0f, static_cast<float>(M_PI_4)});
 
-[[nodiscard]] bool FittedFurniture::checkIf( FittedFurnitureFlags _flag ) const {
+[[nodiscard]] bool FittedFurniture::checkIf( FittedFurnitureFlagsT _flag ) const {
     return checkBitWiseFlag(flags, _flag);
 }
 
@@ -435,7 +435,7 @@ namespace RoomService {
         if ( fpd.hasDecorations() ) {
             for ( const auto& dec : fpd.getDecorations() ) {
                 auto decF = furns.spawn(dec);
-                float h1 = checkBitWiseFlag(decF->flags, FF_CanBeHanged) ? middleHeightFromObject(r, mainF, decF)
+                float h1 = checkBitWiseFlag(decF->flags, FittedFurnitureFlags::FF_CanBeHanged) ? middleHeightFromObject(r, mainF, decF)
                                                                         : 0.00f;
                 completed &= h1 >= 0.0f;
                 if ( h1 >= 0.0f ) {
@@ -609,6 +609,24 @@ namespace RoomService {
         _ff->height = _ff->bbox3d.calcHeight();
     }
 
+    bool checkBBoxInsideRoom( const RoomBSData* r, const Rect2f& bbox ) {
+        ClipperLib::Clipper c;
+        ClipperLib::Path pathSubject = ClipperLib::V2fToPath(bbox.points());
+        V2f subjectPathSize = ClipperLib::pathSize(pathSubject);
+        c.AddPath(pathSubject, ClipperLib::ptSubject, true);
+        c.AddPath(ClipperLib::V2fToPath(r->mPerimeterSegments), ClipperLib::ptClip, true);
+        ClipperLib::Paths solution;
+        c.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
+
+        if ( ( !solution.empty() && solution.size() == 1 && solution[0].size() == 4 ) ) {
+            V2f solutionPathSize = ClipperLib::pathSize(solution[0]);
+            if ( isVerySimilar(solutionPathSize, subjectPathSize) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool addFurniture( FurnitureRuleParams& params ) {
         params.ff->position3d = XZY::C(params.ff->xyLocation, params.ff->heightOffset);
         calculateFurnitureBBox( params.ff.get() );
@@ -628,33 +646,22 @@ namespace RoomService {
             return true;
         }
 
-        ClipperLib::Clipper c;
-        ClipperLib::Path pathSubject = ClipperLib::V2fToPath(params.ff->bbox.points());
-        V2f subjectPathSize = ClipperLib::pathSize(pathSubject);
-        c.AddPath(pathSubject, ClipperLib::ptSubject, true);
-        c.AddPath(ClipperLib::V2fToPath(params.r->mPerimeterSegments), ClipperLib::ptClip, true);
-        ClipperLib::Paths solution;
-        c.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
-
-        if ( (!solution.empty() && solution.size() == 1 && solution[0].size() == 4) ) {
-            V2f solutionPathSize = ClipperLib::pathSize(solution[0]);
-            if ( isVerySimilar(solutionPathSize, subjectPathSize) ) {
-                if ( !params.ff->checkIf(FF_CanOverlap) && !checkBitWiseFlag(params.flags, FurnitureRuleFlags::ForceCanOverlap) ) {
-                    for ( const auto& furn : params.r->mFittedFurniture ) {
-                        if ( params.ff->heightOffset != furn->heightOffset ) {
-                            if ( params.ff->heightOffset > furn->heightOffset + furn->bbox3d.calcHeight() ||
-                                 params.ff->heightOffset + params.ff->bbox3d.calcHeight() < furn->heightOffset ) {
-                                continue;
-                            }
-                        }
-                        if ( params.ff->bbox.intersect(furn->bbox, 0.001f) ) {
-                            return false;
+        if ( checkBBoxInsideRoom(params.r, params.ff->bbox) ) {
+            if ( !params.ff->checkIf(FittedFurnitureFlags::FF_CanOverlap) && !checkBitWiseFlag(params.flags, FurnitureRuleFlags::ForceCanOverlap) ) {
+                for ( const auto& furn : params.r->mFittedFurniture ) {
+                    if ( params.ff->heightOffset != furn->heightOffset ) {
+                        if ( params.ff->heightOffset > furn->heightOffset + furn->bbox3d.calcHeight() ||
+                             params.ff->heightOffset + params.ff->bbox3d.calcHeight() < furn->heightOffset ) {
+                            continue;
                         }
                     }
+                    if ( params.ff->bbox.intersect(furn->bbox, 0.001f) ) {
+                        return false;
+                    }
                 }
-                params.r->mFittedFurniture.push_back(params.ff);
-                return true;
             }
+            params.r->mFittedFurniture.push_back(params.ff);
+            return true;
         }
         return false;
     }
@@ -831,10 +838,10 @@ std::shared_ptr<FittedFurniture> FurnitureMapStorage::spawn( FT _ft ) {
 
 void initializeDefaultFurnituresFlags( FT _ft, FittedFurniture& _ff ) {
     if ( _ft == FTH::FT_Carpet || _ft == FTH::FT_TVWithStand ) {
-        orBitWiseFlag(_ff.flags, FF_CanOverlap);
+        orBitWiseFlag(_ff.flags, FittedFurnitureFlags::FF_CanOverlap);
     }
     if ( _ft == FTH::FT_Picture ) {
-        orBitWiseFlag(_ff.flags, FF_CanBeHanged | FF_isDecoration);
+        orBitWiseFlag(_ff.flags, FittedFurnitureFlags::FF_CanBeHanged | FittedFurnitureFlags::FF_isDecoration);
     }
 }
 

@@ -5,6 +5,7 @@
 #include <core/math/htypes.hpp>
 
 struct FittedFurniture;
+struct RoomBSData;
 
 float metersToCentimeters( float valueInMeter );
 float centimetersToMeters( float valueInCM );
@@ -17,6 +18,7 @@ public:
     ArchStructural* arch = nullptr;
     ArchSegment* archSegment = nullptr;
     FittedFurniture* furnitureSelected = nullptr;
+    RoomBSData* room = nullptr;
     float nearV = 0.0f;
     V3f normal = V3f::ZERO;
 };

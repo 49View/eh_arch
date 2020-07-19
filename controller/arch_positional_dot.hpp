@@ -27,6 +27,8 @@ private:
     bool isFlying = false;
     bool antiWallRotation = false;
     bool bHitFurniture = false;
+    bool bRoomBboxCheck = false;
+    FeatureIntersectionFlagsT featureIntersectionFlags = 0;
     V3f  prevFurnitureMovePosition{};
     FeatureIntersection fd{};
     FeatureIntersection fdFurniture{};

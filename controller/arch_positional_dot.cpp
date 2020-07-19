@@ -11,11 +11,12 @@
 #include <render_scene_graph/render_orchestrator.h>
 
 #include <eh_arch/models/house_service.hpp>
+#include <eh_arch/models/room_service.hpp>
 
 static constexpr float fullDotOpacityValue = 0.85f;
 
 ArchPositionalDot::ArchPositionalDot() {
-    positionalDotAlphaAnim = std::make_shared < AnimType < float >> ( fullDotOpacityValue, "positionalDotAlphaAnim" );
+    positionalDotAlphaAnim = std::make_shared<AnimType<float >>(fullDotOpacityValue, "positionalDotAlphaAnim");
 }
 
 /// @brief
@@ -37,30 +38,28 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
     bool isControlKeyDown =
             _aid.TI().checkModKeyPressed(GMK_LEFT_CONTROL) || _aid.TI().checkModKeyPressed(GMK_RIGHT_CONTROL);
 
-    if ( _aid.isMouseTouchedDownFirstTime(TOUCH_ZERO) && bHitFurniture && isControlKeyDown ) {
-        fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
-                                                        FeatureIntersectionFlags::FIF_Walls |
-                                                        FeatureIntersectionFlags::FIF_Floors);
-        prevFurnitureMovePosition = rsg.DC()->getPosition() + ( dir * fdFurniture.nearV );
-    }
     if ( _aid.isMouseTouchedDownAndMoving(TOUCH_ZERO) && bHitFurniture && isControlKeyDown ) {
         fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
-                                                        FeatureIntersectionFlags::FIF_Walls |
-                                                        FeatureIntersectionFlags::FIF_Floors);
-        V3f ic = rsg.DC()->getPosition() + ( dir * fdFurniture.nearV );
-        V3f off = ic - prevFurnitureMovePosition;
-        auto node = rsg.SG().Nodes().find(fd.furnitureSelected->linkedUUID);
-        if ( node->second ) {
-            node->second->move(off);
+                                                        featureIntersectionFlags);
+        if ( fdFurniture.hasHit() ) {
+            V3f ic = rsg.DC()->getPosition() + ( dir * fdFurniture.nearV );
+            if ( prevFurnitureMovePosition != V3f::HUGE_VALUE_NEG ) {
+                V3f off = ic - prevFurnitureMovePosition;
+                auto potentialBBox = fd.furnitureSelected->bbox;
+                potentialBBox.translate(XZY::C2(off));
+                if ( !bRoomBboxCheck || RS::checkBBoxInsideRoom(fd.room, potentialBBox) ) {
+                    auto node = rsg.SG().Nodes().find(fd.furnitureSelected->linkedUUID);
+                    if ( node->second ) {
+                        node->second->move(off);
+                    }
+                    fd.furnitureSelected->position3d += off;
+                    fd.furnitureSelected->bbox3d.translate(off);
+                    fd.furnitureSelected->bbox.translate(XZY::C2(off));
+                }
+            }
+            prevFurnitureMovePosition = ic;
         }
-        fd.furnitureSelected->position3d += off;
-        fd.furnitureSelected->bbox3d.translate(off);
-        fd.furnitureSelected->bbox.translate(XZY::C2(off));
-        prevFurnitureMovePosition = ic;
     }
-//    if ( _aid.isMouseTouchedUp(TOUCH_ZERO) && bHitFurniture && isControlKeyDown ) {
-//        bHitFurniture = false;
-//    }
 
     bool singleTap = _aid.isMouseSingleTap(TOUCH_ZERO);
     if ( !isFlying && !isControlKeyDown ) {
@@ -68,8 +67,13 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
                                                FeatureIntersectionFlags::FIF_All);
         fd.furnitureSelected = dynamic_cast<FittedFurniture *>(fd.arch);
         bHitFurniture = fd.furnitureSelected != nullptr;
+        if ( bHitFurniture ) {
+            featureIntersectionFlags = fd.furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged)
+                                       ? FeatureIntersectionFlags::FIF_Walls : FeatureIntersectionFlags::FIF_Floors;
+            prevFurnitureMovePosition = V3f::HUGE_VALUE_NEG;
+        }
     }
-    if ( ( _aid.isMouseTouchedDownFirstTime(TOUCH_ZERO) || positionChangedOut ) && !isFlying && !isControlKeyDown) {
+    if ( ( _aid.isMouseTouchedDownFirstTime(TOUCH_ZERO) || positionChangedOut ) && !isFlying && !isControlKeyDown ) {
         Timeline::stop(positionalDotAlphaAnim, positionalDotAlphaFadeInAnimKey, positionalDotAlphaAnim->value);
         positionalDotAlphaFadeOutAnimKey = Timeline::play(positionalDotAlphaAnim, 0,
                                                           KeyFramePair{ dotFadeTime, 0.0f, AnimVelocityType::Cosine });
@@ -111,7 +115,7 @@ void ArchPositionalDot::update( const HouseBSData *_house, const AggregatedInput
 
         ic.setY(rsg.DC()->getPosition().y());
 
-        if ( singleTap && !isFlying ) {
+        if ( singleTap && !isFlying && !isControlKeyDown ) {
             float speedFactor = ( isNewPositionWalkingOnFloor || !antiWallRotation ) ? 1.0f
                                                                                      : slowingDownTimeOnRotationFactor;
             isFlying = true;

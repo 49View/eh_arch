@@ -654,6 +654,7 @@ namespace RoomService {
         return false;
     }
 
+    bool checkBBoxInsideRoom( const RoomBSData* r, const Rect2f& bbox );
     Vector2f maxEnclsingBoundingBoxCenter( const RoomBSData *r );
     size_t numTotalSegments( const RoomBSData *r );
     std::string roomName( const RoomBSData *r );
