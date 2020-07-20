@@ -42,6 +42,7 @@ public:
 
     void centerCameraMiddleOfHouse( float slack = 0.0f );
     void centerCameraMiddleOfHouseWithFloorplanInfoOffset( float floorplanOffset, float slack = 0.0f);
+    const Matrix4f& FloorplanNavigationMatrix() const;
     HouseRenderContainer& HRC();
     HouseBSData *H();
 
@@ -52,11 +53,7 @@ public:
     void setTopDownView();
     void setDollHouseView();
 
-    // Updates (these are run every frame)
-    void updateViewingModes( const AggregatedInputData& _aid );
-protected:
-    void updateWalkView( const AggregatedInputData& _aid );
-    void updateRenderCameraLocator();
+    ArchPositionalDot& PositionalDot();
 
 protected:
     SceneGraph& sg;

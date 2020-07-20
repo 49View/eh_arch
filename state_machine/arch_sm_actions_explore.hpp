@@ -91,6 +91,20 @@ struct WhichRoomAmI {
     }
 };
 
+static void renderCameraLocator(ArchOrchestrator& asg, RenderOrchestrator& rsg) {
+    // Update camera locator on map
+    auto camPos = rsg.DC()->getPosition() * V3f::MASK_Y_OUT;
+    auto camDir = -rsg.DC()->getDirection() * 0.7f;
+    auto sm = DShaderMatrix{ DShaderMatrixValue2dColor };
+    rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocatorIM, camPos, V4f::DARK_RED, 0.4f,
+                                 RDSPreMult(asg.FloorplanNavigationMatrix()),
+                                 sm, std::string{ "CameraOminoKey" });
+    rsg.RR().draw<DArrow>(CommandBufferLimits::CameraLocatorIM, V3fVector{ camPos, camPos + camDir },
+                          RDSArrowAngle(0.45f),
+                          RDSArrowLength(0.6f), V4f::DARK_RED, 0.004f, sm, RDSPreMult(asg.FloorplanNavigationMatrix()),
+                          std::string{ "CameraOminoKeyDirection1" });
+}
+
 struct PushTourPath {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         HouseService::pushTourPath(asg.H(), CameraSpatialsKeyFrame{ rsg.DC()->getSpatials(), 0.0f });
@@ -109,3 +123,46 @@ struct PopTourPath {
         HouseService::popTourPath(asg.H(), event.popIndex);
     }
 };
+
+struct Tick {
+    void operator()( const OnTickEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+        if ( asg.H() ) {
+            renderCameraLocator( asg, rsg );
+            auto dir = event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC());
+            asg.PositionalDot().tick( asg.H(), dir, event.aid.mods(), rsg );
+        }
+    }
+};
+
+struct FirstTimeTouchDown {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            asg.PositionalDot().firstTimeTouchDown();
+        }
+    }
+};
+
+struct TouchMoveWithModKeyCtrl {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            asg.PositionalDot().touchMoveWithModKeyCtrl( asg.H(), rsg );
+        }
+    }
+};
+
+struct TouchUp {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            asg.PositionalDot().touchUp();
+        }
+    }
+};
+
+struct SingleTap {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            asg.PositionalDot().singleTap( rsg );
+        }
+    }
+};
+

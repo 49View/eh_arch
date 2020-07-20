@@ -36,6 +36,12 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnMakeHouse3dEvent> / MakeHouse3d{}
             ,state<class ExploreState> + event<OnAddFurnitureSingleEvent> / AddFurnitureSingle{}
             ,state<class ExploreState> + event<OnTakeScreenShotEvent> / TakeScreenShot{}
+            // Mouse/Camera events
+            ,state<class ExploreState> + event<OnTickEvent> / Tick{}
+            ,state<class ExploreState> + event<OnFirstTimeTouchDownEvent> / FirstTimeTouchDown{}
+            ,state<class ExploreState> + event<OnTouchMoveWithModKeyCtrlEvent> / TouchMoveWithModKeyCtrl{}
+            ,state<class ExploreState> + event<OnTouchUpEvent> / TouchUp{}
+            ,state<class ExploreState> + event<OnSingleTapEvent> / SingleTap{}
         );
     }
 };

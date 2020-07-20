@@ -257,7 +257,7 @@ void ArchOrchestrator::setTourView() {
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
 
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
-    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
 
@@ -287,7 +287,7 @@ void ArchOrchestrator::setWalkView( float animationSpeed ) {
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart),
           AnimEndCallback{ [&]() {
-              fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
+              fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
               sg.setCollisionEnabled(true);
               fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
               arc.pm(RDSPreMult(calcFloorplanNavigationTransform(3.5f, 0.02f)));
@@ -319,7 +319,7 @@ void ArchOrchestrator::setFloorPlanView( FloorPlanRenderMode fprm ) {
 
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 1.0f });
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
-    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
 
@@ -343,7 +343,7 @@ void ArchOrchestrator::setTopDownView() {
     centerCameraMiddleOfHouse(H()->bbox3d.calcDepth() + 0.3f);
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
-    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 0.0f, rsg.RR().CLIIncludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
     fader(0.9f, 1.0f, rsg.RR().CLIExcludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
@@ -365,7 +365,7 @@ void ArchOrchestrator::setDollHouseView() {
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
-    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocator));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 0.0f, rsg.RR().CLIIncludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
     fader(0.9f, 1.0f, rsg.RR().CLIExcludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
@@ -373,32 +373,10 @@ void ArchOrchestrator::setDollHouseView() {
     sg.setCollisionEnabled(false);
 }
 
-void ArchOrchestrator::updateRenderCameraLocator() {
-    // Omino
-    auto camPos = rsg.DC()->getPosition() * V3f::MASK_Y_OUT;
-    auto camDir = -rsg.DC()->getDirection() * 0.7f;
-    auto sm = DShaderMatrix{ DShaderMatrixValue2dColor };
-    rsg.RR().clearBucket(CommandBufferLimits::CameraLocator);
-    rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, camPos, V4f::DARK_RED, 0.4f,
-                                 RDSPreMult(floorplanNavigationMatrix),
-                                 sm, std::string{ "CameraOminoKey" });
-    rsg.RR().draw<DArrow>(CommandBufferLimits::CameraLocator, V3fVector{ camPos, camPos + camDir },
-                          RDSArrowAngle(0.45f),
-                          RDSArrowLength(0.6f), V4f::RED, 0.004f, sm, RDSPreMult(floorplanNavigationMatrix),
-                          std::string{ "CameraOminoKeyDirection1" });
+const Matrix4f& ArchOrchestrator::FloorplanNavigationMatrix() const {
+    return floorplanNavigationMatrix;
 }
 
-void ArchOrchestrator::updateWalkView( const AggregatedInputData& _aid ) {
-    updateRenderCameraLocator();
-    positionalDot.update(H(), _aid, rsg);
-}
-
-void ArchOrchestrator::updateViewingModes( const AggregatedInputData& _aid ) {
-    switch ( arc.getViewingMode() ) {
-        case AVM_Walk:
-            updateWalkView(_aid);
-            break;
-        default:
-            break;
-    }
+ArchPositionalDot& ArchOrchestrator::PositionalDot() {
+    return positionalDot;
 }
