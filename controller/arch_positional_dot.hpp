@@ -5,13 +5,16 @@
 #pragma once
 
 #include <string>
+#include <core/math/vector3f.h>
 #include <core/math/anim_type.hpp>
+#include <eh_arch/models/htypes.hpp>
 #include <eh_arch/models/arch_structural_service.hpp>
 
 class RenderOrchestrator;
 struct HouseBSData;
 struct AggregatedInputData;
 struct InputMods;
+struct FittedFurniture;
 
 class ArchPositionalDot {
 public:
@@ -29,19 +32,14 @@ private:
     floata positionalDotAlphaAnim;
     std::string positionalDotAlphaFadeInAnimKey;
     std::string positionalDotAlphaFadeOutAnimKey;
-    bool positionChangedIn = false;
-    bool positionChangedOut = false;
-    bool currentHit = false;
     bool isFlying = false;
     bool antiWallRotation = false;
-    bool bHitFurniture = false;
+    FittedFurniture* furnitureSelected = nullptr;
     bool bRoomBboxCheck = false;
-    FeatureIntersectionFlagsT featureIntersectionFlags = 0;
     V3f  prevFurnitureMovePosition{};
     V3f dir{V3f::ZERO};
     V3f hitPosition{V3f::ZERO};
-    FeatureIntersection fd{};
-    FeatureIntersection fdFurniture{};
+    FeatureIntersection fd;
 };
 
 
