@@ -27,9 +27,13 @@ struct OnActivateEvent {
     FloorPlanRenderMode floorPlanRenderMode = FloorPlanRenderMode::Normal3d;
 };
 
+struct OnTickControlKeyEvent {
+    const AggregatedInputData& aid;
+};
 struct OnTickEvent {
     const AggregatedInputData& aid;
 };
+
 struct OnAltPressedEvent {
 };
 struct OnClearEvent {

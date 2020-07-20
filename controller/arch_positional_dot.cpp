@@ -27,7 +27,7 @@ ArchPositionalDot::ArchPositionalDot() {
     positionalDotAlphaAnim = std::make_shared<AnimType<float >>(fullDotOpacityValue, "positionalDotAlphaAnim");
 }
 
-void ArchPositionalDot::updateRender( RenderOrchestrator& rsg ) {
+void ArchPositionalDot::updateDot( RenderOrchestrator& rsg ) {
 
     if ( fd.hasHit() ) {
         float safeDist = fd.nearV > minSafeDistance ? fd.nearV - minSafeDistance : 0.0f;
@@ -35,13 +35,11 @@ void ArchPositionalDot::updateRender( RenderOrchestrator& rsg ) {
 
         float alphaDistanceAttenuation = min(distance(hitPosition, rsg.DC()->getPosition()), fadeOutNearDistance);
         float finalAlphaValue = positionalDotAlphaAnim->value * alphaDistanceAttenuation;
-        bool isBlueDot = !furnitureSelected;// (isNewPositionWalkingOnFloor || !antiWallRotation);
-        C4f outerDotColor = isBlueDot ? V4f::SKY_BLUE.A(finalAlphaValue) : V4f::SPRING_GREEN.A(
-                finalAlphaValue);
+        C4f outerDotColor = V4f::SKY_BLUE.A(finalAlphaValue);
         auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
         std::stringstream stream;
         stream << std::fixed << std::setprecision(2) << finalAlphaValue;
-        std::string nameTag = stream.str() + ( isBlueDot ? "1" : "0" );
+        std::string nameTag = stream.str();
         rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, hitPosition,
                                      V4f::WHITE.A(finalAlphaValue),
                                      outerDotSize + outerDotBorderSize, sm3, RDSRotationNormalAxis{ fd.normal },
@@ -55,6 +53,17 @@ void ArchPositionalDot::updateRender( RenderOrchestrator& rsg ) {
                                      RDSArchSegments{ 36 }, "d3" + nameTag);
 
         hitPosition.setY(rsg.DC()->getPosition().y());
+    }
+}
+
+void ArchPositionalDot::updateFurnitureSelection( RenderOrchestrator& rsg ) {
+
+    if ( fd.hasHit() ) {
+        if ( furnitureSelected ) {
+            rsg.RR().draw<DLine>(CommandBufferLimits::CameraMousePointers, furnitureSelected->bbox.points3d_xzy(),
+                                 V4f::ORANGE_SCHEME1_1, "furnbbox", true, 0.03f);
+
+        }
     }
 }
 
@@ -85,7 +94,7 @@ void ArchPositionalDot::touchMoveWithModKeyCtrl( const HouseBSData *_house, Rend
 /// to that single point so I think it will look horrible, needs to provide a better solution.
 /// \param _aid
 void
-ArchPositionalDot::tick( const HouseBSData *_house, const V3f& _dir, const InputMods& _mods, RenderOrchestrator& rsg ) {
+ArchPositionalDot::tick( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg ) {
 
     dir = _dir;
 
@@ -94,26 +103,43 @@ ArchPositionalDot::tick( const HouseBSData *_house, const V3f& _dir, const Input
 //        asg.pushHouseChange();
 //    }
 
-    if ( !_mods.isControlKeyDown ) furnitureSelected = nullptr;
+    furnitureSelected = nullptr;
+    if ( !isFlying ) {
+        fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
+                                               FeatureIntersectionFlags::FIF_Walls |
+                                               FeatureIntersectionFlags::FIF_Floors);
+    }
+
+    updateDot(rsg);
+}
+
+void ArchPositionalDot::tickControlKey( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg ) {
+    dir = _dir;
 
     if ( !isFlying ) {
-        FeatureIntersectionFlagsT featureIntersectionFlags = furnitureSelected ? FeatureIntersectionFlags::FIF_Floors :
-                                                             FeatureIntersectionFlags::FIF_Walls |
-                                                             FeatureIntersectionFlags::FIF_Floors;
+        FeatureIntersectionFlagsT fff = FeatureIntersectionFlags::FIF_Walls |
+                                        FeatureIntersectionFlags::FIF_Floors;
+        if ( furnitureSelected ) {
+            fff = furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ? FeatureIntersectionFlags::FIF_Walls : FeatureIntersectionFlags::FIF_Floors;
+        }
+
+        FeatureIntersectionFlagsT featureIntersectionFlags = fff;
 
         fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
                                                featureIntersectionFlags);
-        if ( _mods.isControlKeyDown && !furnitureSelected ) {
-            auto fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
-                                                                 FeatureIntersectionFlags::FIF_Furnitures);
-            if ( fdFurniture.hasHit() ) {
-                furnitureSelected = dynamic_cast<FittedFurniture *>(fdFurniture.arch);
+
+        auto fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
+                                                             FeatureIntersectionFlags::FIF_Furnitures);
+        if ( fdFurniture.hasHit() ) {
+            auto ffs = dynamic_cast<FittedFurniture *>(fdFurniture.arch);
+            if ( ffs != furnitureSelected ) {
+                furnitureSelected = ffs;
                 prevFurnitureMovePosition = V3f::HUGE_VALUE_NEG;
             }
         }
     }
 
-    updateRender(rsg);
+    updateFurnitureSelection(rsg);
 }
 
 void ArchPositionalDot::singleTap( RenderOrchestrator& rsg ) {

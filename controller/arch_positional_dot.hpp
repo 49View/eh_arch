@@ -19,14 +19,18 @@ struct FittedFurniture;
 class ArchPositionalDot {
 public:
     ArchPositionalDot();
-    void tick( const HouseBSData* _house, const V3f& _dir, const InputMods& _mods, RenderOrchestrator& rsg );
+    void tick( const HouseBSData* _house, const V3f& _dir, RenderOrchestrator& rsg );
+    void tickControlKey( const HouseBSData* _house, const V3f& _dir, RenderOrchestrator& rsg );
 
     // Events
-    void updateRender( RenderOrchestrator& rsg );
     void touchMoveWithModKeyCtrl(const HouseBSData *_house, RenderOrchestrator& rsg);
     void firstTimeTouchDown();
     void touchUp();
     void singleTap(RenderOrchestrator& rsg);
+
+private:
+    void updateDot( RenderOrchestrator& rsg );
+    void updateFurnitureSelection( RenderOrchestrator& rsg );
 
 private:
     floata positionalDotAlphaAnim;

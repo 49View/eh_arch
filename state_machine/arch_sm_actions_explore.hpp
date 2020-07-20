@@ -124,12 +124,21 @@ struct PopTourPath {
     }
 };
 
+
+struct TickControlKey {
+    void operator()( const OnTickControlKeyEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+        if ( asg.H() ) {
+            renderCameraLocator( asg, rsg );
+            asg.PositionalDot().tickControlKey( asg.H(), event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC()), rsg );
+        }
+    }
+};
+
 struct Tick {
     void operator()( const OnTickEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
             renderCameraLocator( asg, rsg );
-            auto dir = event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC());
-            asg.PositionalDot().tick( asg.H(), dir, event.aid.mods(), rsg );
+            asg.PositionalDot().tick( asg.H(), event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC()), rsg );
         }
     }
 };
