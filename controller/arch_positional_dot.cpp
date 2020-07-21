@@ -242,7 +242,7 @@ void ArchPositionalDot::tickControlKey( const HouseBSData *_house, const V3f& _d
 //    }
 
     if ( !isFlying ) {
-        rsg.setMICursorCapture(false);
+        rsg.setMICursorCapture(false, bFurnitureTargetLocked ? MouseCursorType::HAND : MouseCursorType::ARROW );
         if ( !bFurnitureTargetLocked ) {
             fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), _dir },
                                                             FeatureIntersectionFlags::FIF_Furnitures);
@@ -283,6 +283,7 @@ void ArchPositionalDot::tickControlKey( const HouseBSData *_house, const V3f& _d
                 bFillFullFurnitureOutline = false;
             }
             bool isMouseOverSelection = isMouseOverFurnitureInnerSelector(rsg.DC()->getPosition(), _dir);
+            rsg.setMICursorCapture(false, isMouseOverSelection ? MouseCursorType::HAND : MouseCursorType::ARROW );
             if ( fd.hasHit() ) {
                 float safeDist = fd.nearV > minSafeDistance ? fd.nearV - minSafeDistance : 0.0f;
                 hitPosition = rsg.DC()->getPosition() + ( _dir * safeDist );
