@@ -27,6 +27,10 @@ inline V4f defaultDotColor() {
     return C4f::SKY_BLUE;
 }
 
+inline V4f furnitureMoveDotColor() {
+    return C4f::PASTEL_GREEN;
+}
+
 FadeInOutContainer::FadeInOutContainer() {
     floatAnim = std::make_shared<AnimType<float >>(fullDotOpacityValue, UUIDGen::make());
 }
@@ -165,10 +169,8 @@ void ArchPositionalDot::updateFurnitureSelection( RenderOrchestrator& rsg, const
     stream << std::fixed << std::setprecision(2) << furnitureSelectionAlphaAnim.value();
     std::string nameTag = _dotColor.toString() + "furnitureBBox" + stream.str();
 
-    rsg.RR().drawTriangleStrip(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
-                            _dotColor.A(0.3f), nameTag+"a" );
-//    rsg.RR().draw<DPoly>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
-//                         _dotColor.A(0.3f), sm3, nameTag+"a");
+    rsg.RR().drawTriangleQuad(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
+                            _dotColor.A(furnitureSelectionAlphaAnim.value()*0.5f), nameTag+"a" );
 
     rsg.RR().draw<DLine>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
                          _dotColor.A(furnitureSelectionAlphaAnim.value()), sm3, nameTag, true, 0.015f);
@@ -244,13 +246,14 @@ void ArchPositionalDot::tickControlKey( const HouseBSData *_house, const V3f& _d
         if ( !bFurnitureTargetLocked ) {
             fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), _dir },
                                                             FeatureIntersectionFlags::FIF_Furnitures);
+            fd = HouseService::rayFeatureIntersect( _house, RayPair3{ rsg.DC()->getPosition(), _dir },
+                                                    FeatureIntersectionFlags::FIF_Walls |
+                                                    FeatureIntersectionFlags::FIF_Floors);
+
             if ( fdFurniture.hasHit() ) {
                 V3f refNormal = V3f::UP_AXIS;
                 furnitureSelectionAlphaAnim.fadeIn();
                 furnitureSelected = dynamic_cast<FittedFurniture *>(fdFurniture.arch);
-                fd = HouseService::rayFeatureIntersect( _house, RayPair3{ rsg.DC()->getPosition(), _dir },
-                                                       FeatureIntersectionFlags::FIF_Walls |
-                                                       FeatureIntersectionFlags::FIF_Floors);
 
                 if ( furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ) {
                     float closestDist = dot(fd.normal, V3f::X_AXIS);
@@ -280,11 +283,15 @@ void ArchPositionalDot::tickControlKey( const HouseBSData *_house, const V3f& _d
                 bFillFullFurnitureOutline = false;
             }
             bool isMouseOverSelection = isMouseOverFurnitureInnerSelector(rsg.DC()->getPosition(), _dir);
-            auto lDotColor = furnitureSelected && isMouseOverSelection ? defaultDotColor() : C4f::PASTEL_GREEN;
-            tick(_house, _dir, rsg, true, lDotColor );
+            if ( fd.hasHit() ) {
+                float safeDist = fd.nearV > minSafeDistance ? fd.nearV - minSafeDistance : 0.0f;
+                hitPosition = rsg.DC()->getPosition() + ( _dir * safeDist );
+                positionalDotAlphaAnim.fade(isMouseOverSelection ? FadeInternalPhase::Out : FadeInternalPhase::In);
+                updateDot(rsg, furnitureMoveDotColor());
+            }
         }
         if ( furnitureSelected ) {
-            updateFurnitureSelection(rsg, centerBottomFurnitureSelected, defaultDotColor() );
+            updateFurnitureSelection(rsg, centerBottomFurnitureSelected, furnitureMoveDotColor() );
         }
     }
 }
