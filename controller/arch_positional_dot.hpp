@@ -78,6 +78,7 @@ private:
     Plane3f furniturePlane;
     FittedFurniture *furnitureSelected = nullptr;
     V3f centerBottomFurnitureSelected{ V3f::ZERO };
+    std::vector<V3f> furnitureSelectionOutline;
     JMATH::AABB centerBottomBBox;
     V3f prevFurnitureMovePosition{};
     FeatureIntersection fdFurniture;
