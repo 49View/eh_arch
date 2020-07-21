@@ -138,7 +138,6 @@ ArchPositionalDot::tick( const HouseBSData *_house, const V3f& _dir, RenderOrche
     if ( !isFlying ) {
         if ( !isComingFromInternal ) {
             rsg.setMICursorCapture(true);
-            furniturePositionalDotAlphaAnim.setValue(0.0f);
             furnitureSelectionAlphaAnim.setValue( 0.0f );
         }
         fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), _dir },
@@ -160,14 +159,19 @@ ArchPositionalDot::tick( const HouseBSData *_house, const V3f& _dir, RenderOrche
 
 void ArchPositionalDot::updateFurnitureSelection( RenderOrchestrator& rsg, const V3f& centerBottomPos, const C4f& _dotColor ) {
 
-    drawDotCircled(rsg, 0.15f, centerBottomPos, fd.normal, _dotColor, furniturePositionalDotAlphaAnim.value());
+    auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
 
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2) << furnitureSelectionAlphaAnim.value();
     std::string nameTag = _dotColor.toString() + "furnitureBBox" + stream.str();
 
+    rsg.RR().drawTriangleStrip(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
+                            _dotColor.A(0.3f), nameTag+"a" );
+//    rsg.RR().draw<DPoly>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
+//                         _dotColor.A(0.3f), sm3, nameTag+"a");
+
     rsg.RR().draw<DLine>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
-                         _dotColor.A(furnitureSelectionAlphaAnim.value()), nameTag, true, 0.015f);
+                         _dotColor.A(furnitureSelectionAlphaAnim.value()), sm3, nameTag, true, 0.015f);
 }
 
 bool ArchPositionalDot::isMouseOverFurnitureInnerSelector(const V3f& _origin, const V3f& _dir) const {
@@ -205,7 +209,6 @@ void ArchPositionalDot::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrches
             if ( furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ) {
                 furniturePlane = Plane3f{ fd.normal, centerBottomFurnitureSelected };
             } else {
-                auto topDownOutline = centerBottomBBox.topDownOutline();
                 furniturePlane = Plane3f{ centerBottomFurnitureSelected, centerBottomFurnitureSelected + V3f::X_AXIS,
                                           centerBottomFurnitureSelected + V3f::Z_AXIS };
             }
@@ -242,45 +245,44 @@ void ArchPositionalDot::tickControlKey( const HouseBSData *_house, const V3f& _d
             fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), _dir },
                                                             FeatureIntersectionFlags::FIF_Furnitures);
             if ( fdFurniture.hasHit() ) {
+                V3f refNormal = V3f::UP_AXIS;
                 furnitureSelectionAlphaAnim.fadeIn();
                 furnitureSelected = dynamic_cast<FittedFurniture *>(fdFurniture.arch);
+                fd = HouseService::rayFeatureIntersect( _house, RayPair3{ rsg.DC()->getPosition(), _dir },
+                                                       FeatureIntersectionFlags::FIF_Walls |
+                                                       FeatureIntersectionFlags::FIF_Floors);
+
                 if ( furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ) {
-                    auto lHitPoint = rsg.DC()->getPosition() + (_dir*fdFurniture.nearV);
-
-                    auto minDist = distance(lHitPoint, furnitureSelected->bbox3d.centreFront());
+                    float closestDist = dot(fd.normal, V3f::X_AXIS);
                     centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreFront();
-
-                    auto lDist = distance(lHitPoint, furnitureSelected->bbox3d.centreBack());
-                    if ( lDist < minDist ) {
+                    if ( auto d = dot(fd.normal, V3f::X_AXIS_NEG); d > closestDist ) {
                         centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreBack();
-                        minDist = lDist;
+                        closestDist = d;
                     }
-
-                    lDist = distance(lHitPoint, furnitureSelected->bbox3d.centreLeft());
-                    if ( lDist < minDist ) {
+                    if ( auto d = dot(fd.normal, V3f::Z_AXIS); d > closestDist ) {
                         centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreLeft();
-                        minDist = lDist;
+                        closestDist = d;
                     }
-
-                    lDist = distance(lHitPoint, furnitureSelected->bbox3d.centreRight());
-                    if ( lDist < minDist ) {
+                    if ( auto d = dot(fd.normal, V3f::Z_AXIS_NEG); d > closestDist ) {
                         centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreRight();
                     }
                     furnitureSelectionOutline = createBBoxOutline(centerBottomFurnitureSelected, V3f::UP_AXIS*furnitureSelected->bbox3d.calcHeight(), V3f::Z_AXIS*furnitureSelected->bbox3d.calcDepth());
+                    refNormal = fd.normal;
                 } else {
                     centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreBottom();
                     furnitureSelectionOutline = furnitureSelected->bbox.points3d_xzy();
                 }
-                V3f ext = V3f{ 0.15f, 0.01f, 0.15f };
-                centerBottomBBox = JMATH::AABB{ centerBottomFurnitureSelected - ext, centerBottomFurnitureSelected + ext };
+
+                centerBottomBBox = AABB{furnitureSelectionOutline};
+                bFillFullFurnitureOutline = isMouseOverFurnitureInnerSelector(rsg.DC()->getPosition(), _dir);
             } else {
                 furnitureSelectionAlphaAnim.fadeOut();
+                bFillFullFurnitureOutline = false;
             }
+            bool isMouseOverSelection = isMouseOverFurnitureInnerSelector(rsg.DC()->getPosition(), _dir);
+            auto lDotColor = furnitureSelected && isMouseOverSelection ? defaultDotColor() : C4f::PASTEL_GREEN;
+            tick(_house, _dir, rsg, true, lDotColor );
         }
-        bool isMouseOverSelection = isMouseOverFurnitureInnerSelector(rsg.DC()->getPosition(), _dir);
-        auto lDotColor = furnitureSelected && isMouseOverSelection ? defaultDotColor() : C4f::PASTEL_GREEN;
-        furniturePositionalDotAlphaAnim.fade(isMouseOverSelection || !fdFurniture.hasHit() || bFurnitureTargetLocked ? FadeInternalPhase::Out : FadeInternalPhase::In);
-        tick(_house, _dir, rsg, true, lDotColor );
         if ( furnitureSelected ) {
             updateFurnitureSelection(rsg, centerBottomFurnitureSelected, defaultDotColor() );
         }

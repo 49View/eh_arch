@@ -71,10 +71,10 @@ private:
     V3f hitPosition{ V3f::ZERO };
     FeatureIntersection fd;
 
-    FadeInOutContainer furniturePositionalDotAlphaAnim;
     FadeInOutContainer furnitureSelectionAlphaAnim;
     bool bBullsEye = false;
     bool bFurnitureTargetLocked = false;
+    bool bFillFullFurnitureOutline = false;
     Plane3f furniturePlane;
     FittedFurniture *furnitureSelected = nullptr;
     V3f centerBottomFurnitureSelected{ V3f::ZERO };
