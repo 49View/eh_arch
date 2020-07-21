@@ -94,6 +94,7 @@ struct OnTouchUpWithModKeyCtrlEvent {
 
 struct OnFirstTimeTouchDownWithModKeyCtrlEvent {
     V2f mousePos{ V2fc::HUGE_VALUE_NEG };
+    const AggregatedInputData& aid;
 };
 
 struct OnFirstTimeTouchDownEvent {
@@ -109,6 +110,7 @@ struct OnTouchMoveEvent {
 
 struct OnTouchMoveWithModKeyCtrlEvent {
     V2f mousePos{ V2fc::HUGE_VALUE_NEG };
+    const AggregatedInputData& aid;
 };
 struct OnTouchMoveViewportSpaceEvent {
     V2f viewportPos{ V2fc::HUGE_VALUE_NEG };

@@ -40,8 +40,10 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnTickEvent> / Tick{}
             ,state<class ExploreState> + event<OnTickControlKeyEvent> / TickControlKey{}
             ,state<class ExploreState> + event<OnFirstTimeTouchDownEvent> / FirstTimeTouchDown{}
+            ,state<class ExploreState> + event<OnFirstTimeTouchDownWithModKeyCtrlEvent> / FirstTimeTouchDownWithModKeyCtrl{}
             ,state<class ExploreState> + event<OnTouchMoveWithModKeyCtrlEvent> / TouchMoveWithModKeyCtrl{}
             ,state<class ExploreState> + event<OnTouchUpEvent> / TouchUp{}
+            ,state<class ExploreState> + event<OnTouchUpWithModKeyCtrlEvent> / TouchUpWithModKeyCtrl{}
             ,state<class ExploreState> + event<OnSingleTapEvent> / SingleTap{}
         );
     }

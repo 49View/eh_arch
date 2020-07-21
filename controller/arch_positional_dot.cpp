@@ -15,7 +15,7 @@
 
 static constexpr float fullDotOpacityValue = 0.85f;
 static constexpr float outerDotSize = 0.2f;
-static constexpr float outerDotBorderSize = 0.015f;
+static constexpr float outerDotBorderRatio = 1.0f/13.333333333333333333333333f;
 static constexpr float smallDotRatio = 0.8f;
 static constexpr float fadeOutNearDistance = 1.0f; // If dot is closer than this from the camera, linearly fade it out.
 static constexpr float minSafeDistance = 0.75f; // Deduct this distance from clicked dot position to avoid being to close to walls/objects
@@ -27,64 +27,61 @@ ArchPositionalDot::ArchPositionalDot() {
     positionalDotAlphaAnim = std::make_shared<AnimType<float >>(fullDotOpacityValue, "positionalDotAlphaAnim");
 }
 
+void drawDotCircled( RenderOrchestrator& rsg, float dotSize, const V3f& hitPosition, const V3f& normal, float finalAlphaValue ) {
+    C4f outerDotColor = V4f::SKY_BLUE.A(finalAlphaValue);
+    auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(2) << finalAlphaValue;
+    std::string nameTag = stream.str();
+    rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, hitPosition,
+                                 V4f::WHITE.A(finalAlphaValue),
+                                 dotSize + outerDotSize*outerDotBorderRatio, sm3, RDSRotationNormalAxis{ normal },
+                                 RDSArchSegments{ 36 }, "d1" + nameTag);
+    rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, hitPosition, outerDotColor,
+                                 dotSize, sm3, RDSRotationNormalAxis{ normal }, RDSArchSegments{ 36 },
+                                 "d2" + nameTag);
+    rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, hitPosition,
+                                 V4f::WHITE.A(finalAlphaValue),
+                                 dotSize * smallDotRatio, sm3, RDSRotationNormalAxis{ normal },
+                                 RDSArchSegments{ 36 }, "d3" + nameTag);
+}
+
 void ArchPositionalDot::updateDot( RenderOrchestrator& rsg ) {
+    float alphaDistanceAttenuation = min(distance(hitPosition, rsg.DC()->getPosition()), fadeOutNearDistance);
+    float finalAlphaValue = positionalDotAlphaAnim->value * alphaDistanceAttenuation;
+    
+    drawDotCircled( rsg, outerDotSize,  hitPosition, fd.normal, finalAlphaValue );
 
-    if ( fd.hasHit() ) {
-        float safeDist = fd.nearV > minSafeDistance ? fd.nearV - minSafeDistance : 0.0f;
-        hitPosition = rsg.DC()->getPosition() + ( dir * safeDist );
-
-        float alphaDistanceAttenuation = min(distance(hitPosition, rsg.DC()->getPosition()), fadeOutNearDistance);
-        float finalAlphaValue = positionalDotAlphaAnim->value * alphaDistanceAttenuation;
-        C4f outerDotColor = V4f::SKY_BLUE.A(finalAlphaValue);
-        auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
-        std::stringstream stream;
-        stream << std::fixed << std::setprecision(2) << finalAlphaValue;
-        std::string nameTag = stream.str();
-        rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, hitPosition,
-                                     V4f::WHITE.A(finalAlphaValue),
-                                     outerDotSize + outerDotBorderSize, sm3, RDSRotationNormalAxis{ fd.normal },
-                                     RDSArchSegments{ 36 }, "d1" + nameTag);
-        rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, hitPosition, outerDotColor,
-                                     outerDotSize, sm3, RDSRotationNormalAxis{ fd.normal }, RDSArchSegments{ 36 },
-                                     "d2" + nameTag);
-        rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, hitPosition,
-                                     V4f::WHITE.A(finalAlphaValue),
-                                     outerDotSize * smallDotRatio, sm3, RDSRotationNormalAxis{ fd.normal },
-                                     RDSArchSegments{ 36 }, "d3" + nameTag);
-
-        hitPosition.setY(rsg.DC()->getPosition().y());
-    }
+    hitPosition.setY(rsg.DC()->getPosition().y());
 }
 
-void ArchPositionalDot::updateFurnitureSelection( RenderOrchestrator& rsg ) {
+void ArchPositionalDot::updateFurnitureSelection( RenderOrchestrator& rsg, const V3f& centerBottomPos ) {
 
-    if ( fd.hasHit() ) {
-        if ( furnitureSelected ) {
-            rsg.RR().draw<DLine>(CommandBufferLimits::CameraMousePointers, furnitureSelected->bbox.points3d_xzy(),
-                                 V4f::ORANGE_SCHEME1_1, "furnbbox", true, 0.03f);
+    drawDotCircled( rsg, 0.15f, centerBottomPos, V3f::UP_AXIS, 1.0f );
 
-        }
-    }
+    rsg.RR().draw<DLine>(CommandBufferLimits::CameraMousePointers, furnitureSelected->bbox.points3d_xzy(),
+                         V4f::SKY_BLUE.A(0.33f), "furnbbox", true, 0.015f);
+
 }
 
-void ArchPositionalDot::touchMoveWithModKeyCtrl( const HouseBSData *_house, RenderOrchestrator& rsg ) {
-    if ( furnitureSelected && fd.hasHit() ) {
-        hitPosition = rsg.DC()->getPosition() + ( dir * fd.nearV );
-        if ( prevFurnitureMovePosition != V3f::HUGE_VALUE_NEG ) {
-            V3f off = hitPosition - prevFurnitureMovePosition;
-            auto potentialBBox = furnitureSelected->bbox;
-            potentialBBox.translate(XZY::C2(off));
-            if ( !bRoomBboxCheck || RS::checkBBoxInsideRoom(fd.room, potentialBBox) ) {
-                auto node = rsg.SG().Nodes().find(furnitureSelected->linkedUUID);
-                if ( node->second ) {
-                    node->second->move(off);
-                }
-                furnitureSelected->position3d += off;
-                furnitureSelected->bbox3d.translate(off);
-                furnitureSelected->bbox.translate(XZY::C2(off));
+void ArchPositionalDot::touchMoveWithModKeyCtrl( const HouseBSData *_house,  const V3f& _dir, RenderOrchestrator& rsg ) {
+    if ( bFurnitureTargetLocked ) {
+        bool inters = false;
+        auto planeHit = furniturePlane.intersectRay( rsg.DC()->getPosition(), _dir, inters );
+        V3f off = planeHit - prevFurnitureMovePosition;
+        auto potentialBBox = furnitureSelected->bbox;
+        potentialBBox.translate(XZY::C2(off));
+        if ( !bRoomBboxCheck || RS::checkBBoxInsideRoom(fd.room, potentialBBox) ) {
+            auto node = rsg.SG().Nodes().find(furnitureSelected->linkedUUID);
+            if ( node->second ) {
+                node->second->move(off);
             }
+            centerBottomFurnitureSelected += off;
+            furnitureSelected->position3d += off;
+            furnitureSelected->bbox3d.translate(off);
+            furnitureSelected->bbox = potentialBBox;
         }
-        prevFurnitureMovePosition = hitPosition;
+        prevFurnitureMovePosition = planeHit;
     }
 }
 
@@ -93,53 +90,39 @@ void ArchPositionalDot::touchMoveWithModKeyCtrl( const HouseBSData *_house, Rend
 /// the way we do intersections every frame, we would need to store a last known good intersection but it will be stuck
 /// to that single point so I think it will look horrible, needs to provide a better solution.
 /// \param _aid
-void
-ArchPositionalDot::tick( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg ) {
+void ArchPositionalDot::tick( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg ) {
+    if ( !isFlying ) {
+        fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), _dir },
+                                               FeatureIntersectionFlags::FIF_Walls |
+                                               FeatureIntersectionFlags::FIF_Floors);
+        if ( fd.hasHit() ) {
+            float safeDist = fd.nearV > minSafeDistance ? fd.nearV - minSafeDistance : 0.0f;
+            hitPosition = rsg.DC()->getPosition() + ( _dir * safeDist );
+            updateDot(rsg);
+        }
+    }
+}
 
-    dir = _dir;
+void ArchPositionalDot::tickControlKey( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg ) {
 
 //    if ( _aid.isMouseTouchedUp(TOUCH_ZERO) && bHitFurniture && isControlKeyDown ) {
 //        asg.MakeHouse3d{}(asg, rsg, arc);
 //        asg.pushHouseChange();
 //    }
 
-    furnitureSelected = nullptr;
     if ( !isFlying ) {
-        fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
-                                               FeatureIntersectionFlags::FIF_Walls |
-                                               FeatureIntersectionFlags::FIF_Floors);
-    }
-
-    updateDot(rsg);
-}
-
-void ArchPositionalDot::tickControlKey( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg ) {
-    dir = _dir;
-
-    if ( !isFlying ) {
-        FeatureIntersectionFlagsT fff = FeatureIntersectionFlags::FIF_Walls |
-                                        FeatureIntersectionFlags::FIF_Floors;
-        if ( furnitureSelected ) {
-            fff = furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ? FeatureIntersectionFlags::FIF_Walls : FeatureIntersectionFlags::FIF_Floors;
-        }
-
-        FeatureIntersectionFlagsT featureIntersectionFlags = fff;
-
-        fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
-                                               featureIntersectionFlags);
-
-        auto fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), dir },
-                                                             FeatureIntersectionFlags::FIF_Furnitures);
-        if ( fdFurniture.hasHit() ) {
-            auto ffs = dynamic_cast<FittedFurniture *>(fdFurniture.arch);
-            if ( ffs != furnitureSelected ) {
-                furnitureSelected = ffs;
-                prevFurnitureMovePosition = V3f::HUGE_VALUE_NEG;
+        if ( !bFurnitureTargetLocked) {
+            fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), _dir },
+                                                            FeatureIntersectionFlags::FIF_Furnitures);
+            if ( fdFurniture.hasHit() ) {
+                furnitureSelected = dynamic_cast<FittedFurniture *>(fdFurniture.arch);
+                centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreBottom();
             }
         }
+        if ( furnitureSelected ) {
+            updateFurnitureSelection(rsg, centerBottomFurnitureSelected);
+        }
     }
-
-    updateFurnitureSelection(rsg);
 }
 
 void ArchPositionalDot::singleTap( RenderOrchestrator& rsg ) {
@@ -169,6 +152,27 @@ void ArchPositionalDot::singleTap( RenderOrchestrator& rsg ) {
     }
 }
 
+void ArchPositionalDot::firstTimeTouchDownCtrlKey(const V3f& _dir, RenderOrchestrator& rsg) {
+    if ( furnitureSelected && !isFlying ) {
+        V3f ext = V3f{0.15f, 0.01f, 0.15f};
+        JMATH::AABB centerBottomBBox{ centerBottomFurnitureSelected - ext, centerBottomFurnitureSelected + ext };
+
+        float farV = std::numeric_limits<float>::max();
+        float vNear = 0.0f;
+        bFurnitureTargetLocked = centerBottomBBox.intersectLine( rsg.DC()->getPosition(), _dir, vNear, farV);
+        if ( bFurnitureTargetLocked ) {
+            auto topDownOutline = centerBottomBBox.topDownOutline();
+            furniturePlane = Plane3f{centerBottomFurnitureSelected, centerBottomFurnitureSelected+V3f::X_AXIS, centerBottomFurnitureSelected+V3f::Z_AXIS};
+            bool inters = false;
+            prevFurnitureMovePosition = furniturePlane.intersectRay( rsg.DC()->getPosition(), _dir, inters );
+        }
+
+//        Timeline::stop(positionalDotAlphaAnim, positionalDotAlphaFadeInAnimKey, positionalDotAlphaAnim->value);
+//        positionalDotAlphaFadeOutAnimKey = Timeline::play(positionalDotAlphaAnim, 0,
+//                                                          KeyFramePair{ dotFadeTime, 0.0f, AnimVelocityType::Cosine });
+    }
+}
+
 void ArchPositionalDot::firstTimeTouchDown() {
     if ( fd.hasHit() && !isFlying ) {
         Timeline::stop(positionalDotAlphaAnim, positionalDotAlphaFadeInAnimKey, positionalDotAlphaAnim->value);
@@ -184,4 +188,9 @@ void ArchPositionalDot::touchUp() {
                                                          KeyFramePair{ dotFadeTime, fullDotOpacityValue,
                                                                        AnimVelocityType::Cosine });
     }
+}
+
+void ArchPositionalDot::touchUpWithModKeyCtrl() {
+    furnitureSelected = nullptr;
+    bFurnitureTargetLocked = false;
 }

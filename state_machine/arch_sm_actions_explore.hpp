@@ -151,10 +151,29 @@ struct FirstTimeTouchDown {
     }
 };
 
+struct FirstTimeTouchDownWithModKeyCtrl {
+    void operator()( const OnFirstTimeTouchDownWithModKeyCtrlEvent& event,  ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+        if ( asg.H() ) {
+            asg.PositionalDot().firstTimeTouchDownCtrlKey(event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC()), rsg);
+        }
+    }
+};
+
+
+
 struct TouchMoveWithModKeyCtrl {
+    void operator()( const OnTouchMoveWithModKeyCtrlEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            asg.PositionalDot().touchMoveWithModKeyCtrl( asg.H(), event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC()), rsg );
+        }
+    }
+};
+
+
+struct TouchUpWithModKeyCtrl {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
-            asg.PositionalDot().touchMoveWithModKeyCtrl( asg.H(), rsg );
+            asg.PositionalDot().touchUpWithModKeyCtrl();
         }
     }
 };
