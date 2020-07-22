@@ -836,4 +836,13 @@ namespace RoomService {
         return sizeToStringMeters(r->bbox.height(), r->bbox.width());
     }
 
+    FittedFurniture *findFurniture( RoomBSData *r, HashEH furnitureHash ) {
+        for ( auto& ff : r->mFittedFurniture ) {
+            if ( ff->hash == furnitureHash ) {
+                return ff.get();
+            }
+        }
+        return nullptr;
+    }
+
 }

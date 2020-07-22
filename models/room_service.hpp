@@ -585,6 +585,7 @@ namespace RoomService {
 
     void calculateFurnitureBBox( FittedFurniture* _ff );
     void clearFurniture( RoomBSData *r );
+    void addFurniture( RoomBSData *r, std::shared_ptr<FittedFurniture> ff );
     [[nodiscard]] bool addFurniture( FurnitureRuleParams& params );
 
     // ********************
@@ -640,6 +641,7 @@ namespace RoomService {
         MiddleOfRoom,
     };
     bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurnitureRuleScript& fs );
+    FittedFurniture* findFurniture( RoomBSData *r, HashEH furnitureHash );
 
     void setRoomType( RoomBSData *r, ASTypeT rt, const HouseBSData* house );
     void addRoomType( RoomBSData *r, ASTypeT rt, const HouseBSData* house );

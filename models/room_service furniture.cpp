@@ -323,11 +323,7 @@ namespace RoomService {
 //        dest->widthNormal = source->widthNormal;
 //    }
 
-    bool placeAround( FurnitureRuleParams params
-//                       FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source,
-//                      PivotPointPosition where,
-//                      const V2f& slack, const float params.heightOffset
-                      ) {
+    bool placeAround( FurnitureRuleParams params ) {
         placeAroundInternal(params.ff, params.source, params.where, params.slack, params.heightOffset);
         bool completed = RS::addFurniture(params);
 
@@ -341,19 +337,12 @@ namespace RoomService {
         return completed;
     }
 
-    bool placeWallAlong( FurnitureRuleParams params
-//            FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> params.source,
-//                         const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f& params.slack,
-//                         const float params.heightOffset
-                         ) {
+    bool placeWallAlong( FurnitureRuleParams params ) {
         placeAlongWallInternal(params.ff, params.source, params.ls, params.preferredCorner, params.slack, params.heightOffset);
         return RS::addFurniture(params);
     }
 
-    bool placeInBetween( FurnitureRuleParams params
-//            RoomBSData* r, const std::vector<FittedFurniture>& fset, PivotPointPosition params.where,
-//                      const V2f& params.slack, const float params.heightOffset
-                      ) {
+    bool placeInBetween( FurnitureRuleParams params ) {
         placeAroundInternal( params.ff, params.source, params.where, params.slack, params.heightOffset );
         bool completed = RS::addFurniture( params );
 
@@ -367,10 +356,7 @@ namespace RoomService {
         return completed;
     }
 
-    bool placeWallCorner( FurnitureRuleParams params
-//            FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> _ff, const ArchSegment *ls,
-//                          const V2f& params.slack, WallSegmentCorner wsc, float params.heightOffset
-                          ) {
+    bool placeWallCorner( FurnitureRuleParams params ) {
         if ( !params.ls ) return false;
         if ( checkBitWiseFlag(params.ls->tag, WF_IsDoorPart) || checkBitWiseFlag(params.ls->tag, WF_IsWindowPart) ) return false;
 
@@ -387,11 +373,7 @@ namespace RoomService {
         return RS::addFurniture(params);
     }
 
-    bool placeWallAligned( FurnitureRuleParams params
-//            FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> params.ff,
-//                           const WSLO wslo, float extraSlack, uint32_t _exactIndex, float _heightOffset
-                           ) {
-
+    bool placeWallAligned( FurnitureRuleParams params ) {
         auto ls = getWallSegmentFor(params.r, params.wslo, params.exactIndex);
         if ( !ls ) return false;
         if ( checkBitWiseFlag(ls->tag, WF_IsDoorPart) || checkBitWiseFlag(ls->tag, WF_IsWindowPart) ) return false;
@@ -406,10 +388,7 @@ namespace RoomService {
         return addFurniture(params);
     }
 
-    bool placeMiddle( FurnitureRuleParams params
-//            FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> params.ff, const V2f& _pos
-            ) {
-
+    bool placeMiddle( FurnitureRuleParams params ) {
         params.ff->xyLocation = params.pos;
         params.ff->rotation = Quaternion{ 0.0f, V3f::UP_AXIS };
         params.ff->widthNormal = V2fc::X_AXIS;
@@ -625,8 +604,16 @@ namespace RoomService {
         return false;
     }
 
+    void addFurniture( RoomBSData *r, std::shared_ptr<FittedFurniture> ff ) {
+        r->mFittedFurniture.push_back(ff);
+    }
+
     bool addFurniture( FurnitureRuleParams& params ) {
         params.ff->position3d = XZY::C(params.ff->xyLocation, params.ff->heightOffset);
+        // If it has a source furniture add it to the dependant list, IE a table (params.source) and a glass (params.ff)
+        if ( params.source ) {
+            params.source->dependantHashList.emplace_back(params.ff->hash);
+        }
         calculateFurnitureBBox( params.ff.get() );
 
         Rect2f subjectBBox = params.ff->bbox;
@@ -640,7 +627,7 @@ namespace RoomService {
         }
 
         if ( checkBitWiseFlag(params.flags, FurnitureRuleFlags::DoNotClipAgainstRoom) ) {
-            params.r->mFittedFurniture.push_back(params.ff);
+            addFurniture( params.r, params.ff );
             return true;
         }
 
@@ -658,9 +645,10 @@ namespace RoomService {
                     }
                 }
             }
-            params.r->mFittedFurniture.push_back(params.ff);
+            addFurniture( params.r, params.ff );
             return true;
         }
+
         return false;
     }
 
@@ -721,8 +709,7 @@ namespace RoomService {
                                                    FurnitureSlacks{ inFrontOfSlack }
         });
         ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedMiddle),
-                                                   FurnitureRefs{ { FTH::FT_SideBoard },
-                                                                  { FTH::FT_TVWithStand } },
+                                                   FurnitureRefs{ { FTH::FT_SideBoard }, { FTH::FT_TVWithStand } },
                                                    WallSegmentIdentifier{ WSLOH::LongestOpposite() }
         });
         ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::CornerWithDec),
@@ -941,7 +928,7 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     furnitureSet.set.emplace_back(FTH::FT_DrawersHandle, drawersHandleModel, V3f::ZERO, neutralSquareIcon);
 
     Http::post(Url{ "/furnitureset" }, furnitureSet.serialize(), []( HttpResponeParams& res ) {
-        LOGRS(res.BufferString());
+        LOGRS(res.BufferString())
     });
 }
 
@@ -968,11 +955,21 @@ void RoomServiceFurniture::moveFurniture( FittedFurniture *ff, const V3f& off ) 
     ff->center += off;
 }
 
-void RoomServiceFurniture::moveFurniture( FittedFurniture *ff, const V3f& off, SceneGraph& sg ) {
+void moveFurniture( FittedFurniture *ff, const V3f& off, SceneGraph& sg ) {
     RoomServiceFurniture::moveFurniture(ff, off);
     auto node = sg.Nodes().find(ff->linkedUUID);
     if ( node->second ) {
         node->second->move(off);
+    }
+}
+
+void RoomServiceFurniture::moveFurniture( RoomBSData* r, FittedFurniture *ff, const V3f& off, SceneGraph& sg ) {
+    moveFurniture( ff, off, sg );
+    for ( auto& hash : ff->dependantHashList ) {
+        auto dependantFurn = RoomService::findFurniture( r, hash );
+        if ( dependantFurn ) {
+            moveFurniture( dependantFurn, off, sg );
+        }
     }
 }
 

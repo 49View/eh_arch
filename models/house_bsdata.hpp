@@ -25,7 +25,12 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2132;
+static const uint64_t SHouseJSONVersion = 2133;
+
+// Version log
+//
+// 2020-07-22 -    #2133 - Added dependantHash to FittedFurniture
+
 static const float defaltToBeOverwritten = 7543859749023.0f;
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
@@ -77,7 +82,7 @@ struct ArchStructural : public ArchBase {
     float width = defaltToBeOverwritten;
     float depth = defaltToBeOverwritten;
     Vector2f center = V2fc::ZERO;
-    int64_t linkedHash = 0;
+    HashEH linkedHash = 0;
     SequencePart sequencePart = 0;
     std::vector<Triangle2d> mTriangles2d;
 
@@ -168,11 +173,12 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     }
 };
 
-JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center, linkedHash, sequencePart, mTriangles2d,
-        name, symbolRef, size, scale, position3d, xyLocation, heightOffset, rotation, widthNormal,
-         depthNormal, flags)
+JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center, linkedHash,
+           sequencePart, mTriangles2d, name, symbolRef, dependantHashList, size, scale, position3d, xyLocation,
+           heightOffset, rotation, widthNormal, depthNormal, flags)
     std::string name;
     std::string symbolRef = S::SQUARE;
+    std::vector<HashEH> dependantHashList; // This represents a link between IE a table and few glasses placed over it.
     Vector3f size = Vector3f::ONE;
     Vector3f scale = Vector3f::ONE;
     Vector3f position3d = V3f::ZERO;

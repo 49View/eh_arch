@@ -193,7 +193,7 @@ void ArchPositionalDot::touchMoveWithModKeyCtrl( [[maybe_unused]] const HouseBSD
         if ( !bRoomBboxCheck || RS::checkBBoxInsideRoom(fd.room, potentialBBox) ) {
             centerBottomFurnitureSelected += off;
             for ( auto& v : furnitureSelectionOutline ) v+=off;
-            RoomServiceFurniture::moveFurniture(furnitureSelected, off, rsg.SG());
+            RoomServiceFurniture::moveFurniture(fd.room, furnitureSelected, off, rsg.SG());
         }
         prevFurnitureMovePosition = planeHit;
     }
