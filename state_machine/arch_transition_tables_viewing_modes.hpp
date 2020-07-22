@@ -37,6 +37,9 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnAddFurnitureSingleEvent> / AddFurnitureSingle{}
             ,state<class ExploreState> + event<OnTakeScreenShotEvent> / TakeScreenShot{}
 
+            ,state<class ExploreState> + event<OnUndoEvent> / UndoExploreAction{}
+            ,state<class ExploreState> + event<OnRedoEvent> / RedoExploreAction{}
+
             // Mouse/Camera events
             ,state<class ExploreState> + event<OnTickEvent> / Tick{}
             ,state<class ExploreState> + event<OnTickControlKeyEvent> / TickControlKey{}

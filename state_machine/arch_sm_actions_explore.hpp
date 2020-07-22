@@ -143,6 +143,22 @@ struct Tick {
     }
 };
 
+struct UndoExploreAction {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
+        asg.undoHouseChange();
+        arc.resetSelection();
+        MakeHouse3d{}(asg, rsg, arc);
+    }
+};
+
+struct RedoExploreAction {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
+        asg.redoHouseChange();
+        arc.resetSelection();
+        MakeHouse3d{}(asg, rsg, arc);
+    }
+};
+
 struct FirstTimeTouchDown {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
@@ -163,6 +179,7 @@ struct SpaceToggle {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
             asg.PositionalDot().spaceToggle(rsg);
+            asg.pushHouseChange();
         }
     }
 };
@@ -171,6 +188,7 @@ struct DeleteSelected {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
             asg.PositionalDot().deleteSelected(rsg);
+            asg.pushHouseChange();
         }
     }
 };

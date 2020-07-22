@@ -932,6 +932,15 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     });
 }
 
+void dependantFurnitureCallback( RoomBSData* r, FittedFurniture* ff, std::function<void(FittedFurniture*)> callback ) {
+    for ( auto& hash : ff->dependantHashList ) {
+        auto dependantFurn = RoomService::findFurniture( r, hash );
+        if ( dependantFurn ) {
+            callback(dependantFurn);
+        }
+    }
+}
+
 void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff, const Quaternion& rot ) {
     ff->rotation = ff->rotation * rot;
     ff->rotation.normalise();
@@ -950,12 +959,9 @@ void rotateFurniture( FittedFurniture *ff, const Quaternion& rot, SceneGraph& sg
 
 void RoomServiceFurniture::rotateFurniture( RoomBSData* r, FittedFurniture *ff, const Quaternion& rot, SceneGraph& sg ) {
     rotateFurniture( ff, rot, sg );
-    for ( auto& hash : ff->dependantHashList ) {
-        auto dependantFurn = RoomService::findFurniture( r, hash );
-        if ( dependantFurn ) {
-            rotateFurniture( dependantFurn, rot, sg );
-        }
-    }
+    dependantFurnitureCallback( r, ff, [rot,&sg](FittedFurniture* _ff) {
+        rotateFurniture( _ff, rot, sg );
+    });
 }
 
 void RoomServiceFurniture::moveFurniture( FittedFurniture *ff, const V3f& off ) {
@@ -975,12 +981,9 @@ void moveFurniture( FittedFurniture *ff, const V3f& off, SceneGraph& sg ) {
 
 void RoomServiceFurniture::moveFurniture( RoomBSData* r, FittedFurniture *ff, const V3f& off, SceneGraph& sg ) {
     moveFurniture( ff, off, sg );
-    for ( auto& hash : ff->dependantHashList ) {
-        auto dependantFurn = RoomService::findFurniture( r, hash );
-        if ( dependantFurn ) {
-            moveFurniture( dependantFurn, off, sg );
-        }
-    }
+    dependantFurnitureCallback( r, ff, [off,&sg](FittedFurniture* _ff) {
+        moveFurniture( _ff, off, sg );
+    });
 }
 
 void RoomServiceFurniture::scaleIncrementalFurniture( FittedFurniture *ff, float scale ) {
@@ -988,7 +991,7 @@ void RoomServiceFurniture::scaleIncrementalFurniture( FittedFurniture *ff, float
     RS::calculateFurnitureBBox(ff);
 }
 
-void RoomServiceFurniture::removeFurniture( RoomBSData* r, FittedFurniture *ff, SceneGraph& sg ) {
+void removeFurnitureInternal( RoomBSData* r, FittedFurniture *ff, SceneGraph& sg ) {
     sg.removeNode(sg.getNode(ff->linkedUUID));
 
     for ( auto f = r->mFittedFurniture.begin(); f < r->mFittedFurniture.end(); ++f ) {
@@ -997,5 +1000,11 @@ void RoomServiceFurniture::removeFurniture( RoomBSData* r, FittedFurniture *ff, 
             break;
         }
     }
+}
 
+void RoomServiceFurniture::removeFurniture( RoomBSData* r, FittedFurniture *ff, SceneGraph& sg ) {
+    dependantFurnitureCallback( r, ff, [r,&sg](FittedFurniture* _ff) {
+        removeFurnitureInternal( r, _ff, sg );
+    });
+    removeFurnitureInternal( r, ff, sg );
 }
