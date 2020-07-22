@@ -275,7 +275,7 @@ void ArchPositionalDot::tickControlKey( const HouseBSData *_house, const V3f& _d
                     refNormal = fd.normal;
                 } else {
                     centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreBottom();
-                    furnitureSelectionOutline = furnitureSelected->bbox.points3d_xzy();
+                    furnitureSelectionOutline = furnitureSelected->bbox3d.bottomFace();
                 }
 
                 centerBottomBBox = AABB{furnitureSelectionOutline};
