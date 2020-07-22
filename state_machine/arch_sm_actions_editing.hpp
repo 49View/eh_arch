@@ -173,7 +173,7 @@ struct SpaceToggleFeatureManipulation {
                     DoorService::toggleOrientations(dynamic_cast<DoorBSData *>(asf.elem));
                     break;
                 case FittedFurnitureT:
-                    RoomServiceFurniture::rotateFurniture(dynamic_cast<FittedFurniture *>(asf.elem));
+                    RoomServiceFurniture::rotateFurniture(dynamic_cast<FittedFurniture *>(asf.elem), QuaternionC::QuarterYawRotation );
                     break;
                 default:
                     break;
@@ -234,7 +234,7 @@ struct TakeScreenShot {
 };
 
 
-struct TouchMovePolyFeatureManipulation {
+struct [[maybe_unused]] TouchMovePolyFeatureManipulation {
     bool operator()( const OnTouchMoveViewportSpaceEvent& mouseEvent, ArchOrchestrator& asg,
                      ArchRenderController& arc ) noexcept {
         auto is = mouseEvent.viewportPos;

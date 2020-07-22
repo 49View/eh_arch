@@ -38,7 +38,7 @@ private:
 namespace RoomServiceFurniture {
     void addDefaultFurnitureSet( const std::string& _name );
     void rotateFurniture( RoomBSData* r, FittedFurniture *ff, const Quaternion& rot, SceneGraph& sg );
-    void rotateFurniture( FittedFurniture* ff, const Quaternion& rot = QuaternionC::QuarterRotation );
+    void rotateFurniture( FittedFurniture* ff, const Quaternion& rot );
     void moveFurniture( FittedFurniture* ff, const V3f& off );
     void moveFurniture( RoomBSData* r, FittedFurniture* ff, const V3f& off, SceneGraph& sg );
     void scaleIncrementalFurniture( FittedFurniture* ff, float scale );
