@@ -159,7 +159,13 @@ struct FirstTimeTouchDownWithModKeyCtrl {
     }
 };
 
-
+struct SpaceToggle {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+        if ( asg.H() ) {
+            asg.PositionalDot().spaceToggle(rsg);
+        }
+    }
+};
 
 struct TouchMoveWithModKeyCtrl {
     void operator()( const OnTouchMoveWithModKeyCtrlEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {

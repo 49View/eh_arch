@@ -20,8 +20,6 @@
 #include "room_service_furniture.hpp"
 #include "kitchen_room_service.hpp"
 
-auto quarterRotation = quatFromAxis(V4f{0.0f, 1.0f, 0.0f, static_cast<float>(M_PI_4)});
-
 [[nodiscard]] bool FittedFurniture::checkIf( FittedFurnitureFlagsT _flag ) const {
     return checkBitWiseFlag(flags, _flag);
 }
@@ -947,10 +945,35 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
     });
 }
 
-void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff ) {
-    ff->rotation = ff->rotation * quarterRotation;
+void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff, const Quaternion& rot ) {
+    ff->rotation = ff->rotation * rot;
     ff->rotation.normalise();
-    RS::calculateFurnitureBBox(ff);
+    ff->bbox3d.rotate(rot);
+    ff->bbox = ff->bbox3d.topDown();
+//    RS::calculateFurnitureBBox(ff);
+}
+
+void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff, const Quaternion& rot, SceneGraph& sg ) {
+    RoomServiceFurniture::rotateFurniture( ff, rot );
+    auto node = sg.Nodes().find(ff->linkedUUID);
+    if ( node->second ) {
+        node->second->updateTransform(ff->rotation);
+    }
+}
+
+void RoomServiceFurniture::moveFurniture( FittedFurniture *ff, const V3f& off ) {
+    ff->position3d += off;
+    ff->bbox3d.translate(off);
+    ff->bbox = ff->bbox3d.topDown();
+    ff->center += off;
+}
+
+void RoomServiceFurniture::moveFurniture( FittedFurniture *ff, const V3f& off, SceneGraph& sg ) {
+    RoomServiceFurniture::moveFurniture(ff, off);
+    auto node = sg.Nodes().find(ff->linkedUUID);
+    if ( node->second ) {
+        node->second->move(off);
+    }
 }
 
 void RoomServiceFurniture::scaleIncrementalFurniture( FittedFurniture *ff, float scale ) {

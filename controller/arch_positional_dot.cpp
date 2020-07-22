@@ -8,11 +8,11 @@
 #include <graphics/ghtypes.hpp>
 #include <graphics/renderer.h>
 #include <graphics/mouse_input.hpp>
-#include <poly/scene_graph.h>
 #include <render_scene_graph/render_orchestrator.h>
 
 #include <eh_arch/models/house_service.hpp>
 #include <eh_arch/models/room_service.hpp>
+#include <eh_arch/models/room_service_furniture.hpp>
 
 static constexpr float fullDotOpacityValue = 0.75f;
 static constexpr float outerDotSize = 0.2f;
@@ -191,15 +191,9 @@ void ArchPositionalDot::touchMoveWithModKeyCtrl( [[maybe_unused]] const HouseBSD
         auto potentialBBox = furnitureSelected->bbox;
         potentialBBox.translate(XZY::C2(off));
         if ( !bRoomBboxCheck || RS::checkBBoxInsideRoom(fd.room, potentialBBox) ) {
-            auto node = rsg.SG().Nodes().find(furnitureSelected->linkedUUID);
-            if ( node->second ) {
-                node->second->move(off);
-            }
             centerBottomFurnitureSelected += off;
             for ( auto& v : furnitureSelectionOutline ) v+=off;
-            furnitureSelected->position3d += off;
-            furnitureSelected->bbox3d.translate(off);
-            furnitureSelected->bbox = potentialBBox;
+            RoomServiceFurniture::moveFurniture(furnitureSelected, off, rsg.SG());
         }
         prevFurnitureMovePosition = planeHit;
     }
@@ -220,6 +214,13 @@ void ArchPositionalDot::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrches
         }
     }
 }
+
+void ArchPositionalDot::spaceToggle( RenderOrchestrator& rsg ) {
+    if ( furnitureSelected && !isFlying ) {
+        RoomServiceFurniture::rotateFurniture(furnitureSelected, QuaternionC::QuarterRotation, rsg.SG() );
+    }
+}
+
 
 void ArchPositionalDot::touchUpWithModKeyCtrl() {
     furnitureSelected = nullptr;

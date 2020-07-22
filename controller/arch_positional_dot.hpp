@@ -56,7 +56,7 @@ public:
     void touchUp();
     void touchUpWithModKeyCtrl();
     void singleTap( RenderOrchestrator& rsg );
-
+    void spaceToggle( RenderOrchestrator& rsg );
 private:
     void updateDot( RenderOrchestrator& rsg, const C4f& _dotColor );
     void updateFurnitureSelection( RenderOrchestrator& rsg, const V3f& centerBottomPos, const C4f& _dotColor );

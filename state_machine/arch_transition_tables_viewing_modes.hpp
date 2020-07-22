@@ -36,6 +36,7 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnMakeHouse3dEvent> / MakeHouse3d{}
             ,state<class ExploreState> + event<OnAddFurnitureSingleEvent> / AddFurnitureSingle{}
             ,state<class ExploreState> + event<OnTakeScreenShotEvent> / TakeScreenShot{}
+
             // Mouse/Camera events
             ,state<class ExploreState> + event<OnTickEvent> / Tick{}
             ,state<class ExploreState> + event<OnTickControlKeyEvent> / TickControlKey{}
@@ -45,6 +46,9 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnTouchUpEvent> / TouchUp{}
             ,state<class ExploreState> + event<OnTouchUpWithModKeyCtrlEvent> / TouchUpWithModKeyCtrl{}
             ,state<class ExploreState> + event<OnSingleTapEvent> / SingleTap{}
+            // Basic House customisation
+            ,state<class ExploreState> + event<OnSpaceEvent> / SpaceToggle{}
+            ,state<class ExploreState> + event<OnDeleteEvent>[DeleteFeatureManipulation{}] / ExitFeatureManipulation{}
         );
     }
 };
