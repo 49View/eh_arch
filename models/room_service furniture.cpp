@@ -940,11 +940,21 @@ void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff, const Quaternio
 //    RS::calculateFurnitureBBox(ff);
 }
 
-void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff, const Quaternion& rot, SceneGraph& sg ) {
+void rotateFurniture( FittedFurniture *ff, const Quaternion& rot, SceneGraph& sg ) {
     RoomServiceFurniture::rotateFurniture( ff, rot );
     auto node = sg.Nodes().find(ff->linkedUUID);
     if ( node->second ) {
         node->second->updateTransform(ff->rotation);
+    }
+}
+
+void RoomServiceFurniture::rotateFurniture( RoomBSData* r, FittedFurniture *ff, const Quaternion& rot, SceneGraph& sg ) {
+    rotateFurniture( ff, rot, sg );
+    for ( auto& hash : ff->dependantHashList ) {
+        auto dependantFurn = RoomService::findFurniture( r, hash );
+        if ( dependantFurn ) {
+            rotateFurniture( dependantFurn, rot, sg );
+        }
     }
 }
 

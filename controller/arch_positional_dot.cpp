@@ -216,8 +216,8 @@ void ArchPositionalDot::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrches
 }
 
 void ArchPositionalDot::spaceToggle( RenderOrchestrator& rsg ) {
-    if ( furnitureSelected && !isFlying ) {
-        RoomServiceFurniture::rotateFurniture(furnitureSelected, QuaternionC::QuarterRotation, rsg.SG() );
+    if ( furnitureSelected && fd.room && !isFlying ) {
+        RoomServiceFurniture::rotateFurniture( fd.room, furnitureSelected, QuaternionC::QuarterRotation, rsg.SG() );
     }
 }
 
