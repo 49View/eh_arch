@@ -72,7 +72,6 @@ private:
     FeatureIntersection fd;
 
     FadeInOutContainer furnitureSelectionAlphaAnim;
-    bool bBullsEye = false;
     bool bFurnitureTargetLocked = false;
     bool bFillFullFurnitureOutline = false;
     Plane3f furniturePlane;
