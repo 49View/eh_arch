@@ -197,6 +197,7 @@ void ArchPositionalDot::touchMoveWithModKeyCtrl( [[maybe_unused]] const HouseBSD
             centerBottomFurnitureSelected += off;
             for ( auto& v : furnitureSelectionOutline ) v += off;
             RoomServiceFurniture::moveFurniture(fd.room, furnitureSelected, off, rsg.SG());
+            bFurnitureDirty = true;
         }
         prevFurnitureMovePosition = planeHit;
     }
@@ -232,9 +233,12 @@ void ArchPositionalDot::deleteSelected( RenderOrchestrator& rsg ) {
     }
 }
 
-void ArchPositionalDot::touchUpWithModKeyCtrl() {
+bool ArchPositionalDot::touchUpWithModKeyCtrl() {
     furnitureSelected = nullptr;
     bFurnitureTargetLocked = false;
+    bool ret = bFurnitureDirty;
+    bFurnitureDirty = false;
+    return ret;
 }
 
 std::vector<V3f> createBBoxOutline( const V3f& input, const V3f& axis1, const V3f& axis2 ) {

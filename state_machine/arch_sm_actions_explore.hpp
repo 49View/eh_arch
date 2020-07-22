@@ -4,7 +4,7 @@
 
 #pragma once
 
-struct ActivateOrbitMode {
+struct [[maybe_unused]] ActivateOrbitMode {
     void
     operator()( SceneGraph& sg, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
         rsg.setRigCameraController(CameraControlType::Orbit);
@@ -25,7 +25,7 @@ struct InitializeHouseMaker {
     }
 };
 
-static inline void show3dViewInternal( ArchOrchestrator& asg, std::function<void()> callback ) {
+static inline void show3dViewInternal( ArchOrchestrator& asg, const std::function<void()>& callback ) {
     if ( !asg.H() ) return;
     if ( asg.HRC().houseId != asg.H()->propertyId ) {
         asg.make3dHouse(callback);
@@ -34,13 +34,13 @@ static inline void show3dViewInternal( ArchOrchestrator& asg, std::function<void
     }
 }
 
-struct ActivateFloorplanView {
+struct [[maybe_unused]] ActivateFloorplanView {
     void
-    operator()( SceneGraph& sg, ArchRenderController& arc, RenderOrchestrator& rsg, ArchOrchestrator& asg ) noexcept {
-        asg.setFloorPlanView(fprm);
+    operator()( SceneGraph& sg, ArchRenderController& arc, RenderOrchestrator& rsg, ArchOrchestrator& asg ) const noexcept {
+        asg.setFloorPlanView(floorPlanRenderMode);
     }
 
-    FloorPlanRenderMode fprm = FloorPlanRenderMode::Normal3d;
+    FloorPlanRenderMode floorPlanRenderMode = FloorPlanRenderMode::Normal3d;
 };
 
 struct ActivateTourView {
@@ -201,11 +201,13 @@ struct TouchMoveWithModKeyCtrl {
     }
 };
 
-
 struct TouchUpWithModKeyCtrl {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
-            asg.PositionalDot().touchUpWithModKeyCtrl();
+            bool isDirty = asg.PositionalDot().touchUpWithModKeyCtrl();
+            if ( isDirty ) {
+                asg.pushHouseChange();
+            }
         }
     }
 };

@@ -54,7 +54,7 @@ public:
     void firstTimeTouchDown();
     void firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrator& rsg );
     void touchUp();
-    void touchUpWithModKeyCtrl();
+    bool touchUpWithModKeyCtrl();
     void singleTap( RenderOrchestrator& rsg );
     void spaceToggle( RenderOrchestrator& rsg );
     void deleteSelected( RenderOrchestrator& rsg );
@@ -75,6 +75,7 @@ private:
     FadeInOutContainer furnitureSelectionAlphaAnim;
     bool bFurnitureTargetLocked = false;
     bool bFillFullFurnitureOutline = false;
+    bool bFurnitureDirty = false;
     Plane3f furniturePlane;
     FittedFurniture *furnitureSelected = nullptr;
     V3f centerBottomFurnitureSelected{ V3f::ZERO };
