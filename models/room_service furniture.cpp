@@ -987,3 +987,15 @@ void RoomServiceFurniture::scaleIncrementalFurniture( FittedFurniture *ff, float
     ff->scale += V3f{scale};
     RS::calculateFurnitureBBox(ff);
 }
+
+void RoomServiceFurniture::removeFurniture( RoomBSData* r, FittedFurniture *ff, SceneGraph& sg ) {
+    sg.removeNode(sg.getNode(ff->linkedUUID));
+
+    for ( auto f = r->mFittedFurniture.begin(); f < r->mFittedFurniture.end(); ++f ) {
+        if ( (*f)->hash == ff->hash ) {
+            r->mFittedFurniture.erase(f);
+            break;
+        }
+    }
+
+}

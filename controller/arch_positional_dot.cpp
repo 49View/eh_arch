@@ -226,6 +226,11 @@ void ArchPositionalDot::spaceToggle( RenderOrchestrator& rsg ) {
     }
 }
 
+void ArchPositionalDot::deleteSelected( RenderOrchestrator& rsg ) {
+    if ( furnitureSelected && fd.room && !isFlying ) {
+        RoomServiceFurniture::removeFurniture(fd.room, furnitureSelected, rsg.SG());
+    }
+}
 
 void ArchPositionalDot::touchUpWithModKeyCtrl() {
     furnitureSelected = nullptr;

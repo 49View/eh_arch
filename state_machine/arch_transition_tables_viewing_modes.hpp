@@ -48,7 +48,7 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnSingleTapEvent> / SingleTap{}
             // Basic House customisation
             ,state<class ExploreState> + event<OnSpaceEvent> / SpaceToggle{}
-            ,state<class ExploreState> + event<OnDeleteEvent>[DeleteFeatureManipulation{}] / ExitFeatureManipulation{}
+            ,state<class ExploreState> + event<OnDeleteEvent> / DeleteSelected{}
         );
     }
 };

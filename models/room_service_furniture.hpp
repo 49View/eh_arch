@@ -42,4 +42,5 @@ namespace RoomServiceFurniture {
     void moveFurniture( FittedFurniture* ff, const V3f& off );
     void moveFurniture( RoomBSData* r, FittedFurniture* ff, const V3f& off, SceneGraph& sg );
     void scaleIncrementalFurniture( FittedFurniture* ff, float scale );
+    void removeFurniture( RoomBSData* r, FittedFurniture *ff, SceneGraph& sg );
 }
