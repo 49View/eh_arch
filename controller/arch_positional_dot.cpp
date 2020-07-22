@@ -8,6 +8,7 @@
 #include <graphics/ghtypes.hpp>
 #include <graphics/renderer.h>
 #include <graphics/mouse_input.hpp>
+#include <poly/scene_graph.h>
 #include <render_scene_graph/render_orchestrator.h>
 
 #include <eh_arch/models/house_service.hpp>

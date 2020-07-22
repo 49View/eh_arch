@@ -16,6 +16,7 @@
 #include <graphics/lightmap_manager.hpp>
 #include <render_scene_graph/render_orchestrator.h>
 #include <render_scene_graph/ui_view.hpp>
+#include <poly/scene_graph.h>
 #include <poly/converters/gltf2/gltf2.h>
 #include <core/math/poly_utils.hpp>
 

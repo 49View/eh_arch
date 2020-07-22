@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <render_scene_graph/backend_io_services.hpp>
 #include <eh_arch/models/house_service.hpp>
 #include <eh_arch/models/wall_service.hpp>
 #include <eh_arch/models/door_service.hpp>
