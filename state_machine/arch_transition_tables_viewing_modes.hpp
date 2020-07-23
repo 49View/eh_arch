@@ -43,6 +43,11 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnTouchUpEvent> / TouchUp{}
             ,state<class ExploreState> + event<OnSingleTapEvent> / SingleTap{}
 
+            ,state<class ExploreState> + event<OnDecreaseValueFastAltEvent> / TimeDecrementFast{}
+            ,state<class ExploreState> + event<OnIncreaseValueFastAltEvent> / TimeIncrementFast{}
+            ,state<class ExploreState> + event<OnDecreaseValueAltEvent> / TimeDecrement{}
+            ,state<class ExploreState> + event<OnIncreaseValueAltEvent> / TimeIncrement{}
+
             ,state<class ExploreEditState> + event<OnUndoEvent> / UndoExploreAction{}
             ,state<class ExploreEditState> + event<OnRedoEvent> / RedoExploreAction{}
 

@@ -228,3 +228,34 @@ struct SingleTap {
     }
 };
 
+struct TimeIncrementFast {
+    void operator()( const OnIncreaseValueFastAltEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            rsg.addSecondsToTime(60*event.increment);
+        }
+    }
+};
+
+struct TimeDecrementFast {
+    void operator()( const OnDecreaseValueFastAltEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            rsg.addSecondsToTime(60*event.increment);
+        }
+    }
+};
+
+struct TimeIncrement {
+    void operator()( const OnIncreaseValueAltEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            rsg.addSecondsToTime(60*event.increment);
+        }
+    }
+};
+
+struct TimeDecrement {
+    void operator()( const OnDecreaseValueAltEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            rsg.addSecondsToTime(60*event.increment);
+        }
+    }
+};
