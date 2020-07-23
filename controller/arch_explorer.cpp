@@ -93,7 +93,7 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
 }
 
 void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {
-    if ( furnitureSelected && fd.room ) {
+    if ( furnitureSelected && bFurnitureTargetLocked && fd.room ) {
         Quaternion quat = furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged)
                           ? QuaternionC::QuarterRollRotation : QuaternionC::QuarterYawRotation;
         RoomServiceFurniture::rotateFurniture(fd.room, furnitureSelected, quat, rsg.SG());
@@ -101,7 +101,7 @@ void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {
 }
 
 void ArchExplorer::deleteSelected( RenderOrchestrator& rsg ) {
-    if ( furnitureSelected && fd.room ) {
+    if ( furnitureSelected && bFurnitureTargetLocked && fd.room ) {
         RoomServiceFurniture::removeFurniture(fd.room, furnitureSelected, rsg.SG());
     }
 }
