@@ -25,25 +25,6 @@ struct FloorPlanViewStateMachine {
     }
 };
 
-struct ExploreEditStateMachine {
-    auto operator()() const noexcept {
-        return make_transition_table(
-            *state<class Initial> / []{} = state<class ExploreEditState>
-
-            ,state<class ExploreEditState> + event<OnUndoEvent> / UndoExploreAction{}
-            ,state<class ExploreEditState> + event<OnRedoEvent> / RedoExploreAction{}
-
-            ,state<class ExploreEditState> + event<OnTickControlKeyEvent> / TickControlKey{}
-            ,state<class ExploreEditState> + event<OnFirstTimeTouchDownWithModKeyCtrlEvent> / FirstTimeTouchDownWithModKeyCtrl{}
-            ,state<class ExploreEditState> + event<OnTouchMoveWithModKeyCtrlEvent> / TouchMoveWithModKeyCtrl{}
-            ,state<class ExploreEditState> + event<OnTouchUpWithModKeyCtrlEvent> / TouchUpWithModKeyCtrl{}
-
-            ,state<class ExploreEditState> + event<OnSpaceEvent> / SpaceToggle{}
-            ,state<class ExploreEditState> + event<OnDeleteEvent> / DeleteSelected{}
-        );
-    }
-};
-
 struct ExploreStateMachine {
     auto operator()() const noexcept {
         return make_transition_table(
@@ -62,8 +43,21 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnTouchUpEvent> / TouchUp{}
             ,state<class ExploreState> + event<OnSingleTapEvent> / SingleTap{}
 
+            ,state<class ExploreEditState> + event<OnUndoEvent> / UndoExploreAction{}
+            ,state<class ExploreEditState> + event<OnRedoEvent> / RedoExploreAction{}
+
+            ,state<class ExploreEditState> + event<OnTickEvent> / TickExploreEdit{}
+            ,state<class ExploreEditState> + event<OnFirstTimeTouchDownEvent> / FirstTimeTouchDownExploreEdit{}
+            ,state<class ExploreEditState> + event<OnTouchMoveEvent> / TouchMoveExploreEdit{}
+            ,state<class ExploreEditState> + event<OnTouchUpEvent> / TouchUpExploreEdit{}
+
+            ,state<class ExploreEditState> + event<OnSpaceEvent> / SpaceToggle{}
+            ,state<class ExploreEditState> + event<OnDeleteEvent> / DeleteSelected{}
+
             // Sub state machines
-            ,state<class ExploreState> + event<OnExploreEditEnterEvent> / []{} = state<ExploreEditStateMachine>
+            ,state<class ExploreState> + event<OnSingleTapSecondaryEvent> / []{} = state<ExploreEditState>
+            ,state<class ExploreEditState> + event<OnSingleTapSecondaryEvent> / []{} = state<ExploreState>
+            ,state<class ExploreEditState> + event<OnEscapeEvent> / []{} = state<ExploreState>
         );
     }
 };

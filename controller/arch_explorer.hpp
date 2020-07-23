@@ -31,7 +31,7 @@ public:
     // Events
     void touchMoveWithModKeyCtrl( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg );
     void firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrator& rsg );
-    bool touchUpWithModKeyCtrl();
+    bool touchUpWithModKeyCtrl( RenderOrchestrator& rsg );
     void spaceToggle( RenderOrchestrator& rsg );
     void deleteSelected( RenderOrchestrator& rsg );
 private:
@@ -44,8 +44,8 @@ private:
     V3f hitPosition{ V3f::ZERO };
     FeatureIntersection fd;
 
-    FadeInOutSwitch furnitureSelectionAlphaAnim{explorerFullDotOpacityValue, explorerDotFadeTime};
-    FadeInOutSwitch positionalDotAlphaAnim{explorerFullDotOpacityValue, explorerDotFadeTime};
+    FadeInOutSwitch furnitureSelectionAlphaAnim{ explorerFullDotOpacityValue, explorerDotFadeTime };
+    FadeInOutSwitch positionalDotAlphaAnim{ explorerFullDotOpacityValue, explorerDotFadeTime };
     bool bRoomBboxCheck = false;
     bool bFurnitureTargetLocked = false;
     bool bFillFullFurnitureOutline = false;

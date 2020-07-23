@@ -72,6 +72,7 @@ void ArchExplorer::touchMoveWithModKeyCtrl( [[maybe_unused]] const HouseBSData *
         }
         prevFurnitureMovePosition = planeHit;
     }
+    rsg.DC()->enableInputs(!bFurnitureTargetLocked);
 }
 
 void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrator& rsg ) {
@@ -88,6 +89,7 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
             prevFurnitureMovePosition = furniturePlane.intersectRay(rsg.DC()->getPosition(), _dir, inters);
         }
     }
+    rsg.setMICursorCapture( !bFurnitureTargetLocked, bFurnitureTargetLocked||bFillFullFurnitureOutline ? MouseCursorType::HAND : MouseCursorType::ARROW );
 }
 
 void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {
@@ -104,7 +106,9 @@ void ArchExplorer::deleteSelected( RenderOrchestrator& rsg ) {
     }
 }
 
-bool ArchExplorer::touchUpWithModKeyCtrl() {
+bool ArchExplorer::touchUpWithModKeyCtrl( RenderOrchestrator& rsg ) {
+    rsg.DC()->enableInputs(true);
+    rsg.setMICursorCapture( true, bFillFullFurnitureOutline ? MouseCursorType::HAND : MouseCursorType::ARROW );
     furnitureSelected = nullptr;
     bFurnitureTargetLocked = false;
     bool ret = bFurnitureDirty;
@@ -123,7 +127,6 @@ std::vector<V3f> createBBoxOutline( const V3f& input, const V3f& axis1, const V3
 
 void ArchExplorer::tickControlKey( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg ) {
 
-    rsg.setMICursorCapture(false, bFurnitureTargetLocked ? MouseCursorType::HAND : MouseCursorType::ARROW);
     if ( !bFurnitureTargetLocked ) {
         fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), _dir },
                                                         FeatureIntersectionFlags::FIF_Furnitures);
@@ -166,7 +169,7 @@ void ArchExplorer::tickControlKey( const HouseBSData *_house, const V3f& _dir, R
             bFillFullFurnitureOutline = false;
         }
         bool isMouseOverSelection = isMouseOverFurnitureInnerSelector(rsg.DC()->getPosition(), _dir);
-        rsg.setMICursorCapture(false, isMouseOverSelection ? MouseCursorType::HAND : MouseCursorType::ARROW);
+        rsg.setMICursorCapture( true, isMouseOverSelection ? MouseCursorType::HAND : MouseCursorType::ARROW);
         if ( fd.hasHit() ) {
             float safeDist = fd.nearV > minSafeDistance ? fd.nearV - minSafeDistance : 0.0f;
             hitPosition = rsg.DC()->getPosition() + ( _dir * safeDist );

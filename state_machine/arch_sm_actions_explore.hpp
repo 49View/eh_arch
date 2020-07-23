@@ -125,8 +125,8 @@ struct PopTourPath {
 };
 
 
-struct TickControlKey {
-    void operator()( const OnTickControlKeyEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+struct TickExploreEdit {
+    void operator()( const OnTickEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
             renderCameraLocator( asg, rsg );
             asg.Explorer().tickControlKey( asg.H(), event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg );
@@ -167,8 +167,8 @@ struct FirstTimeTouchDown {
     }
 };
 
-struct FirstTimeTouchDownWithModKeyCtrl {
-    void operator()( const OnFirstTimeTouchDownWithModKeyCtrlEvent& event,  ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+struct FirstTimeTouchDownExploreEdit {
+    void operator()( const OnFirstTimeTouchDownEvent& event,  ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
             asg.Explorer().firstTimeTouchDownCtrlKey(event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg);
         }
@@ -193,18 +193,18 @@ struct DeleteSelected {
     }
 };
 
-struct TouchMoveWithModKeyCtrl {
-    void operator()( const OnTouchMoveWithModKeyCtrlEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+struct TouchMoveExploreEdit {
+    void operator()( const OnTouchMoveEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
             asg.Explorer().touchMoveWithModKeyCtrl( asg.H(), event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg );
         }
     }
 };
 
-struct TouchUpWithModKeyCtrl {
+struct TouchUpExploreEdit {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
-            bool isDirty = asg.Explorer().touchUpWithModKeyCtrl();
+            bool isDirty = asg.Explorer().touchUpWithModKeyCtrl( rsg );
             if ( isDirty ) {
                 asg.pushHouseChange();
             }
