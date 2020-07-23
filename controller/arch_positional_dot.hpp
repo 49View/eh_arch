@@ -7,7 +7,7 @@
 #include <string>
 #include <core/math/vector3f.h>
 #include <core/math/vector4f.h>
-#include <core/math/anim_type.hpp>
+#include <core/math/anim.h>
 #include <core/math/plane3f.h>
 #include <core/math/aabb.h>
 #include <eh_arch/models/htypes.hpp>
@@ -20,69 +20,27 @@ struct AggregatedInputData;
 struct InputMods;
 struct FittedFurniture;
 
-enum class FadeInternalPhase {
-    In,
-    Out
-};
-
-struct FadeInOutContainer {
-    FadeInOutContainer();
-
-    [[nodiscard]] float value() const;
-    void setValue( float _value);
-    floata& anim();
-
-    void fade(FadeInternalPhase phase);
-    void fadeIn();
-    void fadeOut();
-
-    std::string inPhaseId;
-    std::string outPhaseId;
-private:
-    floata floatAnim;
-};
+static constexpr float fullDotOpacityValue = 0.75f;
+static constexpr float dotFadeTime = 0.15f;
 
 class ArchPositionalDot {
 public:
     ArchPositionalDot() = default;
-    void tick( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg, bool isComingFromInternal = false,
-               const C4f& _dotColor = C4f::SKY_BLUE );
-    void tickControlKey( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg );
+    void tick( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg );
 
     // Events
-    void touchMoveWithModKeyCtrl( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg );
     void firstTimeTouchDown();
-    void firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrator& rsg );
     void touchUp();
-    bool touchUpWithModKeyCtrl();
     void singleTap( RenderOrchestrator& rsg );
-    void spaceToggle( RenderOrchestrator& rsg );
-    void deleteSelected( RenderOrchestrator& rsg );
 private:
-    void updateDot( RenderOrchestrator& rsg, const C4f& _dotColor );
-    void updateFurnitureSelection( RenderOrchestrator& rsg, const V3f& centerBottomPos, const C4f& _dotColor );
-
-    [[nodiscard]] bool isMouseOverFurnitureInnerSelector( const V3f& _origin, const V3f& _dir ) const;
+    void updateDot( RenderOrchestrator& rsg );
 
 private:
-    FadeInOutContainer positionalDotAlphaAnim;
+    FadeInOutSwitch positionalDotAlphaAnim{ fullDotOpacityValue, dotFadeTime };
     bool isFlying = false;
     bool antiWallRotation = false;
-    bool bRoomBboxCheck = false;
     V3f hitPosition{ V3f::ZERO };
     FeatureIntersection fd;
-
-    FadeInOutContainer furnitureSelectionAlphaAnim;
-    bool bFurnitureTargetLocked = false;
-    bool bFillFullFurnitureOutline = false;
-    bool bFurnitureDirty = false;
-    Plane3f furniturePlane;
-    FittedFurniture *furnitureSelected = nullptr;
-    V3f centerBottomFurnitureSelected{ V3f::ZERO };
-    std::vector<V3f> furnitureSelectionOutline;
-    JMATH::AABB centerBottomBBox;
-    V3f prevFurnitureMovePosition{};
-    FeatureIntersection fdFurniture;
 };
 
 

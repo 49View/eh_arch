@@ -6,6 +6,7 @@
 
 #include <core/math/vector2f.h>
 #include <eh_arch/models/property_list.hpp>
+#include <utility>
 
 struct OnWhichRoomAmIEvent {
 };
@@ -20,8 +21,8 @@ struct OnPopTourPathEvent {
 
 struct OnActivateEvent {
     OnActivateEvent() = default;
-    OnActivateEvent( const std::function<void()>& ccf ) : ccf(ccf) {}
-    OnActivateEvent( FloorPlanRenderMode _floorPlanRenderMode ) : floorPlanRenderMode(_floorPlanRenderMode) {}
+    explicit OnActivateEvent( std::function<void()>  ccf ) : ccf(std::move(ccf)) {}
+    explicit OnActivateEvent( FloorPlanRenderMode _floorPlanRenderMode ) : floorPlanRenderMode(_floorPlanRenderMode) {}
 
     std::function<void()> ccf = nullptr;
     FloorPlanRenderMode floorPlanRenderMode = FloorPlanRenderMode::Normal3d;
@@ -48,8 +49,8 @@ struct OnElaborateHouseBitmapEvent {
 struct OnRecalculateFurnitureEvent {
 };
 struct OnAddFurnitureSingleEvent {
-    RoomBSData *room;
-    FurnitureSet furnitureSet;
+    RoomBSData *room = nullptr;
+    FurnitureSet furnitureSet{};
 };
 
 struct OnHouseMakerToggleEvent {
@@ -76,5 +77,6 @@ struct OnGlobalRescaleEvent {
     float currentScaleFactorMeters = 1.0f;
 };
 
-struct OnEnterFittedFurnitureManipulationEvent {
+struct OnExploreEditEnterEvent {
 };
+

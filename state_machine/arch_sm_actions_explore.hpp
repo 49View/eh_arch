@@ -129,7 +129,7 @@ struct TickControlKey {
     void operator()( const OnTickControlKeyEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
             renderCameraLocator( asg, rsg );
-            asg.PositionalDot().tickControlKey( asg.H(), event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg );
+            asg.Explorer().tickControlKey( asg.H(), event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg );
         }
     }
 };
@@ -170,7 +170,7 @@ struct FirstTimeTouchDown {
 struct FirstTimeTouchDownWithModKeyCtrl {
     void operator()( const OnFirstTimeTouchDownWithModKeyCtrlEvent& event,  ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
-            asg.PositionalDot().firstTimeTouchDownCtrlKey(event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg);
+            asg.Explorer().firstTimeTouchDownCtrlKey(event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg);
         }
     }
 };
@@ -178,7 +178,7 @@ struct FirstTimeTouchDownWithModKeyCtrl {
 struct SpaceToggle {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
-            asg.PositionalDot().spaceToggle(rsg);
+            asg.Explorer().spaceToggle(rsg);
             asg.pushHouseChange();
         }
     }
@@ -187,7 +187,7 @@ struct SpaceToggle {
 struct DeleteSelected {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
-            asg.PositionalDot().deleteSelected(rsg);
+            asg.Explorer().deleteSelected(rsg);
             asg.pushHouseChange();
         }
     }
@@ -196,7 +196,7 @@ struct DeleteSelected {
 struct TouchMoveWithModKeyCtrl {
     void operator()( const OnTouchMoveWithModKeyCtrlEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
-            asg.PositionalDot().touchMoveWithModKeyCtrl( asg.H(), event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg );
+            asg.Explorer().touchMoveWithModKeyCtrl( asg.H(), event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg );
         }
     }
 };
@@ -204,7 +204,7 @@ struct TouchMoveWithModKeyCtrl {
 struct TouchUpWithModKeyCtrl {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
-            bool isDirty = asg.PositionalDot().touchUpWithModKeyCtrl();
+            bool isDirty = asg.Explorer().touchUpWithModKeyCtrl();
             if ( isDirty ) {
                 asg.pushHouseChange();
             }

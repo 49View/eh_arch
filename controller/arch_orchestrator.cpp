@@ -380,3 +380,7 @@ const Matrix4f& ArchOrchestrator::FloorplanNavigationMatrix() const {
 ArchPositionalDot& ArchOrchestrator::PositionalDot() {
     return positionalDot;
 }
+
+ArchExplorer& ArchOrchestrator::Explorer() {
+    return archExplorer;
+}

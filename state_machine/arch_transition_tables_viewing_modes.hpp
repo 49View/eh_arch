@@ -25,6 +25,25 @@ struct FloorPlanViewStateMachine {
     }
 };
 
+struct ExploreEditStateMachine {
+    auto operator()() const noexcept {
+        return make_transition_table(
+            *state<class Initial> / []{} = state<class ExploreEditState>
+
+            ,state<class ExploreEditState> + event<OnUndoEvent> / UndoExploreAction{}
+            ,state<class ExploreEditState> + event<OnRedoEvent> / RedoExploreAction{}
+
+            ,state<class ExploreEditState> + event<OnTickControlKeyEvent> / TickControlKey{}
+            ,state<class ExploreEditState> + event<OnFirstTimeTouchDownWithModKeyCtrlEvent> / FirstTimeTouchDownWithModKeyCtrl{}
+            ,state<class ExploreEditState> + event<OnTouchMoveWithModKeyCtrlEvent> / TouchMoveWithModKeyCtrl{}
+            ,state<class ExploreEditState> + event<OnTouchUpWithModKeyCtrlEvent> / TouchUpWithModKeyCtrl{}
+
+            ,state<class ExploreEditState> + event<OnSpaceEvent> / SpaceToggle{}
+            ,state<class ExploreEditState> + event<OnDeleteEvent> / DeleteSelected{}
+        );
+    }
+};
+
 struct ExploreStateMachine {
     auto operator()() const noexcept {
         return make_transition_table(
@@ -37,21 +56,14 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnAddFurnitureSingleEvent> / AddFurnitureSingle{}
             ,state<class ExploreState> + event<OnTakeScreenShotEvent> / TakeScreenShot{}
 
-            ,state<class ExploreState> + event<OnUndoEvent> / UndoExploreAction{}
-            ,state<class ExploreState> + event<OnRedoEvent> / RedoExploreAction{}
-
             // Mouse/Camera events
             ,state<class ExploreState> + event<OnTickEvent> / Tick{}
-            ,state<class ExploreState> + event<OnTickControlKeyEvent> / TickControlKey{}
             ,state<class ExploreState> + event<OnFirstTimeTouchDownEvent> / FirstTimeTouchDown{}
-            ,state<class ExploreState> + event<OnFirstTimeTouchDownWithModKeyCtrlEvent> / FirstTimeTouchDownWithModKeyCtrl{}
-            ,state<class ExploreState> + event<OnTouchMoveWithModKeyCtrlEvent> / TouchMoveWithModKeyCtrl{}
             ,state<class ExploreState> + event<OnTouchUpEvent> / TouchUp{}
-            ,state<class ExploreState> + event<OnTouchUpWithModKeyCtrlEvent> / TouchUpWithModKeyCtrl{}
             ,state<class ExploreState> + event<OnSingleTapEvent> / SingleTap{}
-            // Basic House customisation
-            ,state<class ExploreState> + event<OnSpaceEvent> / SpaceToggle{}
-            ,state<class ExploreState> + event<OnDeleteEvent> / DeleteSelected{}
+
+            // Sub state machines
+            ,state<class ExploreState> + event<OnExploreEditEnterEvent> / []{} = state<ExploreEditStateMachine>
         );
     }
 };
