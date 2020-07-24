@@ -93,19 +93,22 @@ void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {
     }
 }
 
-void ArchExplorer::replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+void ArchExplorer::replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg,
+                                          RenderOrchestrator& rsg ) {
     auto ff = FittedFurniture{
             { _furnitureCandidate.hash, _furnitureCandidate.bboxSize },
             furnitureSelected->keyTag, furnitureSelected->symbolRef };
-    auto ffs = EntityFactory::cloneHashed(ff);
-    V2f pos = XZY::C2(centerBottomFurnitureSelected);
-    auto f = HouseService::findFloorOf(asg.H(), fd.room->hash);
-    RS::placeManually(
-            FurnitureRuleParams{ f, fd.room, ffs, pos,
-                                 furnitureSelected->heightOffset,
-                                 furnitureSelected->rotation,
-                                 FRPFurnitureRuleFlags{
-                                         forceManualFurnitureFlags } });
+    ff.flags = furnitureSelected->flags;
+    auto clonedFurniture = EntityFactory::cloneHashed(ff);
+    cloneInternal( asg.H(), furnitureSelected, clonedFurniture );
+//    V2f pos = XZY::C2(centerBottomFurnitureSelected);
+//    auto f = HouseService::findFloorOf(asg.H(), fd.room->hash);
+//    RS::placeManually(
+//            FurnitureRuleParams{ f, fd.room, ffs, pos,
+//                                 furnitureSelected->heightOffset,
+//                                 furnitureSelected->rotation,
+//                                 FRPFurnitureRuleFlags{
+//                                         forceManualFurnitureFlags } });
     RoomServiceFurniture::removeFurniture(fd.room, furnitureSelected, rsg.SG());
     asg.make3dHouse([&]() {
         LOGRS("Respawn an house after changing furniture")
@@ -115,17 +118,18 @@ void ArchExplorer::replaceFurnitureFinal( const EntityMetaData& _furnitureCandid
 
 void ArchExplorer::replaceFurnitureWithOneOfItsKind( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
     if ( canBeManipulated() ) {
-        LOGRS("Name: " << furnitureSelected->name << " keyTag: " << furnitureSelected->keyTag)
-        auto furnitureCandidate = furnitureReplacer.findCandidate(furnitureSelected->keyTag);
-        if ( furnitureCandidate ) {
-            replaceFurnitureFinal(*furnitureCandidate, asg, rsg );
+        if ( auto furnitureCandidate = furnitureReplacer.findCandidate(
+                    furnitureSelected->keyTag); furnitureCandidate ) {
+            replaceFurnitureFinal(*furnitureCandidate, asg, rsg);
         } else {
             ResourceMetaData::getListOf(ResourceGroup::Geom, furnitureSelected->keyTag,
                                         [&]( CRefResourceMetadataList el ) {
-                                            furnitureReplacer.addMetadataListFromTag(furnitureSelected->keyTag, el, furnitureSelected->name);
                                             if ( !el.empty() ) {
-                                                auto furnitureCandidate = furnitureReplacer.findCandidate(furnitureSelected->keyTag);
-                                                replaceFurnitureFinal(*furnitureCandidate, asg, rsg );
+                                                furnitureReplacer.addMetadataListFromTag(furnitureSelected->keyTag, el,
+                                                                                         furnitureSelected->name);
+                                                replaceFurnitureFinal(
+                                                        *furnitureReplacer.findCandidate(furnitureSelected->keyTag),
+                                                        asg, rsg);
                                             }
                                         });
         }
@@ -138,17 +142,23 @@ void ArchExplorer::deleteSelected( RenderOrchestrator& rsg ) {
     }
 }
 
-void ArchExplorer::cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg ) {
-    auto ffs = EntityFactory::cloneHashed(*furnitureSelected);
-    V2f pos = XZY::C2(centerBottomFurnitureSelected);
+void ArchExplorer::cloneInternal( HouseBSData *_house, FittedFurniture* sourceFurniture, std::shared_ptr<FittedFurniture> clonedFurniture ) {
+    auto depthOffset = sourceFurniture->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ? sourceFurniture->depthNormal * sourceFurniture->width : V2fc::ZERO;
+    V2f pos = XZY::C2(hitPosition) + depthOffset;
     auto f = HouseService::findFloorOf(_house, fd.room->hash);
     RS::placeManually(
-            FurnitureRuleParams{ f, fd.room, ffs, pos, furnitureSelected->heightOffset, furnitureSelected->rotation,
+            FurnitureRuleParams{ f, fd.room, clonedFurniture, pos, sourceFurniture->heightOffset, sourceFurniture->rotation,
                                  FRPFurnitureRuleFlags{ forceManualFurnitureFlags } });
+}
+
+void ArchExplorer::cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg ) {
+    auto clonedFurniture = EntityFactory::cloneHashed(*furnitureSelected);
+    cloneInternal( _house, furnitureSelected, clonedFurniture );
 }
 
 bool ArchExplorer::touchUpWithModKeyCtrl( RenderOrchestrator& rsg ) {
     rsg.DC()->enableInputs(true);
+    rsg.DC()->LockScrollWheelMovements(false);
     rsg.setMICursorCapture(true, bFillFullFurnitureOutline ? MouseCursorType::HAND : MouseCursorType::ARROW);
     furnitureSelected = nullptr;
     bFurnitureTargetLocked = false;
@@ -176,6 +186,7 @@ void ArchExplorer::tickControlKey( const HouseBSData *_house, const V3f& _dir, R
                                                FeatureIntersectionFlags::FIF_Floors);
 
         if ( fdFurniture.hasHit() && fdFurniture.nearV < fd.nearV ) {
+            hitPosition = rsg.DC()->getPosition() + ( _dir * fd.nearV );
             V3f refNormal = V3f::UP_AXIS;
             furnitureSelectionAlphaAnim.fadeIn();
             furnitureSelected = dynamic_cast<FittedFurniture *>(fdFurniture.arch);
@@ -210,6 +221,7 @@ void ArchExplorer::tickControlKey( const HouseBSData *_house, const V3f& _dir, R
             bFillFullFurnitureOutline = false;
         }
         bool isMouseOverSelection = isMouseOverFurnitureInnerSelector(rsg.DC()->getPosition(), _dir);
+        rsg.DC()->LockScrollWheelMovements(isMouseOverSelection);
         rsg.setMICursorCapture(true, isMouseOverSelection ? MouseCursorType::HAND : MouseCursorType::ARROW);
     }
     if ( furnitureSelected ) {
@@ -217,7 +229,9 @@ void ArchExplorer::tickControlKey( const HouseBSData *_house, const V3f& _dir, R
     }
 }
 
-void FurnitureExplorerReplacer::addMetadataListFromTag( const std::string& _keyTag, CRefResourceMetadataList _metadataList, const std::string& _initialIndexCheck ) {
+void
+FurnitureExplorerReplacer::addMetadataListFromTag( const std::string& _keyTag, CRefResourceMetadataList _metadataList,
+                                                   const std::string& _initialIndexCheck ) {
     if ( !_metadataList.empty() ) {
         // This inserts the main key tag (_keyTag) maps to an array of all possible candidates of EntityMetaData (_metadataList)
         replaceFurniture.emplace(_keyTag, _metadataList);
@@ -237,13 +251,13 @@ void FurnitureExplorerReplacer::addMetadataListFromTag( const std::string& _keyT
         // the current selected element as last one to occur.
         if ( const auto& listIter = replaceFurniture.find(_keyTag); listIter != replaceFurniture.end() ) {
             auto list = listIter->second;
-            auto tagsArray = split_tags( _initialIndexCheck );
+            auto tagsArray = split_tags(_initialIndexCheck);
             std::sort(tagsArray.begin(), tagsArray.end());
             for ( auto lIndex = 0u; lIndex < list.size(); lIndex++ ) {
-                auto nameArray = split_tags( getFileNameOnly(list[lIndex].name) );
-                auto v3 = vectorsIntersection( tagsArray, nameArray );
+                auto nameArray = split_tags(getFileNameOnly(list[lIndex].name));
+                auto v3 = vectorsIntersection(tagsArray, nameArray);
                 if ( v3 == tagsArray ) {
-                    replacingIndex[_keyTag] = cai(lIndex+1, list.size());
+                    replacingIndex[_keyTag] = cai(lIndex + 1, list.size());
                     break;
                 }
             }
@@ -254,11 +268,11 @@ void FurnitureExplorerReplacer::addMetadataListFromTag( const std::string& _keyT
 std::optional<EntityMetaData>
 FurnitureExplorerReplacer::findCandidate( const std::string& _keyTag ) {
     if ( auto listIter = replaceFurniture.find(_keyTag); listIter != replaceFurniture.end() ) {
-       auto list = listIter->second;
-       auto fIndex = replacingIndex[_keyTag];
-       // Circularly scrolling through all possible candidates for keyTag
-       replacingIndex[_keyTag] = cai(replacingIndex[_keyTag]+1, list.size());
-       return list[fIndex];
+        auto list = listIter->second;
+        auto fIndex = replacingIndex[_keyTag];
+        // Circularly scrolling through all possible candidates for keyTag
+        replacingIndex[_keyTag] = cai(replacingIndex[_keyTag] + 1, list.size());
+        return list[fIndex];
     }
     return std::nullopt;
 }

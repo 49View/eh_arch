@@ -54,6 +54,7 @@ private:
     [[nodiscard]] bool isMouseOverFurnitureInnerSelector( const V3f& _origin, const V3f& _dir ) const;
     [[nodiscard]] bool canBeManipulated() const;
     void replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg, RenderOrchestrator& rsg );
+    void cloneInternal( HouseBSData *_house, FittedFurniture* sourceFurniture, std::shared_ptr<FittedFurniture> clonedFurniture );
 private:
     FeatureIntersection fd;
 
@@ -64,6 +65,7 @@ private:
     bool bFurnitureDirty = false;
     Plane3f furniturePlane;
     FittedFurniture *furnitureSelected = nullptr;
+    V3f hitPosition = V3f::ZERO;
     V3f centerBottomFurnitureSelected{ V3f::ZERO };
     std::vector<V3f> furnitureSelectionOutline;
     JMATH::AABB centerBottomBBox;
