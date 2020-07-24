@@ -106,6 +106,14 @@ void ArchExplorer::deleteSelected( RenderOrchestrator& rsg ) {
     }
 }
 
+void ArchExplorer::cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg ) {
+    auto ffs = EntityFactory::cloneHashed(*furnitureSelected);
+    V2f pos = XZY::C2(centerBottomFurnitureSelected);
+    auto f = HouseService::findFloorOf(_house, fd.room->hash);
+    RS::placeManually(
+            FurnitureRuleParams{ f, fd.room, ffs, pos, FRPFurnitureRuleFlags{ forceManualFurnitureFlags } });
+}
+
 bool ArchExplorer::touchUpWithModKeyCtrl( RenderOrchestrator& rsg ) {
     rsg.DC()->enableInputs(true);
     rsg.setMICursorCapture( true, bFillFullFurnitureOutline ? MouseCursorType::HAND : MouseCursorType::ARROW );

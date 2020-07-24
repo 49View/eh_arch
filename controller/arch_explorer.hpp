@@ -34,10 +34,11 @@ public:
     bool touchUpWithModKeyCtrl( RenderOrchestrator& rsg );
     void spaceToggle( RenderOrchestrator& rsg );
     void deleteSelected( RenderOrchestrator& rsg );
+    void cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg );
+
 private:
     void updateDot( RenderOrchestrator& rsg, const C4f& _dotColor );
     void updateFurnitureSelection( RenderOrchestrator& rsg, const V3f& centerBottomPos, const C4f& _dotColor );
-
     [[nodiscard]] bool isMouseOverFurnitureInnerSelector( const V3f& _origin, const V3f& _dir ) const;
 
 private:

@@ -193,6 +193,16 @@ struct DeleteSelected {
     }
 };
 
+struct CloneSelectedFurniture {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            asg.Explorer().cloneSelected( asg.H(), rsg);
+            MakeHouse3d{}(asg, rsg, arc);
+            asg.pushHouseChange();
+        }
+    }
+};
+
 struct TouchMoveExploreEdit {
     void operator()( const OnTouchMoveEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
