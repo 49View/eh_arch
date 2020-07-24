@@ -45,7 +45,6 @@ private:
     FeatureIntersection fd;
 
     FadeInOutSwitch furnitureSelectionAlphaAnim{ explorerFullDotOpacityValue, explorerDotFadeTime };
-    FadeInOutSwitch positionalDotAlphaAnim{ explorerFullDotOpacityValue, explorerDotFadeTime };
     bool bRoomBboxCheck = false;
     bool bFurnitureTargetLocked = false;
     bool bFillFullFurnitureOutline = false;

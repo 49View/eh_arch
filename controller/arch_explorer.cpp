@@ -13,9 +13,6 @@
 #include <eh_arch/models/room_service.hpp>
 #include <eh_arch/models/room_service_furniture.hpp>
 
-static constexpr float fadeOutNearDistance = 1.0f; // If dot is closer than this from the camera, linearly fade it out.
-static constexpr float minSafeDistance = 0.75f; // Deduct this distance from clicked dot position to avoid being to close to walls/objects
-
 inline V4f defaultDotColor() {
     return C4f::SKY_BLUE;
 }
