@@ -93,7 +93,7 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
 }
 
 void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {
-    if ( furnitureSelected && bFurnitureTargetLocked && fd.room ) {
+    if ( furnitureSelected && (bFurnitureTargetLocked||bFillFullFurnitureOutline) && fd.room ) {
         Quaternion quat = furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged)
                           ? QuaternionC::QuarterRollRotation : QuaternionC::QuarterYawRotation;
         RoomServiceFurniture::rotateFurniture(fd.room, furnitureSelected, quat, rsg.SG());
@@ -101,7 +101,7 @@ void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {
 }
 
 void ArchExplorer::deleteSelected( RenderOrchestrator& rsg ) {
-    if ( furnitureSelected && bFurnitureTargetLocked && fd.room ) {
+    if ( furnitureSelected && (bFurnitureTargetLocked||bFillFullFurnitureOutline) && fd.room ) {
         RoomServiceFurniture::removeFurniture(fd.room, furnitureSelected, rsg.SG());
     }
 }
@@ -111,7 +111,7 @@ void ArchExplorer::cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg )
     V2f pos = XZY::C2(centerBottomFurnitureSelected);
     auto f = HouseService::findFloorOf(_house, fd.room->hash);
     RS::placeManually(
-            FurnitureRuleParams{ f, fd.room, ffs, pos, FRPFurnitureRuleFlags{ forceManualFurnitureFlags } });
+            FurnitureRuleParams{ f, fd.room, ffs, pos, furnitureSelected->heightOffset, furnitureSelected->rotation, FRPFurnitureRuleFlags{ forceManualFurnitureFlags } });
 }
 
 bool ArchExplorer::touchUpWithModKeyCtrl( RenderOrchestrator& rsg ) {
