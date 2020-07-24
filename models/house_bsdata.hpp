@@ -25,10 +25,11 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2133;
+static const uint64_t SHouseJSONVersion = 2134;
 
 // Version log
 //
+// 2020-07-24 -    #2134 - Added keyTag and tags to FittedFurniture
 // 2020-07-22 -    #2133 - Added dependantHash to FittedFurniture
 
 static const float defaltToBeOverwritten = 7543859749023.0f;
@@ -174,9 +175,11 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
 };
 
 JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center, linkedHash,
-           sequencePart, mTriangles2d, name, symbolRef, dependantHashList, size, scale, position3d, xyLocation,
-           heightOffset, rotation, widthNormal, depthNormal, flags)
+           sequencePart, mTriangles2d, name, keyTag, tags, symbolRef, dependantHashList, size, scale, position3d,
+           xyLocation, heightOffset, rotation, widthNormal, depthNormal, flags)
     std::string name;
+    std::string keyTag;
+    std::vector<std::string> tags;
     std::string symbolRef = S::SQUARE;
     std::vector<HashEH> dependantHashList; // This represents a link between IE a table and few glasses placed over it.
     Vector3f size = Vector3f::ONE;
@@ -188,11 +191,8 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, he
     V2f widthNormal = V2fc::ZERO;
     V2f depthNormal = V2fc::ZERO;
     FittedFurnitureFlagsT flags = 0;
-    explicit FittedFurniture( const std::tuple<std::string, V3f>& args, std::string _symbolRef ) :
-            name(std::get<0>(args)), symbolRef(std::move(_symbolRef)), size(std::get<1>(args)) {
-        type = ArchType::FittedFurnitureT;
-    }
-    FittedFurniture( std::string _name, const Vector3f& _size ) : name(std::move(_name)), size(_size) {
+    explicit FittedFurniture( const std::tuple<std::string, V3f>& args, const std::string& _keyTag, const std::string& _symbolRef ) :
+            name(std::get<0>(args)), keyTag(_keyTag), symbolRef(std::move(_symbolRef)), size(std::get<1>(args)) {
         type = ArchType::FittedFurnitureT;
     }
     [[nodiscard]] bool checkIf( FittedFurnitureFlagsT _flag ) const;

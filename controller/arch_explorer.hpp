@@ -10,10 +10,12 @@
 #include <core/math/anim.h>
 #include <core/math/plane3f.h>
 #include <core/math/aabb.h>
+#include <core/resources/resource_metadata.hpp>
 #include <eh_arch/models/htypes.hpp>
 #include <eh_arch/models/arch_structural_service.hpp>
 
 class RenderOrchestrator;
+class ArchOrchestrator;
 
 struct HouseBSData;
 struct AggregatedInputData;
@@ -22,6 +24,16 @@ struct FittedFurniture;
 
 static constexpr float explorerFullDotOpacityValue = 0.75f;
 static constexpr float explorerDotFadeTime = 0.15f;
+
+class FurnitureExplorerReplacer {
+public:
+    void addMetadataListFromTag( const std::string& _keyTag, CRefResourceMetadataList el, const std::string& _initialIndexCheck );
+    std::optional<EntityMetaData> findCandidate( const std::string& _keyTag );
+private:
+    std::unordered_map<std::string, ResourceMetadataList> replaceFurniture;
+    std::unordered_map<std::string, uint64_t> replacingIndex;
+};
+
 
 class ArchExplorer {
 public:
@@ -35,12 +47,13 @@ public:
     void spaceToggle( RenderOrchestrator& rsg );
     void deleteSelected( RenderOrchestrator& rsg );
     void cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg );
-    void replaceFurnitureWithOneOfItsKind( RenderOrchestrator& rsg );
+    void replaceFurnitureWithOneOfItsKind( ArchOrchestrator& asg, RenderOrchestrator& rsg );
 
 private:
     void updateFurnitureSelection( RenderOrchestrator& rsg, const V3f& centerBottomPos, const C4f& _dotColor );
     [[nodiscard]] bool isMouseOverFurnitureInnerSelector( const V3f& _origin, const V3f& _dir ) const;
-
+    [[nodiscard]] bool canBeManipulated() const;
+    void replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg, RenderOrchestrator& rsg );
 private:
     FeatureIntersection fd;
 
@@ -56,4 +69,5 @@ private:
     JMATH::AABB centerBottomBBox;
     V3f prevFurnitureMovePosition{};
     FeatureIntersection fdFurniture;
+    FurnitureExplorerReplacer furnitureReplacer;
 };

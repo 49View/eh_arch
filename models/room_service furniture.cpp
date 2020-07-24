@@ -868,7 +868,7 @@ void FurnitureMapStorage::addIndex( FT _ft, FittedFurniture& _ff ) {
 }
 
 void FurnitureMapStorage::addIndex( const FurnitureSet& f ) {
-    auto ff = FittedFurniture{ { f.name, f.bboxSize }, f.symbol };
+    auto ff = FittedFurniture{ { f.name, f.bboxSize }, FurnitureTypeHandler::name(FT(f.ftype)), f.symbol };
     this->addIndex(FT(f.ftype), ff);
 }
 

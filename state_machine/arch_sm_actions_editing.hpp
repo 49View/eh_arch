@@ -213,7 +213,7 @@ struct FurnishHouse {
 struct AddFurnitureSingle {
     void operator()( const OnAddFurnitureSingleEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg,
                      ArchRenderController& arc ) {
-        auto ff = FittedFurniture{ { event.furnitureSet.name, event.furnitureSet.bboxSize },
+        auto ff = FittedFurniture{ { event.furnitureSet.name, event.furnitureSet.bboxSize }, FurnitureTypeHandler::name(FT(event.furnitureSet.ftype)),
                                    event.furnitureSet.symbol };
         auto ffs = EntityFactory::cloneHashed(ff);
         V2f pos = RS::maxEnclsingBoundingBoxCenter(event.room);

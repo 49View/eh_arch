@@ -187,8 +187,7 @@ struct SpaceToggle {
 struct ReplaceFurnitureWithOneOfItsKind {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
-            asg.Explorer().replaceFurnitureWithOneOfItsKind(rsg);
-            asg.pushHouseChange();
+            asg.Explorer().replaceFurnitureWithOneOfItsKind(asg, rsg);
         }
     }
 };
