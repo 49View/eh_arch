@@ -24,16 +24,6 @@ inline V4f furnitureMoveDotColor() {
     return C4f::PASTEL_GREEN;
 }
 
-void ArchExplorer::updateDot( RenderOrchestrator& rsg, const C4f& _dotColor ) {
-static constexpr float outerDotSize = 0.2f;
-    float alphaDistanceAttenuation = min(distance(hitPosition, rsg.DC()->getPosition()), fadeOutNearDistance);
-    float finalAlphaValue = positionalDotAlphaAnim.value() * alphaDistanceAttenuation;
-
-    rsg.RR().drawDotCircled( outerDotSize, hitPosition, fd.normal, _dotColor, finalAlphaValue, "d1");
-
-    hitPosition.setY(rsg.DC()->getPosition().y());
-}
-
 void ArchExplorer::updateFurnitureSelection( RenderOrchestrator& rsg, const V3f& centerBottomPos,
                                                   const C4f& _dotColor ) {
 
@@ -100,6 +90,10 @@ void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {
     }
 }
 
+void ArchExplorer::replaceFurnitureWithOneOfItsKind( RenderOrchestrator& rsg ) {
+
+}
+
 void ArchExplorer::deleteSelected( RenderOrchestrator& rsg ) {
     if ( furnitureSelected && (bFurnitureTargetLocked||bFillFullFurnitureOutline) && fd.room ) {
         RoomServiceFurniture::removeFurniture(fd.room, furnitureSelected, rsg.SG());
@@ -142,7 +136,7 @@ void ArchExplorer::tickControlKey( const HouseBSData *_house, const V3f& _dir, R
                                                FeatureIntersectionFlags::FIF_Walls |
                                                FeatureIntersectionFlags::FIF_Floors);
 
-        if ( fdFurniture.hasHit() ) {
+        if ( fdFurniture.hasHit() && fdFurniture.nearV < fd.nearV) {
             V3f refNormal = V3f::UP_AXIS;
             furnitureSelectionAlphaAnim.fadeIn();
             furnitureSelected = dynamic_cast<FittedFurniture *>(fdFurniture.arch);
@@ -178,12 +172,6 @@ void ArchExplorer::tickControlKey( const HouseBSData *_house, const V3f& _dir, R
         }
         bool isMouseOverSelection = isMouseOverFurnitureInnerSelector(rsg.DC()->getPosition(), _dir);
         rsg.setMICursorCapture( true, isMouseOverSelection ? MouseCursorType::HAND : MouseCursorType::ARROW);
-        if ( fd.hasHit() ) {
-            float safeDist = fd.nearV > minSafeDistance ? fd.nearV - minSafeDistance : 0.0f;
-            hitPosition = rsg.DC()->getPosition() + ( _dir * safeDist );
-            positionalDotAlphaAnim.fade(isMouseOverSelection ? FadeInternalPhase::Out : FadeInternalPhase::In);
-            updateDot(rsg, furnitureMoveDotColor());
-        }
     }
     if ( furnitureSelected ) {
         updateFurnitureSelection(rsg, centerBottomFurnitureSelected, furnitureMoveDotColor());

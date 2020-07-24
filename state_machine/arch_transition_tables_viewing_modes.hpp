@@ -57,6 +57,7 @@ struct ExploreStateMachine {
             ,state<class ExploreEditState> + event<OnTouchUpEvent> / TouchUpExploreEdit{}
 
             ,state<class ExploreEditState> + event<OnSpaceEvent> / SpaceToggle{}
+            ,state<class ExploreEditState> + event<OnScrollEvent> / ReplaceFurnitureWithOneOfItsKind{}
             ,state<class ExploreEditState> + event<OnCloneEvent> / CloneSelectedFurniture{}
             ,state<class ExploreEditState> + event<OnDeleteEvent> / DeleteSelected{}
 

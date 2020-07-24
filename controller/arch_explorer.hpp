@@ -35,14 +35,13 @@ public:
     void spaceToggle( RenderOrchestrator& rsg );
     void deleteSelected( RenderOrchestrator& rsg );
     void cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg );
+    void replaceFurnitureWithOneOfItsKind( RenderOrchestrator& rsg );
 
 private:
-    void updateDot( RenderOrchestrator& rsg, const C4f& _dotColor );
     void updateFurnitureSelection( RenderOrchestrator& rsg, const V3f& centerBottomPos, const C4f& _dotColor );
     [[nodiscard]] bool isMouseOverFurnitureInnerSelector( const V3f& _origin, const V3f& _dir ) const;
 
 private:
-    V3f hitPosition{ V3f::ZERO };
     FeatureIntersection fd;
 
     FadeInOutSwitch furnitureSelectionAlphaAnim{ explorerFullDotOpacityValue, explorerDotFadeTime };
@@ -58,8 +57,4 @@ private:
     JMATH::AABB centerBottomBBox;
     V3f prevFurnitureMovePosition{};
     FeatureIntersection fdFurniture;
-
 };
-
-
-
