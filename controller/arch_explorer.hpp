@@ -54,7 +54,7 @@ private:
     [[nodiscard]] bool isMouseOverFurnitureInnerSelector( const V3f& _origin, const V3f& _dir ) const;
     [[nodiscard]] bool canBeManipulated() const;
     void replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg, RenderOrchestrator& rsg );
-    void cloneInternal( HouseBSData *_house, FittedFurniture* sourceFurniture, std::shared_ptr<FittedFurniture> clonedFurniture );
+    void cloneInternal( HouseBSData *_house, FittedFurniture* sourceFurniture, const std::shared_ptr<FittedFurniture>& clonedFurniture );
 private:
     FeatureIntersection fd;
 

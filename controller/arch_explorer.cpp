@@ -142,7 +142,7 @@ void ArchExplorer::deleteSelected( RenderOrchestrator& rsg ) {
     }
 }
 
-void ArchExplorer::cloneInternal( HouseBSData *_house, FittedFurniture* sourceFurniture, std::shared_ptr<FittedFurniture> clonedFurniture ) {
+void ArchExplorer::cloneInternal( HouseBSData *_house, FittedFurniture* sourceFurniture, const std::shared_ptr<FittedFurniture>& clonedFurniture ) {
     auto depthOffset = sourceFurniture->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ? sourceFurniture->depthNormal * sourceFurniture->width : V2fc::ZERO;
     V2f pos = XZY::C2(hitPosition) + depthOffset;
     auto f = HouseService::findFloorOf(_house, fd.room->hash);
