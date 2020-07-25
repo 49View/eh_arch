@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <eh_arch/controller/arch_explorer.hpp>
+
 struct [[maybe_unused]] ActivateOrbitMode {
     void
     operator()( SceneGraph& sg, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
@@ -129,7 +131,7 @@ struct TickExploreEdit {
     void operator()( const OnTickEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
             renderCameraLocator( asg, rsg );
-            asg.Explorer().tickControlKey( asg.H(), event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg );
+            asg.Explorer().tickControlKey( asg, event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg );
         }
     }
 };
@@ -226,6 +228,14 @@ struct TouchUpExploreEdit {
             if ( isDirty ) {
                 asg.pushHouseChange();
             }
+        }
+    }
+};
+
+struct SingleTapExploreEdit {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            asg.Explorer().singleClickSelection( rsg );
         }
     }
 };

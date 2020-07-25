@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include <core/resources/resource_metadata.hpp>
 #include <core/util.h>
+#include <core/resources/resource_metadata.hpp>
 #include <graphics/imgui/imgui.h>
+#include <graphics/imgui/im_gui_utils.h>
 #include <poly/scene_graph.h>
 #include <render_scene_graph/render_orchestrator.h>
 
@@ -17,7 +18,6 @@
 #include <eh_arch/models/htypes_functions.hpp>
 
 #include "eh_arch/state_machine/arch_sm_events__fsm.hpp"
-#include "house_maker/sources/selection_editor.hpp"
 
 class RemoteEntitySelector {
 public:
@@ -62,8 +62,8 @@ public:
         return ret;
     }
 
-    template<typename BE, typename R>
-    void update( BE *backEnd, const std::string& mediaFolder, SceneGraph& sg, RenderOrchestrator& rsg, R *_resource ) {
+    template<typename R>
+    void update( ArchOrchestrator& asg, const std::string& mediaFolder, RenderOrchestrator& rsg, R *_resource ) {
 
         if ( !_resource || resourceGroup.empty() ) return;
         if ( resourceGroup == ResourceGroup::Geom && metadataGeomList.empty() ) return;
@@ -92,7 +92,11 @@ public:
         if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
         if (no_docking)         window_flags |= ImGuiWindowFlags_NoDocking;
 
+        auto viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2{0.0f, viewport->Size.y*0.8f});
+        ImGui::SetNextWindowSize(ImVec2{viewport->Size.x, viewport->Size.y*0.2f});
         ImGui::Begin("Entity", nullptr, window_flags );
+
         ImGui::Columns(3);
         auto wWidth = ImGui::GetWindowWidth();
         auto windowPadding = ImGui::GetStyle().WindowPadding.x;
@@ -123,19 +127,19 @@ public:
                         if ( m + t >= metadataGeomList.size() ) break;
                         const auto& meta = metadataGeomList[m + t];
                         if ( !meta.thumb.empty() ) {
-                            auto imr = sg.get<RawImage>(meta.thumb);
+                            auto imr = rsg.SG().get<RawImage>(meta.thumb);
                             if ( !imr ) {
                                 auto fileData = FM::readLocalFileC(
                                         mediaFolder + "entities/" + meta.group + "/" + meta.thumb);
                                 if ( !fileData.empty() ) {
-                                    sg.addRawImageIM(meta.thumb, RawImage{ fileData });
+                                    rsg.SG().addRawImageIM(meta.thumb, RawImage{ fileData });
                                 }
                             }
                         }
                         auto im = rsg.TH( meta.thumb.empty() ? S::WHITE : meta.thumb);
                         if ( im ) {
                             if ( ImGui::ImageButton(ImGuiRenderTexture(im), ImVec2(thumbSize, thumbSize)) ) {
-                                backEnd->process_event(OnAddFurnitureSingleEvent{_resource, FurnitureSet{FT::FT_Sofa, meta.hash, meta.bboxSize, S::SQUARE}});
+//                                backEnd->process_event(OnAddFurnitureSingleEvent{_resource, FurnitureSet{FT::FT_Sofa, meta.hash, meta.bboxSize, S::SQUARE}});
                             }
                             auto sanitizedTags = tagsSanitisedFor(query, meta.group, meta.tags);
                             if ( ImGui::IsItemHovered() ) {
@@ -162,12 +166,12 @@ public:
                         if ( t > 0 ) ImGui::SameLine();
                         if ( m + t >= metadataMaterialList.size() ) break;
                         const auto& meta = metadataMaterialList[m + t];
-                        auto imr = sg.get<RawImage>(meta.thumb);
+                        auto imr = rsg.SG().get<RawImage>(meta.thumb);
                         if ( !imr ) {
                             auto fileData = FM::readLocalFileC(
                                     mediaFolder + "entities/" + meta.group + "/" + meta.thumb);
                             if ( !fileData.empty() ) {
-                                sg.addRawImageIM(meta.thumb, RawImage{ fileData });
+                                rsg.SG().addRawImageIM(meta.thumb, RawImage{ fileData });
                             }
                         }
                         auto im = rsg.TH(meta.thumb);
@@ -175,7 +179,8 @@ public:
                             if ( ImGui::ImageButton(ImGuiRenderTexture(im), ImVec2(matThumbSize, matThumbSize)) ) {
                                 materialAndColorTarget->materialHash = meta.hash;
                                 materialAndColorTarget->materialName = meta.name;
-                                backEnd->process_event(OnMakeHouse3dEvent{});
+                                asg.make3dHouse([&]() { LOGRS("Spawn an house changing a material") });
+//                                backEnd->process_event(OnMakeHouse3dEvent{});
                             }
                             auto sanitizedTags = tagsSanitisedFor(query, meta.group, meta.tags);
                             if ( ImGui::IsItemHovered() ) {
@@ -242,7 +247,8 @@ public:
                             materialAndColorTarget->color = meta.color;
                             materialAndColorTarget->colorHash = meta.hash;
                             materialAndColorTarget->colorName = meta.name;
-                            backEnd->process_event(OnMakeHouse3dEvent{});
+                            asg.make3dHouse([&]() { LOGRS("Spawn an house changing a material color") });
+//                            backEnd->process_event(OnMakeHouse3dEvent{});
                         }
                         if ( ImGui::IsItemHovered() ) {
                             ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);

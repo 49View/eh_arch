@@ -1189,6 +1189,7 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                         fd.normal = planeFloor.n;
                         fd.arch = room.get();
                         fd.room = room.get();
+                        fd.intersectedType = GHType::Floor;
                     }
                 }
 
@@ -1201,6 +1202,7 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                                 fd.normal = plane.n;
                                 fd.archSegment = &wd;
                                 fd.room = room.get();
+                                fd.intersectedType = GHType::Wall;
                             }
                         }
                     }
@@ -1212,6 +1214,7 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                         if ( ArchStructuralService::intersectRayMin(ff.get(), rayPair, fd.nearV) ) {
                             fd.arch = ff.get();
                             fd.room = room.get();
+                            fd.intersectedType = GHType::Furniture;
                         }
                     }
                 }

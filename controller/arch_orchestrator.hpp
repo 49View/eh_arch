@@ -13,16 +13,16 @@
 #include <eh_arch/models/room_service_furniture.hpp>
 #include <eh_arch/controller/arch_tour.hpp>
 #include <eh_arch/controller/arch_positional_dot.hpp>
-#include <eh_arch/controller/arch_explorer.hpp>
 #include "htypes.hpp"
 
 class SceneGraph;
 class RenderOrchestrator;
+class ArchExplorer;
 struct AggregatedInputData;
 
 class ArchOrchestrator {
 public:
-    explicit ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg, ArchRenderController& _arc );
+    explicit ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg, ArchRenderController& _arc, ArchExplorer& _ae );
 
     void loadFurnitureMapStorage( const std::string& _name );
     FurnitureMapStorage& FurnitureMap();
@@ -61,6 +61,7 @@ protected:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
     ArchRenderController& arc;
+    ArchExplorer& archExplorer;
     Memento<HouseBSData> houseJson;
     ArchIOEvents currIOEvent = ArchIOEvents::AIOE_None;
     HouseRenderContainer hrc;
@@ -69,6 +70,5 @@ protected:
     FloorPlanRenderMode lastKnownGoodFloorPlanRenderMode = FloorPlanRenderMode::Normal3d;
     Matrix4f floorplanNavigationMatrix{Matrix4f::MIDENTITY()};
     ArchPositionalDot positionalDot;
-    ArchExplorer archExplorer;
     TourPlayback tourPlayback;
 };

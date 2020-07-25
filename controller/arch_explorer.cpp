@@ -85,6 +85,15 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
                                                                                : MouseCursorType::ARROW);
 }
 
+void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
+    // If we are on a manipulable object do nothing
+    if ( !canBeManipulated() && fd.hasHit() ) {
+        res.prepare(fd.intersectedType, "", ResourceGroup::Material);
+
+        LOGRS("Hit type " << fd.intersectedType );
+    }
+}
+
 void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {
     if ( canBeManipulated() ) {
         Quaternion quat = furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged)
@@ -176,14 +185,16 @@ std::vector<V3f> createBBoxOutline( const V3f& input, const V3f& axis1, const V3
     return ret;
 }
 
-void ArchExplorer::tickControlKey( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg ) {
+void ArchExplorer::tickControlKey( ArchOrchestrator& asg, const V3f& _dir, RenderOrchestrator& rsg ) {
 
     if ( !bFurnitureTargetLocked ) {
-        fdFurniture = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), _dir },
+        fdFurniture = HouseService::rayFeatureIntersect(asg.H(), RayPair3{ rsg.DC()->getPosition(), _dir },
                                                         FeatureIntersectionFlags::FIF_Furnitures);
-        fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), _dir },
+        fd = HouseService::rayFeatureIntersect(asg.H(), RayPair3{ rsg.DC()->getPosition(), _dir },
                                                FeatureIntersectionFlags::FIF_Walls |
                                                FeatureIntersectionFlags::FIF_Floors);
+
+        res.update( asg, "/home/dado/media/media/",  rsg, fd.room);
 
         if ( fdFurniture.hasHit() && fdFurniture.nearV < fd.nearV ) {
             hitPosition = rsg.DC()->getPosition() + ( _dir * fd.nearV );

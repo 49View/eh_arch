@@ -3,11 +3,11 @@
 //
 
 #include "arch_orchestrator.hpp"
+
 #include <core/resources/resource_builder.hpp>
 #include <core/TTF.h>
 #include <core/camera.h>
 #include <core/resources/profile.hpp>
-#include <render_scene_graph/render_orchestrator.h>
 #include <core/math/vector_util.hpp>
 #include <core/lightmap_exchange_format.h>
 
@@ -20,16 +20,16 @@
 #include <poly/collision_mesh.hpp>
 #include <poly/scene_graph.h>
 
+#include <render_scene_graph/render_orchestrator.h>
+
 #include <eh_arch/models/house_bsdata.hpp>
 #include <eh_arch/models/house_service.hpp>
-
+#include <eh_arch/controller/arch_render_controller.hpp>
+#include <eh_arch/controller/arch_explorer.hpp>
 #include <eh_arch/render/house_render.hpp>
 
-#include <eh_arch/controller/arch_render_controller.hpp>
-
-ArchOrchestrator::ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg, ArchRenderController& _arc ) : sg(_sg),
-                                                                                                              rsg(_rsg),
-                                                                                                              arc(_arc) {
+ArchOrchestrator::ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg, ArchRenderController& _arc, ArchExplorer& _ae ) :
+    sg(_sg), rsg(_rsg), arc(_arc), archExplorer(_ae) {
 }
 
 namespace HOD { // HighOrderDependency
@@ -58,6 +58,7 @@ namespace HOD { // HighOrderDependency
                     ret.addDep(sg, ResourceGroup::Geom, furn->name);
                     ret.addDep(sg, ResourceGroup::Profile, furn->symbolRef);
                 }
+
 
                 // Will load Kitchen and bathroom sets here
                 ret.addDep(sg, ResourceGroup::Material, room->kitchenData.worktopMaterial.materialHash);

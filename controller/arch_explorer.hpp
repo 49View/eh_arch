@@ -13,6 +13,7 @@
 #include <core/resources/resource_metadata.hpp>
 #include <eh_arch/models/htypes.hpp>
 #include <eh_arch/models/arch_structural_service.hpp>
+#include "remote_entity_selector.hpp"
 
 class RenderOrchestrator;
 class ArchOrchestrator;
@@ -37,13 +38,14 @@ private:
 
 class ArchExplorer {
 public:
-    ArchExplorer() = default;
-    void tickControlKey( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg );
+    ArchExplorer( RemoteEntitySelector& res ) : res(res) {}
+    void tickControlKey( ArchOrchestrator& asg, const V3f& _dir, RenderOrchestrator& rsg );
 
     // Events
     void touchMoveWithModKeyCtrl( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg );
     void firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrator& rsg );
     bool touchUpWithModKeyCtrl( RenderOrchestrator& rsg );
+    void singleClickSelection( RenderOrchestrator& rsg );
     void spaceToggle( RenderOrchestrator& rsg );
     void deleteSelected( RenderOrchestrator& rsg );
     void cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg );
@@ -56,6 +58,7 @@ private:
     void replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg, RenderOrchestrator& rsg );
     void cloneInternal( HouseBSData *_house, FittedFurniture* sourceFurniture, const std::shared_ptr<FittedFurniture>& clonedFurniture );
 private:
+    RemoteEntitySelector& res;
     FeatureIntersection fd;
 
     FadeInOutSwitch furnitureSelectionAlphaAnim{ explorerFullDotOpacityValue, explorerDotFadeTime };
