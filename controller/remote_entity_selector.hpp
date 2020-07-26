@@ -19,6 +19,7 @@
 
 #include "eh_arch/state_machine/arch_sm_events__fsm.hpp"
 
+
 class RemoteEntitySelector {
 public:
 
@@ -63,11 +64,12 @@ public:
     }
 
     template<typename R>
-    void update( ArchOrchestrator& asg, const std::string& mediaFolder, RenderOrchestrator& rsg, R *_resource ) {
+    void update( ArchOrchestrator& asg, bool *isWidgetOpen, const std::string& mediaFolder, RenderOrchestrator& rsg,
+                 R *_resource ) {
 
-        if ( !_resource || resourceGroup.empty() ) return;
-        if ( resourceGroup == ResourceGroup::Geom && metadataGeomList.empty() ) return;
-        if ( resourceGroup == ResourceGroup::Material && metadataMaterialList.empty() ) return;
+//        ImGui::ShowDemoWindow();
+
+        if ( !_resource || resourceGroup.empty() || !*isWidgetOpen ) return;
 
         static bool no_titlebar = true;
         static bool no_scrollbar = false;
@@ -76,48 +78,37 @@ public:
         static bool no_resize = true;
         static bool no_collapse = true;
         static bool no_nav = true;
-        static bool no_background = false;
+        static bool no_background = true;
         static bool no_bring_to_front = false;
         static bool no_docking = true;
 
-        ImGuiWindowFlags window_flags = 0;
-        if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
-        if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
-        if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
-        if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
-        if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
-        if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
-        if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
-        if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
-        if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
-        if (no_docking)         window_flags |= ImGuiWindowFlags_NoDocking;
+        ImGuiWindowFlags window_flags = 0u;
+        if ( no_titlebar ) window_flags |= ImGuiWindowFlags_NoTitleBar;
+        if ( no_scrollbar ) window_flags |= ImGuiWindowFlags_NoScrollbar;
+        if ( !no_menu ) window_flags |= ImGuiWindowFlags_MenuBar;
+        if ( no_move ) window_flags |= ImGuiWindowFlags_NoMove;
+        if ( no_resize ) window_flags |= ImGuiWindowFlags_NoResize;
+        if ( no_collapse ) window_flags |= ImGuiWindowFlags_NoCollapse;
+        if ( no_nav ) window_flags |= ImGuiWindowFlags_NoNav;
+        if ( no_background ) window_flags |= ImGuiWindowFlags_NoBackground;
+        if ( no_bring_to_front ) window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+        if ( no_docking ) window_flags |= ImGuiWindowFlags_NoDocking;
 
         auto viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(ImVec2{0.0f, viewport->Size.y*0.8f});
-        ImGui::SetNextWindowSize(ImVec2{viewport->Size.x, viewport->Size.y*0.2f});
-        ImGui::Begin("Entity", nullptr, window_flags );
-
-        ImGui::Columns(3);
+        ImGui::SetNextWindowPos(ImVec2{ viewport->Size.x * 0.48f, viewport->Size.y * 0.25f });
+        ImGui::SetNextWindowSize(ImVec2{ viewport->Size.x * 0.5f, viewport->Size.y * 0.5f });
+        ImGui::Begin("Entity", isWidgetOpen, window_flags);
         auto wWidth = ImGui::GetWindowWidth();
         auto windowPadding = ImGui::GetStyle().WindowPadding.x;
         auto framePadding = ImGui::GetStyle().FramePadding.x;
-        auto columnIndexWidth = wWidth*0.2;
-        auto columnMaterialWidth = wWidth*0.4;
-        auto columnColorsWidth = wWidth*0.4;
-        ImGui::SetColumnWidth(0, columnIndexWidth);
-        ImGui::SetColumnWidth(1, columnMaterialWidth);
-        ImGui::SetColumnWidth(2, columnColorsWidth);
 
-        ImGui::TextColored(ImVec4(0.5, 0.7, 0.2, 1.0), "%s", GHTypeToString(label).c_str());
-
-        static char query[256] = { '\0' };
-        ImGui::SetNextItemWidth(-1.0f);
-        if ( ImGui::InputTextWithHint("", "Filter by...(IE: \"wood\", \"coffee,table\")", query, 256, ImGuiInputTextFlags_EnterReturnsTrue) ) {
-            ResourceMetaData::getListOf(resourceGroup, query, resListCallback());
-        }
-
-        ImGui::NextColumn();
         if ( resourceGroup == ResourceGroup::Geom ) {
+            static char query[256] = { '\0' };
+            ImGui::SetNextItemWidth(-1.0f);
+            if ( ImGui::InputTextWithHint("", "Search for...(IE: \"coffee,table\")", query, 256,
+                                          ImGuiInputTextFlags_EnterReturnsTrue) ) {
+                ResourceMetaData::getListOf(resourceGroup, query, resListCallback());
+            }
             if ( !metadataGeomList.empty() ) {
                 int grouping = 3;
                 for ( auto m = 0u; m < metadataGeomList.size(); m += 3 ) {
@@ -136,7 +127,7 @@ public:
                                 }
                             }
                         }
-                        auto im = rsg.TH( meta.thumb.empty() ? S::WHITE : meta.thumb);
+                        auto im = rsg.TH(meta.thumb.empty() ? S::WHITE : meta.thumb);
                         if ( im ) {
                             if ( ImGui::ImageButton(ImGuiRenderTexture(im), ImVec2(thumbSize, thumbSize)) ) {
 //                                backEnd->process_event(OnAddFurnitureSingleEvent{_resource, FurnitureSet{FT::FT_Sofa, meta.hash, meta.bboxSize, S::SQUARE}});
@@ -155,12 +146,22 @@ public:
         }
 
         if ( resourceGroup == ResourceGroup::Material ) {
+
+            ImGui::TextColored(ImVec4(0.5, 0.7, 0.2, 1.0), "%s", GHTypeToString(label).c_str());
+
+            static char query[256] = { '\0' };
+            ImGui::SetNextItemWidth(-1.0f);
+            if ( ImGui::InputTextWithHint("", "Filter by...(IE: \"wood\", \"carpet\")", query, 256,
+                                          ImGuiInputTextFlags_EnterReturnsTrue) ) {
+                ResourceMetaData::getListOf(resourceGroup, query, resListCallback());
+            }
+
             materialAndColorTarget = getCommonMaterialChangeMapping(label, _resource);
             if ( !materialAndColorTarget ) return;
 
             if ( !metadataMaterialList.empty() ) {
-                int grouping = (columnMaterialWidth-windowPadding*2) / (thumbSize+framePadding);
-                int matThumbSize = thumbSize-framePadding;
+                int grouping = ( wWidth - windowPadding * 2 ) / ( thumbSize + framePadding );
+                int matThumbSize = thumbSize - framePadding;
                 for ( auto m = 0u; m < metadataMaterialList.size(); m += grouping ) {
                     for ( int t = 0; t < grouping; t++ ) {
                         if ( t > 0 ) ImGui::SameLine();
@@ -192,49 +193,59 @@ public:
                         }
                     }
                 }
+            }
+        }
 
-                ImGui::NextColumn();
+        if ( resourceGroup == ResourceGroup::Color ) {
+            materialAndColorTarget = getCommonMaterialChangeMapping(label, _resource);
+            if ( !materialAndColorTarget ) return;
 
-                std::vector<std::pair<std::string, C4f>> colors;
-                colors.emplace_back("red", C4f::INDIAN_RED);
-                colors.emplace_back("green", C4f::FOREST_GREEN);
-                colors.emplace_back("black", C4f::DARK_GRAY);
+            if ( metadataColorList.empty() ) {
+                ResourceMetaData::getListOf(ResourceGroup::Color, "yellow",
+                                            [&]( CRefResourceMetadataList el ) {
+                                                metadataColorList = el;
+                                            });
+            }
 
-                colors.emplace_back("blue", C4f::SKY_BLUE);
-                colors.emplace_back("cream", C4f::SAND);
-                colors.emplace_back("grey", C4f::PASTEL_GRAY);
+            std::vector<std::pair<std::string, C4f>> colors;
+            colors.emplace_back("red", C4f::INDIAN_RED);
+            colors.emplace_back("green", C4f::FOREST_GREEN);
+            colors.emplace_back("black", C4f::DARK_GRAY);
 
-                colors.emplace_back("orange", C4f::PASTEL_ORANGE);
-                colors.emplace_back("pink", C4f::HOT_PINK);
-                colors.emplace_back("purple", C4f::DARK_PURPLE);
+            colors.emplace_back("blue", C4f::SKY_BLUE);
+            colors.emplace_back("cream", C4f::SAND);
+            colors.emplace_back("grey", C4f::PASTEL_GRAY);
 
-                colors.emplace_back("teal", C4f::PASTEL_CYAN);
-                colors.emplace_back("white", C4f::LIGHT_GREY);
-                colors.emplace_back("yellow", C4f::PASTEL_YELLOW);
+            colors.emplace_back("orange", C4f::PASTEL_ORANGE);
+            colors.emplace_back("pink", C4f::HOT_PINK);
+            colors.emplace_back("purple", C4f::DARK_PURPLE);
 
-                constexpr int colorFamilyThumbSize = 32;
-                for ( auto m = 0u; m < colors.size(); m++ ) {
-                    const auto& color = colors[m];
-                    if ( ImGui::ColorButton(color.first.c_str(),
-                                            ImVec4(color.second.x(), color.second.y(), color.second.z(), 1.0f), 0,
-                                            ImVec2(colorFamilyThumbSize, colorFamilyThumbSize)) ) {
-                        ResourceMetaData::getListOf(ResourceGroup::Color, color.first,
-                                                    [&]( CRefResourceMetadataList el ) {
-                                                        metadataColorList = el;
-                                                    });
-                    }
-                    if ( ImGui::IsItemHovered() ) {
-                        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-                        ImGui::SetTooltip("%s", color.first.c_str());
-                    }
-                    ImGui::SameLine();
+            colors.emplace_back("teal", C4f::PASTEL_CYAN);
+            colors.emplace_back("white", C4f::LIGHT_GREY);
+            colors.emplace_back("yellow", C4f::PASTEL_YELLOW);
+
+            constexpr int colorFamilyThumbSize = 32;
+            for ( auto m = 0u; m < colors.size(); m++ ) {
+                const auto& color = colors[m];
+                if ( ImGui::ColorButton(color.first.c_str(),
+                                        ImVec4(color.second.x(), color.second.y(), color.second.z(), 1.0f), 0,
+                                        ImVec2(colorFamilyThumbSize, colorFamilyThumbSize)) ) {
+                    ResourceMetaData::getListOf(ResourceGroup::Color, color.first,
+                                                [&]( CRefResourceMetadataList el ) {
+                                                    metadataColorList = el;
+                                                });
                 }
+                if ( ImGui::IsItemHovered() ) {
+                    ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                    ImGui::SetTooltip("%s", color.first.c_str());
+                }
+                ImGui::SameLine();
             }
 
             if ( !metadataColorList.empty() ) {
                 constexpr int thumbSizeMedium = 64;
-                int grouping = (columnColorsWidth-windowPadding*2) / (thumbSizeMedium+framePadding);
-                int colThumbSize = thumbSizeMedium-framePadding;
+                int grouping = ( wWidth - windowPadding * 2 ) / ( thumbSizeMedium + framePadding );
+                int colThumbSize = thumbSizeMedium - framePadding;
 
                 for ( auto m = 0u; m < metadataColorList.size(); m += grouping ) {
                     ImGui::NewLine();
@@ -252,16 +263,14 @@ public:
                         }
                         if ( ImGui::IsItemHovered() ) {
                             ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-                            ImGui::BeginTooltip();
-                            ImGui::Text("Color Name:");
-                            ImGui::Text("%s", meta.name.c_str());
-                            ImGui::EndTooltip();
+                            ImGui::SetTooltip("%s", meta.name.c_str());
                         }
                         ImGui::SameLine();
                     }
                 }
             }
         }
+
         ImGui::End();
     }
 

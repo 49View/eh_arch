@@ -16,6 +16,7 @@
 #include "remote_entity_selector.hpp"
 
 class RenderOrchestrator;
+
 class ArchOrchestrator;
 
 struct HouseBSData;
@@ -28,7 +29,8 @@ static constexpr float explorerDotFadeTime = 0.15f;
 
 class FurnitureExplorerReplacer {
 public:
-    void addMetadataListFromTag( const std::string& _keyTag, CRefResourceMetadataList el, const std::string& _initialIndexCheck );
+    void addMetadataListFromTag( const std::string& _keyTag, CRefResourceMetadataList el,
+                                 const std::string& _initialIndexCheck );
     std::optional<EntityMetaData> findCandidate( const std::string& _keyTag );
 private:
     std::unordered_map<std::string, ResourceMetadataList> replaceFurniture;
@@ -38,8 +40,8 @@ private:
 
 class ArchExplorer {
 public:
-    ArchExplorer( RemoteEntitySelector& res ) : res(res) {}
-    void tickControlKey( ArchOrchestrator& asg, const V3f& _dir, RenderOrchestrator& rsg );
+    explicit ArchExplorer( RemoteEntitySelector& res ) : res(res) {}
+    void tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rsg, const AggregatedInputData& aid );
 
     // Events
     void touchMoveWithModKeyCtrl( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg );
@@ -52,11 +54,16 @@ public:
     void replaceFurnitureWithOneOfItsKind( ArchOrchestrator& asg, RenderOrchestrator& rsg );
 
 private:
-    void updateFurnitureSelection( RenderOrchestrator& rsg, const V3f& centerBottomPos, const C4f& _dotColor );
+    void updateFurnitureSelection( RenderOrchestrator& rsg, const AggregatedInputData& aid, const V3f& centerBottomPos,
+                                   const C4f& _dotColor );
     [[nodiscard]] bool isMouseOverFurnitureInnerSelector( const V3f& _origin, const V3f& _dir ) const;
     [[nodiscard]] bool canBeManipulated() const;
-    void replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg, RenderOrchestrator& rsg );
-    void cloneInternal( HouseBSData *_house, FittedFurniture* sourceFurniture, const std::shared_ptr<FittedFurniture>& clonedFurniture );
+    [[nodiscard]] bool isActivelySelectingWall() const;
+    [[nodiscard]] bool isActivelySelectingFloor() const;
+    void
+    replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg, RenderOrchestrator& rsg );
+    void cloneInternal( HouseBSData *_house, FittedFurniture *sourceFurniture,
+                        const std::shared_ptr<FittedFurniture>& clonedFurniture );
 private:
     RemoteEntitySelector& res;
     FeatureIntersection fd;
@@ -66,6 +73,7 @@ private:
     bool bFurnitureTargetLocked = false;
     bool bFillFullFurnitureOutline = false;
     bool bFurnitureDirty = false;
+    bool bColorMaterialWidgetActive = false;
     Plane3f furniturePlane;
     FittedFurniture *furnitureSelected = nullptr;
     V3f hitPosition = V3f::ZERO;

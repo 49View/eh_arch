@@ -131,7 +131,7 @@ struct TickExploreEdit {
     void operator()( const OnTickEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
             renderCameraLocator( asg, rsg );
-            asg.Explorer().tickControlKey( asg, event.aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get()), rsg );
+            asg.Explorer().tickControlKey( asg, rsg, event.aid );
         }
     }
 };

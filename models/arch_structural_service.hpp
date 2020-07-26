@@ -18,7 +18,7 @@ public:
     ArchStructural* arch = nullptr;
     ArchSegment* archSegment = nullptr;
     RoomBSData* room = nullptr;
-    float nearV = 0.0f;
+    float nearV = std::numeric_limits<float>::max();
     V3f normal = V3f::ZERO;
     GHTypeT intersectedType = GHType::Generic;
 };

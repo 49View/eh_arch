@@ -16,6 +16,7 @@
 #include <eh_arch/models/house_service.hpp>
 #include <eh_arch/models/room_service.hpp>
 #include <eh_arch/models/room_service_furniture.hpp>
+#include <eh_arch/render/ui/house_ui_material_properties.hpp>
 
 inline V4f furnitureMoveDotColor() {
     return C4f::PASTEL_GREEN;
@@ -25,20 +26,37 @@ bool ArchExplorer::canBeManipulated() const {
     return ( furnitureSelected && ( bFurnitureTargetLocked || bFillFullFurnitureOutline ) && fd.room );
 }
 
-void ArchExplorer::updateFurnitureSelection( RenderOrchestrator& rsg, const V3f& centerBottomPos,
-                                             const C4f& _dotColor ) {
+bool ArchExplorer::isActivelySelectingWall() const {
+    return !bFurnitureTargetLocked && !bFillFullFurnitureOutline && fd.hasHit() && fd.intersectedType == GHType::Wall;
+}
 
+bool ArchExplorer::isActivelySelectingFloor() const {
+    return !bFurnitureTargetLocked && !bFillFullFurnitureOutline && fd.hasHit() && fd.intersectedType == GHType::Floor;
+}
+
+void ArchExplorer::updateFurnitureSelection( RenderOrchestrator& rsg, const AggregatedInputData& aid,
+                                             const V3f& centerBottomPos, const C4f& _dotColor ) {
     auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
 
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(2) << furnitureSelectionAlphaAnim.value();
-    std::string nameTag = _dotColor.toString() + "furnitureBBox" + stream.str();
+    auto mouseScreenPos = aid.mousePosYInv(TOUCH_ZERO);
+    mouseScreenPos.setX( mouseScreenPos.x() + getScreenSizef.x() * 0.02f );
+    if ( isActivelySelectingWall() && !bColorMaterialWidgetActive ) {
+        slimMaterialAndColorPropertyMemo( mouseScreenPos, fd.archSegment->wallMaterial.materialHash.empty() ? fd.room->wallsMaterial : fd.archSegment->wallMaterial, rsg.TH(S::WHITE) );
+    } else if ( isActivelySelectingFloor() && !bColorMaterialWidgetActive ) {
+        slimMaterialAndColorPropertyMemo(mouseScreenPos, fd.room->floorMaterial, rsg.TH(S::WHITE) );
+    }
+    if ( furnitureSelected ) {
+        std::stringstream stream;
+        stream << std::fixed << std::setprecision(2) << furnitureSelectionAlphaAnim.value();
+        std::string nameTag = _dotColor.toString() + "furnitureBBox" + stream.str();
 
-    rsg.RR().drawTriangleQuad(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
-                              _dotColor.A(furnitureSelectionAlphaAnim.value() * 0.5f), nameTag + "a");
+        rsg.RR().drawTriangleQuad(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
+                                  _dotColor.A(furnitureSelectionAlphaAnim.value() * 0.5f), nameTag + "a");
 
-    rsg.RR().draw<DLine>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
-                         _dotColor.A(furnitureSelectionAlphaAnim.value()), sm3, nameTag, true, 0.015f);
+        rsg.RR().draw<DLine>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
+                             _dotColor.A(furnitureSelectionAlphaAnim.value()), sm3, nameTag, true, 0.015f);
+    }
+
 }
 
 bool ArchExplorer::isMouseOverFurnitureInnerSelector( const V3f& _origin, const V3f& _dir ) const {
@@ -87,11 +105,17 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
 
 void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
     // If we are on a manipulable object do nothing
-    if ( !canBeManipulated() && fd.hasHit() ) {
-        res.prepare(fd.intersectedType, "", ResourceGroup::Material);
-
-        LOGRS("Hit type " << fd.intersectedType );
+    if ( !bColorMaterialWidgetActive ) {
+        bColorMaterialWidgetActive = true;
+        if ( isActivelySelectingWall() ) {
+            res.prepare(fd.intersectedType, "", ResourceGroup::Color);
+        } else if ( isActivelySelectingFloor() ) {
+            res.prepare(fd.intersectedType, "", ResourceGroup::Material);
+        }
+    } else {
+        bColorMaterialWidgetActive = false;
     }
+
 }
 
 void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {
@@ -109,15 +133,7 @@ void ArchExplorer::replaceFurnitureFinal( const EntityMetaData& _furnitureCandid
             furnitureSelected->keyTag, furnitureSelected->symbolRef };
     ff.flags = furnitureSelected->flags;
     auto clonedFurniture = EntityFactory::cloneHashed(ff);
-    cloneInternal( asg.H(), furnitureSelected, clonedFurniture );
-//    V2f pos = XZY::C2(centerBottomFurnitureSelected);
-//    auto f = HouseService::findFloorOf(asg.H(), fd.room->hash);
-//    RS::placeManually(
-//            FurnitureRuleParams{ f, fd.room, ffs, pos,
-//                                 furnitureSelected->heightOffset,
-//                                 furnitureSelected->rotation,
-//                                 FRPFurnitureRuleFlags{
-//                                         forceManualFurnitureFlags } });
+    cloneInternal(asg.H(), furnitureSelected, clonedFurniture);
     RoomServiceFurniture::removeFurniture(fd.room, furnitureSelected, rsg.SG());
     asg.make3dHouse([&]() {
         LOGRS("Respawn an house after changing furniture")
@@ -151,18 +167,22 @@ void ArchExplorer::deleteSelected( RenderOrchestrator& rsg ) {
     }
 }
 
-void ArchExplorer::cloneInternal( HouseBSData *_house, FittedFurniture* sourceFurniture, const std::shared_ptr<FittedFurniture>& clonedFurniture ) {
-    auto depthOffset = sourceFurniture->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ? sourceFurniture->depthNormal * sourceFurniture->width : V2fc::ZERO;
+void ArchExplorer::cloneInternal( HouseBSData *_house, FittedFurniture *sourceFurniture,
+                                  const std::shared_ptr<FittedFurniture>& clonedFurniture ) {
+    auto depthOffset = sourceFurniture->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ? sourceFurniture->depthNormal *
+                                                                                        sourceFurniture->width
+                                                                                      : V2fc::ZERO;
     V2f pos = XZY::C2(hitPosition) + depthOffset;
     auto f = HouseService::findFloorOf(_house, fd.room->hash);
     RS::placeManually(
-            FurnitureRuleParams{ f, fd.room, clonedFurniture, pos, sourceFurniture->heightOffset, sourceFurniture->rotation,
+            FurnitureRuleParams{ f, fd.room, clonedFurniture, pos, sourceFurniture->heightOffset,
+                                 sourceFurniture->rotation,
                                  FRPFurnitureRuleFlags{ forceManualFurnitureFlags } });
 }
 
 void ArchExplorer::cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg ) {
     auto clonedFurniture = EntityFactory::cloneHashed(*furnitureSelected);
-    cloneInternal( _house, furnitureSelected, clonedFurniture );
+    cloneInternal(_house, furnitureSelected, clonedFurniture);
 }
 
 bool ArchExplorer::touchUpWithModKeyCtrl( RenderOrchestrator& rsg ) {
@@ -185,7 +205,9 @@ std::vector<V3f> createBBoxOutline( const V3f& input, const V3f& axis1, const V3
     return ret;
 }
 
-void ArchExplorer::tickControlKey( ArchOrchestrator& asg, const V3f& _dir, RenderOrchestrator& rsg ) {
+void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rsg, const AggregatedInputData& aid ) {
+
+    auto _dir = aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get());
 
     if ( !bFurnitureTargetLocked ) {
         fdFurniture = HouseService::rayFeatureIntersect(asg.H(), RayPair3{ rsg.DC()->getPosition(), _dir },
@@ -194,7 +216,7 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, const V3f& _dir, Rende
                                                FeatureIntersectionFlags::FIF_Walls |
                                                FeatureIntersectionFlags::FIF_Floors);
 
-        res.update( asg, "/home/dado/media/media/",  rsg, fd.room);
+        res.update(asg, &bColorMaterialWidgetActive, "/home/dado/media/media/", rsg, fd.room);
 
         if ( fdFurniture.hasHit() && fdFurniture.nearV < fd.nearV ) {
             hitPosition = rsg.DC()->getPosition() + ( _dir * fd.nearV );
@@ -235,9 +257,9 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, const V3f& _dir, Rende
         rsg.DC()->LockScrollWheelMovements(isMouseOverSelection);
         rsg.setMICursorCapture(true, isMouseOverSelection ? MouseCursorType::HAND : MouseCursorType::ARROW);
     }
-    if ( furnitureSelected ) {
-        updateFurnitureSelection(rsg, centerBottomFurnitureSelected, furnitureMoveDotColor());
-    }
+//    if ( furnitureSelected ) {
+    updateFurnitureSelection(rsg, aid, centerBottomFurnitureSelected, furnitureMoveDotColor());
+//    }
 }
 
 void

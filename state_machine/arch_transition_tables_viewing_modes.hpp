@@ -63,8 +63,8 @@ struct ExploreStateMachine {
             ,state<class ExploreEditState> + event<OnDeleteEvent> / DeleteSelected{}
 
             // Sub state machines
-            ,state<class ExploreState> + event<OnSingleTapSecondaryEvent> / []{} = state<ExploreEditState>
-            ,state<class ExploreEditState> + event<OnSingleTapSecondaryEvent> / []{} = state<ExploreState>
+            ,state<class ExploreState> + event<OnToggleShortCut1Event> / []{} = state<ExploreEditState>
+            ,state<class ExploreEditState> + event<OnToggleShortCut1Event> / []{} = state<ExploreState>
             ,state<class ExploreEditState> + event<OnEscapeEvent> / []{} = state<ExploreState>
         );
     }
