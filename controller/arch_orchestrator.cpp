@@ -44,6 +44,9 @@ namespace HOD { // HighOrderDependency
             ret.addDep(sg, ResourceGroup::Material, floor->externalWallsMaterial.materialHash);
             for ( const auto& room : floor->rooms ) {
                 ret.addDep(sg, ResourceGroup::Material, room->wallsMaterial.materialHash);
+                for ( const auto& as : room->mWallSegmentsSorted ) {
+                    ret.addDep(sg, ResourceGroup::Material, as.wallMaterial.materialHash);
+                }
                 ret.addDep(sg, ResourceGroup::Material, room->ceilingMaterial.materialHash);
                 ret.addDep(sg, ResourceGroup::Material, room->floorMaterial.materialHash);
                 ret.addDep(sg, ResourceGroup::Material, room->covingMaterial.materialHash);

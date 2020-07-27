@@ -11,6 +11,9 @@
 
 template<typename R>
 inline static MaterialAndColorProperty *getCommonMaterialChangeMapping( GHTypeT key, R *resource ) {
+    if constexpr ( std::is_same_v<R, ArchSegment> ) {
+        if ( key == GHType::Wall ) return &resource->wallMaterial;
+    }
     if constexpr ( std::is_same_v<R, RoomBSData> ) {
         if ( key == GHType::Wall ) return &resource->wallsMaterial;
         if ( key == GHType::Floor ) return &resource->floorMaterial;

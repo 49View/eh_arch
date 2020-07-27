@@ -40,6 +40,7 @@ namespace HouseService {
     void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );
     void reevaluateDoorsAndWindowsAfterRoomChange( HouseBSData* h );
     void moveArch( HouseBSData *_house, ArchStructural* elem, const V2f& offset2d );
+    void changeWallsMaterial( const HouseBSData *house, MaterialAndColorProperty& mcp );
 
     // Delete
     void removeArch( HouseBSData *_house, int64_t hashToRemove );

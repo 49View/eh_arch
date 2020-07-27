@@ -475,3 +475,11 @@ void HouseService::popTourPath( HouseBSData *_house, int i ) {
 bool HouseService::hasTour( const HouseBSData *_house ) {
     return !_house->tourPaths.empty();
 }
+
+void HouseService::changeWallsMaterial( const HouseBSData *house, MaterialAndColorProperty& mcp ) {
+    for ( auto& f : house->mFloors ) {
+        for ( auto& r : f->rooms ) {
+            RoomService::changeWallsMaterial( r.get(), mcp );
+        }
+    }
+}
