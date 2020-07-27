@@ -57,6 +57,47 @@ std::vector<std::string> RemoteEntitySelector::tagsSanitisedFor( const std::stri
     return ret;
 }
 
+void RemoteEntitySelector::applyInjection( ArchOrchestrator& asg ) {
+    if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeRoom ) {
+        if ( fd.intersectedType == GHType::Floor ) {
+            RoomService::changeFloorsMaterial( fd.room, *materialAndColorTarget );
+        } else if ( fd.intersectedType == GHType::Wall ) {
+            RoomService::changeWallsMaterial( fd.room, *materialAndColorTarget );
+        }
+    }
+    if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeHouse ) {
+        if ( fd.intersectedType == GHType::Floor ) {
+            HouseService::changeFloorsMaterial( asg.H(), *materialAndColorTarget );
+        } else if ( fd.intersectedType == GHType::Wall ) {
+            HouseService::changeWallsMaterial( asg.H(), *materialAndColorTarget );
+        }
+    }
+    asg.make3dHouse([&]() { LOGRS("Spawn an house changing a material color") });
+    asg.pushHouseChange();
+}
+
+void RemoteEntitySelector::injectMaterial( ArchOrchestrator& asg, const EntityMetaData& meta ) {
+    materialAndColorTarget->materialHash = meta.hash;
+    materialAndColorTarget->materialName = meta.name;
+    if ( materialAndColorTarget->colorHash.empty() ) {
+        materialAndColorTarget->color = fd.room->wallsMaterial.color;
+        materialAndColorTarget->colorHash = fd.room->wallsMaterial.colorHash;
+        materialAndColorTarget->colorName = fd.room->wallsMaterial.colorName;
+    }
+    applyInjection( asg );
+}
+
+void RemoteEntitySelector::injectColor( ArchOrchestrator& asg, const EntityMetaData& meta ) {
+    if ( materialAndColorTarget->materialHash.empty() ) {
+        materialAndColorTarget->materialHash = fd.room->wallsMaterial.materialHash;
+        materialAndColorTarget->materialName = fd.room->wallsMaterial.materialName;
+    }
+    materialAndColorTarget->color = meta.color;
+    materialAndColorTarget->colorHash = meta.hash;
+    materialAndColorTarget->colorName = meta.name;
+    applyInjection( asg );
+}
+
 void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& mediaFolder, RenderOrchestrator& rsg ) {
 
 //        ImGui::ShowDemoWindow();
@@ -176,22 +217,7 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                             if ( im ) {
                                 if ( ImGui::ImageButton(ImGuiRenderTexture(im),
                                                         ImVec2(matThumbSize, matThumbSize)) ) {
-                                    materialAndColorTarget->materialHash = meta.hash;
-                                    materialAndColorTarget->materialName = meta.name;
-                                    if ( materialAndColorTarget->colorHash.empty() ) {
-                                        materialAndColorTarget->color = fd.room->wallsMaterial.color;
-                                        materialAndColorTarget->colorHash = fd.room->wallsMaterial.colorHash;
-                                        materialAndColorTarget->colorName = fd.room->wallsMaterial.colorName;
-                                    }
-                                    if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeRoom ) {
-                                        RoomService::changeWallsMaterial( fd.room, *materialAndColorTarget );
-                                    }
-                                    if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeHouse ) {
-                                        HouseService::changeWallsMaterial( asg.H(), *materialAndColorTarget );
-                                    }
-
-                                    asg.make3dHouse([&]() { LOGRS("Spawn an house changing a material") });
-                                    //                                backEnd->process_event(OnMakeHouse3dEvent{});
+                                    injectMaterial( asg, meta );
                                 }
                                 auto sanitizedTags = tagsSanitisedFor(query, meta.group, meta.tags);
                                 if ( ImGui::IsItemHovered() ) {
@@ -263,20 +289,7 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                             if ( ImGui::ColorButton(meta.color.toString().c_str(),
                                                     ImVec4(meta.color.x(), meta.color.y(), meta.color.z(), 1.0f), 0,
                                                     ImVec2(colThumbSize, colThumbSize)) ) {
-                                if ( materialAndColorTarget->materialHash.empty() ) {
-                                    materialAndColorTarget->materialHash = fd.room->wallsMaterial.materialHash;
-                                    materialAndColorTarget->materialName = fd.room->wallsMaterial.materialName;
-                                }
-                                materialAndColorTarget->color = meta.color;
-                                materialAndColorTarget->colorHash = meta.hash;
-                                materialAndColorTarget->colorName = meta.name;
-                                if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeRoom ) {
-                                    RoomService::changeWallsMaterial( fd.room, *materialAndColorTarget );
-                                }
-                                if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeHouse ) {
-                                    HouseService::changeWallsMaterial( asg.H(), *materialAndColorTarget );
-                                }
-                                asg.make3dHouse([&]() { LOGRS("Spawn an house changing a material color") });
+                                injectColor( asg, meta );
                             }
                             if ( ImGui::IsItemHovered() ) {
                                 ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);

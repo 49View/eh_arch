@@ -845,10 +845,14 @@ namespace RoomService {
         return nullptr;
     }
 
-    void changeWallsMaterial( RoomBSData *r, MaterialAndColorProperty& mcp ) {
+    void changeWallsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp ) {
         for ( auto& ws : r->mWallSegmentsSorted ) {
             ws.wallMaterial = mcp;
         }
+    }
+
+    void changeFloorsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp ) {
+        r->floorMaterial = mcp;
     }
 
 }

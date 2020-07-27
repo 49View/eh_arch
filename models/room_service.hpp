@@ -578,7 +578,8 @@ namespace RoomService {
     void WallSegments( RoomBSData *r, const std::vector<std::vector<ArchSegment>>& val );
     void makeTriangles2d( RoomBSData *r );
     void calclMaxBoundingBox( RoomBSData *r );
-    void changeWallsMaterial( RoomBSData *r, MaterialAndColorProperty& mcp );
+    void changeWallsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp );
+    void changeFloorsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp );
 
     void furnish( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns );
     const ArchSegment *getWallSegmentFor( RoomBSData *r, WSLO wslo, uint32_t _exactIndex = 0 );

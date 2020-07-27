@@ -31,16 +31,17 @@ class RemoteEntitySelector {
 public:
 
     ResourceMetadataListCallback resListCallback();
-
-    void prepare( const FeatureIntersection& _fd, const std::string& _presets, const std::string& _resourceGroup, int _defaultTab );
-
+    void prepare( const FeatureIntersection& _fd, const std::string& _presets, const std::string& _resourceGroup,
+                  int _defaultTab );
     static std::vector<std::string>
     tagsSanitisedFor( const std::string& query, const std::string& group, const std::vector<std::string>& tags );
-
     void update( ArchOrchestrator& asg, const std::string& mediaFolder, RenderOrchestrator& rsg );
-
     [[nodiscard]] int groupIndex() const;
 
+private:
+    void injectColor( ArchOrchestrator& asg, const EntityMetaData& meta );
+    void injectMaterial( ArchOrchestrator& asg, const EntityMetaData& meta );
+    void applyInjection( ArchOrchestrator& asg );
 private:
     FeatureIntersection fd;
     GHTypeT label{ GHType::None };
