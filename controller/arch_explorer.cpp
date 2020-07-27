@@ -105,16 +105,22 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
 
 void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
     // If we are on a manipulable object do nothing
-    if ( !bColorMaterialWidgetActive ) {
-        bColorMaterialWidgetActive = true;
-        if ( isActivelySelectingWall() ) {
-            res.prepare(fd.intersectedType, "", ResourceGroup::Color);
-        } else if ( isActivelySelectingFloor() ) {
-            res.prepare(fd.intersectedType, "", ResourceGroup::Material);
+    if ( isActivelySelectingWall() ) {
+        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 1) ) {
+            res.prepare(fd.intersectedType, "", ResourceGroup::Material, 2);
+            bColorMaterialWidgetActive = true;
+        } else {
+            bColorMaterialWidgetActive = false;
         }
-    } else {
-        bColorMaterialWidgetActive = false;
+    } else if ( isActivelySelectingFloor() ) {
+        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
+            res.prepare(fd.intersectedType, "", ResourceGroup::Material, 1);
+            bColorMaterialWidgetActive = true;
+        } else {
+            bColorMaterialWidgetActive = false;
+        }
     }
+
 
 }
 
@@ -216,7 +222,7 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
                                                FeatureIntersectionFlags::FIF_Walls |
                                                FeatureIntersectionFlags::FIF_Floors);
 
-        res.update(asg, &bColorMaterialWidgetActive, "/home/dado/media/media/", rsg, fd.room);
+        res.update(asg, bColorMaterialWidgetActive, "/home/dado/media/media/", rsg, fd.room);
 
         if ( fdFurniture.hasHit() && fdFurniture.nearV < fd.nearV ) {
             hitPosition = rsg.DC()->getPosition() + ( _dir * fd.nearV );

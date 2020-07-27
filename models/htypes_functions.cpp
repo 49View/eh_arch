@@ -59,11 +59,11 @@ std::string defaultMaterialAndColorPropertyPresetsForGHType( GHTypeT key ) {
     if ( checkBitWiseFlag( key, GHType::KitchenWorktop) )    append( ret, "granite+marble");
     if ( checkBitWiseFlag( key, GHType::KitchenCabinet) )    append( ret, "wood+metal");
     if ( checkBitWiseFlag( key, GHType::KitchenBackSplash) ) append( ret, "wood+metal");
-    if ( checkBitWiseFlag( key, GHType::Wall) )              append( ret, "plaster");
+    if ( checkBitWiseFlag( key, GHType::Wall) )              append( ret, "plaster+wood+tiles");
     if ( checkBitWiseFlag( key, GHType::Floor) )             append( ret, "wood+tiles+carpet");
     if ( checkBitWiseFlag( key, GHType::Skirting) )          append( ret, "wood+tiles");
     if ( checkBitWiseFlag( key, GHType::Coving) )            append( ret, "wood+tiles");
-    if ( checkBitWiseFlag( key, GHType::Ceiling) )           append( ret, "plaster");
+    if ( checkBitWiseFlag( key, GHType::Ceiling) )           append( ret, "plaster+wood");
 
     return ret;
 }
