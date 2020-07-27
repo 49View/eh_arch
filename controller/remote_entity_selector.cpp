@@ -36,13 +36,7 @@ void RemoteEntitySelector::prepare( const FeatureIntersection& _fd, const std::s
         ResourceMetaData::getListOf(resourceGroup, presets, resListCallback());
     }
 
-    if ( fd.intersectedType == GHType::Wall ) {
-        materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.archSegment );
-    } else if ( fd.intersectedType == GHType::Floor ) {
-        materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.room );
-    } else if ( fd.intersectedType == GHType::Ceiling ) {
-        materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.room );
-    }
+    materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.archSegment, fd.room );
 }
 
 std::vector<std::string> RemoteEntitySelector::tagsSanitisedFor( const std::string& query, const std::string& group,
@@ -65,6 +59,12 @@ void RemoteEntitySelector::applyInjection( ArchOrchestrator& asg ) {
             RoomService::changeFloorsMaterial( fd.room, *materialAndColorTarget );
         } else if ( fd.intersectedType == GHType::Wall ) {
             RoomService::changeWallsMaterial( fd.room, *materialAndColorTarget );
+        } else if ( fd.intersectedType == GHType::Ceiling ) {
+            RoomService::changeCeilingsMaterial( fd.room, *materialAndColorTarget );
+        } else if ( fd.intersectedType == GHType::Skirting ) {
+            RoomService::changeSkirtingsMaterial( fd.room, *materialAndColorTarget );
+        } else if ( fd.intersectedType == GHType::Coving ) {
+            RoomService::changeCovingsMaterial( fd.room, *materialAndColorTarget );
         }
     }
     if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeHouse ) {
@@ -72,6 +72,12 @@ void RemoteEntitySelector::applyInjection( ArchOrchestrator& asg ) {
             HouseService::changeFloorsMaterial( asg.H(), *materialAndColorTarget );
         } else if ( fd.intersectedType == GHType::Wall ) {
             HouseService::changeWallsMaterial( asg.H(), *materialAndColorTarget );
+        } else if ( fd.intersectedType == GHType::Ceiling ) {
+            HouseService::changeCeilingsMaterial( asg.H(), *materialAndColorTarget );
+        } else if ( fd.intersectedType == GHType::Skirting ) {
+            HouseService::changeSkirtingsMaterial( asg.H(), *materialAndColorTarget );
+        } else if ( fd.intersectedType == GHType::Coving ) {
+            HouseService::changeCovingsMaterial( asg.H(), *materialAndColorTarget );
         }
     }
     asg.make3dHouse([&]() { LOGRS("Spawn an house changing a material color") });

@@ -58,9 +58,7 @@ private:
                                    const C4f& _dotColor );
     [[nodiscard]] bool isMouseOverFurnitureInnerSelector( const V3f& _origin, const V3f& _dir ) const;
     [[nodiscard]] bool canBeManipulated() const;
-    [[nodiscard]] bool isActivelySelectingWall() const;
-    [[nodiscard]] bool isActivelySelectingFloor() const;
-    [[nodiscard]] bool isActivelySelectingCeiling() const;
+    [[nodiscard]] bool isActivelySelecting( GHTypeT _ghTypeCheck ) const;
     void
     replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg, RenderOrchestrator& rsg );
     void cloneInternal( HouseBSData *_house, FittedFurniture *sourceFurniture,

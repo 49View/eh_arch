@@ -26,16 +26,8 @@ bool ArchExplorer::canBeManipulated() const {
     return ( furnitureSelected && ( bFurnitureTargetLocked || bFillFullFurnitureOutline ) && fd.room );
 }
 
-bool ArchExplorer::isActivelySelectingWall() const {
-    return !bFurnitureTargetLocked && !bFillFullFurnitureOutline && fd.hasHit() && fd.intersectedType == GHType::Wall;
-}
-
-bool ArchExplorer::isActivelySelectingFloor() const {
-    return !bFurnitureTargetLocked && !bFillFullFurnitureOutline && fd.hasHit() && fd.intersectedType == GHType::Floor;
-}
-
-bool ArchExplorer::isActivelySelectingCeiling() const {
-    return !bFurnitureTargetLocked && !bFillFullFurnitureOutline && fd.hasHit() && fd.intersectedType == GHType::Ceiling;
+bool ArchExplorer::isActivelySelecting( GHTypeT _ghTypeCheck ) const {
+    return !bFurnitureTargetLocked && !bFillFullFurnitureOutline && fd.hasHit() && fd.intersectedType == _ghTypeCheck;
 }
 
 void ArchExplorer::updateFurnitureSelection( RenderOrchestrator& rsg, const AggregatedInputData& aid,
@@ -109,22 +101,36 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
 
 void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
     // If we are on a manipulable object do nothing
-    if ( isActivelySelectingWall() ) {
+    if ( isActivelySelecting( GHType::Wall ) ) {
         if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 1) ) {
             res.prepare(fd, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
         } else {
             bColorMaterialWidgetActive = false;
         }
-    } else if ( isActivelySelectingFloor() ) {
+    } else if ( isActivelySelecting( GHType::Floor ) ) {
         if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
             res.prepare(fd, "", ResourceGroup::Material, 1);
             bColorMaterialWidgetActive = true;
         } else {
             bColorMaterialWidgetActive = false;
         }
-    } else if ( isActivelySelectingCeiling() ) {
-        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 1 ) ) {
+    } else if ( isActivelySelecting( GHType::Ceiling ) ) {
+        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
+            res.prepare(fd, "", ResourceGroup::Material, 2);
+            bColorMaterialWidgetActive = true;
+        } else {
+            bColorMaterialWidgetActive = false;
+        }
+    } else if ( isActivelySelecting( GHType::Coving ) ) {
+        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
+            res.prepare(fd, "", ResourceGroup::Material, 2);
+            bColorMaterialWidgetActive = true;
+        } else {
+            bColorMaterialWidgetActive = false;
+        }
+    } else if ( isActivelySelecting( GHType::Skirting ) ) {
+        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
             res.prepare(fd, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
         } else {

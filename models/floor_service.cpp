@@ -1199,10 +1199,18 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                         for ( const auto& quad : wd.quads ) {
                             Plane3f plane{ quad[0], quad[2], quad[1] };
                             if ( plane.intersectRayOnQuadMin(rayPair, quad, fd.nearV) ) {
+                                V3f iPoint = rayPair.origin + (rayPair.dir * fd.nearV);
                                 fd.normal = plane.n;
                                 fd.archSegment = &wd;
                                 fd.room = room.get();
-                                fd.intersectedType = GHType::Wall;
+                                if ( distance(iPoint.y(), f->z) < 0.15f ) {
+                                    fd.intersectedType = GHType::Skirting;
+                                } else if ( room->mHasCoving && distance(iPoint.y(), f->z + f->height) < 0.15f ) {
+                                    fd.intersectedType = GHType::Coving;
+                                } else {
+                                    fd.intersectedType = GHType::Wall;
+                                }
+
                             }
                         }
                     }
