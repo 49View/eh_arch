@@ -5,6 +5,25 @@
 #pragma once
 
 #include <eh_arch/controller/arch_explorer.hpp>
+#include <graphics/vertex_processing_anim.h>
+
+struct ExploreEditStateEntry {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+        if ( asg.H() ) {
+            fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+            fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
+        }
+    }
+};
+
+struct ExploreEditStateExit {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+        if ( asg.H() ) {
+            fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+            fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
+        }
+    }
+};
 
 struct [[maybe_unused]] ActivateOrbitMode {
     void

@@ -120,8 +120,6 @@ void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
             bColorMaterialWidgetActive = false;
         }
     }
-
-
 }
 
 void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {

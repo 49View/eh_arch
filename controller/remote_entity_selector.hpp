@@ -79,7 +79,7 @@ public:
         static bool no_resize = true;
         static bool no_collapse = true;
         static bool no_nav = true;
-        static bool no_background = true;
+        static bool no_background = false;
         static bool no_bring_to_front = false;
         static bool no_docking = true;
 
@@ -96,8 +96,9 @@ public:
         if ( no_docking ) window_flags |= ImGuiWindowFlags_NoDocking;
 
         auto viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(ImVec2{ viewport->Size.x * 0.48f, viewport->Size.y * 0.25f });
-        ImGui::SetNextWindowSize(ImVec2{ viewport->Size.x * 0.5f, viewport->Size.y * 0.5f });
+        auto wsize = max(viewport->Size.y * 0.2f, 300.0f);
+        ImGui::SetNextWindowPos(ImVec2{ 0.0f, viewport->Size.y - wsize });
+        ImGui::SetNextWindowSize(ImVec2{ viewport->Size.x, wsize });
         ImGui::Begin("Entity", nullptr, window_flags);
         auto wWidth = ImGui::GetWindowWidth();
         auto windowPadding = ImGui::GetStyle().WindowPadding.x;
@@ -149,6 +150,11 @@ public:
         if ( resourceGroup == ResourceGroup::Material || resourceGroup == ResourceGroup::Color ) {
 
             ImGui::TextColored(ImVec4(0.9, 0.7, 0.2, 1.0), "%s", GHTypeToString(label).c_str());
+            ImGui::SameLine();
+            static int e = 0;
+            ImGui::RadioButton("Single", &e, 0); ImGui::SameLine();
+            ImGui::RadioButton("all room", &e, 1); ImGui::SameLine();
+            ImGui::RadioButton("all house", &e, 2);
 
             ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
             if ( ImGui::BeginTabBar("MyTabBar", tab_bar_flags) ) {
@@ -166,8 +172,8 @@ public:
                     if ( !materialAndColorTarget ) return;
 
                     if ( !metadataMaterialList.empty() ) {
-                        int grouping = ( wWidth - windowPadding * 2 ) / ( thumbSize + framePadding );
-                        int matThumbSize = thumbSize - framePadding;
+                        int grouping = static_cast<int>(( wWidth - windowPadding * 2 ) / ( thumbSize + framePadding ))-1;
+                        float matThumbSize = thumbSize - framePadding;
                         for ( auto m = 0u; m < metadataMaterialList.size(); m += grouping ) {
                             for ( int t = 0; t < grouping; t++ ) {
                                 if ( t > 0 ) ImGui::SameLine();
@@ -234,8 +240,7 @@ public:
                     colors.emplace_back("yellow", C4f::PASTEL_YELLOW);
 
                     constexpr int colorFamilyThumbSize = 32;
-                    for ( auto m = 0u; m < colors.size(); m++ ) {
-                        const auto& color = colors[m];
+                    for (auto & color : colors) {
                         if ( ImGui::ColorButton(color.first.c_str(),
                                                 ImVec4(color.second.x(), color.second.y(), color.second.z(), 1.0f), 0,
                                                 ImVec2(colorFamilyThumbSize, colorFamilyThumbSize)) ) {
@@ -252,9 +257,9 @@ public:
                     }
 
                     if ( !metadataColorList.empty() ) {
-                        constexpr int thumbSizeMedium = 64;
-                        int grouping = ( wWidth - windowPadding * 2 ) / ( thumbSizeMedium + framePadding );
-                        int colThumbSize = thumbSizeMedium - framePadding;
+                        constexpr float thumbSizeMedium = 64.0f;
+                        int grouping = static_cast<int>(( wWidth - windowPadding * 2 ) / ( thumbSizeMedium + framePadding ))-1;
+                        float colThumbSize = thumbSizeMedium - framePadding;
 
                         for ( auto m = 0u; m < metadataColorList.size(); m += grouping ) {
                             ImGui::NewLine();
