@@ -60,6 +60,7 @@ private:
     [[nodiscard]] bool canBeManipulated() const;
     [[nodiscard]] bool isActivelySelectingWall() const;
     [[nodiscard]] bool isActivelySelectingFloor() const;
+    [[nodiscard]] bool isActivelySelectingCeiling() const;
     void
     replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg, RenderOrchestrator& rsg );
     void cloneInternal( HouseBSData *_house, FittedFurniture *sourceFurniture,

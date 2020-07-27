@@ -476,7 +476,7 @@ bool HouseService::hasTour( const HouseBSData *_house ) {
     return !_house->tourPaths.empty();
 }
 
-void HouseService::changeFloorsMaterial( const HouseBSData *house, const MaterialAndColorProperty& mcp ) {
+void HouseService::changeFloorsMaterial( HouseBSData *house, const MaterialAndColorProperty& mcp ) {
     for ( auto& f : house->mFloors ) {
         for ( auto& r : f->rooms ) {
             RoomService::changeFloorsMaterial( r.get(), mcp );
@@ -484,10 +484,42 @@ void HouseService::changeFloorsMaterial( const HouseBSData *house, const Materia
     }
 }
 
-void HouseService::changeWallsMaterial( const HouseBSData *house, const MaterialAndColorProperty& mcp ) {
+void HouseService::changeWallsMaterial( HouseBSData *house, const MaterialAndColorProperty& mcp ) {
     for ( auto& f : house->mFloors ) {
         for ( auto& r : f->rooms ) {
             RoomService::changeWallsMaterial( r.get(), mcp );
         }
     }
+}
+
+void HouseService::changeCeilingsMaterial( HouseBSData *house, const MaterialAndColorProperty& mcp ) {
+    for ( auto& f : house->mFloors ) {
+        for ( auto& r : f->rooms ) {
+            RoomService::changeCeilingsMaterial( r.get(), mcp );
+        }
+    }
+}
+
+void HouseService::changeSkirtingsMaterial( HouseBSData *house, const MaterialAndColorProperty& mcp ) {
+    for ( auto& f : house->mFloors ) {
+        for ( auto& r : f->rooms ) {
+            RoomService::changeSkirtingsMaterial( r.get(), mcp );
+        }
+    }
+}
+
+void HouseService::changeCovingsMaterial( HouseBSData *house, const MaterialAndColorProperty& mcp ) {
+    for ( auto& f : house->mFloors ) {
+        for ( auto& r : f->rooms ) {
+            RoomService::changeCovingsMaterial( r.get(), mcp );
+        }
+    }
+}
+
+void HouseService::changeSkirtingsProfile( HouseBSData *house, const MaterialAndColorProperty& mcp ) {
+
+}
+
+void HouseService::changeCovingsProfile( HouseBSData *house, const MaterialAndColorProperty& mcp ) {
+
 }

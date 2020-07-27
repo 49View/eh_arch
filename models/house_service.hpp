@@ -40,8 +40,13 @@ namespace HouseService {
     void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );
     void reevaluateDoorsAndWindowsAfterRoomChange( HouseBSData* h );
     void moveArch( HouseBSData *_house, ArchStructural* elem, const V2f& offset2d );
-    void changeWallsMaterial( const HouseBSData *house, const MaterialAndColorProperty& mcp );
-    void changeFloorsMaterial( const HouseBSData *house, const MaterialAndColorProperty& mcp );
+    void changeWallsMaterial( HouseBSData *house, const MaterialAndColorProperty& mcp );
+    void changeFloorsMaterial( HouseBSData *house, const MaterialAndColorProperty& mcp );
+    void changeCeilingsMaterial( HouseBSData *house, const MaterialAndColorProperty& mcp );
+    void changeSkirtingsMaterial( HouseBSData *, const MaterialAndColorProperty& mcp );
+    void changeCovingsMaterial( HouseBSData *, const MaterialAndColorProperty& mcp );
+    void changeSkirtingsProfile( HouseBSData *, const MaterialAndColorProperty& mcp );
+    void changeCovingsProfile( HouseBSData *, const MaterialAndColorProperty& mcp );
 
     // Delete
     void removeArch( HouseBSData *_house, int64_t hashToRemove );

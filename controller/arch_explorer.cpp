@@ -34,17 +34,21 @@ bool ArchExplorer::isActivelySelectingFloor() const {
     return !bFurnitureTargetLocked && !bFillFullFurnitureOutline && fd.hasHit() && fd.intersectedType == GHType::Floor;
 }
 
+bool ArchExplorer::isActivelySelectingCeiling() const {
+    return !bFurnitureTargetLocked && !bFillFullFurnitureOutline && fd.hasHit() && fd.intersectedType == GHType::Ceiling;
+}
+
 void ArchExplorer::updateFurnitureSelection( RenderOrchestrator& rsg, const AggregatedInputData& aid,
                                              const V3f& centerBottomPos, const C4f& _dotColor ) {
     auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
 
-    auto mouseScreenPos = aid.mousePosYInv(TOUCH_ZERO);
-    mouseScreenPos.setX( mouseScreenPos.x() + getScreenSizef.x() * 0.02f );
-    if ( isActivelySelectingWall() && !bColorMaterialWidgetActive ) {
-        slimMaterialAndColorPropertyMemo( mouseScreenPos, fd.archSegment->wallMaterial.materialHash.empty() ? fd.room->wallsMaterial : fd.archSegment->wallMaterial, rsg.TH(S::WHITE) );
-    } else if ( isActivelySelectingFloor() && !bColorMaterialWidgetActive ) {
-        slimMaterialAndColorPropertyMemo(mouseScreenPos, fd.room->floorMaterial, rsg.TH(S::WHITE) );
-    }
+//    auto mouseScreenPos = aid.mousePosYInv(TOUCH_ZERO);
+//    mouseScreenPos.setX( mouseScreenPos.x() + getScreenSizef.x() * 0.02f );
+//    if ( isActivelySelectingWall() && !bColorMaterialWidgetActive ) {
+//        slimMaterialAndColorPropertyMemo( mouseScreenPos, fd.archSegment->wallMaterial.materialHash.empty() ? fd.room->wallsMaterial : fd.archSegment->wallMaterial, rsg.TH(S::WHITE) );
+//    } else if ( isActivelySelectingFloor() && !bColorMaterialWidgetActive ) {
+//        slimMaterialAndColorPropertyMemo(mouseScreenPos, fd.room->floorMaterial, rsg.TH(S::WHITE) );
+//    }
     if ( furnitureSelected ) {
         std::stringstream stream;
         stream << std::fixed << std::setprecision(2) << furnitureSelectionAlphaAnim.value();
@@ -115,6 +119,13 @@ void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
     } else if ( isActivelySelectingFloor() ) {
         if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
             res.prepare(fd, "", ResourceGroup::Material, 1);
+            bColorMaterialWidgetActive = true;
+        } else {
+            bColorMaterialWidgetActive = false;
+        }
+    } else if ( isActivelySelectingCeiling() ) {
+        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 1 ) ) {
+            res.prepare(fd, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
         } else {
             bColorMaterialWidgetActive = false;
@@ -218,7 +229,8 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
                                                         FeatureIntersectionFlags::FIF_Furnitures);
         fd = HouseService::rayFeatureIntersect(asg.H(), RayPair3{ rsg.DC()->getPosition(), _dir },
                                                FeatureIntersectionFlags::FIF_Walls |
-                                               FeatureIntersectionFlags::FIF_Floors);
+                                               FeatureIntersectionFlags::FIF_Floors |
+                                                       FeatureIntersectionFlags::FIF_Ceilings );
 
         if ( bColorMaterialWidgetActive ) {
             res.update(asg, "/home/dado/media/media/", rsg );

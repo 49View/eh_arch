@@ -855,4 +855,25 @@ namespace RoomService {
         r->floorMaterial = mcp;
     }
 
+    void changeCeilingsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp ) {
+        r->ceilingMaterial = mcp;
+    }
+
+    void changeSkirtingsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp ) {
+        r->skirtingMaterial = mcp;
+    }
+
+    void changeCovingsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp ) {
+        r->covingMaterial = mcp;
+    }
+
+    void changeSkirtingsProfile( RoomBSData *r, const MaterialAndColorProperty& mcp ) {
+
+    }
+
+    void changeCovingsProfile( RoomBSData *r, const MaterialAndColorProperty& mcp ) {
+
+    }
+
+
 }

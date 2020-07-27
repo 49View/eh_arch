@@ -40,6 +40,8 @@ void RemoteEntitySelector::prepare( const FeatureIntersection& _fd, const std::s
         materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.archSegment );
     } else if ( fd.intersectedType == GHType::Floor ) {
         materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.room );
+    } else if ( fd.intersectedType == GHType::Ceiling ) {
+        materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.room );
     }
 }
 

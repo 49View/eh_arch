@@ -580,6 +580,11 @@ namespace RoomService {
     void calclMaxBoundingBox( RoomBSData *r );
     void changeWallsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp );
     void changeFloorsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp );
+    void changeCeilingsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp );
+    void changeSkirtingsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp );
+    void changeCovingsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp );
+    void changeSkirtingsProfile( RoomBSData *r, const MaterialAndColorProperty& mcp );
+    void changeCovingsProfile( RoomBSData *r, const MaterialAndColorProperty& mcp );
 
     void furnish( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns );
     const ArchSegment *getWallSegmentFor( RoomBSData *r, WSLO wslo, uint32_t _exactIndex = 0 );

@@ -1208,6 +1208,20 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                     }
                 }
 
+                // Ceilings
+                if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Ceilings) ) {
+                    V3f a = XZY::C(std::get<0>(room->mTriangles2d[0]), f->z+f->height);
+                    V3f b = XZY::C(std::get<1>(room->mTriangles2d[0]), f->z+f->height);
+                    V3f c = XZY::C(std::get<2>(room->mTriangles2d[0]), f->z+f->height);
+                    Plane3f planeFloor{ a, b, c };
+                    if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->mTriangles2d, f->z+f->height, fd.nearV,  WindingOrder::CW) ) {
+                        fd.normal = -planeFloor.n;
+                        fd.arch = room.get();
+                        fd.room = room.get();
+                        fd.intersectedType = GHType::Ceiling;
+                    }
+                }
+
                 // Furniture
                 if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Furnitures) ) {
                     for ( const auto& ff : room->mFittedFurniture ) {
