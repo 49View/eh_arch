@@ -207,8 +207,7 @@ namespace RoomService {
         return ret;
     }
 
-    float middleHeightFromObject( RoomBSData *r, std::shared_ptr<FittedFurniture> base,
-                                  std::shared_ptr<FittedFurniture> dec ) {
+    float middleHeightFromObject( RoomBSData *r, FittedFurniture* base, FittedFurniture* dec ) {
         constexpr float sensibleMaxCovingHeight = 0.15f;
         return ( ( r->height - sensibleMaxCovingHeight - base->size.y() - dec->size.y() ) / 2.0f );
     }
@@ -241,7 +240,7 @@ namespace RoomService {
         return ls;
     }
 
-    void placeAroundInternal( std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source,
+    void placeAroundInternal( std::shared_ptr<FittedFurniture> dest, FittedFurniture* source,
                               PivotPointPosition where,
                               const V2f& slack, const float _height ) {
         switch ( where ) {
@@ -281,7 +280,7 @@ namespace RoomService {
         dest->widthNormal = source->widthNormal;
     }
 
-    void placeAlongWallInternal( std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source,
+    void placeAlongWallInternal( std::shared_ptr<FittedFurniture> dest, FittedFurniture* source,
                                  const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f& slack,
                                  const float _height ) {
 
@@ -415,15 +414,14 @@ namespace RoomService {
     }
 
     bool
-    placeDecorations( FloorBSData *f, RoomBSData *r, std::shared_ptr<FittedFurniture> mainF, FurnitureMapStorage& furns,
+    placeDecorations( FloorBSData *f, RoomBSData *r, FittedFurniture* mainF, FurnitureMapStorage& furns,
                       const FurniturePlacementRule& fpd ) {
         bool completed = true;
         if ( fpd.hasDecorations() ) {
             for ( const auto& dec : fpd.getDecorations() ) {
                 auto decF = furns.spawn(dec);
                 float h1 = checkBitWiseFlag(decF->flags, FittedFurnitureFlags::FF_CanBeHanged) ? middleHeightFromObject(
-                        r, mainF, decF)
-                                                                                               : 0.00f;
+                        r, mainF, decF.get()) : 0.00f;
                 completed &= h1 >= 0.0f;
                 if ( h1 >= 0.0f ) {
                     float h = mainF->size.y() + h1;
@@ -446,14 +444,14 @@ namespace RoomService {
         if ( completed ) {
             if ( fpd.hasBase(1) ) {
                 completed &= RS::placeAround(
-                        FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF }, PPP::TopLeft });
+                        FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF.get() }, PPP::TopLeft });
             }
             if ( fpd.hasBase(2) ) {
                 completed &= RS::placeAround(
-                        FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(2)), FRPSource{ mainF }, PPP::TopRight });
+                        FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(2)), FRPSource{ mainF.get() }, PPP::TopRight });
             }
         }
-        completed &= RS::placeDecorations(f, r, mainF, furns, fpd);
+        completed &= RS::placeDecorations(f, r, mainF.get(), furns, fpd);
         return completed;
     }
 
@@ -467,10 +465,10 @@ namespace RoomService {
         // If it has more than 1 furniture then place them in front of the main furniture, like a coffee table in front of a sofa
         if ( fpd.hasBase(1) ) {
             completed &= RS::placeAround(
-                    FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF }, PPP::BottomCenter,
+                    FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF.get() }, PPP::BottomCenter,
                                          FRPSlack{ fpd.getSlack() } });
         }
-        completed &= RS::placeDecorations(f, r, mainF, furns, fpd);
+        completed &= RS::placeDecorations(f, r, mainF.get(), furns, fpd);
         return completed;
     }
 
@@ -489,10 +487,10 @@ namespace RoomService {
         // If it has more than 1 furniture then place them in front of the main furniture, like a coffee table in front of a sofa
         if ( fpd.hasBase(1) ) {
             completed &= RS::placeAround(
-                    FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF }, PPP::BottomCenter,
+                    FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF.get() }, PPP::BottomCenter,
                                          FRPSlack{ fpd.getSlack() } });
         }
-        completed &= RS::placeDecorations(f, r, mainF, furns, fpd);
+        completed &= RS::placeDecorations(f, r, mainF.get(), furns, fpd);
         return completed;
     }
 
@@ -529,7 +527,7 @@ namespace RoomService {
 
         for ( size_t t = 1; t < fset.size(); t++ ) {
             auto currFurn = furns.spawn(fset[t]);
-            completed &= RS::placeWallAlong(FurnitureRuleParams{ f, r, currFurn, FRPSource{ prevFurn }, ls,
+            completed &= RS::placeWallAlong(FurnitureRuleParams{ f, r, currFurn, FRPSource{ prevFurn.get() }, ls,
                                                                  FRPWallSegmentCorner{ fpd.getPreferredCorner() },
                                                                  FRPSlack{ fpd.getSlack(t).xy() } });
             if ( !completed ) break;
@@ -553,7 +551,7 @@ namespace RoomService {
         if ( fpd.hasDecorations() ) {
             const std::vector<FT>& decorations = fpd.getDecorations();
             auto dec = furns.spawn(decorations.front());
-            float h1 = middleHeightFromObject(r, mainF, dec);
+            float h1 = middleHeightFromObject(r, mainF.get(), dec.get());
             completed &= h1 >= 0.0f;
             if ( h1 >= 0.0f ) {
                 float h = mainF->size.y() + h1;

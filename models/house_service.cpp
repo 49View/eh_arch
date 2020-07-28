@@ -243,6 +243,7 @@ std::shared_ptr<ArchStructural> HouseService::rayIntersect( const HouseBSData* _
 			rayIntersectInternal( _house, floor->stairs, origin, dir, nearV, found );
 		}
 	}
+
 	return found;
 }
 
@@ -251,6 +252,9 @@ FeatureIntersection HouseService::rayFeatureIntersect( const HouseBSData* house,
 
     for ( const auto& f : house->mFloors ) {
         FloorService::rayFeatureIntersect( f.get(), rayPair, fd, fif );
+    }
+    if ( fd.hasHit() ) {
+        fd.hitPosition = rayPair.origin + ( rayPair.dir * fd.nearV );
     }
     return fd;
 }

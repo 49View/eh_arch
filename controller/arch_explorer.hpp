@@ -76,7 +76,6 @@ private:
     bool bColorMaterialWidgetActive = false;
     Plane3f furniturePlane;
     FittedFurniture *furnitureSelected = nullptr;
-    V3f hitPosition = V3f::ZERO;
     V3f centerBottomFurnitureSelected{ V3f::ZERO };
     std::vector<V3f> furnitureSelectionOutline;
     JMATH::AABB centerBottomBBox;

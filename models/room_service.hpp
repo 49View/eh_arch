@@ -426,7 +426,7 @@ private:
 };
 
 struct FRPSource {
-    std::shared_ptr<FittedFurniture> source;
+    FittedFurniture* source;
 };
 
 struct FRPWidthNormal {
@@ -481,7 +481,7 @@ struct FurnitureRuleParams {
             ff = param;
         }
         if constexpr ( std::is_same_v<T, FRPSource> ) {
-            source = param.source;
+            if ( param.source ) source = param.source;
         }
         if constexpr ( std::is_same_v<T, Quaternion> ) {
             rot = param;
@@ -527,7 +527,7 @@ struct FurnitureRuleParams {
     FloorBSData *f = nullptr;
     RoomBSData *r = nullptr;
     std::shared_ptr<FittedFurniture> ff;
-    std::shared_ptr<FittedFurniture> source;
+    FittedFurniture* source = nullptr;
     V2f pos = V2fc::ZERO;
     Quaternion rot{};
     V2f widthNormal = V2fc::X_AXIS;

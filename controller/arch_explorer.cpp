@@ -105,35 +105,35 @@ void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
     // If we are on a manipulable object do nothing
     if ( isActivelySelecting( GHType::Wall ) ) {
         if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 1) ) {
-            res.prepare(fd, "", ResourceGroup::Material, 2);
+            res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
         } else {
             bColorMaterialWidgetActive = false;
         }
     } else if ( isActivelySelecting( GHType::Floor ) ) {
         if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
-            res.prepare(fd, "", ResourceGroup::Material, 1);
+            res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 1);
             bColorMaterialWidgetActive = true;
         } else {
             bColorMaterialWidgetActive = false;
         }
     } else if ( isActivelySelecting( GHType::Ceiling ) ) {
         if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
-            res.prepare(fd, "", ResourceGroup::Material, 2);
+            res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
         } else {
             bColorMaterialWidgetActive = false;
         }
     } else if ( isActivelySelecting( GHType::Coving ) ) {
         if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
-            res.prepare(fd, "", ResourceGroup::Material, 2);
+            res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
         } else {
             bColorMaterialWidgetActive = false;
         }
     } else if ( isActivelySelecting( GHType::Skirting ) ) {
         if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
-            res.prepare(fd, "", ResourceGroup::Material, 2);
+            res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
         } else {
             bColorMaterialWidgetActive = false;
@@ -195,7 +195,7 @@ void ArchExplorer::cloneInternal( HouseBSData *_house, FittedFurniture *sourceFu
     auto depthOffset = sourceFurniture->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ? sourceFurniture->depthNormal *
                                                                                         sourceFurniture->width
                                                                                       : V2fc::ZERO;
-    V2f pos = XZY::C2(hitPosition) + depthOffset;
+    V2f pos = XZY::C2(fd.hitPosition) + depthOffset;
     auto f = HouseService::findFloorOf(_house, fd.room->hash);
     RS::placeManually(
             FurnitureRuleParams{ f, fd.room, clonedFurniture, pos, sourceFurniture->heightOffset,
@@ -245,7 +245,6 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
         }
 
         if ( fdFurniture.hasHit() && fdFurniture.nearV < fd.nearV ) {
-            hitPosition = rsg.DC()->getPosition() + ( _dir * fd.nearV );
             V3f refNormal = V3f::UP_AXIS;
             furnitureSelectionAlphaAnim.fadeIn();
             furnitureSelected = dynamic_cast<FittedFurniture *>(fdFurniture.arch);
@@ -289,7 +288,8 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
 }
 
 void ArchExplorer::addNewFurniture( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
-
+    res.prepare(fd, fdFurniture, "", ResourceGroup::Geom, 1);
+    bColorMaterialWidgetActive = true;
 }
 
 void

@@ -31,7 +31,7 @@ class RemoteEntitySelector {
 public:
 
     ResourceMetadataListCallback resListCallback();
-    void prepare( const FeatureIntersection& _fd, const std::string& _presets, const std::string& _resourceGroup,
+    void prepare( const FeatureIntersection& _fd, const FeatureIntersection& _fdfurniture, const std::string& _presets, const std::string& _resourceGroup,
                   int _defaultTab );
     static std::vector<std::string>
     tagsSanitisedFor( const std::string& query, const std::string& group, const std::vector<std::string>& tags );
@@ -42,8 +42,10 @@ private:
     void injectColor( ArchOrchestrator& asg, const EntityMetaData& meta );
     void injectMaterial( ArchOrchestrator& asg, const EntityMetaData& meta );
     void applyInjection( ArchOrchestrator& asg );
+    void addNewFurniture( ArchOrchestrator& asg, EntityMetaData meta );
 private:
     FeatureIntersection fd;
+    FeatureIntersection fdfurniture;
     GHTypeT label{ GHType::None };
     std::string resourceGroup{};
     int originalTabIndex = 0;

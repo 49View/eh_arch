@@ -20,6 +20,7 @@ public:
     RoomBSData* room = nullptr;
     float nearV = std::numeric_limits<float>::max();
     V3f normal = V3f::ZERO;
+    V3f hitPosition = V3f::ZERO;
     GHTypeT intersectedType = GHType::Generic;
 };
 

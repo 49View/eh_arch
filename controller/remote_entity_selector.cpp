@@ -23,9 +23,10 @@ ResourceMetadataListCallback RemoteEntitySelector::resListCallback() {
     return nullptr;
 }
 
-void RemoteEntitySelector::prepare( const FeatureIntersection& _fd, const std::string& _presets,
-                                    const std::string& _resourceGroup, int _defaultTab ) {
+void RemoteEntitySelector::prepare( const FeatureIntersection& _fd, const FeatureIntersection& _fdfurniture,
+                                    const std::string& _presets, const std::string& _resourceGroup, int _defaultTab ) {
     fd = _fd;
+    fdfurniture = _fdfurniture;
     label = fd.intersectedType;
     resourceGroup = _resourceGroup;
     originalTabIndex = _defaultTab;
@@ -37,7 +38,7 @@ void RemoteEntitySelector::prepare( const FeatureIntersection& _fd, const std::s
         ResourceMetaData::getListOf(resourceGroup, presets, resListCallback());
     }
 
-    materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.archSegment, fd.room );
+    materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.archSegment, fd.room);
 }
 
 std::vector<std::string> RemoteEntitySelector::tagsSanitisedFor( const std::string& query, const std::string& group,
@@ -57,28 +58,28 @@ std::vector<std::string> RemoteEntitySelector::tagsSanitisedFor( const std::stri
 void RemoteEntitySelector::applyInjection( ArchOrchestrator& asg ) {
     if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeRoom ) {
         if ( fd.intersectedType == GHType::Floor ) {
-            RoomService::changeFloorsMaterial( fd.room, *materialAndColorTarget );
+            RoomService::changeFloorsMaterial(fd.room, *materialAndColorTarget);
         } else if ( fd.intersectedType == GHType::Wall ) {
-            RoomService::changeWallsMaterial( fd.room, *materialAndColorTarget );
+            RoomService::changeWallsMaterial(fd.room, *materialAndColorTarget);
         } else if ( fd.intersectedType == GHType::Ceiling ) {
-            RoomService::changeCeilingsMaterial( fd.room, *materialAndColorTarget );
+            RoomService::changeCeilingsMaterial(fd.room, *materialAndColorTarget);
         } else if ( fd.intersectedType == GHType::Skirting ) {
-            RoomService::changeSkirtingsMaterial( fd.room, *materialAndColorTarget );
+            RoomService::changeSkirtingsMaterial(fd.room, *materialAndColorTarget);
         } else if ( fd.intersectedType == GHType::Coving ) {
-            RoomService::changeCovingsMaterial( fd.room, *materialAndColorTarget );
+            RoomService::changeCovingsMaterial(fd.room, *materialAndColorTarget);
         }
     }
     if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeHouse ) {
         if ( fd.intersectedType == GHType::Floor ) {
-            HouseService::changeFloorsMaterial( asg.H(), *materialAndColorTarget );
+            HouseService::changeFloorsMaterial(asg.H(), *materialAndColorTarget);
         } else if ( fd.intersectedType == GHType::Wall ) {
-            HouseService::changeWallsMaterial( asg.H(), *materialAndColorTarget );
+            HouseService::changeWallsMaterial(asg.H(), *materialAndColorTarget);
         } else if ( fd.intersectedType == GHType::Ceiling ) {
-            HouseService::changeCeilingsMaterial( asg.H(), *materialAndColorTarget );
+            HouseService::changeCeilingsMaterial(asg.H(), *materialAndColorTarget);
         } else if ( fd.intersectedType == GHType::Skirting ) {
-            HouseService::changeSkirtingsMaterial( asg.H(), *materialAndColorTarget );
+            HouseService::changeSkirtingsMaterial(asg.H(), *materialAndColorTarget);
         } else if ( fd.intersectedType == GHType::Coving ) {
-            HouseService::changeCovingsMaterial( asg.H(), *materialAndColorTarget );
+            HouseService::changeCovingsMaterial(asg.H(), *materialAndColorTarget);
         }
     }
     asg.make3dHouse([&]() { LOGRS("Spawn an house changing a material color") });
@@ -93,7 +94,7 @@ void RemoteEntitySelector::injectMaterial( ArchOrchestrator& asg, const EntityMe
         materialAndColorTarget->colorHash = fd.room->wallsMaterial.colorHash;
         materialAndColorTarget->colorName = fd.room->wallsMaterial.colorName;
     }
-    applyInjection( asg );
+    applyInjection(asg);
 }
 
 void RemoteEntitySelector::injectColor( ArchOrchestrator& asg, const EntityMetaData& meta ) {
@@ -104,7 +105,21 @@ void RemoteEntitySelector::injectColor( ArchOrchestrator& asg, const EntityMetaD
     materialAndColorTarget->color = meta.color;
     materialAndColorTarget->colorHash = meta.hash;
     materialAndColorTarget->colorName = meta.name;
-    applyInjection( asg );
+    applyInjection(asg);
+}
+
+void RemoteEntitySelector::addNewFurniture( ArchOrchestrator& asg, EntityMetaData meta ) {
+    auto ff = FittedFurniture{ { meta.hash, meta.bboxSize },"sofa", S::SQUARE };
+    auto clonedFurniture = EntityFactory::clone(ff);
+
+    auto hitBestPoint = fd.nearV < fdfurniture.nearV ? fd.hitPosition : fdfurniture.hitPosition;
+    float heightOffset = fd.nearV < fdfurniture.nearV ? 0.0f : fdfurniture.arch->bbox3d.calcHeight();
+    V2f pos = XZY::C2(hitBestPoint);// + depthOffset;
+    auto f = HouseService::findFloorOf(asg.H(), fd.room->hash);
+    RS::placeManually(FurnitureRuleParams{ f, fd.room, clonedFurniture, pos, heightOffset, FRPSource{reinterpret_cast<FittedFurniture*>(fdfurniture.arch)},
+                                           FRPFurnitureRuleFlags{ forceManualFurnitureFlags } });
+    asg.make3dHouse([]() {});
+    asg.pushHouseChange();
 }
 
 void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& mediaFolder, RenderOrchestrator& rsg ) {
@@ -144,6 +159,19 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
     auto framePadding = ImGui::GetStyle().FramePadding.x;
 
     if ( resourceGroup == ResourceGroup::Geom ) {
+
+        float columnCurrentMcp = max(200.0f, wWidth * 0.15f);
+        float columnOptionsMcp = wWidth - columnCurrentMcp;
+        ImGui::Columns(2, "mcpCols");
+        ImGui::SetColumnWidth(0, columnCurrentMcp);
+        ImGui::SetColumnWidth(1, columnOptionsMcp);
+//        auto ims = S::WHITE;
+//        auto im = rsg.TH(ims);
+//        ImGui::Text("%s", mcp.colorName.c_str());
+//        ImGui::ImageButton( ImGuiRenderTexture(guiTexture), ImVec2(colThumbSize, colThumbSize), ImVec2(0,0), ImVec2(1,1), -1, ImVec4(0,0,0,0), ImVec4(mcp.color.x(), mcp.color.y(), mcp.color.z(), 1.0f) );
+
+        ImGui::NextColumn();
+
         static char query[256] = { '\0' };
         ImGui::SetNextItemWidth(-1.0f);
         if ( ImGui::InputTextWithHint("", "Search for...(IE: \"coffee,table\")", query, 256,
@@ -171,6 +199,7 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                     auto im = rsg.TH(meta.thumb.empty() ? S::WHITE : meta.thumb);
                     if ( im ) {
                         if ( ImGui::ImageButton(ImGuiRenderTexture(im), ImVec2(thumbSize, thumbSize)) ) {
+                            addNewFurniture(asg, meta);
 //                                backEnd->process_event(OnAddFurnitureSingleEvent{_resource, FurnitureSet{FT::FT_Sofa, meta.hash, meta.bboxSize, S::SQUARE}});
                         }
                         auto sanitizedTags = tagsSanitisedFor(query, meta.group, meta.tags);
@@ -192,11 +221,13 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
         ImGui::SameLine();
         ImGui::TextColored(ImVec4(0.9, 0.7, 0.2, 1.0), "%s", GHTypeToString(label).c_str());
         ImGui::SameLine();
-        ImGui::RadioButton("Single", &changeScope, 0); ImGui::SameLine();
-        ImGui::RadioButton("Room", &changeScope, 1); ImGui::SameLine();
+        ImGui::RadioButton("Single", &changeScope, 0);
+        ImGui::SameLine();
+        ImGui::RadioButton("Room", &changeScope, 1);
+        ImGui::SameLine();
         ImGui::RadioButton("House", &changeScope, 2);
 
-        float columnCurrentMcp = max(200.0f, wWidth*0.15f);
+        float columnCurrentMcp = max(200.0f, wWidth * 0.15f);
         float columnOptionsMcp = wWidth - columnCurrentMcp;
         ImGui::Columns(2, "mcpCols");
         ImGui::SetColumnWidth(0, columnCurrentMcp);
@@ -207,7 +238,7 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
             ims = mat->getDiffuseTexture();
         }
         auto im = rsg.TH(ims);
-        slimMaterialAndColorPropertyMemo( *materialAndColorTarget, im );
+        slimMaterialAndColorPropertyMemo(*materialAndColorTarget, im);
         ImGui::NextColumn();
         ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
         if ( ImGui::BeginTabBar("MyTabBar", tab_bar_flags) ) {
@@ -222,7 +253,9 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                 }
 
                 if ( !metadataMaterialList.empty() ) {
-                    int grouping = static_cast<int>(( columnOptionsMcp - windowPadding * 2 ) / ( thumbSize + framePadding ))-1;
+                    int grouping =
+                            static_cast<int>(( columnOptionsMcp - windowPadding * 2 ) / ( thumbSize + framePadding )) -
+                            1;
                     float matThumbSize = thumbSize - framePadding;
                     for ( auto m = 0u; m < metadataMaterialList.size(); m += grouping ) {
                         for ( int t = 0; t < grouping; t++ ) {
@@ -239,8 +272,8 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                             }
                             auto im = rsg.TH(meta.thumb);
                             if ( im ) {
-                                if ( ImGui::ImageButton(ImGuiRenderTexture(im),ImVec2(matThumbSize, matThumbSize)) ) {
-                                    injectMaterial( asg, meta );
+                                if ( ImGui::ImageButton(ImGuiRenderTexture(im), ImVec2(matThumbSize, matThumbSize)) ) {
+                                    injectMaterial(asg, meta);
                                 }
                                 auto sanitizedTags = tagsSanitisedFor(query, meta.group, meta.tags);
                                 if ( ImGui::IsItemHovered() ) {
@@ -283,7 +316,7 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                 colors.emplace_back("yellow", C4f::PASTEL_YELLOW);
 
                 constexpr int colorFamilyThumbSize = 32;
-                for (auto & color : colors) {
+                for ( auto& color : colors ) {
                     if ( ImGui::ColorButton(color.first.c_str(),
                                             ImVec4(color.second.x(), color.second.y(), color.second.z(), 1.0f), 0,
                                             ImVec2(colorFamilyThumbSize, colorFamilyThumbSize)) ) {
@@ -301,7 +334,8 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
 
                 if ( !metadataColorList.empty() ) {
                     constexpr float thumbSizeMedium = 64.0f;
-                    int grouping = static_cast<int>(( columnOptionsMcp - windowPadding * 2 ) / ( thumbSizeMedium + framePadding ))-1;
+                    int grouping = static_cast<int>(( columnOptionsMcp - windowPadding * 2 ) /
+                                                    ( thumbSizeMedium + framePadding )) - 1;
                     float colThumbSize = thumbSizeMedium - framePadding;
 
                     for ( auto m = 0u; m < metadataColorList.size(); m += grouping ) {
@@ -312,7 +346,7 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                             if ( ImGui::ColorButton(meta.color.toString().c_str(),
                                                     ImVec4(meta.color.x(), meta.color.y(), meta.color.z(), 1.0f), 0,
                                                     ImVec2(colThumbSize, colThumbSize)) ) {
-                                injectColor( asg, meta );
+                                injectColor(asg, meta);
                             }
                             if ( ImGui::IsItemHovered() ) {
                                 ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
