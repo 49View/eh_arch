@@ -10,7 +10,7 @@
 #include <core/resources/material_and_color_property.hpp>
 
 template<typename A, typename R>
-inline static MaterialAndColorProperty *getCommonMaterialChangeMapping( GHTypeT key, A *arch, R *resource ) {
+inline static MaterialAndColorProperty *getCommonMaterialChangeMapping( GHTypeT key, A *arch, R *resource, bool& isKitchen ) {
     if ( key == GHType::Wall ) return &arch->wallMaterial;
     if ( key == GHType::Floor ) return &resource->floorMaterial;
     if ( key == GHType::Skirting ) return &resource->skirtingMaterial;
@@ -18,7 +18,8 @@ inline static MaterialAndColorProperty *getCommonMaterialChangeMapping( GHTypeT 
     if ( key == GHType::Ceiling ) return &resource->ceilingMaterial;
 
     // This can be optional
-    if ( KitchenRoomService::hasKitchen( resource ) ) {
+    isKitchen = KitchenRoomService::hasKitchen( resource );
+    if ( isKitchen ) {
         if ( key == GHType::KitchenWorktop ) return &resource->kitchenData.worktopMaterial;
         if ( key == GHType::KitchenCabinet ) return &resource->kitchenData.unitsMaterial;
         if ( key == GHType::KitchenBackSplash ) return &resource->kitchenData.backSplashMaterial;

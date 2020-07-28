@@ -3,6 +3,7 @@
 //
 
 #include "remote_entity_selector.hpp"
+#include <graphics/render_light_manager.h>
 #include <eh_arch/render/ui/house_ui_material_properties.hpp>
 
 int RemoteEntitySelector::groupIndex() const {
@@ -38,7 +39,7 @@ void RemoteEntitySelector::prepare( const FeatureIntersection& _fd, const Featur
         ResourceMetaData::getListOf(resourceGroup, presets, resListCallback());
     }
 
-    materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.archSegment, fd.room);
+    materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.archSegment, fd.room, bKichenElementSelected );
 }
 
 std::vector<std::string> RemoteEntitySelector::tagsSanitisedFor( const std::string& query, const std::string& group,
@@ -56,32 +57,36 @@ std::vector<std::string> RemoteEntitySelector::tagsSanitisedFor( const std::stri
 }
 
 void RemoteEntitySelector::applyInjection( ArchOrchestrator& asg ) {
-    if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeRoom ) {
-        if ( fd.intersectedType == GHType::Floor ) {
-            RoomService::changeFloorsMaterial(fd.room, *materialAndColorTarget);
-        } else if ( fd.intersectedType == GHType::Wall ) {
-            RoomService::changeWallsMaterial(fd.room, *materialAndColorTarget);
-        } else if ( fd.intersectedType == GHType::Ceiling ) {
-            RoomService::changeCeilingsMaterial(fd.room, *materialAndColorTarget);
-        } else if ( fd.intersectedType == GHType::Skirting ) {
-            RoomService::changeSkirtingsMaterial(fd.room, *materialAndColorTarget);
-        } else if ( fd.intersectedType == GHType::Coving ) {
-            RoomService::changeCovingsMaterial(fd.room, *materialAndColorTarget);
+
+    if ( !bKichenElementSelected ) {
+        if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeRoom ) {
+            if ( fd.intersectedType == GHType::Floor ) {
+                RoomService::changeFloorsMaterial(fd.room, *materialAndColorTarget);
+            } else if ( fd.intersectedType == GHType::Wall ) {
+                RoomService::changeWallsMaterial(fd.room, *materialAndColorTarget);
+            } else if ( fd.intersectedType == GHType::Ceiling ) {
+                RoomService::changeCeilingsMaterial(fd.room, *materialAndColorTarget);
+            } else if ( fd.intersectedType == GHType::Skirting ) {
+                RoomService::changeSkirtingsMaterial(fd.room, *materialAndColorTarget);
+            } else if ( fd.intersectedType == GHType::Coving ) {
+                RoomService::changeCovingsMaterial(fd.room, *materialAndColorTarget);
+            }
+        }
+        if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeHouse ) {
+            if ( fd.intersectedType == GHType::Floor ) {
+                HouseService::changeFloorsMaterial(asg.H(), *materialAndColorTarget);
+            } else if ( fd.intersectedType == GHType::Wall ) {
+                HouseService::changeWallsMaterial(asg.H(), *materialAndColorTarget);
+            } else if ( fd.intersectedType == GHType::Ceiling ) {
+                HouseService::changeCeilingsMaterial(asg.H(), *materialAndColorTarget);
+            } else if ( fd.intersectedType == GHType::Skirting ) {
+                HouseService::changeSkirtingsMaterial(asg.H(), *materialAndColorTarget);
+            } else if ( fd.intersectedType == GHType::Coving ) {
+                HouseService::changeCovingsMaterial(asg.H(), *materialAndColorTarget);
+            }
         }
     }
-    if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeHouse ) {
-        if ( fd.intersectedType == GHType::Floor ) {
-            HouseService::changeFloorsMaterial(asg.H(), *materialAndColorTarget);
-        } else if ( fd.intersectedType == GHType::Wall ) {
-            HouseService::changeWallsMaterial(asg.H(), *materialAndColorTarget);
-        } else if ( fd.intersectedType == GHType::Ceiling ) {
-            HouseService::changeCeilingsMaterial(asg.H(), *materialAndColorTarget);
-        } else if ( fd.intersectedType == GHType::Skirting ) {
-            HouseService::changeSkirtingsMaterial(asg.H(), *materialAndColorTarget);
-        } else if ( fd.intersectedType == GHType::Coving ) {
-            HouseService::changeCovingsMaterial(asg.H(), *materialAndColorTarget);
-        }
-    }
+
     asg.make3dHouse([&]() { LOGRS("Spawn an house changing a material color") });
     asg.pushHouseChange();
 }
@@ -124,7 +129,7 @@ void RemoteEntitySelector::addNewFurniture( ArchOrchestrator& asg, EntityMetaDat
 
 void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& mediaFolder, RenderOrchestrator& rsg ) {
 
-//        ImGui::ShowDemoWindow();
+//    ImGui::ShowDemoWindow();
 
     static bool no_titlebar = true;
     static bool no_scrollbar = false;
@@ -232,17 +237,46 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
         ImGui::Columns(2, "mcpCols");
         ImGui::SetColumnWidth(0, columnCurrentMcp);
         ImGui::SetColumnWidth(1, columnOptionsMcp);
-        auto ims = S::WHITE;
-        auto mat = rsg.SG().get<Material>(materialAndColorTarget->materialHash);
-        if ( mat ) {
-            ims = mat->getDiffuseTexture();
+        slimMaterialAndColorPropertyMemo( rsg, materialAndColorTarget );
+
+        if ( RS::hasRoomType( fd.room, ASType::Kitchen ) ) {
+            if (ImGui::Button("Kitchen worktop")) {
+                bKichenElementSelected = true;
+                materialAndColorTarget = &fd.room->kitchenData.worktopMaterial;
+            }
+            if (ImGui::Button("Kitchen units")) {
+                bKichenElementSelected = true;
+                materialAndColorTarget = &fd.room->kitchenData.unitsMaterial;
+            }
+            if (ImGui::Button("Kitchen back splash")) {
+                bKichenElementSelected = true;
+                materialAndColorTarget = &fd.room->kitchenData.backSplashMaterial;
+            }
         }
-        auto im = rsg.TH(ims);
-        slimMaterialAndColorPropertyMemo(*materialAndColorTarget, im);
+        int lightIndex = 1;
+        for ( const auto& roomLight : fd.room->mLightFittings ) {
+            std::string lightLabel = "Light " + std::to_string(lightIndex++);
+            auto renderLight = rsg.RR().LM()->findPointLight( roomLight.key );
+            if ( renderLight ) {
+                if ( ImGui::Checkbox(lightLabel.c_str(), &renderLight->GoingUp()) ) {
+                    renderLight->updateLightIntensityAfterToggle();
+                }
+            }
+
+//            for ( const auto& light : rsg.SG().LL().list() ) {
+//                if ( roomLight.key == light->mKey ) {
+//                    if ( ImGui::Button(lightLabel.c_str()) ) {
+//                        rsg.RR().LM()->setPointLightIntensity(0, 1.0f);
+//                    }
+//                    break;
+//                }
+//            }
+        }
+
         ImGui::NextColumn();
+
         ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
         if ( ImGui::BeginTabBar("MyTabBar", tab_bar_flags) ) {
-
             ImGuiTabItemFlags tMFlags = defaultTabIndex == 1 ? ImGuiTabItemFlags_SetSelected : 0;
             if ( ImGui::BeginTabItem("Material", nullptr, tMFlags) ) {
                 static char query[256] = { '\0' };

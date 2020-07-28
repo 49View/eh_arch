@@ -25,10 +25,11 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2134;
+static const uint64_t SHouseJSONVersion = 2140;
 
 // Version log
 //
+// 2020-07-24 -    #2140 - Added LightFittings class
 // 2020-07-24 -    #2134 - Added keyTag and tags to FittedFurniture
 // 2020-07-22 -    #2133 - Added dependantHash to FittedFurniture
 
@@ -393,11 +394,17 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     int kitchenIndexMainWorktop = -1;
 };
 
+JSONDATA(LightFittings, key, lightPosition)
+    LightFittings( const std::string& key, const V3f& lightPosition ) : key(key), lightPosition(lightPosition) {}
+    std::string key;
+    V3f lightPosition;
+};
+
 JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center,
            linkedHash, sequencePart, mTriangles2d, roomTypes, windows, doors, z, mHasCoving, mBBoxCoving, floorType,
            mFittedFurniture,
            mWallSegments, mWallSegmentsSorted, mPerimeterSegments, mvCovingSegments, mvSkirtingSegments,
-           mMaxEnclsingBoundingBox, mLightFittingsLocators, mSocketLocators, mSwichesLocators, maxSizeEnclosedHP1,
+           mMaxEnclsingBoundingBox, mLightFittings, mSocketLocators, mSwichesLocators, maxSizeEnclosedHP1,
            maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite,
            mLongestWallOppositePoint, mPerimeter, area, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth,
            defaultCeilingThickness, spotLightYOffset, wallsMaterial, floorMaterial, ceilingMaterial, covingProfile,
@@ -417,7 +424,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height,
     std::vector<std::vector<Vector2f>> mvSkirtingSegments;
     std::vector<Vector2f> mMaxEnclsingBoundingBox;
 
-    std::vector<Vector3f> mLightFittingsLocators;
+    std::vector<LightFittings> mLightFittings;
     std::vector<Vector3f> mSocketLocators; // z on this holds the rotating z-angle
     std::vector<Vector3f> mSwichesLocators; // z on this holds the rotating z-angle
 

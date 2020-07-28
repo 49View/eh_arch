@@ -63,6 +63,11 @@ struct ExploreStateMachine {
             ,state<class ExploreEditState> + event<OnCloneEvent> / CloneSelectedFurniture{}
             ,state<class ExploreEditState> + event<OnDeleteEvent> / DeleteSelected{}
 
+            ,state<class ExploreEditState> + event<OnDecreaseValueFastAltEvent> / TimeDecrementFast{}
+            ,state<class ExploreEditState> + event<OnIncreaseValueFastAltEvent> / TimeIncrementFast{}
+            ,state<class ExploreEditState> + event<OnDecreaseValueAltEvent> / TimeDecrement{}
+            ,state<class ExploreEditState> + event<OnIncreaseValueAltEvent> / TimeIncrement{}
+
             // Sub state machines
             ,state<class ExploreState> + event<OnToggleShortCut1Event> / ExploreEditStateEntry{} = state<ExploreEditState>
             ,state<class ExploreEditState> + event<OnToggleShortCut1Event> / ExploreEditStateExit{} = state<ExploreState>

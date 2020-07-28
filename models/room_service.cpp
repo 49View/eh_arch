@@ -52,14 +52,16 @@ namespace RoomService {
         Vector2f bs = br.size();
         bool bCenterRoomOnly = false;
 
-        r->mLightFittingsLocators.clear();
+        r->mLightFittings.clear();
         float lightYOffset = r->defaultCeilingThickness;// + r->spotLightYOffset;
 
         int numX = static_cast<int>( bs.x() / r->minLightFittingDistance );
         int numY = static_cast<int>( bs.y() / r->minLightFittingDistance );
 
+        int totalLightsCount = 0;
+        std::string rHash = std::to_string(r->hash);
         if ( numX == 0 || numY == 0 || bCenterRoomOnly ) {
-            r->mLightFittingsLocators.emplace_back(br.centre(), r->height - lightYOffset);
+            r->mLightFittings.emplace_back( rHash+std::to_string(totalLightsCount++), V3f{br.centre(), r->height - lightYOffset} );
             return;
         }
 
@@ -71,7 +73,7 @@ namespace RoomService {
             for ( auto m = 1; m < numX + 1; m++ ) {
                 float lx = static_cast<float>( m ) / static_cast<float>( numX + 1 );
                 Vector2f i = lerp(lx, lv1, lv2);
-                r->mLightFittingsLocators.emplace_back(i, r->height - lightYOffset);
+                r->mLightFittings.emplace_back( rHash+std::to_string(totalLightsCount++), V3f{i, r->height - lightYOffset} );
             }
         }
     }
@@ -492,8 +494,8 @@ namespace RoomService {
         for ( auto& s : r->mMaxEnclsingBoundingBox ) {
             s *= _scale;
         }
-        for ( auto& s : r->mLightFittingsLocators ) {
-            s *= scale3f;
+        for ( auto& s : r->mLightFittings ) {
+            s.lightPosition *= scale3f;
         }
         for ( auto& covs : r->mvCovingSegments ) {
             for ( auto& s : covs ) {

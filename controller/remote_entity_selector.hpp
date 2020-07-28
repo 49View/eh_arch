@@ -50,6 +50,7 @@ private:
     std::string resourceGroup{};
     int originalTabIndex = 0;
     int defaultTabIndex = 0;
+    bool bKichenElementSelected = false;
     MaterialAndColorPropertyChangeScopeT changeScope = MaterialAndColorPropertyChangeScope::ScopeRoom;
     MaterialAndColorProperty *materialAndColorTarget = nullptr;
     ResourceMetadataList metadataGeomList{};
