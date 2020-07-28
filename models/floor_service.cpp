@@ -649,10 +649,10 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *h
     }
 
     // Guess Bedrooms and Kitchen/living rooms (with open plan) (Only for flats/apartments) (floors == 1)
-    // **** Now this is compelte wild guess but we are going to try it nevertheless ****
+    // **** Now this is complete wild guess but we are going to try it nevertheless ****
     // Basically the idea is that if we have between 2 and 4 unassigned rooms (a 1 to 3 bedroom flat)
     // We will guess that the biggest room is the Living/Kitchen area, the rest are the bedrooms
-    // We can do this because we've already detected bathrroms and Hallways above. It's still wild, but might work.
+    // We can do this because we've already detected bathrooms and Hallways above. It's still wild, but might work.
     if ( house->mFloors.size() == 1 && numberOfGenericRoom >= 2 && numberOfGenericRoom <= 4 ) {
         std::vector<std::pair<float, RoomBSData *>> areaPairs{};
         for ( auto& room : f->rooms ) {
@@ -674,6 +674,17 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *h
             // Add the rest, if any
             for ( auto t = 2u; t < areaPairs.size(); t++ ) {
                 RoomService::setRoomType(areaPairs[t].second, ASType::BedroomDouble, house);
+            }
+        }
+    }
+    // Another super guess, for 1 bed flats with open-space kitchen we might guess if it has detected a bathroom and a
+    // bedroom, then the undetected room should be the living/kitchen.
+    if ( house->mFloors.size() == 1 && numberOfGenericRoom == 1 ) {
+        for ( auto& room : f->rooms ) {
+            auto *r = room.get();
+            if ( RoomService::hasRoomType(r, ASType::GenericRoom) ) {
+                RoomService::setRoomType(r, ASType::Kitchen, house);
+                RoomService::addRoomType(r, ASType::LivingRoom, house);
             }
         }
     }
