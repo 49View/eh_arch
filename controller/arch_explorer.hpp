@@ -52,6 +52,7 @@ public:
     void deleteSelected( RenderOrchestrator& rsg );
     void cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg );
     void replaceFurnitureWithOneOfItsKind( ArchOrchestrator& asg, RenderOrchestrator& rsg );
+    void addNewFurniture( ArchOrchestrator& asg, RenderOrchestrator& rsg );
 
 private:
     void updateFurnitureSelection( RenderOrchestrator& rsg, const AggregatedInputData& aid, const V3f& centerBottomPos,

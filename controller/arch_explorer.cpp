@@ -99,6 +99,8 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
                                                                                : MouseCursorType::ARROW);
 }
 
+
+
 void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
     // If we are on a manipulable object do nothing
     if ( isActivelySelecting( GHType::Wall ) ) {
@@ -284,6 +286,10 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
 //    if ( furnitureSelected ) {
     updateFurnitureSelection(rsg, aid, centerBottomFurnitureSelected, furnitureMoveDotColor());
 //    }
+}
+
+void ArchExplorer::addNewFurniture( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+
 }
 
 void

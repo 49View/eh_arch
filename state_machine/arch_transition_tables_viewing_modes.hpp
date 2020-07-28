@@ -55,6 +55,7 @@ struct ExploreStateMachine {
             ,state<class ExploreEditState> + event<OnFirstTimeTouchDownEvent> / FirstTimeTouchDownExploreEdit{}
             ,state<class ExploreEditState> + event<OnTouchMoveEvent> / TouchMoveExploreEdit{}
             ,state<class ExploreEditState> + event<OnSingleTapEvent> / SingleTapExploreEdit{}
+            ,state<class ExploreEditState> + event<OnLongTapEvent> / LongTapExploreEdit{}
             ,state<class ExploreEditState> + event<OnTouchUpEvent> / TouchUpExploreEdit{}
 
             ,state<class ExploreEditState> + event<OnSpaceEvent> / SpaceToggle{}

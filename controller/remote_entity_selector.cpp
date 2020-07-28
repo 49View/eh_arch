@@ -3,6 +3,7 @@
 //
 
 #include "remote_entity_selector.hpp"
+#include <eh_arch/render/ui/house_ui_material_properties.hpp>
 
 int RemoteEntitySelector::groupIndex() const {
     return originalTabIndex;
@@ -187,12 +188,27 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
 
     if ( resourceGroup == ResourceGroup::Material || resourceGroup == ResourceGroup::Color ) {
 
+        ImGui::TextColored(ImVec4(0.7, 0.7, 0.4, 1.0), "%s", RoomService::roomName(fd.room).c_str());
+        ImGui::SameLine();
         ImGui::TextColored(ImVec4(0.9, 0.7, 0.2, 1.0), "%s", GHTypeToString(label).c_str());
         ImGui::SameLine();
         ImGui::RadioButton("Single", &changeScope, 0); ImGui::SameLine();
         ImGui::RadioButton("Room", &changeScope, 1); ImGui::SameLine();
         ImGui::RadioButton("House", &changeScope, 2);
 
+        float columnCurrentMcp = max(200.0f, wWidth*0.15f);
+        float columnOptionsMcp = wWidth - columnCurrentMcp;
+        ImGui::Columns(2, "mcpCols");
+        ImGui::SetColumnWidth(0, columnCurrentMcp);
+        ImGui::SetColumnWidth(1, columnOptionsMcp);
+        auto ims = S::WHITE;
+        auto mat = rsg.SG().get<Material>(materialAndColorTarget->materialHash);
+        if ( mat ) {
+            ims = mat->getDiffuseTexture();
+        }
+        auto im = rsg.TH(ims);
+        slimMaterialAndColorPropertyMemo( *materialAndColorTarget, im );
+        ImGui::NextColumn();
         ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
         if ( ImGui::BeginTabBar("MyTabBar", tab_bar_flags) ) {
 
@@ -206,7 +222,7 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                 }
 
                 if ( !metadataMaterialList.empty() ) {
-                    int grouping = static_cast<int>(( wWidth - windowPadding * 2 ) / ( thumbSize + framePadding ))-1;
+                    int grouping = static_cast<int>(( columnOptionsMcp - windowPadding * 2 ) / ( thumbSize + framePadding ))-1;
                     float matThumbSize = thumbSize - framePadding;
                     for ( auto m = 0u; m < metadataMaterialList.size(); m += grouping ) {
                         for ( int t = 0; t < grouping; t++ ) {
@@ -223,8 +239,7 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                             }
                             auto im = rsg.TH(meta.thumb);
                             if ( im ) {
-                                if ( ImGui::ImageButton(ImGuiRenderTexture(im),
-                                                        ImVec2(matThumbSize, matThumbSize)) ) {
+                                if ( ImGui::ImageButton(ImGuiRenderTexture(im),ImVec2(matThumbSize, matThumbSize)) ) {
                                     injectMaterial( asg, meta );
                                 }
                                 auto sanitizedTags = tagsSanitisedFor(query, meta.group, meta.tags);
@@ -286,7 +301,7 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
 
                 if ( !metadataColorList.empty() ) {
                     constexpr float thumbSizeMedium = 64.0f;
-                    int grouping = static_cast<int>(( wWidth - windowPadding * 2 ) / ( thumbSizeMedium + framePadding ))-1;
+                    int grouping = static_cast<int>(( columnOptionsMcp - windowPadding * 2 ) / ( thumbSizeMedium + framePadding ))-1;
                     float colThumbSize = thumbSizeMedium - framePadding;
 
                     for ( auto m = 0u; m < metadataColorList.size(); m += grouping ) {

@@ -259,6 +259,15 @@ struct SingleTapExploreEdit {
     }
 };
 
+struct LongTapExploreEdit {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        if ( asg.H() ) {
+            asg.Explorer().addNewFurniture( asg, rsg );
+        }
+    }
+};
+
+
 struct TouchUp {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
