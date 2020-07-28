@@ -47,18 +47,20 @@ updateSourceImagesIntoScene( SceneGraph& sg, ArchOrchestrator& asg, const Source
 
 struct UpdateHMB {
     void operator()( SceneGraph& sg, ArchOrchestrator& asg ) {
-        updateSourceImagesIntoScene(sg, asg, HouseMakerBitmap::prepareImages(asg.H(), *sg.get<RawImage>(asg.H()->propertyId)));
+        updateSourceImagesIntoScene(sg, asg,
+                                    HouseMakerBitmap::prepareImages(asg.H(), *sg.get<RawImage>(asg.H()->propertyId)));
     }
 };
 
 
 static inline void
-prepareProperty( const PropertyListing& property, ArchOrchestrator& asg, SceneGraph& sg, const std::string& mediaFolder ) {
+prepareProperty( const PropertyListing& property, ArchOrchestrator& asg, SceneGraph& sg,
+                 const std::string& mediaFolder ) {
 
     auto floorplanImage = RawImage{ FM::readLocalFileC(mediaFolder + property.floorplanUrl) };
     sg.addRawImageIM(property._id, floorplanImage);
     asg.loadHouse(property._id, [&, property]() {
-        HouseMakerBitmap::prepareImages( asg.H(), *sg.get<RawImage>(property._id) );
+        HouseMakerBitmap::prepareImages(asg.H(), *sg.get<RawImage>(property._id));
         asg.centerCameraMiddleOfHouse();
         asg.onEvent(ArchIOEvents::AIOE_OnLoad);
     }, [&, property]() {
@@ -71,7 +73,7 @@ prepareProperty( const PropertyListing& property, ArchOrchestrator& asg, SceneGr
 
 struct CreateHouseTextures {
     void operator()( SceneGraph& sg, ArchOrchestrator& asg ) {
-        HouseMakerBitmap::prepareImages( asg.H(), *sg.get<RawImage>(asg.H()->propertyId) );
+        HouseMakerBitmap::prepareImages(asg.H(), *sg.get<RawImage>(asg.H()->propertyId));
         updateSourceImagesIntoScene(sg, asg, HouseMakerBitmap::getSourceImages());
         asg.showIMHouse();
         asg.onEvent(ArchIOEvents::AIOE_OnLoadComplete);
@@ -103,11 +105,16 @@ struct CreateNewPropertyFromFloorplanImage {
                      const CLIParamMap& cli,
                      OnCreateNewPropertyFromFloorplanImageEvent event ) {
         Http::post(Url{ "/property/newFromImage/" + url_encode(getFileName(event.floorplanFileName)) },
-                   FM::readLocalFileC(event.floorplanFileName), [&]( HttpResponeParams params ) {
-                    PropertyListing property{ params.BufferString() };
-                    prepareProperty(property, asg, sg, *cli.getParam("mediaFolder"));
-                    asg.saveHouse();
-                });
+                   FM::readLocalFileC(event.floorplanFileName),
+                   [&]( HttpResponeParams params ) {
+                        auto bs = params.BufferString();
+                       rsg.SG().addGenericCallback( [&, bs, cli]() {
+                           PropertyListing property{ bs };
+                           prepareProperty(property, asg, sg, *cli.getParam("mediaFolder"));
+                           asg.saveHouse();
+                       });
+                   }
+        );
     }
 };
 
@@ -193,10 +200,10 @@ struct TouchMoveFeatureManipulation {
         auto is = mouseEvent.viewportPos;
         arc.moveSelectionList(is, [&]( const ArchStructuralFeatureDescriptor& asf, const V2f& offset ) {
             if ( asf.feature == ArchStructuralFeature::ASF_Poly ) {
-                HouseService::moveArch(asg.H(), dynamic_cast<ArchStructural*>(asf.elem), offset);
+                HouseService::moveArch(asg.H(), dynamic_cast<ArchStructural *>(asf.elem), offset);
                 asg.pushHouseChange();
             } else {
-                WallService::moveFeature( asf, offset, false);
+                WallService::moveFeature(asf, offset, false);
                 HouseService::recalculateBBox(asg.H());
                 HouseMakerBitmap::makeFromWalls(asg.H());
                 asg.pushHouseChange();

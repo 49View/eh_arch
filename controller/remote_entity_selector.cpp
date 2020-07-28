@@ -170,10 +170,6 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
         ImGui::Columns(2, "mcpCols");
         ImGui::SetColumnWidth(0, columnCurrentMcp);
         ImGui::SetColumnWidth(1, columnOptionsMcp);
-//        auto ims = S::WHITE;
-//        auto im = rsg.TH(ims);
-//        ImGui::Text("%s", mcp.colorName.c_str());
-//        ImGui::ImageButton( ImGuiRenderTexture(guiTexture), ImVec2(colThumbSize, colThumbSize), ImVec2(0,0), ImVec2(1,1), -1, ImVec4(0,0,0,0), ImVec4(mcp.color.x(), mcp.color.y(), mcp.color.z(), 1.0f) );
 
         ImGui::NextColumn();
 
@@ -262,15 +258,6 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                     renderLight->updateLightIntensityAfterToggle();
                 }
             }
-
-//            for ( const auto& light : rsg.SG().LL().list() ) {
-//                if ( roomLight.key == light->mKey ) {
-//                    if ( ImGui::Button(lightLabel.c_str()) ) {
-//                        rsg.RR().LM()->setPointLightIntensity(0, 1.0f);
-//                    }
-//                    break;
-//                }
-//            }
         }
 
         ImGui::NextColumn();
