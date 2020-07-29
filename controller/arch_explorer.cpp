@@ -104,40 +104,40 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
 void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
     // If we are on a manipulable object do nothing
     if ( isActivelySelecting( GHType::Wall ) ) {
-        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 1) ) {
+//        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 1) ) {
             res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
-        } else {
-            bColorMaterialWidgetActive = false;
-        }
+//        } else {
+//            bColorMaterialWidgetActive = false;
+//        }
     } else if ( isActivelySelecting( GHType::Floor ) ) {
-        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
+//        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
             res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 1);
             bColorMaterialWidgetActive = true;
-        } else {
-            bColorMaterialWidgetActive = false;
-        }
+//        } else {
+//            bColorMaterialWidgetActive = false;
+//        }
     } else if ( isActivelySelecting( GHType::Ceiling ) ) {
-        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
+//        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
             res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
-        } else {
-            bColorMaterialWidgetActive = false;
-        }
+//        } else {
+//            bColorMaterialWidgetActive = false;
+//        }
     } else if ( isActivelySelecting( GHType::Coving ) ) {
-        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
+//        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
             res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
-        } else {
-            bColorMaterialWidgetActive = false;
-        }
+//        } else {
+//            bColorMaterialWidgetActive = false;
+//        }
     } else if ( isActivelySelecting( GHType::Skirting ) ) {
-        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
+//        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
             res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
             bColorMaterialWidgetActive = true;
-        } else {
-            bColorMaterialWidgetActive = false;
-        }
+//        } else {
+//            bColorMaterialWidgetActive = false;
+//        }
     }
 }
 
