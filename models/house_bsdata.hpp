@@ -25,11 +25,13 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2140;
+static const uint64_t SHouseJSONVersion = 2142;
 
 // Version log
 //
-// 2020-07-24 -    #2140 - Added LightFittings class
+// 2020-07-29 -    #2142 - Moved northCompassAngle to HouseSourceData, as it's an edit param as original input
+// 2020-07-29 -    #2141 - Finally added northCompassAngle
+// 2020-07-28 -    #2140 - Added LightFittings class
 // 2020-07-24 -    #2134 - Added keyTag and tags to FittedFurniture
 // 2020-07-22 -    #2133 - Added dependantHash to FittedFurniture
 
@@ -37,11 +39,12 @@ static const float defaltToBeOverwritten = 7543859749023.0f;
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
 
-JSONDATA(HouseSourceData, floorPlanSourceName, sourceGuassianSigma, sourceGuassianBeta,
+JSONDATA(HouseSourceData, floorPlanSourceName, northCompassAngle, sourceGuassianSigma, sourceGuassianBeta,
          sourceGuassian, sourceContrast, sourceBrightness, minBinThreshold, maxBinThreshold, sourceSharpen,
          rescaleFactor, maxUShapeLengthRatio, minPerimeterLength, winningStrategy, winningMargin, pixelCMFromOCR)
     std::string floorPlanSourceName{};
 
+    float northCompassAngle = 0.0f;
     int sourceGuassianSigma = 3; // Must be odd? I think so
     float sourceGuassianBeta = -0.75f;
     float sourceGuassian = 1.75f;

@@ -136,6 +136,7 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
             hrc = HouseRender::make3dGeometry(rsg.RR(), sg, H());
             if ( ccf ) ccf();
             rsg.RR().setLoadingFlag(false);
+            rsg.changeTime("14:00", H()->sourceData.northCompassAngle);
             V3f probePos = XZY::C( HouseService::centerOfBiggestRoom(H()));
             probePos.setY(1.25f);
             rsg.setProbePosition(probePos);

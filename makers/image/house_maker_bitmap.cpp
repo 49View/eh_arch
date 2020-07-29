@@ -756,6 +756,7 @@ namespace HouseMakerBitmap {
     }
 
     void setHouseSourceDataSection( HouseBSData *dest, const HouseBSData *source ) {
+        dest->sourceData = source->sourceData;
         dest->propertyId = source->propertyId;
         dest->name = source->name;
     }

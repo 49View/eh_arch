@@ -287,7 +287,7 @@ struct SingleTap {
 struct TimeIncrementFast {
     void operator()( const OnIncreaseValueFastAltEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
-            rsg.addSecondsToTime(60*event.increment);
+            rsg.addSecondsToTime(60*event.increment, asg.H()->sourceData.northCompassAngle);
         }
     }
 };
@@ -295,7 +295,7 @@ struct TimeIncrementFast {
 struct TimeDecrementFast {
     void operator()( const OnDecreaseValueFastAltEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
-            rsg.addSecondsToTime(60*event.increment);
+            rsg.addSecondsToTime(60*event.increment, asg.H()->sourceData.northCompassAngle);
         }
     }
 };
@@ -303,7 +303,7 @@ struct TimeDecrementFast {
 struct TimeIncrement {
     void operator()( const OnIncreaseValueAltEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
-            rsg.addSecondsToTime(60*event.increment);
+            rsg.addSecondsToTime(60*event.increment, asg.H()->sourceData.northCompassAngle);
         }
     }
 };
@@ -311,7 +311,7 @@ struct TimeIncrement {
 struct TimeDecrement {
     void operator()( const OnDecreaseValueAltEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
         if ( asg.H() ) {
-            rsg.addSecondsToTime(60*event.increment);
+            rsg.addSecondsToTime(60*event.increment, asg.H()->sourceData.northCompassAngle);
         }
     }
 };
