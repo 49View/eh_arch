@@ -41,7 +41,7 @@ private:
 class ArchExplorer {
 public:
     explicit ArchExplorer( RemoteEntitySelector& res ) : res(res) {}
-    void tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rsg, const AggregatedInputData& aid );
+    void tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rsg, const AggregatedInputData& aid, const std::string& mediaFolder );
 
     // Events
     void touchMoveWithModKeyCtrl( const HouseBSData *_house, const V3f& _dir, RenderOrchestrator& rsg );

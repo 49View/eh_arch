@@ -99,8 +99,6 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
                                                                                : MouseCursorType::ARROW);
 }
 
-
-
 void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
     // If we are on a manipulable object do nothing
     if ( isActivelySelecting( GHType::Wall ) ) {
@@ -228,7 +226,7 @@ std::vector<V3f> createBBoxOutline( const V3f& input, const V3f& axis1, const V3
     return ret;
 }
 
-void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rsg, const AggregatedInputData& aid ) {
+void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rsg, const AggregatedInputData& aid, const std::string& mediaFolder ) {
 
     auto _dir = aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get());
 
@@ -241,7 +239,7 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
                                                        FeatureIntersectionFlags::FIF_Ceilings );
 
         if ( bColorMaterialWidgetActive ) {
-            res.update(asg, "/home/dado/media/media/", rsg );
+            res.update(asg, mediaFolder, rsg );
         }
 
         if ( fdFurniture.hasHit() && fdFurniture.nearV < fd.nearV ) {

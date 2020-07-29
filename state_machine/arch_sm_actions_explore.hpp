@@ -147,10 +147,10 @@ struct PopTourPath {
 
 
 struct TickExploreEdit {
-    void operator()( const OnTickEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+    void operator()( const OnTickEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, const CLIParamMap& cli ) {
         if ( asg.H() ) {
             renderCameraLocator( asg, rsg );
-            asg.Explorer().tickControlKey( asg, rsg, event.aid );
+            asg.Explorer().tickControlKey( asg, rsg, event.aid, *cli.getParam("mediaFolder") );
         }
     }
 };

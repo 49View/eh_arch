@@ -180,8 +180,10 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
             ResourceMetaData::getListOf(resourceGroup, query, resListCallback());
         }
         if ( !metadataGeomList.empty() ) {
-            int grouping = 3;
-            for ( auto m = 0u; m < metadataGeomList.size(); m += 3 ) {
+            int grouping =
+                    static_cast<int>(( columnOptionsMcp - windowPadding * 2 ) / ( thumbSize + framePadding )) -
+                    1;
+            for ( auto m = 0u; m < metadataGeomList.size(); m += grouping ) {
                 ImGui::NewLine();
                 for ( int t = 0; t < grouping; t++ ) {
                     if ( t > 0 ) ImGui::SameLine();
@@ -201,7 +203,6 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                     if ( im ) {
                         if ( ImGui::ImageButton(ImGuiRenderTexture(im), ImVec2(thumbSize, thumbSize)) ) {
                             addNewFurniture(asg, meta);
-//                                backEnd->process_event(OnAddFurnitureSingleEvent{_resource, FurnitureSet{FT::FT_Sofa, meta.hash, meta.bboxSize, S::SQUARE}});
                         }
                         auto sanitizedTags = tagsSanitisedFor(query, meta.group, meta.tags);
                         if ( ImGui::IsItemHovered() ) {
