@@ -22,7 +22,7 @@ namespace WallRender {
 
     void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const ArchRenderController& arc ) {
         auto color = arc.getFillColor(wall, C4f::BLACK);
-        rr.draw<DPoly>(sm, wall->mTriangles2d, color, arc.pm(), wall->hashFeature("poly"+color.toString()+sm.hash(), 0));
+        rr.draw<DPoly>(sm, wall->mTriangles2d, color, arc.pm(), wall->hashFeature("wallTri"+sm.hash(), 0));
     }
 
 //    void drawIncrementalAlphaWalls2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
@@ -70,7 +70,7 @@ namespace WallRender {
             auto p1 = wall->epoints[t];
 //            ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Point, t, wall };
             auto color = arc.getFillColor(ArchStructuralFeature::ASF_Point, t, wall, C4f::RED);
-            rr.draw<DCircleFilled>(p1, color, width, sm, arc.pm(), wall->hashFeature("w2dPoint"+color.toString()+sm.hash(),t));
+            rr.draw<DCircleFilled>(p1, color, width, sm, arc.pm(), wall->hashFeature("w2dPoint"+sm.hash(),t));
         }
     }
 
@@ -80,7 +80,7 @@ namespace WallRender {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t+1, wall->epoints.size())];
             auto color = arc.getFillColor(ArchStructuralFeature::ASF_Edge, t, wall, Color4f::PASTEL_GREEN);
-            rr.draw<DLine>(p1, p2, color, width*3.f, sm, arc.pm(), wall->hashFeature("w2dEdge"+color.toString()+sm.hash(),t));
+            rr.draw<DLine>(p1, p2, color, width*3.f, sm, arc.pm(), wall->hashFeature("w2dEdge"+sm.hash(),t));
         }
 //        if ( wall->wrapLastPoint ) vlist.emplace_back(wall->epoints[0]);
     }

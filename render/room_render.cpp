@@ -42,6 +42,7 @@ namespace RoomRender {
 //        if ( drawDebug) {
 //            rr.draw<DPoly>( room->mPerimeterSegments, 0.025f, C4f::RED, true );
 //        }
+        auto roomName = RoomService::roomNames(room);
         auto sm = arc.floorPlanShader();
         auto color = arc.getFillColor(room, C4f::BLACK);
         auto lineWidth = arc.floorPlanScaler(0.015f);
@@ -55,15 +56,14 @@ namespace RoomRender {
 
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {
-            auto ffcolor = arc.getFillColor(ff.get(), C4f::BLACK.A(0.5f));
+            auto ffcolor = arc.getFillColor(ff.get(), C4f::BLACK);
             Matrix4f mt{ ff->position3d * V3f::MASK_Y_OUT, ff->rotation, ff->size * ff->scale };
             mt.mult(arc.pm()());
             rr.draw<DLine>(sg.PL(ff->symbolRef), ffcolor, RDSPreMult(mt), sm, lineWidth,
-                           room->hashFeature(ff->symbolRef+ffcolor.toString()+sm.hash(), ffc++));
+                           room->hashFeature("ff"+sm.hash(), ffc++));
         }
 
 
-        auto roomName = RoomService::roomNames(room);
         JMATH::Rect2f bestBBox(room->mMaxEnclsingBoundingBox);
         auto font = sg.FM().get(S::DEFAULT_FONT).get();
         float fontHeight = 0.32f;
@@ -84,13 +84,13 @@ namespace RoomRender {
         areaPos += V2fc::Y_AXIS * fontHeight;
 
         rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, color, arc.pm(),
-                       room->hashFeature(roomName + color.toString()+sm.hash(), 0));
+                       room->hashFeature(roomName, 0));
 
         rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, color, arc.pm(),
-                       room->hashFeature(roomName + color.toString()+sm.hash(), 1));
+                       room->hashFeature(roomName, 1));
 
         rr.draw<DText>(FDS{ areaSQm, font, areaPos, fontHeight }, color, arc.pm(),
-                       room->hashFeature(roomName + color.toString()+sm.hash(), 2));
+                       room->hashFeature(roomName, 2));
 
 //        for ( auto& cov : room->mvSkirtingSegments ) {
 //            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, arc.pm(), room->hashFeature("skirting", 0));
