@@ -22,7 +22,7 @@ namespace WallRender {
 
     void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const ArchRenderController& arc ) {
         auto color = arc.getFillColor(wall, C4f::BLACK);
-        rr.draw<DPoly>(sm, wall->mTriangles2d, color, arc.pm(), wall->hashFeature("wallTri"+sm.hash(), 0));
+        rr.draw<DFlatPoly>(sm, wall->mTriangles2d, color, arc.pm(), wall->hashFeature("wallTri"+sm.hash(), 0));
     }
 
 //    void drawIncrementalAlphaWalls2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,

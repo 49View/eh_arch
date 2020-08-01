@@ -30,7 +30,7 @@ struct [[maybe_unused]] ActivateOrbitMode {
     operator()( SceneGraph& sg, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
         rsg.setRigCameraController(CameraControlType::Orbit);
         rsg.useSkybox(true);
-        rsg.RR().createGrid(CommandBufferLimits::GridStart, 1.0f, ( Color4f::PASTEL_GRAYLIGHT ),
+        rsg.RR().drawGrid(CommandBufferLimits::GridStart, 1.0f, ( Color4f::PASTEL_GRAYLIGHT ),
                             ( Color4f::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
     }
 };

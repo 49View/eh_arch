@@ -40,7 +40,7 @@ namespace RoomRender {
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *room, const ArchRenderController& arc ) {
 
 //        if ( drawDebug) {
-//            rr.draw<DPoly>( room->mPerimeterSegments, 0.025f, C4f::RED, true );
+//            rr.draw<DFlatPoly>( room->mPerimeterSegments, 0.025f, C4f::RED, true );
 //        }
         auto roomName = RoomService::roomNames(room);
         auto sm = arc.floorPlanShader();
@@ -50,7 +50,7 @@ namespace RoomRender {
         bool drawDebug = arc.isFloorPlanRenderModeDebug();
         if ( drawDebug && arc.isSelected(room) ) {
             rr.draw<DLine>(room->mPerimeterSegments, lineWidth*2.0f, color, true, room->hashFeature("perimeter"+sm.hash(), 0));
-//            rr.draw<DPoly>(room->mPerimeterSegments, C4f::WHITE*0.9f, arc.pm(),
+//            rr.draw<DFlatPoly>(room->mPerimeterSegments, C4f::WHITE*0.9f, arc.pm(),
 //                           room->hashFeature("perimeter", 0));
         }
 

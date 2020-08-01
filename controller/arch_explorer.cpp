@@ -46,7 +46,9 @@ void ArchExplorer::updateFurnitureSelection( RenderOrchestrator& rsg, const Aggr
         stream << std::fixed << std::setprecision(2) << furnitureSelectionAlphaAnim.value();
         std::string nameTag = _dotColor.toString() + "furnitureBBox" + stream.str();
 
-        rsg.RR().drawTriangleQuad(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
+//        rsg.RR().drawTriangleQuad(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
+//                                  _dotColor.A(furnitureSelectionAlphaAnim.value() * 0.5f), nameTag + "a");
+        rsg.RR().draw<DPoly>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
                                   _dotColor.A(furnitureSelectionAlphaAnim.value() * 0.5f), nameTag + "a");
 
         rsg.RR().draw<DLine>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,

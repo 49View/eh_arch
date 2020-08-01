@@ -48,7 +48,7 @@ namespace HouseRender {
             float padding = 0.01f;
             auto houseRect = Rect2f{ 0.0f, 0.0f, data->bbox.bottomRight().x() + padding,
                                      data->bbox.bottomRight().y() + padding };
-            rr.draw<DPoly>(rm, houseRect.pointscw(), C4f::WHITE.A(0.05f), arc.pm(), "floorplanFlatPoly"+sm.hash());
+            rr.draw<DFlatPoly>(rm, houseRect.pointscw(), C4f::WHITE.A(0.05f), arc.pm(), "floorplanFlatPoly"+sm.hash());
         } else {
             // 3)
             // I"m commenting this stuff out for now as it overlaps with the 3d rendering floor when both are selected
