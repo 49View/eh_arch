@@ -42,13 +42,11 @@ void ArchExplorer::updateFurnitureSelection( RenderOrchestrator& rsg, const Aggr
 //        slimMaterialAndColorPropertyMemo(mouseScreenPos, fd.room->floorMaterial, rsg.TH(S::WHITE) );
 //    }
     if ( furnitureSelected ) {
-        std::stringstream stream;
-        stream << std::fixed << std::setprecision(2) << furnitureSelectionAlphaAnim.value();
-        std::string nameTag = _dotColor.toString() + "furnitureBBox" + stream.str();
+        std::string nameTag = "furnitureBBox";
 
 //        rsg.RR().drawTriangleQuad(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
 //                                  _dotColor.A(furnitureSelectionAlphaAnim.value() * 0.5f), nameTag + "a");
-        rsg.RR().draw<DPoly>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
+        rsg.RR().draw<DPoly>(CommandBufferLimits::CameraMousePointers, stripifyVertsLine(furnitureSelectionOutline), RDSPrimitive{PRIMITIVE_TRIANGLE_STRIP},
                                   _dotColor.A(furnitureSelectionAlphaAnim.value() * 0.5f), nameTag + "a");
 
         rsg.RR().draw<DLine>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
