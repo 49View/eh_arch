@@ -250,7 +250,7 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
     bool hasBlinds = false;
     bool hasCurtains = true;
     std::string curtainGeom = "curtain";
-    std::string curtainMaterial = "diamante,curtain";
+    std::string curtainMaterial = "curtain02";
 };
 
 JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center,
