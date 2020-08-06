@@ -10,24 +10,17 @@
 #include <graphics/render_light_manager.h>
 
 #include <eh_arch/controller/arch_render_controller.hpp>
-#include <eh_arch/models/floor_service.hpp>
 #include <core/util.h>
 #include <core/font_utils.hpp>
 #include "wall_render.hpp"
-#include "room_render.hpp"
 #include "floor_render.hpp"
 
 namespace HouseRender {
 
-    void IMHouseRender( Renderer& rr, SceneGraph& sg, const HouseBSData *data, const ArchRenderController& arc ) {
-
-        // Clear the bucket always, because if house it's null it should show a clear/empty screen
-        rr.clearBucket(CommandBufferLimits::UI2dStart);
-
+    void IMHouseDrawSourceDataFloorPlan( Renderer& rr, SceneGraph& sg, const HouseBSData *data,
+                                         const ArchRenderController& arc ) {
         // If no data clearly early exit with just clear of buckets performed
         if ( !data ) return;
-
-        auto sm = arc.floorPlanShader();
 
         // We have 3 combinations here:
         // 1) It's a 3d floorPlan with a source image, render the source image as a background
@@ -37,23 +30,31 @@ namespace HouseRender {
         auto sourceImage = sg.get<RawImage>(data->propertyId);
         if ( sourceImage && !isFloorPlanRenderMode2d(arc.renderMode()) ) {
             // 1)
-            auto color1 = C4f::WHITE.A(arc.getFloorPlanTransparencyFactor());
             auto floorPlanBBox = Rect2f{ V2fc::ZERO, V2f{ sourceImage->width, sourceImage->height } *
                                                      data->sourceData.rescaleFactor };
-            auto nameKey = data->propertyId + std::to_string(data->sourceData.rescaleFactor) + color1.toString();
-            rr.draw<DRect>(floorPlanBBox, color1, RDSImage(data->propertyId), RDSRectAxis::XZ, nameKey+sm.hash());
-        } else if ( isFloorPlanRenderMode2d(arc.renderMode()) ) {
-            // 2)
-            auto rm = arc.floorPlanShader();
-            float padding = 0.01f;
-            auto houseRect = Rect2f{ 0.0f, 0.0f, data->bbox.bottomRight().x() + padding,
-                                     data->bbox.bottomRight().y() + padding };
-            rr.draw<DFlatPoly>(rm, houseRect.pointscw(), C4f::WHITE.A(0.05f), arc.pm(), "floorplanFlatPoly"+sm.hash());
-        } else {
-            // 3)
-            // I"m commenting this stuff out for now as it overlaps with the 3d rendering floor when both are selected
-//            rr.draw<DRect>(data->bbox, C4f::WHITE.A(.3f), RDSRectAxis::XZ, "floorplanImageFlat"+sm.hash());
+            auto nameKey = data->propertyId;
+            rr.draw<DRect>(CommandBufferLimits::UnsortedCustom, floorPlanBBox, RDSImage(data->propertyId), RDSRectAxis::XZ, nameKey);
         }
+        // 2), 3) have been moved in IMHouseRender as they are now part of the house IM render
+    }
+
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const HouseBSData *data, const ArchRenderController& arc ) {
+
+        // Clear the bucket always, because if house it's null it should show a clear/empty screen
+        rr.clearBucket(CommandBufferLimits::UI2dStart);
+
+        // If no data clearly early exit with just clear of buckets performed
+        if ( !data ) return;
+
+        IMHouseDrawSourceDataFloorPlan( rr, sg, data, arc );
+
+        auto sm = arc.floorPlanShader();
+
+        // Render whole house BBox flat poly
+        float padding = 0.02f;
+        auto houseRect = Rect2f{ 0.0f, 0.0f, data->bbox.bottomRight().x() + padding,
+                                 data->bbox.bottomRight().y() + padding };
+        rr.draw<DFlatPoly>(CommandBufferLimits::UI2dStart, sm, houseRect.pointscw(), C4f::WHITE, arc.pm(), "floorplanFlatPoly");
 
         // Render general house information
         auto font = sg.FM().get(S::DEFAULT_FONT).get();

@@ -164,8 +164,7 @@ void ArchExplorer::replaceFurnitureFinal( const EntityMetaData& _furnitureCandid
 
 void ArchExplorer::replaceFurnitureWithOneOfItsKind( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
     if ( canBeManipulated() ) {
-        if ( auto furnitureCandidate = furnitureReplacer.findCandidate(
-                    furnitureSelected->keyTag); furnitureCandidate ) {
+        if ( auto furnitureCandidate = furnitureReplacer.findCandidate(furnitureSelected->keyTag); furnitureCandidate ) {
             replaceFurnitureFinal(*furnitureCandidate, asg, rsg);
         } else {
             ResourceMetaData::getListOf(ResourceGroup::Geom, furnitureSelected->keyTag,
@@ -208,7 +207,7 @@ void ArchExplorer::cloneSelected( HouseBSData *_house, RenderOrchestrator& rsg )
 
 bool ArchExplorer::touchUpWithModKeyCtrl( RenderOrchestrator& rsg ) {
     rsg.DC()->enableInputs(true);
-    rsg.DC()->LockScrollWheelMovements(false);
+//    rsg.DC()->LockScrollWheelMovements(false);
     rsg.setMICursorCapture(true, bFillFullFurnitureOutline ? MouseCursorType::HAND : MouseCursorType::ARROW);
     furnitureSelected = nullptr;
     bFurnitureTargetLocked = false;
@@ -277,7 +276,7 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
             bFillFullFurnitureOutline = false;
         }
         bool isMouseOverSelection = isMouseOverFurnitureInnerSelector(rsg.DC()->getPosition(), _dir);
-        rsg.DC()->LockScrollWheelMovements(isMouseOverSelection);
+//        rsg.DC()->LockScrollWheelMovements(isMouseOverSelection);
         rsg.setMICursorCapture(true, isMouseOverSelection ? MouseCursorType::HAND : MouseCursorType::ARROW);
     }
 //    if ( furnitureSelected ) {

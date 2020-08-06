@@ -44,7 +44,7 @@ namespace RoomRender {
 //        }
         auto roomName = RoomService::roomNames(room);
         auto sm = arc.floorPlanShader();
-        auto color = arc.getFillColor(room, C4f::BLACK);
+        auto color = arc.getFillColor(room, C4f::PASTEL_GRAY);
         auto lineWidth = arc.floorPlanScaler(0.015f);
 
         bool drawDebug = arc.isFloorPlanRenderModeDebug();
@@ -84,13 +84,13 @@ namespace RoomRender {
         areaPos += V2fc::Y_AXIS * fontHeight;
 
         rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, color, arc.pm(),
-                       room->hashFeature(roomName, 0));
+                       room->hashFeature("T1", 0));
 
         rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, color, arc.pm(),
-                       room->hashFeature(roomName, 1));
+                       room->hashFeature("T2", 1));
 
         rr.draw<DText>(FDS{ areaSQm, font, areaPos, fontHeight }, color, arc.pm(),
-                       room->hashFeature(roomName, 2));
+                       room->hashFeature("T3", 2));
 
 //        for ( auto& cov : room->mvSkirtingSegments ) {
 //            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, arc.pm(), room->hashFeature("skirting", 0));

@@ -262,6 +262,7 @@ void ArchOrchestrator::setTourView() {
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
 
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UnsortedCustom));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
@@ -289,6 +290,7 @@ void ArchOrchestrator::setWalkView( float animationSpeed ) {
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
 
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UnsortedCustom));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart),
           AnimEndCallback{ [&]() {
@@ -311,6 +313,7 @@ void ArchOrchestrator::setFloorPlanView( FloorPlanRenderMode fprm ) {
     arc.pm(RDSPreMult(Matrix4f::IDENTITY));
     lastKnownGoodFloorPlanRenderMode = fprm;
     arc.renderMode(fprm);
+    HouseRender::IMHouseDrawSourceDataFloorPlan(rsg.RR(), sg, H(), arc);
     HouseRender::IMHouseRender(rsg.RR(), sg, H(), arc);
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
     rsg.useSkybox(false);
@@ -318,12 +321,12 @@ void ArchOrchestrator::setFloorPlanView( FloorPlanRenderMode fprm ) {
         auto quat = quatCompose(quatAngles);
         Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
         centerCameraMiddleOfHouseWithFloorplanInfoOffset(1.3f, 0.2f);;
-        arc.setFloorPlanTransparencyFactor(0.5f);
         showIMHouse();
     }
 
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 1.0f });
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UnsortedCustom));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
     fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::PBRStart));
@@ -341,13 +344,13 @@ void ArchOrchestrator::setTopDownView() {
     arc.renderMode(FloorPlanRenderMode::Normal3d);
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
     rsg.useSkybox(true);
-    arc.setFloorPlanTransparencyFactor(0.0f);
-    showIMHouse();
+//    showIMHouse();
     auto quat = quatCompose(quatAngles);
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
     centerCameraMiddleOfHouse(H()->bbox3d.calcDepth() + 0.3f);
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
-    fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UnsortedCustom));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 0.0f, rsg.RR().CLIIncludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));
@@ -370,6 +373,7 @@ void ArchOrchestrator::setDollHouseView() {
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
+    fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UnsortedCustom));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::GridStart));
     fader(0.9f, 0.0f, rsg.RR().CLIIncludingTag(CommandBufferLimits::PBRStart, ArchType::CeilingT));

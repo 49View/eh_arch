@@ -138,10 +138,6 @@ public:
     std::optional<ArchStructuralFeatureDescriptor> selectionFront() const;
     size_t selectionCount() const;
 
-    [[nodiscard]] float getFloorPlanTransparencyFactor() const;
-    void setFloorPlanTransparencyFactor( float _value );
-    float& FloorPlanTransparencyFactor();
-
     ArchViewingMode getViewingMode() const;
     void setViewingMode( ArchViewingMode _viewingMode );
 private:
@@ -151,5 +147,4 @@ private:
     FloorPlanRenderMode mRenderMode = FloorPlanRenderMode::Normal2d;
     Matrix4f floorplanNavigationMatrix = Matrix4f::MIDENTITY();
     C4f selectedColor = C4f::ORANGE_SCHEME1_1;
-    float floorPlanTransparencyFactor = 0.5f;
 };

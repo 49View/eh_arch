@@ -33,7 +33,7 @@ public:
 
 namespace HouseRender {
 
+    void IMHouseDrawSourceDataFloorPlan( Renderer& rr, SceneGraph& sg, const HouseBSData *data, const ArchRenderController& arc );
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const HouseBSData *mData, const ArchRenderController& arc );
-
     HouseRenderContainer make3dGeometry( Renderer& rr, SceneGraph& sg, const HouseBSData *mData );
 }

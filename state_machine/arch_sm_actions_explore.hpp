@@ -10,6 +10,7 @@
 struct ExploreEditStateEntry {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
+            rsg.DC()->LockScrollWheelMovements(true);
             fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
             fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
         }
@@ -19,6 +20,7 @@ struct ExploreEditStateEntry {
 struct ExploreEditStateExit {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
+            rsg.DC()->LockScrollWheelMovements(false);
             fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
             fader(0.9f, 1.0f, rsg.RR().CLI(CommandBufferLimits::CameraLocatorIM));
         }
@@ -115,15 +117,10 @@ struct WhichRoomAmI {
 static void renderCameraLocator(ArchOrchestrator& asg, RenderOrchestrator& rsg) {
     // Update camera locator on map
     auto camPos = rsg.DC()->getPosition() * V3f::MASK_Y_OUT;
-    auto camDir = -rsg.DC()->getDirection() * 0.7f;
     auto sm = DShaderMatrix{ DShaderMatrixValue2dColor };
-    rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocatorIM, camPos, V4f::DARK_RED, 0.4f,
+    rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocatorIM, camPos, V4f::DARK_RED, 0.3f,
                                  RDSPreMult(asg.FloorplanNavigationMatrix()),
                                  sm, std::string{ "CameraOminoKey" });
-    rsg.RR().draw<DArrow>(CommandBufferLimits::CameraLocatorIM, V3fVector{ camPos, camPos + camDir },
-                          RDSArrowAngle(0.45f),
-                          RDSArrowLength(0.6f), V4f::DARK_RED, 0.004f, sm, RDSPreMult(asg.FloorplanNavigationMatrix()),
-                          std::string{ "CameraOminoKeyDirection1" });
 }
 
 struct PushTourPath {
@@ -149,7 +146,6 @@ struct PopTourPath {
 struct TickExploreEdit {
     void operator()( const OnTickEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg, const CLIParamMap& cli ) {
         if ( asg.H() ) {
-            renderCameraLocator( asg, rsg );
             asg.Explorer().tickControlKey( asg, rsg, event.aid, *cli.getParam("mediaFolder") );
         }
     }

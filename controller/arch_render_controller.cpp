@@ -86,18 +86,6 @@ std::optional<ArchStructuralFeatureDescriptor> ArchRenderController::selectionFr
     return selection.front();
 }
 
-float ArchRenderController::getFloorPlanTransparencyFactor() const {
-    return floorPlanTransparencyFactor;
-}
-
-float& ArchRenderController::FloorPlanTransparencyFactor() {
-    return floorPlanTransparencyFactor;
-}
-
-void ArchRenderController::setFloorPlanTransparencyFactor( float _value ) {
-    floorPlanTransparencyFactor = _value;
-}
-
 ArchViewingMode ArchRenderController::getViewingMode() const {
     return viewingMode;
 }
