@@ -57,9 +57,9 @@ namespace HouseMakerBitmap {
         toGrayScale(sourceFileImageBC, sourceFileImageGraySharpened);
 
         cv::GaussianBlur(sourceFileImageGraySharpened, lSourceFileImageGray, cv::Size(0, 0),
-                         bsdata.sourceGuassianSigma);
-        cv::addWeighted(sourceFileImageGraySharpened, bsdata.sourceGuassian, lSourceFileImageGray,
-                        bsdata.sourceGuassianBeta, 0,
+                         bsdata.sourceGaussianSigma);
+        cv::addWeighted(sourceFileImageGraySharpened, bsdata.sourceGaussian, lSourceFileImageGray,
+                        bsdata.sourceGaussianBeta, 0,
                         lSourceFileImageGray);
 
         threshold(lSourceFileImageGray, si.sourceFileImageBin, bsdata.minBinThreshold, bsdata.maxBinThreshold,

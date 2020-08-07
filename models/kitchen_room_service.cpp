@@ -103,7 +103,7 @@ namespace KitchenRoomService {
                     const V2f& normal, KitchenDrawerTypeT drawerType,
                     KitchenDrawerCreateFlagsT hff = KitchenDrawerCreateFlags::None, const C4f& color = C4f::WHITE ) {
         float computedDepth = checkBitWiseFlag(hff, KitchenDrawerCreateFlags::NoDepth) ? 0.0f : depth;
-        kd.kitchenDrawers.emplace_back(p1s, p2s, z, unitHeight, computedDepth, normal, drawerType, color);
+        kd.kitchenDrawers.emplace_back(p1s, p2s, z, unitHeight, computedDepth, normal, KitchenDrawerShape{drawerType}, color);
     }
 
     V2f oppositePointOnWallFor( RoomBSData *w, const V2f& input, const V2f& direction ) {

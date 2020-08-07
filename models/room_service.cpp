@@ -42,13 +42,13 @@ namespace RoomService {
             float fa = furnitureAngleFromNormal(rotate90(snormal));
             r->mSocketLocators.emplace_back(saneSocketPos, fa);
             if ( indexSkirting == 0 ) {
-                r->mSwichesLocators.emplace_back(sanePos, fa);
+                r->mSwitchesLocators.emplace_back(sanePos, fa);
             }
         }
     }
 
     void calcOptimalLightingFittingPositions( RoomBSData *r ) {
-        JMATH::Rect2f br(r->mMaxEnclsingBoundingBox);
+        JMATH::Rect2f br(r->mMaxEnclosingBoundingBox);
         Vector2f bs = br.size();
         bool bCenterRoomOnly = false;
 
@@ -79,7 +79,7 @@ namespace RoomService {
     }
 
     void addSocketsAndSwitches( RoomBSData *r ) {
-        r->mSwichesLocators.clear();
+        r->mSwitchesLocators.clear();
         r->mSocketLocators.clear();
 
         // add locators for sockets and switches
@@ -119,8 +119,8 @@ namespace RoomService {
                 int qcp1 = cai(q + 1, csize);
                 if ( checkBitWiseFlag(rws[qcm1].tag, WallFlags::WF_IsDoorPart) ) {
                     Vector2f p2mp1 = rws[qc].p2 - rws[qc].p1;
-                    if ( length(p2mp1) > r->mArchiTravesWidth ) {
-                        p1 = rws[qc].p1 + ( normalize(p2mp1) * r->mArchiTravesWidth );
+                    if ( length(p2mp1) > r->mArchitravesWidth ) {
+                        p1 = rws[qc].p1 + ( normalize(p2mp1) * r->mArchitravesWidth );
                         points.push_back(p1);
                     }
                 }
@@ -128,8 +128,8 @@ namespace RoomService {
                 points.push_back(p1);
                 if ( checkBitWiseFlag(rws[qcp1].tag, WallFlags::WF_IsDoorPart) ) {
                     Vector2f p2mp1 = points[points.size() - 2] - p1;
-                    if ( length(p2mp1) > r->mArchiTravesWidth ) {
-                        p1 += normalize(p2mp1) * r->mArchiTravesWidth;
+                    if ( length(p2mp1) > r->mArchitravesWidth ) {
+                        p1 += normalize(p2mp1) * r->mArchitravesWidth;
                         points[points.size() - 1] = p1;
                     } else {
                         points.pop_back();
@@ -285,11 +285,11 @@ namespace RoomService {
         intersection(v1 - vn * 10000.0f, v1 + vn * 10000.0f, vi1, vi2, v3);
         intersection(v2 - vn * 10000.0f, v2 + vn * 10000.0f, vi1, vi2, v4);
 
-        r->mMaxEnclsingBoundingBox.clear();
-        r->mMaxEnclsingBoundingBox.push_back(v1);
-        r->mMaxEnclsingBoundingBox.push_back(v2);
-        r->mMaxEnclsingBoundingBox.push_back(v3);
-        r->mMaxEnclsingBoundingBox.push_back(v4);
+        r->mMaxEnclosingBoundingBox.clear();
+        r->mMaxEnclosingBoundingBox.push_back(v1);
+        r->mMaxEnclosingBoundingBox.push_back(v2);
+        r->mMaxEnclosingBoundingBox.push_back(v3);
+        r->mMaxEnclosingBoundingBox.push_back(v4);
     }
 
     bool findOppositeWallFromPointAllowingGap( const RoomBSData *r, const Vector2f& p1, const Vector2f& normal,
@@ -491,7 +491,7 @@ namespace RoomService {
             s *= _scale;
         }
         r->mPerimeter *= _scale;
-        for ( auto& s : r->mMaxEnclsingBoundingBox ) {
+        for ( auto& s : r->mMaxEnclosingBoundingBox ) {
             s *= _scale;
         }
         for ( auto& s : r->mLightFittings ) {
@@ -541,11 +541,11 @@ namespace RoomService {
 
     Vector2f maxEnclsingBoundingBoxCenter( const RoomBSData *r ) {
         Vector2f lcenter = V2fc::ZERO;
-        for ( auto& v : r->mMaxEnclsingBoundingBox ) {
+        for ( auto& v : r->mMaxEnclosingBoundingBox ) {
             lcenter += v;
         }
 
-        return lcenter / static_cast<float>( r->mMaxEnclsingBoundingBox.size());
+        return lcenter / static_cast<float>( r->mMaxEnclosingBoundingBox.size());
     }
 
     std::optional<uint64_t> findArchSegmentWithWallHash( RoomBSData *r, HashEH hashToFind, int64_t index ) {

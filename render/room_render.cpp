@@ -64,7 +64,7 @@ namespace RoomRender {
         }
 
 
-        JMATH::Rect2f bestBBox(room->mMaxEnclsingBoundingBox);
+        JMATH::Rect2f bestBBox(room->mMaxEnclosingBoundingBox);
         auto font = sg.FM().get(S::DEFAULT_FONT).get();
         float fontHeight = 0.32f;
 
@@ -164,7 +164,7 @@ namespace RoomRender {
                           Light{ LightType_Point, lf.key, w->spotlightGeom, XZY::C(lf.lightPosition) + V3f::UP_AXIS_NEG * w->spotLightYOffset*2.0f,
                                  3.5f, 0.0f, V3f::Y_AXIS * .5f });
         }
-        for ( const auto& lf : w->mSwichesLocators ) {
+        for ( const auto& lf : w->mSwitchesLocators ) {
             sg.GB<GT::Asset>("lightswitch", V3f{ lf.x(), 1.2f, lf.y() },
                              GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
         }

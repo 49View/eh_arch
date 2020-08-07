@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <utility>
 #include <vector>
 #include <string>
 #include <memory>
@@ -25,29 +26,30 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2142;
+static const uint64_t SHouseJSONVersion = 2143;
 
 // Version log
 //
+// 2020-08-27 -    #2143 - Fixed various clangd warnings and spelling mistakes before it was too late
 // 2020-07-29 -    #2142 - Moved northCompassAngle to HouseSourceData, as it's an edit param as original input
 // 2020-07-29 -    #2141 - Finally added northCompassAngle
 // 2020-07-28 -    #2140 - Added LightFittings class
 // 2020-07-24 -    #2134 - Added keyTag and tags to FittedFurniture
 // 2020-07-22 -    #2133 - Added dependantHash to FittedFurniture
 
-static const float defaltToBeOverwritten = 7543859749023.0f;
+static const float defaultToBeOverwritten = 7543859749023.0f;
 
 #define MAKE_POLYMORPHIC virtual void nullfunc() {}
 
-JSONDATA(HouseSourceData, floorPlanSourceName, northCompassAngle, sourceGuassianSigma, sourceGuassianBeta,
-         sourceGuassian, sourceContrast, sourceBrightness, minBinThreshold, maxBinThreshold, sourceSharpen,
+JSONDATA(HouseSourceData, floorPlanSourceName, northCompassAngle, sourceGaussianSigma, sourceGaussianBeta,
+         sourceGaussian, sourceContrast, sourceBrightness, minBinThreshold, maxBinThreshold, sourceSharpen,
          rescaleFactor, maxUShapeLengthRatio, minPerimeterLength, winningStrategy, winningMargin, pixelCMFromOCR)
     std::string floorPlanSourceName{};
 
     float northCompassAngle = 0.0f;
-    int sourceGuassianSigma = 3; // Must be odd? I think so
-    float sourceGuassianBeta = -0.75f;
-    float sourceGuassian = 1.75f;
+    int sourceGaussianSigma = 3; // Must be odd? I think so
+    float sourceGaussianBeta = -0.75f;
+    float sourceGaussian = 1.75f;
     float sourceContrast = 1.8f;
     float minBinThreshold = 254.0f;
     float maxBinThreshold = 255.0f;
@@ -83,32 +85,32 @@ struct ArchStructural : public ArchBase {
     JMATH::Rect2f bbox = JMATH::Rect2f::IDENTITY;
     JMATH::AABB bbox3d = JMATH::AABB::IDENTITY;
     Color4f albedo = Color4f::WHITE;
-    float height = defaltToBeOverwritten;
-    float width = defaltToBeOverwritten;
-    float depth = defaltToBeOverwritten;
+    float height = defaultToBeOverwritten;
+    float width = defaultToBeOverwritten;
+    float depth = defaultToBeOverwritten;
     Vector2f center = V2fc::ZERO;
     HashEH linkedHash = 0;
     SequencePart sequencePart = 0;
     std::vector<Triangle2d> mTriangles2d;
 
-    inline float h() const { return height; }
-    inline float w() const { return width; }
-    inline float d() const { return depth; }
+    [[nodiscard]] inline float h() const { return height; }
+    [[nodiscard]] inline float w() const { return width; }
+    [[nodiscard]] inline float d() const { return depth; }
 
-    inline float hh() const { return h() * 0.5f; }
-    inline float wh() const { return w() * 0.5f; }
-    inline float dh() const { return d() * 0.5f; }
+    [[nodiscard]] inline float hh() const { return h() * 0.5f; }
+    [[nodiscard]] inline float wh() const { return w() * 0.5f; }
+    [[nodiscard]] inline float dh() const { return d() * 0.5f; }
 
 };
 
 
 JSONDATA_H(UShape, ArchBase, hash, type, indices, points, edges, middle, inwardNormals, crossNormals, width,
            mIsDetached)
-    std::array<int32_t, 4> indices;
-    std::array<Vector2f, 4> points;
-    std::array<Vector2f, 3> edges;
-    std::array<Vector2f, 2> inwardNormals;
-    std::array<Vector2f, 2> crossNormals;
+    std::array<int32_t, 4> indices{};
+    std::array<Vector2f, 4> points{};
+    std::array<Vector2f, 3> edges{};
+    std::array<Vector2f, 2> inwardNormals{};
+    std::array<Vector2f, 2> crossNormals{};
     Vector2f middle = V2fc::ZERO;
     float width = -1.0f;
     bool mIsDetached = false;
@@ -120,7 +122,7 @@ JSONDATA_H(UShape, ArchBase, hash, type, indices, points, edges, middle, inwardN
 struct TwoUShapesBased : public ArchStructural {
     UShape us1;
     UShape us2;
-    float thickness = defaltToBeOverwritten;
+    float thickness = defaultToBeOverwritten;
     Vector2f dirWidth = V2fc::ZERO; // Those are the 2 directions of the element, we know the other one is always up
     Vector2f dirDepth = V2fc::ZERO; // Those are the 2 directions of the element, we know the other one is always up
     float ceilingHeight = 2.75f;
@@ -195,8 +197,8 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, he
     V2f widthNormal = V2fc::ZERO;
     V2f depthNormal = V2fc::ZERO;
     FittedFurnitureFlagsT flags = 0;
-    explicit FittedFurniture( const std::tuple<std::string, V3f>& args, const std::string& _keyTag, const std::string& _symbolRef ) :
-            name(std::get<0>(args)), keyTag(_keyTag), symbolRef(std::move(_symbolRef)), size(std::get<1>(args)) {
+    explicit FittedFurniture( const std::tuple<std::string, V3f>& args, std::string  _keyTag, std::string  _symbolRef ) :
+            name(std::get<0>(args)), keyTag(std::move(_keyTag)), symbolRef(std::move(_symbolRef)), size(std::get<1>(args)) {
         type = ArchType::FittedFurnitureT;
     }
     [[nodiscard]] bool checkIf( FittedFurnitureFlagsT _flag ) const;
@@ -272,7 +274,7 @@ JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height,
 
 JSONDATA_H(StairsBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height, width, depth, center,
            linkedHash, sequencePart, mTriangles2d, name)
-    std::string name = "";
+    std::string name;
 };
 
 JSONDATA(KitchenPathFlags, mainSegment, hasCooker, hasSink, hasFridge)
@@ -283,10 +285,10 @@ JSONDATA(KitchenPathFlags, mainSegment, hasCooker, hasSink, hasFridge)
 };
 
 JSONDATA(KitchenPath, p1, p2, normal, crossNormal, depth, cookerPos, cookerPosDelta, sinkPos, fridgePos, flags)
-    V2f p1;
-    V2f p2;
-    V2f normal;
-    V2f crossNormal;
+    V2f p1{V2fc::ZERO};
+    V2f p2{V2fc::ZERO};
+    V2f normal{V2fc::ZERO};
+    V2f crossNormal{V2fc::ZERO};
     float depth = 0.0f;
     V2f cookerPos = V2fc::ZERO;
     float cookerPosDelta = 0.0f;
@@ -302,16 +304,16 @@ JSONDATA(KitchenPath, p1, p2, normal, crossNormal, depth, cookerPos, cookerPosDe
 };
 
 namespace KitchenDrawerType {
-    const static uint64_t Custom = 1;
-    const static uint64_t Filler = 2;
-    const static uint64_t FlatBasic = 3;
-    const static uint64_t FlatVertical25_75 = 4;
+    [[maybe_unused]] constexpr uint64_t Custom = 1;
+    [[maybe_unused]] constexpr uint64_t Filler = 2;
+    [[maybe_unused]] constexpr uint64_t FlatBasic = 3;
+    [[maybe_unused]] constexpr uint64_t FlatVertical25_75 = 4;
 };
 
 using KitchenDrawerTypeT = uint64_t;
 
 JSONDATA(KitchenDrawerCustomShapeCol, size, profileName)
-    V2f size;
+    V2f size{V2fc::ZERO};
     std::string profileName;
 };
 
@@ -326,7 +328,7 @@ JSONDATA(KitchenDrawerCustomShape, rows)
 JSONDATA(KitchenDrawerShape, type, customShapeGrid)
     KitchenDrawerTypeT type = 0;
     KitchenDrawerCustomShape customShapeGrid{};
-    KitchenDrawerShape( KitchenDrawerTypeT type = KitchenDrawerType::FlatBasic ) : type(type) {}
+    explicit KitchenDrawerShape( KitchenDrawerTypeT type = KitchenDrawerType::FlatBasic ) : type(type) {}
 };
 
 JSONDATA(KitchenDrawer, p1, p2, z, unitHeight, depth, normal, shape, color)
@@ -342,7 +344,7 @@ JSONDATA(KitchenDrawer, p1, p2, z, unitHeight, depth, normal, shape, color)
                    KitchenDrawerShape shape, const Color4f& color = C4f::WHITE ) : p1(p1), p2(p2), z(z),
                                                                                    unitHeight(unitHeight),
                                                                                    depth(depth), normal(normal),
-                                                                                   shape(shape),
+                                                                                   shape(std::move(shape)),
                                                                                    color(color) {}
 };
 
@@ -398,7 +400,7 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
 };
 
 JSONDATA(LightFittings, key, lightPosition)
-    LightFittings( const std::string& key, const V3f& lightPosition ) : key(key), lightPosition(lightPosition) {}
+    LightFittings( std::string  key, const V3f& lightPosition ) : key(std::move(key)), lightPosition(lightPosition) {}
     std::string key;
     V3f lightPosition;
 };
@@ -407,9 +409,9 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height,
            linkedHash, sequencePart, mTriangles2d, roomTypes, windows, doors, z, mHasCoving, mBBoxCoving, floorType,
            mFittedFurniture,
            mWallSegments, mWallSegmentsSorted, mPerimeterSegments, mvCovingSegments, mvSkirtingSegments,
-           mMaxEnclsingBoundingBox, mLightFittings, mSocketLocators, mSwichesLocators, maxSizeEnclosedHP1,
+           mMaxEnclosingBoundingBox, mLightFittings, mSocketLocators, mSwitchesLocators, maxSizeEnclosedHP1,
            maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite,
-           mLongestWallOppositePoint, mPerimeter, area, mCovingPerimeter, minLightFittingDistance, mArchiTravesWidth,
+           mLongestWallOppositePoint, mPerimeter, area, mCovingPerimeter, minLightFittingDistance, mArchitravesWidth,
            defaultCeilingThickness, spotLightYOffset, wallsMaterial, floorMaterial, ceilingMaterial, covingProfile,
            skirtingProfile, skirtingMaterial, covingMaterial, spotlightGeom, kitchenData)
     std::vector<ASTypeT> roomTypes{};
@@ -425,11 +427,11 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height,
     std::vector<Vector2f> mPerimeterSegments;
     std::vector<std::vector<Vector2f>> mvCovingSegments;
     std::vector<std::vector<Vector2f>> mvSkirtingSegments;
-    std::vector<Vector2f> mMaxEnclsingBoundingBox;
+    std::vector<Vector2f> mMaxEnclosingBoundingBox;
 
     std::vector<LightFittings> mLightFittings;
     std::vector<Vector3f> mSocketLocators; // z on this holds the rotating z-angle
-    std::vector<Vector3f> mSwichesLocators; // z on this holds the rotating z-angle
+    std::vector<Vector3f> mSwitchesLocators; // z on this holds the rotating z-angle
 
     Vector2f maxSizeEnclosedHP1 = V2fc::ZERO;
     Vector2f maxSizeEnclosedHP2 = V2fc::ZERO;
@@ -443,7 +445,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, height,
     float area = 0.0f;
     float mCovingPerimeter = 0.0f;
     float minLightFittingDistance = 2.0f;
-    float mArchiTravesWidth = 0.1f;
+    float mArchitravesWidth = 0.1f;
     float defaultCeilingThickness = 0.02f;
     float spotLightYOffset = 0.5f;
     MaterialAndColorProperty wallsMaterial{ "plaster_ultra_fine_spray", C4f{ 0.93f, 0.91f, 0.89f, 1.0f } };
@@ -503,10 +505,10 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, heig
              bathRoomSinkHeight, defaultWallColor, accuracy, tourPaths, mFloors)
     uint64_t version = SHouseJSONVersion;
     std::string propertyId;
-    std::string name = "";
-    std::string source = "";
-    std::string declaredSQm = "";
-    std::string defaultSkybox = "";
+    std::string name;
+    std::string source;
+    std::string declaredSQm;
+    std::string defaultSkybox;
     HouseSourceData sourceData;
     V3f bestInternalViewingPosition = V3f::ZERO;
     Quaternion bestInternalViewingAngle;
