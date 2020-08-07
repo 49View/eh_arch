@@ -414,7 +414,7 @@ namespace RoomService {
     bool roomNeedsCoving( const RoomBSData *r ) {
         return !( RS::hasRoomType(r, ASType::Bathroom) || RS::hasRoomType(r, ASType::ToiletRoom) ||
                   RS::hasRoomType(r, ASType::ShowerRoom) ||
-                  RS::hasRoomType(r, ASType::Ensuite) );
+                  RS::hasRoomType(r, ASType::EnSuite) );
     }
 
     float area( const RoomBSData *r ) {
@@ -621,7 +621,7 @@ namespace RoomService {
 
             case ASType::Bathroom:
             case ASType::ShowerRoom:
-            case ASType::Ensuite:
+            case ASType::EnSuite:
             case ASType::ToiletRoom:
                 r->floorMaterial = house->defaultBathroomFloorMaterial;
                 r->wallsMaterial = house->defaultBathroomWallMaterial;
@@ -659,7 +659,7 @@ namespace RoomService {
             case ASType::ShowerRoom:
                 return "Shower Room";
 
-            case ASType::Ensuite:
+            case ASType::EnSuite:
                 return "En Suite";
 
             case ASType::ToiletRoom:
@@ -727,7 +727,7 @@ namespace RoomService {
             case ASType::ShowerRoom:
                 return "shower-room";
 
-            case ASType::Ensuite:
+            case ASType::EnSuite:
                 return "en-suite";
 
             case ASType::ToiletRoom:
@@ -794,7 +794,7 @@ namespace RoomService {
             case ASType::ShowerRoom:
                 return Color4f::PASTEL_CYAN;
 
-            case ASType::Ensuite:
+            case ASType::EnSuite:
                 return Color4f::PASTEL_CYAN;
 
             case ASType::ToiletRoom:

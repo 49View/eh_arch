@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <utility>
 #include <vector>
 #include <string>
@@ -31,13 +31,13 @@ class FeatureIntersection;
 
 using GenericCallback = std::function<void()>;
 
-constexpr float inch = 2.54f;
-constexpr float inch1o = 1.0f / 2.54f;
+[[maybe_unused]] constexpr float inch = 2.54f;
+[[maybe_unused]] constexpr float oneOverInch = 1.0f / 2.54f;
 
-enum class MeasureUnitType {
-	Inch = 0,
-	Centimeter = 1,
-	DoNotConvert
+namespace MeasureUnitType {
+	[[maybe_unused]] constexpr uint64_t Inch = 0;
+	[[maybe_unused]] constexpr uint64_t Centimeter = 1;
+	[[maybe_unused]] constexpr uint64_t DoNotConvert = 2;
 };
 
 enum class WallType {
@@ -49,28 +49,27 @@ enum class WallType {
 
 enum WallFlags {
 	WF_None = 0,
-	WF_HasSkirting = 1,
-	WF_HasCoving = 1 << 1,
-	WF_IsDoorPart = 1 << 2,
-	WF_IsWindowPart = 1 << 3,
+	WF_HasSkirting = 1u,
+	WF_HasCoving = 1u << 1u,
+	WF_IsDoorPart = 1u << 2u,
+	WF_IsWindowPart = 1u << 3u,
 };
 
 enum class ArchStructuralFeature {
     ASF_None,
     ASF_Point,
     ASF_Edge,
-    ASF_Poly,
-    ASF_Box
+    ASF_Poly
 };
 
-using ASF = ArchStructuralFeature;
-
 namespace FeatureIntersectionFlags {
-    static constexpr uint64_t FIF_Floors          = 1u << 0u;
-    static constexpr uint64_t FIF_Walls           = 1u << 1u;
-    static constexpr uint64_t FIF_Ceilings        = 1u << 2u;
-    static constexpr uint64_t FIF_Furnitures      = 1u << 3u;
-    static constexpr uint64_t FIF_All             = 0xffffffffffffffff;
+    [[maybe_unused]] constexpr uint64_t FIF_Floors          = 1u << 0u;
+    [[maybe_unused]] constexpr uint64_t FIF_Walls           = 1u << 1u;
+    [[maybe_unused]] constexpr uint64_t FIF_Windows         = 1u << 2u;
+    [[maybe_unused]] constexpr uint64_t FIF_Doors           = 1u << 3u;
+    [[maybe_unused]] constexpr uint64_t FIF_Ceilings        = 1u << 4u;
+    [[maybe_unused]] constexpr uint64_t FIF_Furnitures      = 1u << 5u;
+    [[maybe_unused]] constexpr uint64_t FIF_All             = 0xffffffffffffffff;
 }
 
 using FeatureIntersectionFlagsT = uint64_t;
@@ -89,7 +88,7 @@ enum class CeilingType {
 	Flat,
 	Loft,
 	KitchenExtension,
-	Custon
+	Custom
 };
 
 enum class CeilingMatType {
@@ -108,68 +107,61 @@ enum class FloorRectType {
 };
 
 namespace WallLastPointWrap {
-	const static bool Yes = true;
-	const static bool No = false;
+	[[maybe_unused]] constexpr bool Yes = true;
+	[[maybe_unused]] constexpr bool No = false;
 };
 
 using WallLastPointWrapT = bool;
 
-struct DoorPivotIndex {
-	static const uint64_t W1 = 0;
-	static const uint64_t W2 = 1;
+namespace DoorPivotIndex {
+	[[maybe_unused]] constexpr uint64_t W1 = 0;
+	[[maybe_unused]] constexpr uint64_t W2 = 1;
 };
-
-using DoorPivotIndexT = uint64_t;
 
 // This contains information on how the door will open, specifically:
 // W1 or W2 is where the pivot point is
 // CW or CCW, is whether the door will open clockwise or anticlockwise
-struct DoorOrientation {
-	static const uint64_t W1_CW = 0;
-	static const uint64_t W1_CCW = 1;
-	static const uint64_t W2_CW = 2;
-	static const uint64_t W2_CCW = 3;
+namespace DoorOrientation {
+	[[maybe_unused]] constexpr uint64_t W1_CW = 0;
+	[[maybe_unused]] constexpr uint64_t W1_CCW = 1;
+	[[maybe_unused]] constexpr uint64_t W2_CW = 2;
+	[[maybe_unused]] constexpr uint64_t W2_CCW = 3;
 };
 
-using DoorOrientationT = uint64_t;
-
 namespace ASType {
-	const static uint64_t Floor = 0;
-	const static uint64_t Wall = 1;
-	const static uint64_t Door = 2;
-	const static uint64_t Window = 3;
-	const static uint64_t Stairs = 4;
-	const static uint64_t GenericRoom = 5;
-	const static uint64_t LivingRoom = 6;
-	const static uint64_t Kitchen = 7;
-	const static uint64_t BedroomSingle = 8;
-	const static uint64_t BedroomDouble = 9;
-	const static uint64_t BedroomMaster = 10;
-	const static uint64_t Bathroom = 11;
-	const static uint64_t ShowerRoom = 12;
-	const static uint64_t ToiletRoom = 13;
-	const static uint64_t Conservatory = 14;
-	const static uint64_t GamesRoom = 15;
-	const static uint64_t Laundry = 16;
-	const static uint64_t Hallway = 17;
-	const static uint64_t Garage = 18;
-	const static uint64_t Ensuite = 19;
-	const static uint64_t DiningRoom = 20;
-	const static uint64_t Studio = 21;
-	const static uint64_t Cupboard = 22;
-	const static uint64_t Storage = 23;
-	const static uint64_t BoilerRoom = 24;
-	const static uint64_t LastRoom = 25; // if you add any room make sure LastRoom is last index + 1
+	[[maybe_unused]] constexpr uint64_t Floor = 0;
+	[[maybe_unused]] constexpr uint64_t Wall = 1;
+	[[maybe_unused]] constexpr uint64_t Door = 2;
+	[[maybe_unused]] constexpr uint64_t Window = 3;
+	[[maybe_unused]] constexpr uint64_t Stairs = 4;
+	[[maybe_unused]] constexpr uint64_t GenericRoom = 5;
+	[[maybe_unused]] constexpr uint64_t LivingRoom = 6;
+	[[maybe_unused]] constexpr uint64_t Kitchen = 7;
+	[[maybe_unused]] constexpr uint64_t BedroomSingle = 8;
+	[[maybe_unused]] constexpr uint64_t BedroomDouble = 9;
+	[[maybe_unused]] constexpr uint64_t BedroomMaster = 10;
+	[[maybe_unused]] constexpr uint64_t Bathroom = 11;
+	[[maybe_unused]] constexpr uint64_t ShowerRoom = 12;
+	[[maybe_unused]] constexpr uint64_t ToiletRoom = 13;
+	[[maybe_unused]] constexpr uint64_t Conservatory = 14;
+	[[maybe_unused]] constexpr uint64_t GamesRoom = 15;
+	[[maybe_unused]] constexpr uint64_t Laundry = 16;
+	[[maybe_unused]] constexpr uint64_t Hallway = 17;
+	[[maybe_unused]] constexpr uint64_t Garage = 18;
+	[[maybe_unused]] constexpr uint64_t EnSuite = 19;
+	[[maybe_unused]] constexpr uint64_t DiningRoom = 20;
+	[[maybe_unused]] constexpr uint64_t Studio = 21;
+	[[maybe_unused]] constexpr uint64_t Cupboard = 22;
+	[[maybe_unused]] constexpr uint64_t Storage = 23;
+	[[maybe_unused]] constexpr uint64_t BoilerRoom = 24;
+	[[maybe_unused]] constexpr uint64_t LastRoom = 25; // if you add any room make sure LastRoom is last index + 1
 };
 
 using ASTypeT = uint64_t;
 
-static const float z_eps = 0.0f;
-
 enum uShapePairPosition {
-	USPP_None = 0,
-	USPP_Start = 1,
-	USPP_End = 1 << 1,
+	USPP_Start = 1u,
+	USPP_End = 1u << 1u,
 };
 
 struct uShapeiPointCheck {
@@ -183,10 +175,10 @@ typedef std::pair<int32_t, int32_t> roomTypeIndex;
 struct ArchIntersection {
     ArchStructural* arch = nullptr;
     bool hit = false;
-    V2f i;
-    V2f p1;
-    V2f p2;
-    V2f pn;
+    V2f i = V2fc::ZERO;
+    V2f p1 = V2fc::ZERO;
+    V2f p2 = V2fc::ZERO;
+    V2f pn = V2fc::ZERO;
 };
 
 struct FloorUShapesPair {
@@ -196,41 +188,41 @@ struct FloorUShapesPair {
 };
 
 enum ArchType : uint64_t {
-	GenericT = 1,
-	WallT = 1 << 1,
-	SkirtingT = 1 << 2,
-	FloorT = 1 << 3,
-	StairStepT = 1 << 4,
-	HandRailT = 1 << 5,
-	StringerT = 1 << 6,
-	Window_SillT = 1 << 7,
-	WindowT = 1 << 8,
-	DoorT = 1 << 9,
-	WallPointT = 1 << 10,
-	DoorAnchorT = 1 << 11,
-	WindowAnchorT = 1 << 12,
-	StairsT = 1 << 13,
-	RoomT = 1 << 14,
-	CurtainT = 1 << 15,
-	CeilingT = 1 << 16,
-	FittedFurnitureT = 1 << 17
+	GenericT = 1u,
+	WallT = 1u << 1u,
+	SkirtingT = 1u << 2u,
+	FloorT = 1u << 3u,
+	StairStepT = 1u << 4u,
+	HandRailT = 1u << 5u,
+	StringerT = 1u << 6u,
+	Window_SillT = 1u << 7u,
+	WindowT = 1u << 8u,
+	DoorT = 1u << 9u,
+	WallPointT = 1u << 10u,
+	DoorAnchorT = 1u << 11u,
+	WindowAnchorT = 1u << 12u,
+	StairsT = 1u << 13u,
+	RoomT = 1u << 14u,
+	CurtainT = 1u << 15u,
+	CeilingT = 1u << 16u,
+	FittedFurnitureT = 1u << 17u
 };
 
 using ArchTypeT = uint64_t;
 
 namespace FittedFurnitureFlags {
-    static constexpr uint64_t FF_CanOverlap = 1 << 0;
-    static constexpr uint64_t FF_CanBeHanged = 1 << 1;
-    static constexpr uint64_t FF_CanBeDecorated = 1 << 2;
-    static constexpr uint64_t FF_isDecoration = 1 << 3;
+    [[maybe_unused]] constexpr uint64_t FF_CanOverlap = 1u << 0u;
+    [[maybe_unused]] constexpr uint64_t FF_CanBeHanged = 1u << 1u;
+    [[maybe_unused]] constexpr uint64_t FF_CanBeDecorated = 1u << 2u;
+    [[maybe_unused]] constexpr uint64_t FF_isDecoration = 1u << 3u;
 };
 
 using FittedFurnitureFlagsT = uint64_t;
 
-struct ArchSubType {
-    const static int64_t NotApplicable = -1;
-    const static int64_t DoorSingle = 0;
-    const static int64_t DoorDouble = 1;
+namespace ArchSubType {
+    [[maybe_unused]] constexpr int64_t NotApplicable = -1;
+    [[maybe_unused]] constexpr int64_t DoorSingle = 0;
+    [[maybe_unused]] constexpr int64_t DoorDouble = 1;
 };
 
 using ArchSubTypeT = int64_t;
@@ -239,37 +231,37 @@ using ArchSubTypeT = int64_t;
 // Warning: any changes here needs to update **GHTypeToString**
 // ************************************************************
 namespace GHType {
-	constexpr uint64_t None = 0u;
-	constexpr uint64_t Generic = 1u;
-	constexpr uint64_t Wall = 1u << 1u;
-	constexpr uint64_t Floor = 1u << 2u;
-	constexpr uint64_t Stairs = 1u << 3u;
-	constexpr uint64_t Window = 1u << 4u;
-	constexpr uint64_t Door = 1u << 5u;
-	constexpr uint64_t DoorRect = 1u << 6u;
-	constexpr uint64_t DoorFrame = 1u << 15u;
-	constexpr uint64_t Ceiling = 1u << 7u;
-	constexpr uint64_t Ground = 1u << 8u;
-	constexpr uint64_t Skirting = 1u << 9u;
-	constexpr uint64_t Coving = 1u << 10u;
-	constexpr uint64_t WallPlaster = 1u << 11u;
-	constexpr uint64_t WallPlasterUShape = 1u << 12u;
-	constexpr uint64_t WallPlasterExternal = 1u << 13u;
-	constexpr uint64_t WallPlasterInternal = 1u << 14u;
-	constexpr uint64_t WallTilesInternal = 1u << 16u;
-	constexpr uint64_t KitchenWorktop = 1u << 17u;
-	constexpr uint64_t KitchenCabinet = 1u << 18u;
-	constexpr uint64_t KitchenSink = 1u << 19u;
-	constexpr uint64_t KitchenOven = 1u << 20u;
-	constexpr uint64_t KitchenHob = 1u << 21u;
-	constexpr uint64_t LightFitting = 1u << 22u;
-	constexpr uint64_t Locator = 1u << 23u;
-	constexpr uint64_t PowerSocket = 1u << 24u;
-	constexpr uint64_t LightSwitch = 1u << 25u;
-	constexpr uint64_t Room = 1u << 26u;
-    constexpr uint64_t KitchenBackSplash = 1u << 27u;
-    constexpr uint64_t Furniture = 1u << 28u;
-    constexpr uint64_t Fitting = 1u << 29u;
+	[[maybe_unused]] constexpr uint64_t None = 0u;
+	[[maybe_unused]] constexpr uint64_t Generic = 1u;
+	[[maybe_unused]] constexpr uint64_t Wall = 1u << 1u;
+	[[maybe_unused]] constexpr uint64_t Floor = 1u << 2u;
+	[[maybe_unused]] constexpr uint64_t Stairs = 1u << 3u;
+	[[maybe_unused]] constexpr uint64_t Window = 1u << 4u;
+	[[maybe_unused]] constexpr uint64_t Door = 1u << 5u;
+	[[maybe_unused]] constexpr uint64_t DoorRect = 1u << 6u;
+	[[maybe_unused]] constexpr uint64_t DoorFrame = 1u << 15u;
+	[[maybe_unused]] constexpr uint64_t Ceiling = 1u << 7u;
+	[[maybe_unused]] constexpr uint64_t Ground = 1u << 8u;
+	[[maybe_unused]] constexpr uint64_t Skirting = 1u << 9u;
+	[[maybe_unused]] constexpr uint64_t Coving = 1u << 10u;
+	[[maybe_unused]] constexpr uint64_t WallPlaster = 1u << 11u;
+	[[maybe_unused]] constexpr uint64_t WallPlasterUShape = 1u << 12u;
+	[[maybe_unused]] constexpr uint64_t WallPlasterExternal = 1u << 13u;
+	[[maybe_unused]] constexpr uint64_t WallPlasterInternal = 1u << 14u;
+	[[maybe_unused]] constexpr uint64_t WallTilesInternal = 1u << 16u;
+	[[maybe_unused]] constexpr uint64_t KitchenWorktop = 1u << 17u;
+	[[maybe_unused]] constexpr uint64_t KitchenCabinet = 1u << 18u;
+	[[maybe_unused]] constexpr uint64_t KitchenSink = 1u << 19u;
+	[[maybe_unused]] constexpr uint64_t KitchenOven = 1u << 20u;
+	[[maybe_unused]] constexpr uint64_t KitchenHob = 1u << 21u;
+	[[maybe_unused]] constexpr uint64_t LightFitting = 1u << 22u;
+	[[maybe_unused]] constexpr uint64_t Locator = 1u << 23u;
+	[[maybe_unused]] constexpr uint64_t PowerSocket = 1u << 24u;
+	[[maybe_unused]] constexpr uint64_t LightSwitch = 1u << 25u;
+	[[maybe_unused]] constexpr uint64_t Room = 1u << 26u;
+    [[maybe_unused]] constexpr uint64_t KitchenBackSplash = 1u << 27u;
+    [[maybe_unused]] constexpr uint64_t Furniture = 1u << 28u;
+    [[maybe_unused]] constexpr uint64_t Fitting = 1u << 29u;
 };
 // ************************************************************
 // Warning: any changes here needs to update **GHTypeToString**

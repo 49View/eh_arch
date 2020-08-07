@@ -21,9 +21,9 @@ std::map<std::string, ASTypeT> RoomNameMapping::map {
         {"kitchen",  ASType::Kitchen},
         {"khchen",  ASType::Kitchen},
         {"bathroom",  ASType::Bathroom},
-        {"ensuite",  ASType::Ensuite},
-        {"en-suite",  ASType::Ensuite},
-        {"en-suile",  ASType::Ensuite},
+        {"ensuite",  ASType::EnSuite},
+        {"en-suite",  ASType::EnSuite},
+        {"en-suile",  ASType::EnSuite},
         {"garage",  ASType::Garage},
         {"garden room",  ASType::Conservatory},
         {"studio",  ASType::Studio}
