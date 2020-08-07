@@ -66,6 +66,7 @@ ArchPositionalDot::tick( const HouseBSData *_house, const V3f& _dir, RenderOrche
     if ( !isFlying ) {
         fd = HouseService::rayFeatureIntersect(_house, RayPair3{ rsg.DC()->getPosition(), _dir },
                                                FeatureIntersectionFlags::FIF_Walls |
+                                               FeatureIntersectionFlags::FIF_Windows |
                                                FeatureIntersectionFlags::FIF_Floors);
         if ( fd.hasHit() ) {
             float safeDist = fd.nearV > minSafeDistance ? fd.nearV - minSafeDistance : 0.0f;

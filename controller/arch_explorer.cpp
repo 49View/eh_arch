@@ -16,7 +16,6 @@
 #include <eh_arch/models/house_service.hpp>
 #include <eh_arch/models/room_service.hpp>
 #include <eh_arch/models/room_service_furniture.hpp>
-#include <eh_arch/render/ui/house_ui_material_properties.hpp>
 
 inline V4f furnitureMoveDotColor() {
     return C4f::PASTEL_GREEN;
@@ -46,8 +45,9 @@ void ArchExplorer::updateFurnitureSelection( RenderOrchestrator& rsg, const Aggr
 
 //        rsg.RR().drawTriangleQuad(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
 //                                  _dotColor.A(furnitureSelectionAlphaAnim.value() * 0.5f), nameTag + "a");
-        rsg.RR().draw<DPoly>(CommandBufferLimits::CameraMousePointers, stripifyVertsLine(furnitureSelectionOutline), RDSPrimitive{PRIMITIVE_TRIANGLE_STRIP},
-                                  _dotColor.A(furnitureSelectionAlphaAnim.value() * 0.5f), nameTag + "a");
+        rsg.RR().draw<DPoly>(CommandBufferLimits::CameraMousePointers, stripifyVertsLine(furnitureSelectionOutline),
+                             RDSPrimitive{ PRIMITIVE_TRIANGLE_STRIP },
+                             _dotColor.A(furnitureSelectionAlphaAnim.value() * 0.5f), nameTag + "a");
 
         rsg.RR().draw<DLine>(CommandBufferLimits::CameraMousePointers, furnitureSelectionOutline,
                              _dotColor.A(furnitureSelectionAlphaAnim.value()), sm3, nameTag, true, 0.015f);
@@ -101,38 +101,38 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
 
 void ArchExplorer::singleClickSelection( RenderOrchestrator& rsg ) {
     // If we are on a manipulable object do nothing
-    if ( isActivelySelecting( GHType::Wall ) ) {
+    if ( isActivelySelecting(GHType::Wall) ) {
 //        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 1) ) {
-            res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
-            bColorMaterialWidgetActive = true;
+        res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
+        bColorMaterialWidgetActive = true;
 //        } else {
 //            bColorMaterialWidgetActive = false;
 //        }
-    } else if ( isActivelySelecting( GHType::Floor ) ) {
+    } else if ( isActivelySelecting(GHType::Floor) ) {
 //        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
-            res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 1);
-            bColorMaterialWidgetActive = true;
+        res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 1);
+        bColorMaterialWidgetActive = true;
 //        } else {
 //            bColorMaterialWidgetActive = false;
 //        }
-    } else if ( isActivelySelecting( GHType::Ceiling ) ) {
+    } else if ( isActivelySelecting(GHType::Ceiling) ) {
 //        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
-            res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
-            bColorMaterialWidgetActive = true;
+        res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
+        bColorMaterialWidgetActive = true;
 //        } else {
 //            bColorMaterialWidgetActive = false;
 //        }
-    } else if ( isActivelySelecting( GHType::Coving ) ) {
+    } else if ( isActivelySelecting(GHType::Coving) ) {
 //        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
-            res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
-            bColorMaterialWidgetActive = true;
+        res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
+        bColorMaterialWidgetActive = true;
 //        } else {
 //            bColorMaterialWidgetActive = false;
 //        }
-    } else if ( isActivelySelecting( GHType::Skirting ) ) {
+    } else if ( isActivelySelecting(GHType::Skirting) ) {
 //        if ( !bColorMaterialWidgetActive || ( bColorMaterialWidgetActive && res.groupIndex() == 2 ) ) {
-            res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
-            bColorMaterialWidgetActive = true;
+        res.prepare(fd, fdFurniture, "", ResourceGroup::Material, 2);
+        bColorMaterialWidgetActive = true;
 //        } else {
 //            bColorMaterialWidgetActive = false;
 //        }
@@ -164,7 +164,8 @@ void ArchExplorer::replaceFurnitureFinal( const EntityMetaData& _furnitureCandid
 
 void ArchExplorer::replaceFurnitureWithOneOfItsKind( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
     if ( canBeManipulated() ) {
-        if ( auto furnitureCandidate = furnitureReplacer.findCandidate(furnitureSelected->keyTag); furnitureCandidate ) {
+        if ( auto furnitureCandidate = furnitureReplacer.findCandidate(
+                    furnitureSelected->keyTag); furnitureCandidate ) {
             replaceFurnitureFinal(*furnitureCandidate, asg, rsg);
         } else {
             ResourceMetaData::getListOf(ResourceGroup::Geom, furnitureSelected->keyTag,
@@ -225,7 +226,8 @@ std::vector<V3f> createBBoxOutline( const V3f& input, const V3f& axis1, const V3
     return ret;
 }
 
-void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rsg, const AggregatedInputData& aid, const std::string& mediaFolder ) {
+void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rsg, const AggregatedInputData& aid,
+                                   const std::string& mediaFolder ) {
 
     auto _dir = aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get());
 
@@ -234,11 +236,12 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
                                                         FeatureIntersectionFlags::FIF_Furnitures);
         fd = HouseService::rayFeatureIntersect(asg.H(), RayPair3{ rsg.DC()->getPosition(), _dir },
                                                FeatureIntersectionFlags::FIF_Walls |
+                                               FeatureIntersectionFlags::FIF_Windows |
                                                FeatureIntersectionFlags::FIF_Floors |
-                                                       FeatureIntersectionFlags::FIF_Ceilings );
+                                               FeatureIntersectionFlags::FIF_Ceilings);
 
         if ( bColorMaterialWidgetActive ) {
-            res.update(asg, mediaFolder, rsg );
+            res.update(asg, mediaFolder, rsg);
         }
 
         if ( fdFurniture.hasHit() && fdFurniture.nearV < fd.nearV ) {

@@ -174,7 +174,7 @@ bool FloorService::checkTwoUShapesDoNotIntersectAnything( FloorBSData *f, UShape
             allLines.emplace_back(w->epoints[cai(i, wepSize)], w->epoints[cai(i + 1, wepSize)]);
         }
     }
-    Vector2f r;
+    Vector2f r{V3f::ZERO};
     Vector2f start = s1->middle + ( normalize(s2->middle - s1->middle) * 0.01f );
     Vector2f end = s2->middle + ( normalize(s1->middle - s2->middle) * 0.01f );
     for ( auto& l : allLines ) {
@@ -816,7 +816,7 @@ FloorService::changeTypeOfSelectedElementTo( FloorBSData *f, ArchStructural *sou
 
     if ( s ) {
         std::vector<UShape *> allUShapes = FloorService::allUShapes(f);
-        TwoUShapesBased *w = dynamic_cast<TwoUShapesBased *>( source );
+        auto *w = dynamic_cast<TwoUShapesBased *>( source );
         switch ( t ) {
             case ArchType::WindowT: {
                 addWindowFromData(f, f->windowHeight, f->windowBaseOffset, w->us1, w->us2);
@@ -925,7 +925,7 @@ bool FloorService::isInsideCeilingContour( const FloorBSData *f, const Vector2f&
         for ( auto& v : vv ) r.expand(v.xy());
         if ( r.contains(v1) ) {
             topZ1 = vv[0].z();
-            hitLevel1 = level + 1;
+            hitLevel1 = level + 1u;
             bFoundAtLeastOneContour = true;
         }
     }
@@ -1248,6 +1248,17 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                             fd.arch = ff.get();
                             fd.room = room.get();
                             fd.intersectedType = GHType::Furniture;
+                        }
+                    }
+                }
+
+                // Windows
+                if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Windows) ) {
+                    for ( const auto& w : f->windows ) {
+                        if ( ArchStructuralService::intersectRayMin(w.get(), rayPair, fd.nearV) ) {
+                            fd.arch = w.get();
+                            fd.room = room.get();
+                            fd.intersectedType = GHType::Window;
                         }
                     }
                 }
