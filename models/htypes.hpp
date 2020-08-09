@@ -181,6 +181,13 @@ struct ArchIntersection {
     V2f pn = V2fc::ZERO;
 };
 
+namespace ArchRescaleSpace {
+    [[maybe_unused]] constexpr uint64_t FloorplanScaling = 1;
+    [[maybe_unused]] constexpr uint64_t FullScaling = 2;
+}
+
+using ArchRescaleSpaceT = uint64_t ;
+
 struct FloorUShapesPair {
     FloorBSData* f = nullptr;
     UShape* us1 = nullptr;
