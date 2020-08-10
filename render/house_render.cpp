@@ -52,8 +52,8 @@ namespace HouseRender {
 
         // Render whole house BBox flat poly
         float padding = 0.02f;
-        auto houseRect = Rect2f{ 0.0f, 0.0f, data->bbox.bottomRight().x() + padding,
-                                 data->bbox.bottomRight().y() + padding };
+        auto houseRect = Rect2f{ 0.0f, 0.0f, data->BBox().bottomRight().x() + padding,
+                                 data->BBox().bottomRight().y() + padding };
         rr.draw<DFlatPoly>(CommandBufferLimits::UI2dStart, sm, houseRect.pointscw(), C4f::WHITE, arc.pm(), "floorplanFlatPoly");
 
         // Render general house information
@@ -61,8 +61,8 @@ namespace HouseRender {
         auto color = arc.getFillColor(data, C4f::BLACK);
 
         auto d1 = [&]( const std::string& text, float fontHeight, float yOffset ) {
-            auto textPos = FontUtils::fitTextInBox(font, text, data->bbox, fontHeight);
-            textPos.setY(data->bbox.centreTop().y() + yOffset);
+            auto textPos = FontUtils::fitTextInBox(font, text, data->BBox(), fontHeight);
+            textPos.setY(data->BBox().centreTop().y() + yOffset);
 
             rr.draw<DText>(FDS{ text, font, textPos, fontHeight }, color, arc.pm(),
                            data->hashFeature(text + color.toString()+sm.hash(), 0));

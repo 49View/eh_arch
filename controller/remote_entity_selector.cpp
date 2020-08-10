@@ -118,7 +118,7 @@ void RemoteEntitySelector::addNewFurniture( ArchOrchestrator& asg, EntityMetaDat
     auto clonedFurniture = EntityFactory::clone(ff);
 
     auto hitBestPoint = fd.nearV < fdfurniture.nearV ? fd.hitPosition : fdfurniture.hitPosition;
-    float heightOffset = fd.nearV < fdfurniture.nearV ? 0.0f : fdfurniture.arch->bbox3d.calcHeight();
+    float heightOffset = fd.nearV < fdfurniture.nearV ? 0.0f : fdfurniture.arch->Height();
     V2f pos = XZY::C2(hitBestPoint);// + depthOffset;
     auto f = HouseService::findFloorOf(asg.H(), fd.room->hash);
     RS::placeManually(FurnitureRuleParams{ f, fd.room, clonedFurniture, pos, heightOffset, FRPSource{reinterpret_cast<FittedFurniture*>(fdfurniture.arch)},

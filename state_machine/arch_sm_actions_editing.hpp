@@ -155,7 +155,7 @@ struct DeleteFeatureManipulation {
                 HouseService::removeArch(asg.H(), asf.elem->hash);
             } else {
                 WallService::deleteFeature(asf);
-                HouseService::recalculateBBox(asg.H());
+                asg.H()->calcBBox();
             }
             MakeHouse3d{}(asg, rsg, arc);
             asg.showIMHouse();

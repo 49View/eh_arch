@@ -558,7 +558,6 @@ private:
 };
 
 namespace RoomService {
-    std::shared_ptr<RoomBSData> createRoom( const RoomPreData& _preData, float _floorHeight, float _z, const HouseBSData* house );
 
     void updateFromArchSegments( RoomBSData *r, const std::vector<std::vector<ArchSegment>>& ws );
     void calcOptimalLightingFittingPositions( RoomBSData *r );
@@ -566,7 +565,7 @@ namespace RoomService {
     void calcSkirtingSegments( RoomBSData *r );
     void setCoving( RoomBSData *r, bool _state );
     void changeFloorType( RoomBSData *r, FloorMatTypeT _fmt );
-    void assignDefaultRoomFeaturesForType( RoomBSData *r, ASTypeT ast, const HouseBSData* house );
+    void assignDefaultRoomFeaturesForType( RoomBSData *r, ASTypeT ast );
     std::vector<std::vector<Vector2f>> calcCovingSegments( const std::vector<std::vector<ArchSegment>>& ws );
 
     void calcBBox( RoomBSData *r );
@@ -576,7 +575,6 @@ namespace RoomService {
                           float safeSocketBoxWidth );
     void calcLongestWall( RoomBSData *r );
     void WallSegments( RoomBSData *r, const std::vector<std::vector<ArchSegment>>& val );
-    void makeTriangles2d( RoomBSData *r );
     void calclMaxBoundingBox( RoomBSData *r );
     void changeWallsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp );
     void changeFloorsMaterial( RoomBSData *r, const MaterialAndColorProperty& mcp );
@@ -590,7 +588,6 @@ namespace RoomService {
     const ArchSegment *getWallSegmentFor( RoomBSData *r, WSLO wslo, uint32_t _exactIndex = 0 );
     ArchSegment *segmentAtIndex( RoomBSData *r, uint32_t _index );
 
-    void calculateFurnitureBBox( FittedFurniture* _ff );
     void clearFurniture( RoomBSData *r );
     void addFurniture( RoomBSData *r, std::shared_ptr<FittedFurniture> ff );
     [[nodiscard]] bool addFurniture( FurnitureRuleParams& params );
@@ -650,8 +647,8 @@ namespace RoomService {
     bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurnitureRuleScript& fs );
     FittedFurniture* findFurniture( RoomBSData *r, HashEH furnitureHash );
 
-    void setRoomType( RoomBSData *r, ASTypeT rt, const HouseBSData* house );
-    void addRoomType( RoomBSData *r, ASTypeT rt, const HouseBSData* house );
+    void setRoomType( RoomBSData *r, ASTypeT rt );
+    void addRoomType( RoomBSData *r, ASTypeT rt );
     void removeRoomType( RoomBSData *r, ASTypeT rt );
 
     // Query

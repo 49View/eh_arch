@@ -56,10 +56,10 @@ namespace RoomRender {
 
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {
-            auto ffcolor = arc.getFillColor(ff.get(), C4f::BLACK);
-            Matrix4f mt{ ff->position3d * V3f::MASK_Y_OUT, ff->rotation, ff->size * ff->scale };
+            auto ffColor = arc.getFillColor(ff.get(), C4f::BLACK);
+            Matrix4f mt{ ff->position3d * V3f::MASK_Y_OUT, ff->rotation, ff->Size() * ff->scale };
             mt.mult(arc.pm()());
-            rr.draw<DLine>(sg.PL(ff->symbolRef), ffcolor, RDSPreMult(mt), sm, lineWidth,
+            rr.draw<DLine>(sg.PL(ff->symbolRef), ffColor, RDSPreMult(mt), sm, lineWidth,
                            room->hashFeature("ff"+sm.hash(), ffc++));
         }
 
@@ -110,7 +110,7 @@ namespace RoomRender {
 
                 if ( auto profile = sg.PL(w->covingProfile); profile ) {
                     ret.emplace_back(
-                            sg.GB<GT::Follower>(profile, XZY::C(cov, w->height), ff, PolyRaise::VerticalNeg,
+                            sg.GB<GT::Follower>(profile, XZY::C(cov, w->Height()), ff, PolyRaise::VerticalNeg,
                                                 GT::ForceNormalAxis(Vector3f::UP_AXIS),
                                                 GT::Flip(V2fc::X_AXIS), w->covingMaterial));
                 }
@@ -177,7 +177,8 @@ namespace RoomRender {
                 auto furn = sg.GB<GT::Asset>(fur->name, fur->position3d, GT::Rotate(fur->rotation), GT::Scale(fur->scale));
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
-                    fur->bbox3d = furn->BBox3dCopy();
+                    // ####
+//                    fur->bbox3d = furn->BBox3dCopy();
                     ret.furnituresGB.emplace_back(furn);
                 } else {
                     LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
@@ -189,7 +190,7 @@ namespace RoomRender {
         }
 
         ret.ceiling = sg.GB<GT::Extrude>(outline,
-                                         V3f{ V3f::UP_AXIS * (w->height - zPull) },
+                                         V3f{ V3f::UP_AXIS * (w->Height() - zPull) },
                                          w->ceilingMaterial,
                                          GT::Tag(ArchType::CeilingT));
     }

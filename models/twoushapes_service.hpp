@@ -7,15 +7,16 @@
 class TwoUShapesBasedService {
 public:
 	static void rescale( TwoUShapesBased* t, float _scale ) {
-		ArchStructuralService::rescale( t, _scale );
 
 		UShapeService::rescale( t->us1, _scale );
 		UShapeService::rescale( t->us2, _scale );
 		t->thickness *= _scale;
+
+        ArchStructuralService::rescale( t, _scale );
 		calcBBox( t );
 	}
 
-	static void evalData( TwoUShapesBased* t ) {
+	static void evalData( TwoUShapesBased* t, float _height ) {
 		Vector2f p1 = t->us1.middle;
 		Vector2f p2 = t->us2.middle;
 		float wwidth = min( t->us1.width, t->us2.width );
@@ -23,9 +24,10 @@ public:
 		// Recalculate all data that might have changed
 		t->dirWidth = normalize( p2 - p1 );
 		t->dirDepth = rotate( t->dirWidth, M_PI_2 );
-		t->width = JMATH::distance( p1, p2 );
-		t->depth = wwidth;
-		t->center = JMATH::lerp( 0.5f, p1, p2 );
+		t->w() = JMATH::distance( p1, p2 );
+		t->d() = wwidth;
+		t->h() = _height;
+
 		calcBBox( t );
 	}
 
@@ -107,14 +109,14 @@ public:
 
     static void calcBBox( TwoUShapesBased* t ) {
 		t->bbox = JMATH::Rect2f::INVALID;
-		Vector2f negD = -t->dirDepth * ( t->depth*0.5f );
-		Vector2f posD = t->dirDepth * ( t->depth*0.5f );
-		Vector2f negW = -t->dirWidth * ( t->width*0.5f );
-		Vector2f posW = t->dirWidth * ( t->width*0.5f );
-		t->bbox.expand( t->center + negD + posW );
-		t->bbox.expand( t->center + negD + negW );
-		t->bbox.expand( t->center + posD + posW );
-		t->bbox.expand( t->center + posD + negW );
+		Vector2f negD = -t->dirDepth * ( t->HalfDepth() );
+		Vector2f posD = t->dirDepth * ( t->HalfDepth() );
+		Vector2f negW = -t->dirWidth * ( t->HalfWidth() );
+		Vector2f posW = t->dirWidth * ( t->HalfWidth() );
+		t->bbox.expand( t->Center() + negD + posW );
+		t->bbox.expand( t->Center() + negD + negW );
+		t->bbox.expand( t->Center() + posD + posW );
+		t->bbox.expand( t->Center() + posD + negW );
 
 		t->bbox3d.calc( t->bbox, t->ceilingHeight, Matrix4f::IDENTITY );
 	}

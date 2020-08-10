@@ -19,8 +19,6 @@
 #include <graphics/renderer.h>
 
 #include "../models/house_bsdata.hpp"
-#include "../models/door_service.hpp"
-#include "house_render.hpp"
 #include <eh_arch/controller/arch_render_controller.hpp>
 
 namespace DoorRender {
@@ -40,13 +38,13 @@ namespace DoorRender {
         V2f dp = XZY::C2(door->doorPivot);
         dp.rotate(vwangle + M_PI);
 
-        auto p1 = door->center + dp;
+        auto p1 = door->Center2d() + dp;
 
-        V2f dn = V2fc::X_AXIS * (door->width);
+        V2f dn = V2fc::X_AXIS * (door->Width());
         dn.rotate(vwangle + M_PI + door->openingAngleMax * dIndexSign);
         V2f p3 = p1 + dn;
 
-        V2f dn2 = V2fc::X_AXIS * (door->width);
+        V2f dn2 = V2fc::X_AXIS * (door->Width());
         dn2.rotate(vwangle + M_PI);
         V2f p2 = p1 + dn2 * dIndexSign;
 
@@ -207,13 +205,13 @@ namespace DoorRender {
 
     void addDoorArchitrave( SceneGraph& sg, GeomSP mRootH, const DoorBSData *d, float direction ) {
         // Architraves
-        auto fverts = utilGenerateFlatRect(Vector2f(d->width, d->height),
+        auto fverts = utilGenerateFlatRect(Vector2f(d->Width(), d->Height()),
                                            WindingOrder::CCW,
                                            PivotPointPosition::BottomCenter);
 
         if ( auto architrave_ovolo = sg.PL("architrave,ovolo"); architrave_ovolo ) {
             sg.GB<GT::Follower>(architrave_ovolo, fverts, mRootH,
-                                Vector3f::Z_AXIS_NEG * ( -d->depth * direction * .5f ),
+                                Vector3f::Z_AXIS_NEG * ( -d->Depth() * direction * .5f ),
                                 GT::Rotate(Quaternion{ M_PI, V3f{ 0.0f, direction < 0.0f ? -1.0f : 0.0f, 0.0f } }));
         }
 
@@ -221,12 +219,12 @@ namespace DoorRender {
 
 
     void addInnerDoorFrame( SceneGraph& sg, GeomSP mRootH, const DoorBSData *d ) {
-        auto doorProfile = makeInnerDoorFrameProfile(d->depth, d->doorGeomThickness, d->doorTrim, d->doorInnerBumpSize,
+        auto doorProfile = makeInnerDoorFrameProfile(d->Depth(), d->doorGeomThickness, d->doorTrim, d->doorInnerBumpSize,
                                                      d->dIndex);
         sg.addProfileIM(doorProfile->Name(), *doorProfile);
 
         // Add inner frame
-        auto fverts2 = utilGenerateFlatRect(Vector2f(d->width, d->height),
+        auto fverts2 = utilGenerateFlatRect(Vector2f(d->Width(), d->Height()),
                                             WindingOrder::CCW,
                                             PivotPointPosition::BottomCenter);
 
@@ -236,7 +234,7 @@ namespace DoorRender {
     void flatUglyDoor( SceneGraph& sg, GeomSP mRootH, const DoorBSData *d, const V3f& doorPivot,
                        float _doorThinkness = 0.03f ) {
 
-        sg.GB<GT::Extrude>(V2nff{ V2f{ d->width, _doorThinkness }, V3f::UP_AXIS, d->height }, mRootH,
+        sg.GB<GT::Extrude>(V2nff{ V2f{ d->Width(), _doorThinkness }, V3f::UP_AXIS, d->Height() }, mRootH,
                            V3f{ 0.0f, doorPivot.yz() });
     }
 
@@ -269,7 +267,7 @@ namespace DoorRender {
     }
 
     void addFloorUnderDoor( SceneGraph& sg, const DoorBSData *d, GeomSP root ) {
-        sg.GB<GT::Extrude>(V2nff{ V2f{ d->width, d->depth }, V3f::UP_AXIS, 0.001f }, root,
+        sg.GB<GT::Extrude>(V2nff{ V2f{ d->Width(), d->Depth() }, V3f::UP_AXIS, 0.001f }, root,
                            V3f::UP_AXIS * -0.001f);
     }
 
@@ -284,7 +282,7 @@ namespace DoorRender {
         addInnerDoorFrame(sg, rootH, data);
 
         // This is the actual door, if it's a decent size
-        if ( data->width > 0.45f ) {
+        if ( data->Width() > 0.45f ) {
             addDoorGeom(sg, rootH, data);
         }
 
@@ -293,7 +291,7 @@ namespace DoorRender {
 
         float vwangle = -atan2(-data->dirWidth.y(), data->dirWidth.x());
         Quaternion rot(vwangle + M_PI, V3f::UP_AXIS);
-        rootH->updateTransform(XZY::C(data->center, 0.0f), rot, V3f::ONE);
+        rootH->updateTransform(XZY::C(data->Center2d(), 0.0f), rot, V3f::ONE);
 
         GeomSPContainer ret;
         ret.emplace_back(rootH);

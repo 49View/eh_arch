@@ -24,19 +24,15 @@ struct IsInside {
 };
 
 namespace HouseService {
-    // Create
-    std::shared_ptr<FloorBSData> addFloorFromData( HouseBSData *_house, const JMATH::Rect2f& _rect );
-    std::shared_ptr<CollisionMesh> createCollisionMesh( const HouseBSData *_house );
+
+    // Update
     void pushTourPath( HouseBSData *_house, const CameraSpatialsKeyFrame& csk );
     void pushKeyFrameTourPath( HouseBSData *_house, const CameraSpatialsKeyFrame& csk );
     void popTourPath( HouseBSData *_house, int i );
-
-    // Update
     void rescale( HouseBSData *house, float scale );
-    void recalculateBBox( HouseBSData *house );
+    void calcBBox( HouseBSData *house );
     void swapWindowOrDoor( HouseBSData *house, int64_t hashOfTwoShape );
     void mergePoints( HouseBSData *f, const V2fVectorOfVector& points );
-    V2fVectorOfVector rescaleWallInverse( const HouseBSData *house, float scaleFactor );
     void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );
     void reevaluateDoorsAndWindowsAfterRoomChange( HouseBSData* h );
     void moveArch( HouseBSData *_house, ArchStructural* elem, const V2f& offset2d );
@@ -56,6 +52,8 @@ namespace HouseService {
     void clearHouseExcludingFloorsAndWalls( HouseBSData *house );
 
     // Query
+    V2fVectorOfVector rescaleWallInverse( const HouseBSData *house, float scaleFactor );
+    std::shared_ptr<CollisionMesh> createCollisionMesh( const HouseBSData *_house );
     [[nodiscard]] bool hasTour(const HouseBSData *_house);
     float area( const HouseBSData *_house );
     V2f centerOfBiggestRoom( const HouseBSData *house );
@@ -65,12 +63,12 @@ namespace HouseService {
     int getNumberOfWallSegments( std::shared_ptr<HouseBSData> _house );
     Vector2f getFirstFloorAnchor( std::shared_ptr<HouseBSData> _house );
     bool isLastFloor( std::shared_ptr<HouseBSData> _house, int floorNumber );
-    std::pair<uint64_t, uint64_t> getFloorWallPairFor( std::shared_ptr<HouseBSData> _house, const int64_t _hash );
+    std::pair<uint64_t, uint64_t> getFloorWallPairFor( std::shared_ptr<HouseBSData> _house, int64_t _hash );
     std::shared_ptr<ArchStructural>
     rayIntersect( const HouseBSData* _house, const Vector3f& origin, const Vector3f& dir );
     FeatureIntersection rayFeatureIntersect( const HouseBSData* house, const RayPair3& rayPair, FeatureIntersectionFlagsT fif );
     bool findFloorOrRoomAt( std::shared_ptr<HouseBSData> _house, const Vector2f& pos, int& floorIndex );
-    FloorBSData* findFloorOf( HouseBSData* _house, const int64_t _hash );
+    FloorBSData* findFloorOf( HouseBSData* _house, int64_t _hash );
     bool areThereStairsAtFloorNumber( std::shared_ptr<HouseBSData> _house, int floorNumber );
     int floorIndexAtHeight( std::shared_ptr<HouseBSData> _house, float heightToCheck );
     Vector2f maxSingleFloorSize( std::shared_ptr<HouseBSData> _house );

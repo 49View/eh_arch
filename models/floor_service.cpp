@@ -12,7 +12,6 @@
 #include <core/math/rect2f.h>
 #include <core/util.h>
 #include <core/util_follower.hpp>
-#include <core/math/poly_utils.hpp>
 #include <core/math/triangulator.hpp>
 #include <poly/polyclipping/clipper.hpp>
 #include <core/math/vector_util.hpp>
@@ -33,21 +32,17 @@ std::vector<std::pair<V2f, V2f>> FloorServiceIntermediateData::rcus;
 
 void FloorService::addWallsFromData( FloorBSData *f, const V2fVectorOfVector& floorWalls, WallLastPointWrapT wpw ) {
     for ( const auto& fw : floorWalls ) {
-        auto w = WallService::createWall2(fw,
-                                          f->height,
-                                          wpw,
-                                          0.0f,
-                                          WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving);
-
+        auto w = std::make_shared<WallBSData>(fw, f->Height(), wpw, 0.0f,
+                                              WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving);
         f->walls.push_back(w);
     }
-    calcBBox(f);
+    f->calcBBox();
 }
 
 void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData *house, const std::vector<RoomPreData>& rds ) {
     // finally insert in floor
     for ( auto& r : rds ) {
-        auto newRoom = RoomService::createRoom(r, f->height, f->z, house);
+        auto newRoom = std::make_shared<RoomBSData>(r, f->Height(), f->z);
         RoomService::updateFromArchSegments(newRoom.get(), r.wallSegmentsInternal);
         f->rooms.push_back(newRoom);
     }
@@ -63,8 +58,8 @@ void FloorService::updateFromNewDoorOrWindow( FloorBSData *f ) {
         float minDistanceError = std::numeric_limits<float>::max();
         int ri = 0;
         for ( auto& rw : f->rooms ) {
-            float distTL = distance(rw->bbox.topLeft(), room->bbox.topLeft());
-            float distBR = distance(rw->bbox.bottomRight(), room->bbox.bottomRight());
+            float distTL = distance(rw->BBox().topLeft(), room->BBox().topLeft());
+            float distBR = distance(rw->BBox().bottomRight(), room->BBox().bottomRight());
             float td = distTL + distBR;
             if ( td < minDistanceError ) {
                 rwsMapping = { ri, room };
@@ -92,21 +87,21 @@ void FloorService::updateFromNewDoorOrWindow( FloorBSData *f ) {
 void FloorService::addDoorFromData( FloorBSData *f, float _doorHeight, const UShape& w1, const UShape& w2,
                                     ArchSubTypeT /*st*/ /*= ArchSubType::NotApplicable */ ) {
 
-    std::shared_ptr<DoorBSData> d1 = DoorService::createDoor(_doorHeight, f->height, w1, w2);
+    std::shared_ptr<DoorBSData> d1 = DoorService::createDoor(_doorHeight, f->Height(), w1, w2);
     f->doors.push_back(d1);
 
-//	auto wd = WallService::createWall( TwoUShapesBasedService::createWallVertices( d1.get() ), f->height - _doorHeight,
+//	auto wd = WallService::createWall( TwoUShapesBasedService::createWallVertices( d1.get() ), f->Height() - _doorHeight,
 //									   WallLastPointWrap::Yes, _doorHeight, WallFlags::WF_HasCoving |
 //											   WallFlags::WF_IsDoorPart );
 
-    f->walls.push_back(WallService::createWall2(TwoUShapesBasedService::createFrontWallVertices2(d1.get()),
-                                                f->height - _doorHeight,
+    f->walls.push_back(std::make_shared<WallBSData>(TwoUShapesBasedService::createFrontWallVertices2(d1.get()),
+                                                f->Height() - _doorHeight,
                                                 WallLastPointWrap::No, _doorHeight, WallFlags::WF_HasCoving |
                                                                                     WallFlags::WF_IsDoorPart,
                                                 d1->hash));
 
-    f->walls.push_back(WallService::createWall2(TwoUShapesBasedService::createFrontWallVertices3(d1.get()),
-                                                f->height - _doorHeight,
+    f->walls.push_back(std::make_shared<WallBSData>(TwoUShapesBasedService::createFrontWallVertices3(d1.get()),
+                                                f->Height() - _doorHeight,
                                                 WallLastPointWrap::No, _doorHeight, WallFlags::WF_HasCoving |
                                                                                     WallFlags::WF_IsDoorPart,
                                                 d1->hash));
@@ -116,23 +111,23 @@ void
 FloorService::addWindowFromData( FloorBSData *f, float _windowHeight, float _defaultWindowBaseOffset, const UShape& w1,
                                  const UShape& w2 ) {
 
-    std::shared_ptr<WindowBSData> d1 = WindowService::createWindow(_windowHeight, f->height, _defaultWindowBaseOffset,
+    std::shared_ptr<WindowBSData> d1 = WindowService::createWindow(_windowHeight, f->Height(), _defaultWindowBaseOffset,
                                                                    w1, w2);
     f->windows.push_back(d1);
 
-    auto wd1 = WallService::createWall2(TwoUShapesBasedService::createFrontWallVertices2(d1.get()), d1->baseOffset,
+    auto wd1 = std::make_shared<WallBSData>(TwoUShapesBasedService::createFrontWallVertices2(d1.get()), d1->baseOffset,
                                         WallLastPointWrap::No, 0.0f,
                                         WallFlags::WF_HasSkirting | WallFlags::WF_IsWindowPart, d1->hash, 0);
-    auto wd2 = WallService::createWall2(TwoUShapesBasedService::createFrontWallVertices2(
-            d1.get()), f->height - ( d1->baseOffset + _windowHeight ), WallLastPointWrap::No,
+    auto wd2 = std::make_shared<WallBSData>(TwoUShapesBasedService::createFrontWallVertices2(
+            d1.get()), f->Height() - ( d1->baseOffset + _windowHeight ), WallLastPointWrap::No,
                                         d1->baseOffset + _windowHeight,
                                         WallFlags::WF_HasCoving | WallFlags::WF_IsWindowPart, d1->hash, 1);
 
-    auto wd3 = WallService::createWall2(TwoUShapesBasedService::createFrontWallVertices3(d1.get()), d1->baseOffset,
+    auto wd3 = std::make_shared<WallBSData>(TwoUShapesBasedService::createFrontWallVertices3(d1.get()), d1->baseOffset,
                                         WallLastPointWrap::No, 0.0f,
                                         WallFlags::WF_HasSkirting | WallFlags::WF_IsWindowPart, d1->hash, 0);
-    auto wd4 = WallService::createWall2(TwoUShapesBasedService::createFrontWallVertices3(d1.get()),
-                                        f->height - ( d1->baseOffset + _windowHeight ), WallLastPointWrap::No,
+    auto wd4 = std::make_shared<WallBSData>(TwoUShapesBasedService::createFrontWallVertices3(d1.get()),
+                                        f->Height() - ( d1->baseOffset + _windowHeight ), WallLastPointWrap::No,
                                         d1->baseOffset + _windowHeight,
                                         WallFlags::WF_HasCoving | WallFlags::WF_IsWindowPart, d1->hash, 1);
     f->walls.push_back(wd1);
@@ -174,7 +169,7 @@ bool FloorService::checkTwoUShapesDoNotIntersectAnything( FloorBSData *f, UShape
             allLines.emplace_back(w->epoints[cai(i, wepSize)], w->epoints[cai(i + 1, wepSize)]);
         }
     }
-    Vector2f r{V3f::ZERO};
+    Vector2f r{ V3f::ZERO };
     Vector2f start = s1->middle + ( normalize(s2->middle - s1->middle) * 0.01f );
     Vector2f end = s2->middle + ( normalize(s1->middle - s2->middle) * 0.01f );
     for ( auto& l : allLines ) {
@@ -377,7 +372,7 @@ bool FloorService::isIndexInUShape( size_t t, WallBSData *w ) {
 
 void
 FloorService::externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& ws, std::vector<ArchSegment>& wse ) {
-    float floorRadius = JMATH::max(f->bbox.width(), f->bbox.height());
+    float floorRadius = JMATH::max(f->BBox().width(), f->BBox().height());
 
     std::vector<std::pair<V2f, V2f>> wp{};
     for ( const auto& w : f->walls ) {
@@ -416,7 +411,7 @@ FloorService::externalRaysIntoWalls( FloorBSData *f, std::vector<ArchSegment>& w
             auto as = ArchSegmentService::createArchSegment(f->walls, f->number, vn, t, w->hash, w->epoints[t],
                                                             w->epoints[t1],
                                                             middlePoint, w->enormals[t], w->wallFlags,
-                                                            w->sequencePart, w->z, w->height);
+                                                            w->sequencePart, w->z, w->Height());
             if ( bFound ) ws.push_back(as); else wse.push_back(as);
             vn++;
         }
@@ -532,7 +527,7 @@ void FloorService::removeUnPairedUShapes( FloorBSData *f ) {
 
 void FloorService::mergePoints( FloorBSData *f, const V2fVectorOfVector& points, const Rect2f& pointsBBox ) {
 
-    if ( f->bbox.contains(pointsBBox) || f->bbox.intersect(pointsBBox) ) {
+    if ( f->BBox().contains(pointsBBox) || f->BBox().intersect(pointsBBox) ) {
         for ( const auto& wallPoints : points ) {
             bool bHasMerged = false;
             for ( auto& w : f->walls ) {
@@ -558,7 +553,7 @@ float FloorService::updatePerimeter( FloorBSData *f, const std::vector<ArchSegme
     f->perimeterArchSegments = singleRoomSegmentsExternal;
 
 //    for ( auto& ps : f->perimeterArchSegments ) {
-//        ps.quads.emplace_back( makeQuadV3f(XZY::C(ps.p1, f->z), XZY::C(ps.p2, f->z), f->height) );
+//        ps.quads.emplace_back( makeQuadV3f(XZY::C(ps.p1, f->z), XZY::C(ps.p2, f->z), f->Height()) );
 //    }
 
     return lPerimeter;
@@ -636,13 +631,13 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *h
         // Bathrooms
         // Count number of doors and windows a room has, if it has 1 door and no windows... Probably it's a bathroom!
         if ( RoomService::hasRoomType(r, ASType::GenericRoom) && r->doors.size() == 1 && r->windows.empty() ) {
-            RoomService::setRoomType(r, ASType::Bathroom, house);
+            RoomService::setRoomType(r, ASType::Bathroom);
         }
 
         // Hallways
         // Guess hallways by checking if a room has no windows and more than 2 doors.
         if ( RoomService::hasRoomType(r, ASType::GenericRoom) && r->doors.size() > 2 && r->windows.empty() ) {
-            RoomService::setRoomType(r, ASType::Hallway, house);
+            RoomService::setRoomType(r, ASType::Hallway);
         }
 
         if ( RoomService::hasRoomType(r, ASType::GenericRoom) ) numberOfGenericRoom++;
@@ -667,13 +662,13 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *h
         bool goForIt = areaPairs[0].first > areaPairs[1].first * 1.5f;
         if ( goForIt ) {
             // Add the Kitchen/Living
-            RoomService::setRoomType(areaPairs[0].second, ASType::Kitchen, house);
-            RoomService::addRoomType(areaPairs[0].second, ASType::LivingRoom, house);
+            RoomService::setRoomType(areaPairs[0].second, ASType::Kitchen);
+            RoomService::addRoomType(areaPairs[0].second, ASType::LivingRoom);
             // Add the biggest bedroom first, so this is the master bedroom
-            RoomService::setRoomType(areaPairs[1].second, ASType::BedroomMaster, house);
+            RoomService::setRoomType(areaPairs[1].second, ASType::BedroomMaster);
             // Add the rest, if any
             for ( auto t = 2u; t < areaPairs.size(); t++ ) {
-                RoomService::setRoomType(areaPairs[t].second, ASType::BedroomDouble, house);
+                RoomService::setRoomType(areaPairs[t].second, ASType::BedroomDouble);
             }
         }
     }
@@ -683,8 +678,8 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *h
         for ( auto& room : f->rooms ) {
             auto *r = room.get();
             if ( RoomService::hasRoomType(r, ASType::GenericRoom) ) {
-                RoomService::setRoomType(r, ASType::Kitchen, house);
-                RoomService::addRoomType(r, ASType::LivingRoom, house);
+                RoomService::setRoomType(r, ASType::Kitchen);
+                RoomService::addRoomType(r, ASType::LivingRoom);
             }
         }
     }
@@ -693,7 +688,7 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *h
 
 void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f, HouseBSData *house ) {
     for ( auto& w : f->windows ) {
-        auto rooms = FloorService::roomsIntersectingBBox(f, w->bbox.squared(), true);
+        auto rooms = FloorService::roomsIntersectingBBox(f, w->BBox().squared(), true);
         if ( !rooms.empty() ) {
             auto r = rooms[0];
             w->rooms.emplace_back(r->hash);
@@ -702,13 +697,13 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f, HouseBSDa
                 w->hasCurtains = false;
                 w->hasBlinds = true;
             }
-            V2f pointCheckInsideRoom = w->center + ( w->dirDepth * ( w->depth * 0.51f ) );
+            V2f pointCheckInsideRoom = w->Center2d() + ( w->dirDepth * ( w->Depth() * 0.51f ) );
             w->rotOrientation = ArchStructuralService::isPointInside(r, pointCheckInsideRoom) ? M_PI : 0.0f;
         }
     }
 
     for ( auto& w : f->doors ) {
-        auto rooms = FloorService::roomsIntersectingBBox(f, w->bbox.squared(), false);
+        auto rooms = FloorService::roomsIntersectingBBox(f, w->BBox().squared(), false);
         for ( const auto& r : rooms ) {
             r->doors.emplace_back(w->hash);
             w->rooms.emplace_back(r->hash);
@@ -777,7 +772,7 @@ void FloorService::moveArch( FloorBSData *f, ArchStructural *elem, const V2f& of
             for ( auto& ff : room->mFittedFurniture ) {
                 if ( ff.get() == elem ) {
                     ff->position3d += XZY::C(offset2d, 0.0f);
-                    RoomService::calculateFurnitureBBox(ff.get());
+                    ff->calcBBox();
                 }
             }
         }
@@ -842,8 +837,8 @@ float FloorService::area( const FloorBSData *f ) {
     float ret = 0.0f;
 
     for ( const auto& w : f->rooms ) ret += RoomService::area(w.get());
-    for ( const auto& w : f->doors ) ret += w->width * w->depth;
-    for ( const auto& w : f->windows ) ret += w->width * w->depth;
+    for ( const auto& w : f->doors ) ret += w->Width() * w->Depth();
+    for ( const auto& w : f->windows ) ret += w->Width() * w->Depth();
 
     return ret;
 }
@@ -877,7 +872,7 @@ void FloorService::rescale( FloorBSData *f, float _scale ) {
 
     //	for ( auto&& i : stairs ) i->rescale();
 
-    calcBBox(f);
+    f->calcBBox();
 
     f->area = FloorService::area(f);
 }
@@ -925,7 +920,7 @@ bool FloorService::isInsideCeilingContour( const FloorBSData *f, const Vector2f&
         for ( auto& v : vv ) r.expand(v.xy());
         if ( r.contains(v1) ) {
             topZ1 = vv[0].z();
-            hitLevel1 = level + 1u;
+            hitLevel1 = static_cast<int>(level) + 1;
             bFoundAtLeastOneContour = true;
         }
     }
@@ -945,7 +940,7 @@ std::vector<Vector2f> FloorService::allFloorePoints( const FloorBSData *f ) {
 
 bool FloorService::intersectLine2d( const FloorBSData *f, Vector2f const& p0, Vector2f const& p1, Vector2f& i ) {
     bool ret = false;
-    if ( f->bbox.lineIntersection(p0, p1) ) {
+    if ( f->BBox().lineIntersection(p0, p1) ) {
         for ( const auto& w : f->walls ) {
             if ( WallService::intersectLine2d(w.get(), p0, p1, i) ) return true;
         }
@@ -967,7 +962,7 @@ FloorService::intersectLine2dMin( const FloorBSData *f, Vector2f const& p0, Vect
                                   uint32_t filterFlags ) {
     ArchIntersection ret{};
     float minDist = std::numeric_limits<float>::max();
-    if ( f->bbox.lineIntersection(p0, p1) ) {
+    if ( f->BBox().lineIntersection(p0, p1) ) {
         for ( const auto& w : f->walls ) {
             WallService::intersectLine2dMin(w.get(), p0, p1, i, minDist, ret, filterFlags);
         }
@@ -1004,19 +999,6 @@ bool FloorService::isInsideRoomRDS( const V2f& i, const std::vector<RoomPreData>
     return false;
 }
 
-void FloorService::calcBBox( FloorBSData *f ) {
-    f->bbox = Rect2f::INVALID;
-    std::vector<Vector2f> ret = allFloorePoints(f);
-    for ( auto& v : ret ) {
-        f->bbox.expand(v);
-    }
-    f->bbox3d.calc(f->bbox, f->height, Matrix4f({ 0.0f, 0.0f, f->z }));
-
-    //offsetFromFloorAnchor = mHouse->getFirstFloorAnchor();
-    //offsetFromFloorAnchor -= ( bbox.topLeft() + bbox.size()*0.5f );
-    //offsetFromFloorAnchor3d = Vector3f( offsetFromFloorAnchor, z );
-}
-
 void FloorService::removeLinkedArch( FloorBSData *f, int64_t hashToRemove ) {
     if ( hashToRemove == 0 ) return;
     // First check what type it is, in case we need to do cross-checking with other elements
@@ -1034,7 +1016,7 @@ void FloorService::removeWalls( FloorBSData *f ) {
 
 void FloorService::removeWalls( FloorBSData *f, float wwidth ) {
     f->walls.erase(remove_if(f->walls.begin(), f->walls.end(),
-                             [wwidth]( auto const& us ) -> bool { return us->width == wwidth; }), f->walls.end());
+                             [wwidth]( auto const& us ) -> bool { return us->Width() == wwidth; }), f->walls.end());
 }
 
 ArchStructural *FloorService::findElementWithHash( const FloorBSData *f, int64_t _hash ) {
@@ -1130,7 +1112,7 @@ ClipperLib::Paths FloorService::calcPlainPath( const FloorBSData *f ) {
     ClipperLib::Paths ret;
 
     ClipperLib::Path bboxPointsTop;
-    std::vector<Vector2f> bp = f->bbox.points();
+    std::vector<Vector2f> bp = f->BBox().points();
     bboxPointsTop << bp[0] << bp[1] << bp[2] << bp[3];
     ret.push_back(bboxPointsTop);
     ClipperLib::Path bboxPointsTop2;
@@ -1192,11 +1174,11 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
 
                 // Floors
                 if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Floors) ) {
-                    V3f a = XZY::C(std::get<0>(room->mTriangles2d[0]), f->z);
-                    V3f b = XZY::C(std::get<2>(room->mTriangles2d[0]), f->z);
-                    V3f c = XZY::C(std::get<1>(room->mTriangles2d[0]), f->z);
+                    V3f a = XZY::C(std::get<0>(room->Triangles2d()[0]), f->z);
+                    V3f b = XZY::C(std::get<2>(room->Triangles2d()[0]), f->z);
+                    V3f c = XZY::C(std::get<1>(room->Triangles2d()[0]), f->z);
                     Plane3f planeFloor{ a, b, c };
-                    if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->mTriangles2d, f->z, fd.nearV) ) {
+                    if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->Triangles2d(), f->z, fd.nearV) ) {
                         fd.normal = planeFloor.n;
                         fd.arch = room.get();
                         fd.room = room.get();
@@ -1210,13 +1192,13 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                         for ( const auto& quad : wd.quads ) {
                             Plane3f plane{ quad[0], quad[2], quad[1] };
                             if ( plane.intersectRayOnQuadMin(rayPair, quad, fd.nearV) ) {
-                                V3f iPoint = rayPair.origin + (rayPair.dir * fd.nearV);
+                                V3f iPoint = rayPair.origin + ( rayPair.dir * fd.nearV );
                                 fd.normal = plane.n;
                                 fd.archSegment = &wd;
                                 fd.room = room.get();
                                 if ( distance(iPoint.y(), f->z) < 0.15f ) {
                                     fd.intersectedType = GHType::Skirting;
-                                } else if ( room->mHasCoving && distance(iPoint.y(), f->z + f->height) < 0.15f ) {
+                                } else if ( room->mHasCoving && distance(iPoint.y(), f->z + f->Height()) < 0.15f ) {
                                     fd.intersectedType = GHType::Coving;
                                 } else {
                                     fd.intersectedType = GHType::Wall;
@@ -1229,11 +1211,12 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
 
                 // Ceilings
                 if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Ceilings) ) {
-                    V3f a = XZY::C(std::get<0>(room->mTriangles2d[0]), f->z+f->height);
-                    V3f b = XZY::C(std::get<1>(room->mTriangles2d[0]), f->z+f->height);
-                    V3f c = XZY::C(std::get<2>(room->mTriangles2d[0]), f->z+f->height);
+                    V3f a = XZY::C(std::get<0>(room->Triangles2d()[0]), f->z + f->Height());
+                    V3f b = XZY::C(std::get<1>(room->Triangles2d()[0]), f->z + f->Height());
+                    V3f c = XZY::C(std::get<2>(room->Triangles2d()[0]), f->z + f->Height());
                     Plane3f planeFloor{ a, b, c };
-                    if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->mTriangles2d, f->z+f->height, fd.nearV,  WindingOrder::CW) ) {
+                    if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->Triangles2d(), f->z + f->Height(),
+                                                                 fd.nearV, WindingOrder::CW) ) {
                         fd.normal = -planeFloor.n;
                         fd.arch = room.get();
                         fd.room = room.get();

@@ -24,11 +24,10 @@ DoorService::createDoor( float _doorHeight, float _ceilingHeight, const UShape& 
     d1->us2.type = ArchType::DoorT;
     d1->subType = st;
     d1->thickness = 2.0f; // this is 2 inches
-    d1->height = _doorHeight;
     d1->wallFlags = WallFlags::WF_HasCoving;
     d1->ceilingHeight = _ceilingHeight;
 
-    TwoUShapesBasedService::evalData(d1.get());
+    TwoUShapesBasedService::evalData(d1.get(), _doorHeight);
 
     return d1;
 //	openingAngle = std::make_shared<AnimType<float>>( 0.0f );
@@ -72,15 +71,15 @@ bool isLeft( int index ) {
 
 void DoorService::calculatePivots( DoorBSData *d ) {
     float frameGeomPivot = 0.0f;
-    float realDoorWidth = d->width - d->doorTrim * 2.0f;
-    float doorGeomDepthPivot = d->depth * 0.5f;
+    float realDoorWidth = d->Width() - d->doorTrim * 2.0f;
+    float doorGeomDepthPivot = d->HalfDepth();
 
     float side = d->dIndex < 2.0f ? -1.0f : 1.0f;//sideOfLine( wp1, d->center + d->dirDepth, d->center - d->dirDepth );
 
     d->hingesPivot = Vector3f(realDoorWidth * 0.5f * side, d->doorGeomThickness * 0.5f, 0.0f);
 
     if ( isOdd(d->dIndex) ) doorGeomDepthPivot *= -1.0f;
-    float doorGeomPivotX = isLeft(d->dIndex) ? d->width * 0.5f - d->doorTrim : -d->width * 0.5f + d->doorTrim;
+    float doorGeomPivotX = isLeft(d->dIndex) ? d->Width() * 0.5f - d->doorTrim : -d->Width() * 0.5f + d->doorTrim;
     d->doorPivot = { doorGeomPivotX, d->doorTrim, doorGeomDepthPivot };
 
     d->frameHingesPivot = Vector3f(d->hingesPivot.x(), frameGeomPivot, 0.0f);
@@ -99,8 +98,8 @@ void DoorService::calculatePivots( DoorBSData *d ) {
                 Quaternion(M_PI, V3f::Z_AXIS) * Quaternion(M_PI, V3f::UP_AXIS) * Quaternion(M_PI, V3f::X_AXIS);
     }
 
-    d->doorHandlePlateDoorSidePivot = Vector3f(-side * realDoorWidth * 0.5f, 0.0f, d->height * 0.5f);
-    d->doorHandlePlateFrameSidePivot = Vector3f(-side * realDoorWidth * 0.5f, doorGeomDepthPivot, d->height * 0.5f);
+    d->doorHandlePlateDoorSidePivot = Vector3f(-side * realDoorWidth * 0.5f, 0.0f, d->HalfHeight());
+    d->doorHandlePlateFrameSidePivot = Vector3f(-side * realDoorWidth * 0.5f, doorGeomDepthPivot, d->HalfHeight());
     d->doorHandleAngle = ( side > 0.0f ? M_PI : 0.0f ) - M_PI_2;
 
     d->openingAngleMax = isOdd(d->dIndex) ? -M_PI_2 : M_PI_2;
@@ -109,19 +108,19 @@ void DoorService::calculatePivots( DoorBSData *d ) {
     float depthGap = isOdd(d->dIndex) ? d->doorGeomThickness : 0.0f;
     float gapBetweenDoorEdgeAndHinges = 0.003f;
     float totalTrim = ( d->doorTrim * 2.0f + gapBetweenDoorEdgeAndHinges * 2.0f );
-    float xPivot = isLeft(d->dIndex) ? -d->width + d->doorTrim * 2.0f + gapBetweenDoorEdgeAndHinges
+    float xPivot = isLeft(d->dIndex) ? -d->Width() + d->doorTrim * 2.0f + gapBetweenDoorEdgeAndHinges
                                      : gapBetweenDoorEdgeAndHinges;
     // This 2.5f here is to leave space for the frame trim, the inner frame trim, and the 0.5 is a bit of air between it.
-    d->doorSize = V2f{ d->width - totalTrim, d->height - d->doorTrim * 2.5f };
+    d->doorSize = V2f{ d->Width() - totalTrim, d->Height() - d->doorTrim * 2.5f };
     d->doorGeomPivot = V3f{ xPivot, 0.0f, depthGap };
 }
 
 void DoorService::reevaluateInRoom( DoorBSData *d, const RoomBSData* room ) {
     if ( RS::hasRoomType(room, ASType::Hallway) ) {
         float vwangle = -atan2(-d->dirWidth.y(), d->dirWidth.x());
-        V2f dn = V2fc::X_AXIS * d->width;
+        V2f dn = V2fc::X_AXIS * d->Width();
         dn.rotate(vwangle + M_PI * 0.8f);
-        V2f checkPoint = d->center + dn;
+        V2f checkPoint = d->Center2d() + dn;
 
         bool isInsideRoom = RS::isPointInsideRoom(room, checkPoint);
         if ( isInsideRoom || ( d->isMainDoor && !isInsideRoom ) ) {
@@ -145,5 +144,5 @@ void DoorService::reevaluate( DoorBSData *d, FloorBSData* f ) {
 }
 
 void DoorService::getPlasterMiddlePoints( const DoorBSData *d, std::vector<Vector3f>& mpoints ) {
-    mpoints.push_back({ d->bbox3d.centre().xy(), d->height + ( d->ceilingHeight - d->height ) * 0.5f });
+    mpoints.push_back({ d->BBox3d().centre().xy(), d->Height() + ( d->ceilingHeight - d->Height() ) * 0.5f });
 }

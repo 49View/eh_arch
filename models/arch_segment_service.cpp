@@ -19,7 +19,7 @@ void ArchSegmentService::rescale( ArchSegment& _as, float _scale ) {
         }
     }
 }
-ArchSegment ArchSegmentService::createArchSegment( const std::vector <std::shared_ptr<WallBSData>> floorWalls,
+ArchSegment ArchSegmentService::createArchSegment( const std::vector <std::shared_ptr<WallBSData>>& floorWalls,
                                                    const int32_t _iFloor, const int32_t _iWall, const int32_t _iIndex,
                                                    const int64_t _wallHash, const Vector2f& _p1, const Vector2f& _p2,
                                                    const Vector2f& _middle, const Vector2f& _normal,
@@ -46,7 +46,7 @@ ArchSegment ArchSegmentService::createArchSegment( const std::vector <std::share
                 auto p1 = w->epoints[t];
                 auto p2 = w->epoints[cai( t + 1, csize )];
                 if ( p1 == _p1 && p2 == _p2 ) {
-                    ret.quads.emplace_back( makeQuadV3f(XZY::C(_p1, w->z), XZY::C(_p2, w->z),  w->height) );
+                    ret.quads.emplace_back( makeQuadV3f(XZY::C(_p1, w->z), XZY::C(_p2, w->z),  w->Height() ) );
                 }
             }
         }

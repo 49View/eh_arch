@@ -96,7 +96,7 @@ HouseBSData *ArchOrchestrator::H() {
 
 Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( float screenRatio, float screenPadding ) {
     auto m = Matrix4f{ Matrix4f::IDENTITY };
-    float vmax = max(houseJson()->bbox.bottomRight().x(), houseJson()->bbox.bottomRight().y());
+    float vmax = max(houseJson()->BBox().bottomRight().x(), houseJson()->BBox().bottomRight().y());
     float screenFloorplanRatio = ( 1.0f / screenRatio );
     float vmaxScale = vmax / screenFloorplanRatio;
     auto vr = 1.0f / vmaxScale;
@@ -108,18 +108,18 @@ Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( float screenRatio, 
 }
 
 void ArchOrchestrator::centerCameraMiddleOfHouseWithFloorplanInfoOffset( float floorplanOffset, float slack ) {
-    if ( houseJson()->bbox.isValid() ) {
-        Rect2f fpBBox = houseJson()->bbox;
-        fpBBox.expand(houseJson()->bbox.centreTop() + V2fc::Y_AXIS * floorplanOffset);
+    if ( houseJson()->BBox().isValid() ) {
+        Rect2f fpBBox = houseJson()->BBox();
+        fpBBox.expand(houseJson()->BBox().centreTop() + V2fc::Y_AXIS * floorplanOffset);
         Timeline::play(rsg.DC()->PosAnim(), 0,
                        KeyFramePair{ 0.9f, rsg.DC()->center(fpBBox, slack) });
     }
 }
 
 void ArchOrchestrator::centerCameraMiddleOfHouse( float slack ) {
-    if ( houseJson()->bbox.isValid() ) {
+    if ( houseJson()->BBox().isValid() ) {
         Timeline::play(rsg.DC()->PosAnim(), 0,
-                       KeyFramePair{ 0.9f, rsg.DC()->center(houseJson()->bbox, slack) });
+                       KeyFramePair{ 0.9f, rsg.DC()->center(houseJson()->BBox(), slack) });
     }
 }
 
@@ -347,7 +347,7 @@ void ArchOrchestrator::setTopDownView() {
 //    showIMHouse();
     auto quat = quatCompose(quatAngles);
     Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
-    centerCameraMiddleOfHouse(H()->bbox3d.calcDepth() + 0.3f);
+    centerCameraMiddleOfHouse(H()->Depth() + 0.3f);
     Timeline::play(rsg.RR().ssaoBlendFactorAnim(), 0, KeyFramePair{ 0.9f, 0.0f });
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UI2dStart));
     fader(0.9f, 0.0f, rsg.RR().CLI(CommandBufferLimits::UnsortedCustom));

@@ -12,7 +12,7 @@ public:
 	//	return false;
 	//}
 
-	static ArchSegment createArchSegment( const std::vector<std::shared_ptr<WallBSData>> floorWalls, const int32_t _iFloor, const int32_t _iWall, const int32_t _iIndex, const int64_t _wallHash,
+	static ArchSegment createArchSegment( const std::vector<std::shared_ptr<WallBSData>>& floorWalls, const int32_t _iFloor, const int32_t _iWall, const int32_t _iIndex, const int64_t _wallHash,
 				 const Vector2f& _p1, const Vector2f& _p2, const Vector2f& _middle, const Vector2f& _normal, const uint64_t& _tag, const uint64_t& _sequencePart, float _z, float _height );
 	static float length( const ArchSegment& _as );
 	static bool doSegmentsEndsMeet( const ArchSegment& s1, const ArchSegment& s2 );

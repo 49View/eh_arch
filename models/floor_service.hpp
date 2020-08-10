@@ -149,7 +149,6 @@ namespace FloorService {
     std::optional<uint64_t> findRoomArchSegmentWithWallHash( FloorBSData *f, HashEH hashToFind, int64_t index );
 
     // Update
-    void calcBBox( FloorBSData *f );
     float updatePerimeter( FloorBSData *f, const std::vector<ArchSegment>& singleRoomSegmentsExternal );
     void rollbackToCalculatedWalls( FloorBSData *f );
     void mergePoints( FloorBSData *w, const V2fVectorOfVector& points, const Rect2f& pointsBBox );

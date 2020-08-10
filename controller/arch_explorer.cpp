@@ -67,7 +67,7 @@ void ArchExplorer::touchMoveWithModKeyCtrl( [[maybe_unused]] const HouseBSData *
         bool inters = false;
         auto planeHit = furniturePlane.intersectRay(rsg.DC()->getPosition(), _dir, inters);
         V3f off = planeHit - prevFurnitureMovePosition;
-        auto potentialBBox = furnitureSelected->bbox;
+        auto potentialBBox = furnitureSelected->BBox();
         potentialBBox.translate(XZY::C2(off));
         if ( !bRoomBboxCheck || RS::checkBBoxInsideRoom(fd.room, potentialBBox) ) {
             centerBottomFurnitureSelected += off;
@@ -191,7 +191,7 @@ void ArchExplorer::deleteSelected( RenderOrchestrator& rsg ) {
 void ArchExplorer::cloneInternal( HouseBSData *_house, FittedFurniture *sourceFurniture,
                                   const std::shared_ptr<FittedFurniture>& clonedFurniture ) {
     auto depthOffset = sourceFurniture->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ? sourceFurniture->depthNormal *
-                                                                                        sourceFurniture->width
+                                                                                        sourceFurniture->Width()
                                                                                       : V2fc::ZERO;
     V2f pos = XZY::C2(fd.hitPosition) + depthOffset;
     auto f = HouseService::findFloorOf(_house, fd.room->hash);
@@ -251,25 +251,25 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
 
             if ( furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ) {
                 float closestDist = dot(fd.normal, V3f::X_AXIS);
-                centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreFront();
+                centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreFront();
                 if ( auto d = dot(fd.normal, V3f::X_AXIS_NEG); d > closestDist ) {
-                    centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreBack();
+                    centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreBack();
                     closestDist = d;
                 }
                 if ( auto d = dot(fd.normal, V3f::Z_AXIS); d > closestDist ) {
-                    centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreLeft();
+                    centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreLeft();
                     closestDist = d;
                 }
                 if ( auto d = dot(fd.normal, V3f::Z_AXIS_NEG); d > closestDist ) {
-                    centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreRight();
+                    centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreRight();
                 }
                 furnitureSelectionOutline = createBBoxOutline(centerBottomFurnitureSelected,
-                                                              V3f::UP_AXIS * furnitureSelected->bbox3d.calcHeight(),
-                                                              V3f::Z_AXIS * furnitureSelected->bbox3d.calcDepth());
+                                                              V3f::UP_AXIS * furnitureSelected->Height(),
+                                                              V3f::Z_AXIS * furnitureSelected->Depth());
                 refNormal = fd.normal;
             } else {
-                centerBottomFurnitureSelected = furnitureSelected->bbox3d.centreBottom();
-                furnitureSelectionOutline = furnitureSelected->bbox3d.bottomFace();
+                centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreBottom();
+                furnitureSelectionOutline = furnitureSelected->BBox3d().bottomFace();
             }
 
             centerBottomBBox = AABB{ furnitureSelectionOutline };

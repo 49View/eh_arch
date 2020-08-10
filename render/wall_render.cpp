@@ -15,14 +15,13 @@
 #include <eh_arch/controller/arch_render_controller.hpp>
 
 #include "house_render.hpp"
-#include "../models/house_bsdata.hpp"
 #include "../models/wall_service.hpp"
 
 namespace WallRender {
 
     void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const ArchRenderController& arc ) {
         auto color = arc.getFillColor(wall, C4f::BLACK);
-        rr.draw<DFlatPoly>(sm, wall->mTriangles2d, color, arc.pm(), wall->hashFeature("wallTri"+sm.hash(), 0));
+        rr.draw<DFlatPoly>(sm, wall->Triangles2d(), color, arc.pm(), wall->hashFeature("wallTri"+sm.hash(), 0));
     }
 
 //    void drawIncrementalAlphaWalls2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
@@ -41,7 +40,7 @@ namespace WallRender {
 //        }
 //    }
 
-    void drawUShapes2d( Renderer& rr, const WallBSData *wall, float lineWidth, DShaderMatrix sm,
+    void drawUShapes2d( Renderer& rr, const WallBSData *wall, [[maybe_unused]] float lineWidth, DShaderMatrix sm,
                         const ArchRenderController& arc ) {
 //        std::array<Color4f, 3> usc = { Color4f::PASTEL_YELLOW, Color4f::PASTEL_CYAN, Color4f::PASTEL_GREEN };
         int uShapeRC = 0;

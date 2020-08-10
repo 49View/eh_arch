@@ -19,20 +19,19 @@ std::shared_ptr<WindowBSData> WindowService::createWindow( float _windowHeight, 
 	d1->us2 = w2;
 	d1->us1.type = ArchType::WindowT;
 	d1->us2.type = ArchType::WindowT;
-	d1->height = _windowHeight;
 	d1->ceilingHeight = _ceilingHeight;
 	d1->baseOffset = _defaultWindowBaseOffset;
 
-	TwoUShapesBasedService::evalData( d1.get() );
+	TwoUShapesBasedService::evalData( d1.get(), _windowHeight );
 
-	d1->numPanels = static_cast<int32_t>( d1->width / d1->minPanelWidth );
+	d1->numPanels = static_cast<int32_t>( d1->Width() / d1->minPanelWidth );
 	if ( d1->numPanels <= 0 ) d1->numPanels = 1;
 	float totalMainFramesWidths = d1->mainFrameWidth * ( d1->numPanels + 1 );
-	if ( totalMainFramesWidths > d1->width ) {
-		totalMainFramesWidths = d1->width / 2;
-		d1->mainFrameWidth = d1->width / 4.0f;
+	if ( totalMainFramesWidths > d1->Width() ) {
+		totalMainFramesWidths = d1->Width() / 2;
+		d1->mainFrameWidth = d1->Width() / 4.0f;
 	}
-	d1->minPanelWidth = ( d1->width - totalMainFramesWidths ) / d1->numPanels;
+	d1->minPanelWidth = ( d1->Width() - totalMainFramesWidths ) / d1->numPanels;
 
 	return d1;
 }
@@ -42,7 +41,7 @@ void WindowService::rescale( WindowBSData* window, float _scale ) {
 }
 
 void WindowService::getPlasterMiddlePoints( const WindowBSData* w, std::vector<Vector3f>& mpoints ) {
-	mpoints.push_back( { w->bbox3d.centre().xy(), w->baseOffset*0.5f } );
-	float ch = w->ceilingHeight - ( w->baseOffset + w->height );
-	mpoints.push_back( { w->bbox3d.centre().xy(), ( w->baseOffset + w->height ) + ch*0.5f } );
+	mpoints.push_back( { w->Center2d(), w->baseOffset*0.5f } );
+	float ch = w->ceilingHeight - ( w->baseOffset + w->Height() );
+	mpoints.push_back( { w->Center2d(), ( w->baseOffset + w->Height() ) + ch*0.5f } );
 }

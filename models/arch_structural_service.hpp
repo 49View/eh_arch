@@ -70,7 +70,7 @@ public:
     static bool isPointInside( const ArchStructural *a, const Vector3f& _pos );
     static bool isPointInside2d( const ArchStructural *a, const Vector2f& _pos );
     static bool isPointNear2d( const ArchStructural *a, const Vector2f& _pos, float radius );
-    static void rescale( ArchStructural *a, float _scale );
+    static void rescale( ArchStructural *a, float _scale, ArchRescaleSpaceT _scaleSpace = ArchRescaleSpace::FloorplanScaling );
     static bool
     intersectLine( const ArchStructural *a, const Vector3f& linePos, const Vector3f& lineDir, float& tNear );
     static bool intersectRay( const ArchStructural *a, const RayPair3& rayPair );

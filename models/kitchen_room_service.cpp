@@ -173,7 +173,7 @@ namespace KitchenRoomService {
         auto kwp = kd.kitchenWorktopPath[0];
         auto coffeeMachine = furns.spawn(FTH::FT_CoffeeMachine);
         auto rot = Quaternion{ RoomService::furnitureAngleFromNormal(kwp.normal), V3f::UP_AXIS };
-        V2f pos = kwp.p1 + (kwp.crossNormal * coffeeMachine->size.x());
+        V2f pos = kwp.p1 + (kwp.crossNormal * coffeeMachine->Width());
         float height = kd.kitchenWorktopHeight + kd.worktopThickness;
         RS::placeManually(FurnitureRuleParams{ f, w, coffeeMachine, pos, rot,
                             height,
@@ -190,9 +190,9 @@ namespace KitchenRoomService {
         auto cooker = furns.spawn(FTH::FT_Cooktop);
         auto oven = furns.spawn(FTH::FT_OvenPanel);
         auto sink = furns.spawn(FTH::FT_Sink);
-        auto cookerHalfWidth = cooker->size.width() * 0.5;
-        auto ovenHalfWidth = oven->size.width() * 0.5;
-        auto sinkHalfWidth = sink->size.width() * 0.5;
+        auto cookerHalfWidth = cooker->HalfWidth();
+        auto ovenHalfWidth = oven->HalfWidth();
+        auto sinkHalfWidth = sink->HalfWidth();
         auto carryingIndex = 0u;
         float floorLevel = kd.skirtingHeight;// kd.kitchenWorktopHeight - kd.worktopThickness * 0.5f;
         float unitHeight = kd.kitchenWorktopHeight - ( kd.skirtingHeight + ( kd.drawersPadding.x() * 2 ) );
@@ -249,10 +249,10 @@ namespace KitchenRoomService {
         for ( auto t = 0u; t < kd.kitchenWorktopPath.size(); t++ ) {
             auto& kup = kd.kitchenTopUnitsPath[t];
             auto& kwp = kd.kitchenWorktopPath[t];
-            float z = w->height - kd.longDrawersSize.y() - kd.topUnitsCeilingGap;
+            float z = w->Height() - kd.longDrawersSize.y() - kd.topUnitsCeilingGap;
             if ( kwp.flags.hasCooker ) {
                 auto extractorHood = furns.spawn(FTH::FT_ExtractorHood);
-                auto extractorHoodHalfWidth = extractorHood->size.width() * 0.5;
+                auto extractorHoodHalfWidth = extractorHood->HalfWidth();
                 addDrawersFromPoint(kd, z, kd.longDrawersSize.y(), kwp.cookerPosDelta, extractorHoodHalfWidth, kup);
             } else {
                 addDrawersSequencially(kd, kup.p1, kup.p2, z, kd.longDrawersSize.y(), kup.depth, kup.normal,
@@ -265,8 +265,8 @@ namespace KitchenRoomService {
                    const V2f& normal,
                    const V2f& crossNormal ) {
         auto fridge = furns.spawn(FTH::FT_Fridge);
-        auto fridgeWidth = fridge->size.width();
-        auto fridgeDepth = fridge->size.depth();
+        auto fridgeWidth = fridge->Width();
+        auto fridgeDepth = fridge->Depth();
         if ( distance(p1, p2) > fridgeWidth * 1.2f ) { // giving it a bit of slack (*1.2f)
             std::pair<size_t, size_t> targetWall;
             float fridgeSlackGap = 0.15f;

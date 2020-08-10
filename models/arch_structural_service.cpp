@@ -78,11 +78,15 @@ bool ArchStructuralService::isPointNear2d( const ArchStructural *a, const Vector
     return false;
 }
 
-void ArchStructuralService::rescale( ArchStructural *a, float _scale ) {
+void ArchStructuralService::rescale( ArchStructural *a, float _scale, ArchRescaleSpaceT _scaleSpace ) {
     //height *= _scale;
-    a->width *= _scale;
-    a->depth *= _scale;
-    a->center *= _scale;
+    a->w() *= _scale;
+    a->d() *= _scale;
+    if ( _scaleSpace == ArchRescaleSpace::FloorplanScaling ) {
+        a->center() *= V3f{ _scale, 1.0f, _scale};
+    } else {
+        a->center() *= _scale;
+    }
 
     for ( auto& vts : a->mTriangles2d ) {
         std::get<0>(vts) *= _scale;

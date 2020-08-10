@@ -144,8 +144,8 @@ namespace WindowRender {
         float ladderOff = ( bw - ( numLadderStrings - 1 ) * ladderStringGapLength ) * 0.5f;
 
         // new Blind group
-//    auto blindH = mRootH->addChildren<V3f>( V3f{0.0f, _rect.bottom(), -window->dh() + bd*0.5f });
-        auto bp = V3f{ 0.0f, _rect.bottom(), -window->dh() + bd * 0.5f };
+//    auto blindH = mRootH->addChildren<V3f>( V3f{0.0f, _rect.bottom(), -window->HalfDepth() + bd*0.5f });
+        auto bp = V3f{ 0.0f, _rect.bottom(), -window->HalfDepth() + bd * 0.5f };
 
         auto valProfile = makeValanceProfile("valence", valanceSize);
         sg.GB<GT::Follower>(valProfile, lineLR(V3f::X_AXIS, bw), GT::Direction(V3f::UP_AXIS), mRootH,
@@ -185,12 +185,12 @@ namespace WindowRender {
     }
 
     Vector3f depthOffset( WindowBSData *window, float _off ) {
-        return Vector3f::Z_AXIS * ( ( window->depth * 0.5f ) - _off );
+        return Vector3f::Z_AXIS * ( ( window->Depth() * 0.5f ) - _off );
     }
 
     void addPlastersAroundEdges( SceneGraph& sg, GeomSP mRootH, WindowBSData *window, float currBaseOffset ) {
 
-        auto fverts2 = utilGenerateFlatRect(Vector2f(window->width, window->height),
+        auto fverts2 = utilGenerateFlatRect(Vector2f(window->Width(), window->Height()),
                                             WindingOrder::CCW,
                                             PivotPointPosition::BottomCenter);
         for ( auto& v : fverts2 ) {
@@ -207,7 +207,7 @@ namespace WindowRender {
 
             auto profile = Profile::fromPoints("WindowPlasterAround", { vline[0], vline[1] });
 
-            float off = window->depth * 0.25f * ( ( t == 0 ) ? 1.0f : -1.0f );
+            float off = window->Depth() * 0.25f * ( ( t == 0 ) ? 1.0f : -1.0f );
 
             sg.GB<GT::Follower>(profile, fverts2, V3f::Z_AXIS * off, mRootH);
         }
@@ -219,12 +219,12 @@ namespace WindowRender {
         // bottom and top wall pieces
 
         std::array<Vector2f, 2> vline{};
-        vline[1] = Vector2f(0.0f, window->depth * 0.5f);
-        vline[0] = Vector2f(0.0f, -window->depth * 0.5f);
+        vline[1] = Vector2f(0.0f, window->Depth() * 0.5f);
+        vline[0] = Vector2f(0.0f, -window->Depth() * 0.5f);
 
         std::vector<V3f> ptop;
-        ptop.emplace_back(-window->width * 0.5f, 0.0f, 0.0f);
-        ptop.emplace_back(window->width * 0.5f, 0.0f, 0.0f);
+        ptop.emplace_back(-window->Width() * 0.5f, 0.0f, 0.0f);
+        ptop.emplace_back(window->Width() * 0.5f, 0.0f, 0.0f);
         sg.GB<GT::Follower>(Profile::fromPoints("WindowPlasterTB", { vline[0], vline[1] }), ptop,
                             GT::ForceNormalAxis(V3f::Z_AXIS),
                             root);
@@ -234,21 +234,21 @@ namespace WindowRender {
                             root);
 
 //        sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*(0.005f),
-//                      GT::Scale{ window->width, 0.01f, window->depth}, root );
+//                      GT::Scale{ window->Width(), 0.01f, window->Depth()}, root );
 //
 //    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*(window->ceilingHeight-0.005f),
-//                      GT::Scale{ window->width, 0.01f, window->depth}, root );
+//                      GT::Scale{ window->Width(), 0.01f, window->Depth()}, root );
 
     }
 
     void
     addWindowSill( SceneGraph& sg, GeomSP& root, WindowBSData *window, float windowsSillDepth, float currBaseOffset ) {
         sg.GB<GT::Shape>(ShapeType::Pillow, V3f::UP_AXIS * ( currBaseOffset + windowsSillDepth * 0.50f ),
-                         GT::Scale{ window->width * 1.02f, windowsSillDepth, window->depth * 1.12f }, root);
+                         GT::Scale{ window->Width() * 1.02f, windowsSillDepth, window->Depth() * 1.12f }, root);
     }
 
     void addWindowMeshes( SceneGraph& sg, GeomSP mRootH, WindowBSData *window, const Rect2f& _windowRect,
-                          float windowsSillDepth ) {
+                          [[maybe_unused]] float windowsSillDepth ) {
 
         // steam profile
         float stemTrunk = 0.03f;
@@ -262,7 +262,7 @@ namespace WindowRender {
         sg.GB<GT::Follower>(centralStemProfile, _windowRect.pointscw(), depthOffset(window, wppSize.x()),
                             FollowerFlags::WrapPath, GT::Flip(V2fc::X_AXIS), mRootH);
 
-        float panelsWidth = ( window->width - stemTrunk );
+        float panelsWidth = ( window->Width() - stemTrunk );
         int numPanels = static_cast<int>( ceil(panelsWidth / 0.60f));
 
         // Stems
@@ -308,14 +308,14 @@ namespace WindowRender {
         }
     }
 
-    void addCurtains( SceneGraph& sg, GeomSP mRootH, WindowBSData *window, const Rect2f& _windowRect, float baseOff ) {
+    void addCurtains( SceneGraph& sg, GeomSP mRootH, WindowBSData *window, const Rect2f& _windowRect, [[maybe_unused]] float baseOff ) {
         if ( !window->hasCurtains ) return;
 
         auto s = sg.getGeomNameSize("curtain");
         // Rescale the curtain with a % of slack so the curtain doesn't end exactly at window width
-        float totalHeight = window->baseOffset + window->height + window->sillThickness;
-        V3f curtainScale{ ( window->width * 1.25f ) / std::get<1>(s).x(), totalHeight / std::get<1>(s).y(), 1.0f };
-        sg.GB<GT::Asset>("curtain", mRootH, V3f{ 0.0f, 0.0f, -window->depth+ half(std::get<1>(s).z()) }, GT::Scale(curtainScale),
+        float totalHeight = window->baseOffset + window->Height() + window->sillThickness;
+        V3f curtainScale{ ( window->Width() * 1.25f ) / std::get<1>(s).x(), totalHeight / std::get<1>(s).y(), 1.0f };
+        sg.GB<GT::Asset>("curtain", mRootH, V3f{ 0.0f, 0.0f, -window->Depth()+ half(std::get<1>(s).z()) }, GT::Scale(curtainScale),
                          GT::Tag(ArchType::CurtainT),
                          GT::M(window->curtainMaterial));
     }
@@ -326,13 +326,13 @@ namespace WindowRender {
 
         float windowsSillDepth = 0.04f;
         float currBaseOffset = window->baseOffset < window->ceilingHeight ? window->baseOffset : window->ceilingHeight;
-        Rect2f windowRect(Vector2f(window->width, window->height - windowsSillDepth));
-        windowRect.translate({ window->width * -0.5f, currBaseOffset + windowsSillDepth });
+        Rect2f windowRect(Vector2f(window->Width(), window->Height() - windowsSillDepth));
+        windowRect.translate({ window->Width() * -0.5f, currBaseOffset + windowsSillDepth });
 
         addWindowSill(sg, mRootH, window, windowsSillDepth, currBaseOffset);
 
-        Rect2f windowRectInclusive(Vector2f(window->width, window->height));
-        windowRectInclusive.translate({ window->width * -0.5f, currBaseOffset });
+        Rect2f windowRectInclusive(Vector2f(window->Width(), window->Height()));
+        windowRectInclusive.translate({ window->Width() * -0.5f, currBaseOffset });
 
         addPlastersAroundEdges(sg, mRootH, window, currBaseOffset);
         addTopBottomWallPieces(sg, mRootH, window);
@@ -343,7 +343,7 @@ namespace WindowRender {
 
         float vwangle = -atan2(-window->dirWidth.y(), window->dirWidth.x());
         Quaternion rot(vwangle + window->rotOrientation, V3f::UP_AXIS);
-        mRootH->updateTransform(XZY::C(window->center, 0.0f), rot, V3f::ONE); //
+        mRootH->updateTransform(XZY::C(window->Center2d(), 0.0f), rot, V3f::ONE); //
 
         GeomSPContainer ret;
         ret.emplace_back(mRootH);

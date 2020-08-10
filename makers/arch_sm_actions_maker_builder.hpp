@@ -144,7 +144,7 @@ struct GlobalRescale {
             // and we also want an absolute number as a scale factor that we can easily serialize.
             // The reason why we need to do 2 rescale is that we do not have a "1.0" scale factor as that depends
             // on the result of the ocr scan of the floorplan, so first we need to invert the current scale
-            // then apply the new scale. It's a bit awkard but works.
+            // then apply the new scale. It's a bit awkward but works.
             HouseService::rescale(asg.H(), 1.0f / oldScaleFactor);
             asg.H()->sourceData.rescaleFactor = metersToCentimeters(currentScaleFactorMeters);
             HouseService::rescale(asg.H(), asg.H()->sourceData.rescaleFactor);
@@ -176,7 +176,7 @@ struct KeyToggleFeatureManipulation {
         if ( keyEvent.keyCode == GMK_A ) {
             arc.splitFirstEdgeOnSelectionList([&]( const ArchStructuralFeatureDescriptor& asf, const V2f& offset ) {
                 WallService::splitEdgeAndAddPointInTheMiddle(asf, offset);
-                HouseService::recalculateBBox(asg.H());
+                asg.H()->calcBBox();
             });
             asg.pushHouseChange();
             arc.resetSelection();
@@ -204,7 +204,7 @@ struct TouchMoveFeatureManipulation {
                 asg.pushHouseChange();
             } else {
                 WallService::moveFeature(asf, offset, false);
-                HouseService::recalculateBBox(asg.H());
+                asg.H()->calcBBox();
                 HouseMakerBitmap::makeFromWalls(asg.H());
                 asg.pushHouseChange();
             }

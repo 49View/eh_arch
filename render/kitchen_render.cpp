@@ -5,7 +5,6 @@
 #include "kitchen_render.hpp"
 #include <core/math/path_util.h>
 #include <core/resources/profile.hpp>
-#include <core/v_data.hpp>
 #include <core/resources/resource_builder.hpp>
 #include <poly/scene_graph.h>
 #include <poly/vdata_assembler.h>
@@ -98,7 +97,7 @@ namespace KitchenRender {
                                                              kd.kitchenWorktopHeight);
                 sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
             } else {
-                // I've decided to split the worktop in 4 pieces (a'la having a frame around the sink)
+                // I've decided to split the worktop in 4 pieces (like having a frame around the sink)
                 // instead of clipping an hole through it as I still don't trust booleans they are still too risky
                 auto sinkHalfDepth = sg.GM(kd.sinkModel)->BBox3d()->calcDepth() * 0.5f;
                 // Add some filling to make sure the whole sink is cover, ie to cover up round edges
@@ -154,7 +153,7 @@ namespace KitchenRender {
                                  XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, topOfWorktop),
                                  GT::Rotate(rotation));
                 sg.GB<GT::Asset>(kd.extractorHoodModel,
-                                 XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, w->height - extractorHeight),
+                                 XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, w->Height() - extractorHeight),
                                  GT::Rotate(rotation));
                 sg.GB<GT::Asset>(kd.ovenPanelModel,
                                  XZY::C(mp + kup.normal * ( kd.kitchenWorktopDepth - kd.kitchenUnitsRecess ),

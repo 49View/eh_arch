@@ -13,12 +13,6 @@
 struct ArchStructuralFeatureDescriptor;
 
 namespace WallService {
-    std::shared_ptr<WallBSData> createWall2( const std::vector<Vector2f>& epts, float _height,
-                                             WallLastPointWrapT wlpw = WallLastPointWrap::Yes,
-                                             float _z = 0.0f,
-                                             uint32_t wf = WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving,
-                                             int64_t _linkedHash = 0,
-                                             SequencePart sequencePart = 0 );
 
     // Query
     bool contains( const WallBSData *w, const Vector2f& pos );
@@ -49,7 +43,6 @@ namespace WallService {
     void update( WallBSData *w );
     void update( WallBSData *w, const std::vector<Vector2f>& epts );
     void rescale( WallBSData *w, float _scale );
-    void calcBBox( WallBSData *w );
     void updateUShapes( WallBSData *w );
     void removeUnPairedUShapes( WallBSData *w );
     void addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const V2f& point );
@@ -61,7 +54,6 @@ namespace WallService {
     void deleteFeature( const ArchStructuralFeatureDescriptor& asf );
     void splitEdgeAndAddPointInTheMiddle( const ArchStructuralFeatureDescriptor& asf, const V2f& newPoint );
     FloorUShapesPair createTwoShapeAt( HouseBSData *houseJson, const V2f& point );
-    void makeTriangles2d( WallBSData *w );
     bool mergePoints( WallBSData *w, const V2fVector& points );
     void updateFormFactor( WallBSData *w );
     void calculateNormals( WallBSData *w );

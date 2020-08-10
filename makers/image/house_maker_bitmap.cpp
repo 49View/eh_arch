@@ -80,7 +80,7 @@ namespace HouseMakerBitmap {
     void guessNumberOfFloors( HouseBSData *house, const SourceImages& si ) {
         std::vector<JMATH::Rect2f> floorRects = getFloorplanRects(si.sourceFileImageOriginalGray);
         for ( auto& floorRect : floorRects ) {
-            HouseService::addFloorFromData(house, floorRect);
+            house->addFloorFromData(floorRect);
         }
     }
 
@@ -473,7 +473,7 @@ namespace HouseMakerBitmap {
     bool findApproxAreaStrings( const std::string& _val ) {
 
         std::vector<std::string> singleWords = split(_val, ' ');
-        for ( auto& ws : singleWords ) {
+        for ( const auto& ws : singleWords ) {
             if ( ws.find("approx") != std::string::npos ) return true;
             if ( ws.find("area") != std::string::npos ) return true;
             if ( ws.find("gross") != std::string::npos ) return true;
@@ -555,7 +555,7 @@ namespace HouseMakerBitmap {
         std::vector<JMATH::Rect2f> stairsCC;
 
         for ( auto& f : house->mFloors ) {
-            auto ws = evaluateWalls(si, f->bbox, strategyIndex, static_cast<float>( thickness ));
+            auto ws = evaluateWalls(si, f->BBox(), strategyIndex, static_cast<float>( thickness ));
             std::lock_guard<std::mutex> guard(g_pages_mutex);
             weval.mWallEvaluationMapping[std::make_tuple(f->number, strategyIndex, thickness)] = ws;
             gatherWallsData(ws, wed);
@@ -617,10 +617,10 @@ namespace HouseMakerBitmap {
                 doorsWidth.emplace_back(door);
             }
             std::sort(doorsWidth.begin(), doorsWidth.end(), []( const auto& l, const auto& r ) -> bool {
-                return l->width < r->width;
+                return l->Width() < r->Width();
             });
             for ( const auto& door : doorsWidth ) {
-                if ( door->width / doorsWidth[doorsWidth.size() / 2 - 1]->width > 2.0f ) {
+                if ( door->Width() / doorsWidth[doorsWidth.size() / 2 - 1]->Width() > 2.0f ) {
                     FloorService::swapWindowOrDoor(f, house, door->hash);
                 }
             }
@@ -846,13 +846,10 @@ namespace HouseMakerBitmap {
     }
 
     std::shared_ptr<HouseBSData> makeEmpty( const PropertyListing& property, const RawImage& sourceImage ) {
-        std::shared_ptr<HouseBSData> newHouse = std::make_shared<HouseBSData>();
+        auto floorPlanBBox = Rect2f{ V2fc::ZERO, V2f{ sourceImage.width, sourceImage.height } * 0.01f };
+        std::shared_ptr<HouseBSData> newHouse = std::make_shared<HouseBSData>(floorPlanBBox);
         newHouse->propertyId = property._id;
         newHouse->name = property.addressLine1 + " " + property.addressLine2 + " " + property.name;
-        auto floorPlanBBox = Rect2f{ V2fc::ZERO, V2f{ sourceImage.width, sourceImage.height } *
-                                                 newHouse->sourceData.rescaleFactor };
-        newHouse->bbox = floorPlanBBox;
-
         return newHouse;
     }
 

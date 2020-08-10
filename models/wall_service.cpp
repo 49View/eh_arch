@@ -8,35 +8,12 @@
 
 #include "wall_service.hpp"
 #include <core/util.h>
-#include <core/math/triangulator.hpp>
 #include <poly/poly_services.hpp>
 
 #include "arch_structural_service.hpp"
 #include "ushape_service.hpp"
 #include "arch_segment_service.hpp"
 #include "house_service.hpp"
-
-std::shared_ptr<WallBSData> WallService::createWall2( const std::vector<Vector2f>& epts,
-                                                      float _height,
-                                                      WallLastPointWrapT wlpw,
-                                                      float _z,
-                                                      uint32_t wf,
-                                                      int64_t _linkedHash,
-                                                      SequencePart sequencePart ) {
-
-    auto w = std::make_shared<WallBSData>();
-    w->type = ArchType::WallT;
-    w->wrapLastPoint = wlpw;
-    w->linkedHash = _linkedHash;
-    w->sequencePart = sequencePart;
-    w->z = _z;
-    w->wallFlags = wf;
-    w->height = _height;
-
-    WallService::update(w.get(), epts);
-
-    return w;
-}
 
 void WallService::calculateNormals( WallBSData *w ) {
     int csize = static_cast<int>( w->epoints.size());
@@ -55,15 +32,14 @@ void WallService::calculateNormals( WallBSData *w ) {
 }
 
 void WallService::updateFormFactor( WallBSData *w ) {
-    makeTriangles2d(w);
+    w->makeTriangles2d();
     calculateNormals(w);
-    calcBBox(w);
-    w->width = w->bbox.width();
+    w->calcBBox();
 }
 
 void WallService::update( WallBSData *w ) {
     removeCollinear(w->epoints, accuracy1Sqmm);
-    makeTriangles2d(w);
+    w->makeTriangles2d();
 
     // Normals
     int csize = static_cast<int>( w->epoints.size());
@@ -76,8 +52,7 @@ void WallService::update( WallBSData *w ) {
         w->slinesGHType[t] = static_cast<uint64_t>( GHType::WallPlaster );
     }
 
-    calcBBox(w);
-    w->width = w->bbox.width();
+    w->calcBBox();
     WallService::updateUShapes(w);
 }
 
@@ -282,8 +257,8 @@ QuadVector3fList WallService::vertsForWallAt( const WallBSData *w, int t,
                                               const std::vector<std::vector<Vector3f>>& cd ) {
     QuadVector3fList ret;
 
-    float topZ1 = w->height;
-    float topZ2 = w->height;
+    float topZ1 = w->Height();
+    float topZ2 = w->Height();
     Vector3f v1 = XZY::C(w->epoints[t], w->z);
     Vector3f v2 = XZY::C(w->epoints[getCircularArrayIndex(t + 1, static_cast<int>( w->epoints.size()))], w->z);
 
@@ -293,8 +268,8 @@ QuadVector3fList WallService::vertsForWallAt( const WallBSData *w, int t,
     auto hitLevel2 = 0;
     isInsideCeilingContour(cd, v1.xz(), topZ1, hitLevel1);
     isInsideCeilingContour(cd, v2.xz(), topZ2, hitLevel2);
-    float topZmin1 = min(topZ1, w->height);
-    float topZmin2 = min(topZ2, w->height);
+    float topZmin1 = min(topZ1, w->Height());
+    float topZmin2 = min(topZ2, w->Height());
     float minCommonZ = min(topZmin1, topZmin2);
     v3 = v1 + Vector3f::UP_AXIS * minCommonZ;
     v4 = v2 + Vector3f::UP_AXIS * minCommonZ;
@@ -309,7 +284,7 @@ QuadVector3fList WallService::vertsForWallAt( const WallBSData *w, int t,
 
     size_t hitLevel = max(hitLevel1, hitLevel2);
 
-    if ( minCommonZ < w->height ) {
+    if ( minCommonZ < w->Height() ) {
         if ( bTraspassing ) {
             v1 = v3;
             v2 = v4;
@@ -326,12 +301,12 @@ QuadVector3fList WallService::vertsForWallAt( const WallBSData *w, int t,
                 auto& vv = cd[hitLevel];
                 v1 = v3;
                 v2 = v4;
-                if ( v1.z() < w->height ) {
+                if ( v1.z() < w->Height() ) {
                     addVertexFromWall(vv, v1, v3);
                 } else {
                     v3 = { v1.xy(), vv[0].z() };
                 }
-                if ( v2.z() < w->height ) {
+                if ( v2.z() < w->Height() ) {
                     addVertexFromWall(vv, v2, v4);
                 } else {
                     v4 = { v2.xy(), vv[0].z() };
@@ -345,39 +320,12 @@ QuadVector3fList WallService::vertsForWallAt( const WallBSData *w, int t,
 }
 
 bool WallService::checkUShapeIndexStartIsDoorOrWindow( const WallBSData *w, size_t index ) {
-    for ( auto& us : w->mUShapes ) {
+    for ( const auto& us : w->mUShapes ) {
         if ( us.indices[1] == static_cast<int32_t>(index) &&
              ( us.type == ArchType::DoorT || us.type == ArchType::WindowT ) )
             return true;
     }
     return false;
-}
-
-void WallService::makeTriangles2d( WallBSData *w ) {
-    w->mTriangles2d.clear();
-    // Check they are not self-intersecting
-    size_t csize = w->epoints.size();
-    Vector2f pi = V2fc::ZERO;
-    bool bNonPolyLine = false;
-    for ( size_t t = 0; t < csize; t++ ) {
-        Vector2f p1 = w->epoints[getCircularArrayIndexUnsigned(t, csize)];
-        Vector2f p2 = w->epoints[getCircularArrayIndexUnsigned(t + 1, csize)];
-        for ( size_t m = t + 2; m < csize + t - 2; m++ ) {
-            if ( t != m ) {
-                Vector2f p3 = w->epoints[getCircularArrayIndexUnsigned(m, csize)];
-                Vector2f p4 = w->epoints[getCircularArrayIndexUnsigned(m + 1, csize)];
-                if ( intersection(p1, p2, p3, p4, pi) ) {
-                    bNonPolyLine = true;
-                    break;
-                }
-            }
-        }
-        if ( bNonPolyLine ) break;
-    }
-    if ( !bNonPolyLine ) {
-        Triangulator tri(w->epoints, 0.000001f);
-        w->mTriangles2d = tri.get2dTrianglesTuple();
-    }
 }
 
 void WallService::rescale( WallBSData *w, float _scale ) {
@@ -390,7 +338,8 @@ void WallService::rescale( WallBSData *w, float _scale ) {
         UShapeService::rescale(s, _scale);
     }
 
-    calcBBox(w);
+    w->calcBBox();
+    w->makeTriangles2d();
 }
 
 float WallService::segmentLenght( const WallBSData *w, size_t index ) {
@@ -465,7 +414,7 @@ bool WallService::checkIndexAreInMiddleAnyUSHape( const WallBSData *w, int i1, i
 Vector3f WallService::middlePointAt( const WallBSData *w, size_t index ) {
     ASSERT(index < w->epoints.size());
     return { lerp(0.5f, w->epoints[index], w->epoints[cai(index + 1, w->epoints.size())]),
-             w->height * 0.5f };
+             w->Height() * 0.5f };
 }
 
 bool WallService::intersectLine2d( const WallBSData *w, Vector2f const& p0, Vector2f const& p1, Vector2f& i ) {
@@ -510,18 +459,8 @@ WallService::intersectLine2dMin( WallBSData *w, Vector2f const& p0, Vector2f con
     }
 }
 
-void WallService::calcBBox( WallBSData *w ) {
-    if ( w->epoints.empty() ) return;
-
-    w->bbox = Rect2f::INVALID;
-    for ( auto& ep : w->epoints ) {
-        w->bbox.expand(ep);
-    }
-    w->bbox3d.calc(w->bbox, w->height, Matrix4f::IDENTITY);
-}
-
 bool WallService::contains( const WallBSData *w, const Vector2f& pos ) {
-    if ( w->bbox.contains(pos) ) {
+    if ( w->BBox().contains(pos) ) {
         if ( ArchStructuralService::isPointInside(w, pos) ) return true;
     }
     return false;
@@ -530,7 +469,7 @@ bool WallService::contains( const WallBSData *w, const Vector2f& pos ) {
 bool WallService::findElementAt( const WallBSData *w, const Vector2f& pos, Vector2f& w1 ) {
     bool bHasFoundIt = false;
 
-    if ( !w->bbox.contains(pos) ) return bHasFoundIt;
+    if ( !w->BBox().contains(pos) ) return bHasFoundIt;
 
     float minDist = std::numeric_limits<float>::max();
     for ( auto& it : w->epoints ) {
@@ -728,7 +667,7 @@ FloorUShapesPair WallService::createTwoShapeAt( HouseBSData *house, const V2f& p
             fus.us1 = WallService::addTwoShapeAt(dynamic_cast<WallBSData *>(wd.arch), wd);
             auto wd2 = arcInters2[0].second;
             fus.us2 = WallService::addTwoShapeAt(dynamic_cast<WallBSData *>(wd2.arch), wd2);
-            HouseService::recalculateBBox(house);
+            house->calcBBox();
             fus.f = f.get();
             return fus;
         }

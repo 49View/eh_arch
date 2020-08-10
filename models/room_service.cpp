@@ -9,28 +9,17 @@
 #include "room_service.hpp"
 
 #include <core/util.h>
-#include "core/math/triangulator.hpp"
 #include "core/service_factory.h"
 #include "arch_segment_service.hpp"
 #include "arch_structural_service.hpp"
 #include "wall_service.hpp"
 
+static MaterialAndColorProperty defaultKitchenFloorMaterial = "parquet,american";
+static MaterialAndColorProperty defaultBedroomFloorMaterial = "carpet,grey";
+static MaterialAndColorProperty defaultBathroomFloorMaterial = "pavonazzo,tiles";
+static MaterialAndColorProperty defaultBathroomWallMaterial = "yule,weave,tiles";
+
 namespace RoomService {
-
-    std::shared_ptr<RoomBSData> createRoom( const RoomPreData& _preData, const float _floorHeight, const float _z, const HouseBSData* house ) {
-        auto w = ServiceFactory::create<RoomBSData>();
-        w->type = ArchType::RoomT;
-        for ( const auto& rt: _preData.rtypes ) {
-            RoomService::addRoomType(w.get(), rt, house);
-        }
-        w->mHasCoving = !RS::hasRoomType(w.get(), ASType::Kitchen);
-        w->height = _floorHeight;
-        w->width = _preData.bboxInternal.calcWidth();
-        w->depth = _preData.bboxInternal.calcHeight();
-        w->z = _z;
-
-        return w;
-    }
 
     void
     addSocketIfSafe( RoomBSData *r, const std::vector<Vector2f>& cov, size_t indexSkirting,
@@ -61,7 +50,7 @@ namespace RoomService {
         int totalLightsCount = 0;
         std::string rHash = std::to_string(r->hash);
         if ( numX == 0 || numY == 0 || bCenterRoomOnly ) {
-            r->mLightFittings.emplace_back( rHash+std::to_string(totalLightsCount++), V3f{br.centre(), r->height - lightYOffset} );
+            r->mLightFittings.emplace_back( rHash+std::to_string(totalLightsCount++), V3f{br.centre(), r->Height() - lightYOffset} );
             return;
         }
 
@@ -73,7 +62,7 @@ namespace RoomService {
             for ( auto m = 1; m < numX + 1; m++ ) {
                 float lx = static_cast<float>( m ) / static_cast<float>( numX + 1 );
                 Vector2f i = lerp(lx, lv1, lv2);
-                r->mLightFittings.emplace_back( rHash+std::to_string(totalLightsCount++), V3f{i, r->height - lightYOffset} );
+                r->mLightFittings.emplace_back( rHash+std::to_string(totalLightsCount++), V3f{i, r->Height() - lightYOffset} );
             }
         }
     }
@@ -139,7 +128,7 @@ namespace RoomService {
                     points.clear();
                 }
             }
-            if ( r->mvSkirtingSegments.size() == 0 && points.size() > 1 ) {
+            if ( r->mvSkirtingSegments.empty() && points.size() > 1 ) {
                 removeCollinear(points, accuracy1Sqmm);
                 if ( points.size() >= 2 ) r->mvSkirtingSegments.push_back(points);
             }
@@ -227,14 +216,8 @@ namespace RoomService {
         // as it uses the coving segment to determine a "sane" max bbox ***
         r->mBBoxCoving = getContainingBBox(r->mvCovingSegments);
         calclMaxBoundingBox(r);
-        makeTriangles2d(r);
+        r->makeTriangles2d();
         r->area = RS::area(r);
-    }
-
-    void makeTriangles2d( RoomBSData *r ) {
-        r->mTriangles2d.clear();
-        Triangulator tri(r->mPerimeterSegments);
-        r->mTriangles2d = tri.get2dTrianglesTuple();
     }
 
     void calclMaxBoundingBox( RoomBSData *r ) {
@@ -367,7 +350,7 @@ namespace RoomService {
                                  const std::vector<std::vector<ArchSegment>>& ws ) {
         WallSegments(r, ws);
         calcLongestWall(r);
-        calcBBox(r);
+        r->calcBBox();
     }
 
     std::vector<std::vector<Vector2f>>
@@ -419,7 +402,7 @@ namespace RoomService {
 
     float area( const RoomBSData *r ) {
         float ret = 0.0f;
-        for ( auto& vts : r->mTriangles2d ) {
+        for ( const auto& vts : r->Triangles2d() ) {
             auto a = std::get<0>(vts);
             auto b = std::get<1>(vts);
             auto c = std::get<2>(vts);
@@ -430,8 +413,8 @@ namespace RoomService {
 
     bool isPointInsideRoom( const RoomBSData *r, const V2f& point ) {
 
-        if ( r->bbox.contains(point) ) {
-            for ( auto& vts : r->mTriangles2d ) {
+        if ( r->BBox().contains(point) ) {
+            for ( auto& vts : r->Triangles2d() ) {
                 auto a = std::get<0>(vts);
                 auto b = std::get<1>(vts);
                 auto c = std::get<2>(vts);
@@ -516,27 +499,14 @@ namespace RoomService {
         r->maxSizeEnclosedWP1 *= _scale;
         r->maxSizeEnclosedWP2 *= _scale;
 
-        calcBBox(r);
+        r->calcBBox();
 
         r->area = RoomService::area(r);
     }
 
     bool intersectLine2d( const RoomBSData *r, Vector2f const& p0, Vector2f const& p1,
                           Vector2f& /*i*/ ) {
-        return r->bbox.lineIntersection(p0, p1);
-    }
-
-    void calcBBox( RoomBSData *r ) {
-        r->bbox = Rect2f::INVALID;
-
-        for ( auto& ws : r->mWallSegments ) {
-            for ( auto& ep : ws ) {
-                r->bbox.expand(ep.p1);
-                r->bbox.expand(ep.p2);
-            }
-        }
-        r->bbox3d.calc(r->bbox, r->height, Matrix4f::IDENTITY);
-        r->center = r->bbox.calcCentre();
+        return r->BBox().lineIntersection(p0, p1);
     }
 
     Vector2f maxEnclsingBoundingBoxCenter( const RoomBSData *r ) {
@@ -570,16 +540,16 @@ namespace RoomService {
         return ret;
     }
 
-    void setRoomType( RoomBSData *r, ASTypeT rt, const HouseBSData* house ) {
+    void setRoomType( RoomBSData *r, ASTypeT rt ) {
         r->roomTypes.clear();
         r->roomTypes.emplace_back(rt);
-        RoomService::assignDefaultRoomFeaturesForType(r, rt, house);
+        RoomService::assignDefaultRoomFeaturesForType(r, rt);
     }
 
-    void addRoomType( RoomBSData *r, ASTypeT rt, const HouseBSData* house ) {
+    void addRoomType( RoomBSData *r, ASTypeT rt ) {
         if ( auto it = std::find(r->roomTypes.begin(), r->roomTypes.end(), rt); it == r->roomTypes.end() ) {
             if ( r->roomTypes.empty() ) {
-                RoomService::setRoomType(r, rt, house);
+                RoomService::setRoomType(r, rt);
             } else {
                 r->roomTypes.emplace_back(rt);
             }
@@ -594,7 +564,7 @@ namespace RoomService {
         return r->roomTypes.size() == 1 && r->roomTypes[0] == ASType::GenericRoom;
     }
 
-    void assignDefaultRoomFeaturesForType( RoomBSData *r, ASTypeT ast, const HouseBSData* house ) {
+    void assignDefaultRoomFeaturesForType( RoomBSData *r, ASTypeT ast ) {
         switch ( ast ) {
             case ASType::GenericRoom:
             case ASType::LivingRoom:
@@ -610,21 +580,21 @@ namespace RoomService {
             case ASType::BoilerRoom:
             return;
             case ASType::Kitchen:
-                r->floorMaterial = house->defaultKitchenFloorMaterial;
+                r->floorMaterial = defaultKitchenFloorMaterial;
                 return;
 
             case ASType::BedroomSingle:
             case ASType::BedroomDouble:
             case ASType::BedroomMaster:
-                r->floorMaterial = house->defaultBedroomFloorMaterial;
+                r->floorMaterial = defaultBedroomFloorMaterial;
                 return;
 
             case ASType::Bathroom:
             case ASType::ShowerRoom:
             case ASType::EnSuite:
             case ASType::ToiletRoom:
-                r->floorMaterial = house->defaultBathroomFloorMaterial;
-                r->wallsMaterial = house->defaultBathroomWallMaterial;
+                r->floorMaterial = defaultBathroomFloorMaterial;
+                r->wallsMaterial = defaultBathroomWallMaterial;
                 return;
 
             default:
@@ -832,10 +802,10 @@ namespace RoomService {
     }
 
     std::string roomSizeToString( const RoomBSData *r ) {
-        if ( r->bbox.width() > r->bbox.height() ) {
-            return sizeToStringMeters(r->bbox.width(), r->bbox.height());
+        if ( r->BBox().width() > r->BBox().height() ) {
+            return sizeToStringMeters(r->BBox().width(), r->BBox().height());
         }
-        return sizeToStringMeters(r->bbox.height(), r->bbox.width());
+        return sizeToStringMeters(r->BBox().height(), r->BBox().width());
     }
 
     FittedFurniture *findFurniture( RoomBSData *r, HashEH furnitureHash ) {

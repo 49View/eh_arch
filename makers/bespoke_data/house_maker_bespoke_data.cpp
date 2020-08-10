@@ -15,17 +15,16 @@ std::shared_ptr<HouseBSData> HouseMakerBespokeData::make( ArchHouseBespokeData&&
     mHouse = std::make_shared<HouseBSData>();
 
     for ( const auto& wallPoints : _data.floorPoints ) {
-        mHouse->bbox = Rect2f( wallPoints );
-        auto f = HouseService::addFloorFromData( mHouse.get(), mHouse->bbox );
+        auto f = mHouse->addFloorFromData( Rect2f( wallPoints ) );
         WallLastPointWrapT wpw = _data.twoShapePoints.empty();
-        FloorService::addWallsFromData( f.get(), wallPoints, wpw );
+        FloorService::addWallsFromData( f, wallPoints, wpw );
         for ( const auto& dp : _data.twoShapePoints ) {
             switch ( dp.type ) {
                 case ArchType::WindowT:
-                    FloorService::addWindowFromData( f.get(), mHouse->defaultWindowHeight, mHouse->defaultWindowBaseOffset, dp.us1, dp.us2 );
+                    FloorService::addWindowFromData( f, mHouse->defaultWindowHeight, mHouse->defaultWindowBaseOffset, dp.us1, dp.us2 );
                     break;
                 case ArchType::DoorT:
-                    FloorService::addDoorFromData( f.get(), mHouse->doorHeight, dp.us1, dp.us2 );
+                    FloorService::addDoorFromData( f, mHouse->doorHeight, dp.us1, dp.us2 );
                     break;
             }
         }
