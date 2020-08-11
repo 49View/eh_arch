@@ -336,6 +336,9 @@ void TwoUShapesBased::calcBBox() {
     Vector2f& p1 = us1.middle;
     Vector2f& p2 = us2.middle;
 
+    // Recalculate center
+    centre = XZY::C(lerp(0.5f, p1, p2), 0.0f);
+
     // Recalculate all data that might have changed
     dirWidth = normalize( p2 - p1 );
     dirDepth = rotate( dirWidth, M_PI_2 );
@@ -359,8 +362,7 @@ void TwoUShapesBased::calcBBox() {
 // Door
 // *********************************************************************************************************************
 
-DoorBSData::DoorBSData(float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
-                       ArchSubTypeT st) {
+DoorBSData::DoorBSData(float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2, ArchSubTypeT st) {
     type = ArchType::DoorT;
     us1 = w1;
     us2 = w2;
