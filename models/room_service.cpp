@@ -216,8 +216,6 @@ namespace RoomService {
         // as it uses the coving segment to determine a "sane" max bbox ***
         r->mBBoxCoving = getContainingBBox(r->mvCovingSegments);
         calclMaxBoundingBox(r);
-        r->makeTriangles2d();
-        r->area = RS::area(r);
     }
 
     void calclMaxBoundingBox( RoomBSData *r ) {
@@ -456,52 +454,6 @@ namespace RoomService {
             }
         }
         return rti;
-    }
-
-    void rescale( RoomBSData *r, float _scale ) {
-        ArchStructuralService::rescale(r, _scale);
-
-        Vector3f scale3f = { _scale, _scale, 1.0f };
-        for ( auto& covs : r->mWallSegments ) {
-            for ( auto& s : covs ) {
-                ArchSegmentService::rescale(s, _scale);
-            }
-        }
-        for ( auto& s : r->mWallSegmentsSorted ) {
-            ArchSegmentService::rescale(s, _scale);
-        }
-        for ( auto& s : r->mPerimeterSegments ) {
-            s *= _scale;
-        }
-        r->mPerimeter *= _scale;
-        for ( auto& s : r->mMaxEnclosingBoundingBox ) {
-            s *= _scale;
-        }
-        for ( auto& s : r->mLightFittings ) {
-            s.lightPosition *= scale3f;
-        }
-        for ( auto& covs : r->mvCovingSegments ) {
-            for ( auto& s : covs ) {
-                s *= _scale;
-            }
-        }
-        for ( auto& covs : r->mvSkirtingSegments ) {
-            for ( auto& s : covs ) {
-                s *= _scale;
-            }
-        }
-        r->mBBoxCoving *= _scale;
-
-        r->mLongestWallOppositePoint *= _scale;
-
-        r->maxSizeEnclosedHP1 *= _scale;
-        r->maxSizeEnclosedHP2 *= _scale;
-        r->maxSizeEnclosedWP1 *= _scale;
-        r->maxSizeEnclosedWP2 *= _scale;
-
-        r->calcBBox();
-
-        r->area = RoomService::area(r);
     }
 
     bool intersectLine2d( const RoomBSData *r, Vector2f const& p0, Vector2f const& p1,

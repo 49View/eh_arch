@@ -9,10 +9,18 @@
 #include "floor_service.hpp"
 #include "room_service.hpp"
 #include "wall_service.hpp"
+#include "ushape_service.hpp"
+#include "door_service.hpp"
+#include "arch_segment_service.hpp"
+#include "house_service.hpp"
 
 // *********************************************************************************************************************
 // House
 // *********************************************************************************************************************
+
+HouseBSData::HouseBSData( const Rect2f& _floorPlanBBox ) {
+    bbox = _floorPlanBBox;
+}
 
 void HouseBSData::calcBBox() {
     bbox = Rect2f::INVALID;
@@ -27,6 +35,21 @@ void HouseBSData::calcBBox() {
     size = BBox3d().size();
 }
 
+void HouseBSData::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    for ( auto& floor : mFloors ) {
+        floor->rescale(_scale, _scaleSpace);
+    }
+    calcBBox();
+    walkableArea = HouseService::area(this);
+
+    // Post rescaling we might need to get feature with accurate values in cm, so this is a chance to do it
+    for ( auto& f : mFloors ) {
+        for ( auto& r : f->rooms ) {
+            RoomService::calcSkirtingSegments(r.get());
+        }
+    }
+}
+
 FloorBSData *HouseBSData::addFloorFromData( const JMATH::Rect2f& _rect ) {
 
     auto f = std::make_shared<FloorBSData>(_rect, static_cast<int>( mFloors.size() ), defaultCeilingHeight,
@@ -34,10 +57,6 @@ FloorBSData *HouseBSData::addFloorFromData( const JMATH::Rect2f& _rect ) {
                                            defaultWindowBaseOffset);
     mFloors.push_back(f);
     return f.get();
-}
-
-HouseBSData::HouseBSData( const Rect2f& _floorPlanBBox ) {
-    bbox = _floorPlanBBox;
 }
 
 // *********************************************************************************************************************
@@ -76,6 +95,40 @@ void FloorBSData::calcBBox() {
     //offsetFromFloorAnchor3d = Vector3f( offsetFromFloorAnchor, z );
 }
 
+void FloorBSData::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    ArchSpatial::rescale(_scale, _scaleSpace);
+
+    for ( auto& vv : ceilingContours ) {
+        for ( auto& v : vv ) {
+            v *= { _scale, _scale, 1.0f };
+        }
+    }
+    for ( auto& v : mPerimeterSegments ) {
+        v *= _scale;
+    }
+    for ( auto& v : perimeterArchSegments ) {
+        ArchSegmentService::rescale(v, _scale);
+    }
+
+    for ( auto& i : windows ) i->rescale(_scale, _scaleSpace);
+    for ( auto& i : doors ) i->rescale(_scale, _scaleSpace);
+    for ( auto& i : walls ) i->rescale(_scale, _scaleSpace);
+    for ( auto& i : rooms ) i->rescale(_scale, _scaleSpace);
+    for ( auto& usg : orphanedUShapes ) {
+        usg.middle *= _scale;
+    }
+    for ( auto& usg : orphanedWallSegments ) {
+        usg.p1 *= _scale;
+        usg.p2 *= _scale;
+    }
+
+    //	for ( auto&& i : stairs ) i->rescale();
+
+    calcBBox();
+
+    area = FloorService::area(this);
+}
+
 // *********************************************************************************************************************
 // Room
 // *********************************************************************************************************************
@@ -88,6 +141,52 @@ RoomBSData::RoomBSData( const RoomPreData& _preData, const float _floorHeight, c
     mHasCoving = !RS::hasRoomType(this, ASType::Kitchen);
     size = V3f{ _preData.bboxInternal.calcWidth(), _floorHeight, _preData.bboxInternal.calcHeight() };
     z = _z;
+}
+
+void RoomBSData::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    ArchSpatial::rescale(_scale, _scaleSpace);
+
+    Vector3f scale3f = { _scale, _scale, 1.0f };
+    for ( auto& covs : mWallSegments ) {
+        for ( auto& s : covs ) {
+            ArchSegmentService::rescale(s, _scale);
+        }
+    }
+    for ( auto& s : mWallSegmentsSorted ) {
+        ArchSegmentService::rescale(s, _scale);
+    }
+    for ( auto& s : mPerimeterSegments ) {
+        s *= _scale;
+    }
+    mPerimeter *= _scale;
+    for ( auto& s : mMaxEnclosingBoundingBox ) {
+        s *= _scale;
+    }
+    for ( auto& s : mLightFittings ) {
+        s.lightPosition *= scale3f;
+    }
+    for ( auto& covs : mvCovingSegments ) {
+        for ( auto& s : covs ) {
+            s *= _scale;
+        }
+    }
+    for ( auto& covs : mvSkirtingSegments ) {
+        for ( auto& s : covs ) {
+            s *= _scale;
+        }
+    }
+    mBBoxCoving *= _scale;
+
+    mLongestWallOppositePoint *= _scale;
+
+    maxSizeEnclosedHP1 *= _scale;
+    maxSizeEnclosedHP2 *= _scale;
+    maxSizeEnclosedWP1 *= _scale;
+    maxSizeEnclosedWP2 *= _scale;
+
+    calcBBox();
+
+    area = RoomService::area(this);
 }
 
 void RoomBSData::makeTriangles2d() {
@@ -107,6 +206,9 @@ void RoomBSData::calcBBox() {
     }
     bbox3d.calc(bbox, Height(), Matrix4f::IDENTITY);
     centre = bbox.calcCentre();
+
+    makeTriangles2d();
+    area = RS::area(this);
 }
 
 // *********************************************************************************************************************
@@ -130,6 +232,19 @@ WallBSData::WallBSData( const std::vector<Vector2f>& epts,
     WallService::update(this, epts);
 }
 
+void WallBSData::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    ArchSpatial::rescale(_scale, _scaleSpace);
+
+    for ( auto& s : epoints ) {
+        s *= _scale;
+    }
+    for ( auto& s : mUShapes ) {
+        UShapeService::rescale(s, _scale);
+    }
+
+    calcBBox();
+}
+
 void WallBSData::calcBBox() {
     if ( epoints.empty() ) return;
 
@@ -139,6 +254,7 @@ void WallBSData::calcBBox() {
     }
     bbox3d.calc(bbox, Height(), Matrix4f::IDENTITY);
     w() = bbox.width();
+    makeTriangles2d();
 }
 
 void WallBSData::makeTriangles2d() {
@@ -178,4 +294,115 @@ void FittedFurniture::calcBBox() {
     bbox3d = bbox3d.rotate(rotation);
     bbox = bbox3d.topDown();
     centre = bbox3d.centre();
+}
+
+// *********************************************************************************************************************
+// ArchSpatial
+// *********************************************************************************************************************
+
+void ArchSpatial::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    //height *= _scale;
+    w() *= _scale;
+    d() *= _scale;
+    if ( _scaleSpace == ArchRescaleSpace::FloorplanScaling ) {
+        center() *= V3f{ _scale, 1.0f, _scale};
+    } else {
+        center() *= _scale;
+        h() *= _scale;
+    }
+
+    for ( auto& vts : mTriangles2d ) {
+        std::get<0>(vts) *= _scale;
+        std::get<1>(vts) *= _scale;
+        std::get<2>(vts) *= _scale;
+    }
+}
+
+// *********************************************************************************************************************
+// TwoUShapeBased
+// *********************************************************************************************************************
+
+void TwoUShapesBased::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+
+    UShapeService::rescale( us1, _scale );
+    UShapeService::rescale( us2, _scale );
+    thickness *= _scale;
+
+    ArchSpatial::rescale( _scale, _scaleSpace );
+    calcBBox();
+}
+
+void TwoUShapesBased::calcBBox() {
+    Vector2f& p1 = us1.middle;
+    Vector2f& p2 = us2.middle;
+
+    // Recalculate all data that might have changed
+    dirWidth = normalize( p2 - p1 );
+    dirDepth = rotate( dirWidth, M_PI_2 );
+    w() = JMATH::distance( p1, p2 );
+    d() = min( us1.width, us2.width );
+
+    bbox = JMATH::Rect2f::INVALID;
+    Vector2f negD = -dirDepth * ( HalfDepth() );
+    Vector2f posD = dirDepth * ( HalfDepth() );
+    Vector2f negW = -dirWidth * ( HalfWidth() );
+    Vector2f posW = dirWidth * ( HalfWidth() );
+    bbox.expand( Center() + negD + posW );
+    bbox.expand( Center() + negD + negW );
+    bbox.expand( Center() + posD + posW );
+    bbox.expand( Center() + posD + negW );
+
+    bbox3d.calc( bbox, ceilingHeight, Matrix4f::IDENTITY );
+}
+
+// *********************************************************************************************************************
+// Door
+// *********************************************************************************************************************
+
+DoorBSData::DoorBSData(float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
+                       ArchSubTypeT st) {
+    type = ArchType::DoorT;
+    us1 = w1;
+    us2 = w2;
+    us1.type = ArchType::DoorT;
+    us2.type = ArchType::DoorT;
+    subType = st;
+    thickness = 2.0f; // this is 2 inches
+    wallFlags = WallFlags::WF_HasCoving;
+    ceilingHeight = _ceilingHeight;
+    h() = _doorHeight;
+
+    calcBBox();
+}
+
+void DoorBSData::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    TwoUShapesBased::rescale(_scale, _scaleSpace);
+    DoorService::calculatePivots(this);
+}
+
+// *********************************************************************************************************************
+// Window
+// *********************************************************************************************************************
+
+WindowBSData::WindowBSData( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1, const UShape& w2, ArchSubTypeT /*st*/ /*= ArchSubType::NotApplicable */ ) {
+    type = ArchType::WindowT;
+    wallFlags = WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving;
+    us1 = w1;
+    us2 = w2;
+    us1.type = ArchType::WindowT;
+    us2.type = ArchType::WindowT;
+    ceilingHeight = _ceilingHeight;
+    baseOffset = _defaultWindowBaseOffset;
+    h() = _windowHeight;
+
+    calcBBox();
+
+    numPanels = static_cast<int32_t>( Width() / minPanelWidth );
+    if ( numPanels <= 0 ) numPanels = 1;
+    float totalMainFramesWidths = mainFrameWidth * static_cast<float>( numPanels + 1 );
+    if ( totalMainFramesWidths > Width() ) {
+        totalMainFramesWidths = Width() / 2;
+        mainFrameWidth = Width() / 4.0f;
+    }
+    minPanelWidth = ( Width() - totalMainFramesWidths ) / numPanels;
 }

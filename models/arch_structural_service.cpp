@@ -32,12 +32,12 @@ bool ArchStructuralService::typeIsFittedFurniture( const ArchStructural *a ) {
 }
 
 bool ArchStructuralService::isPointInside( const ArchStructural *a, const Vector2f& _pos ) {
-    if ( !a->bbox.contains(_pos) ) return false;
+    if ( !a->BBox().contains(_pos) ) return false;
 
-    if ( a->mTriangles2d.size() == 0 ) {
+    if ( a->Triangles2d().empty() ) {
         return true;
     } else {
-        for ( auto& t : a->mTriangles2d ) {
+        for ( auto& t : a->Triangles2d() ) {
             if ( isInsideTriangle(_pos, std::get<0>(t), std::get<1>(t), std::get<2>(t)) ) {
                 return true;
             }
@@ -52,20 +52,20 @@ bool ArchStructuralService::isPointInside2d( const ArchStructural *a, const Vect
 }
 
 bool ArchStructuralService::isPointInside( const ArchStructural *a, const Vector3f& _pos ) {
-    return isPointInside(a, _pos.xy()) && a->bbox3d.containsZ(_pos.z());
+    return isPointInside(a, _pos.xy()) && a->BBox3d().containsZ(_pos.z());
 }
 
 bool ArchStructuralService::isPointNear2d( const ArchStructural *a, const Vector2f& _pos, float radius ) {
-    // We squared the circle here because it's faster to compute bbox interesection of 2 boses rather than a sphere and a box
+    // We squared the circle here because it's faster to compute bbox intersection of 2 boxes rather than a sphere and a box
     Rect2f squaredCircle = Rect2f{};
     squaredCircle.setCenterAndSize(_pos, V2f{ radius });
 
-    if ( !a->bbox.contains(_pos) && !a->bbox.intersect(squaredCircle) ) return false;
+    if ( !a->BBox().contains(_pos) && !a->BBox().intersect(squaredCircle) ) return false;
 
-    if ( a->mTriangles2d.size() == 0 ) {
+    if ( a->Triangles2d().empty() ) {
         return true;
     } else {
-        for ( auto& t : a->mTriangles2d ) {
+        for ( auto& t : a->Triangles2d() ) {
             if ( isInsideTriangle(_pos, std::get<0>(t), std::get<1>(t), std::get<2>(t)) ) {
                 return true;
             }
@@ -78,39 +78,22 @@ bool ArchStructuralService::isPointNear2d( const ArchStructural *a, const Vector
     return false;
 }
 
-void ArchStructuralService::rescale( ArchStructural *a, float _scale, ArchRescaleSpaceT _scaleSpace ) {
-    //height *= _scale;
-    a->w() *= _scale;
-    a->d() *= _scale;
-    if ( _scaleSpace == ArchRescaleSpace::FloorplanScaling ) {
-        a->center() *= V3f{ _scale, 1.0f, _scale};
-    } else {
-        a->center() *= _scale;
-    }
-
-    for ( auto& vts : a->mTriangles2d ) {
-        std::get<0>(vts) *= _scale;
-        std::get<1>(vts) *= _scale;
-        std::get<2>(vts) *= _scale;
-    }
-}
-
 bool ArchStructuralService::intersectLine( const ArchStructural *a, const Vector3f& linePos, const Vector3f& lineDir,
                                            float& tNear ) {
     float farV = std::numeric_limits<float>::max();
-    return a->bbox3d.intersectLine(linePos, lineDir, tNear, farV);
+    return a->BBox3d().intersectLine(linePos, lineDir, tNear, farV);
 }
 
 bool ArchStructuralService::intersectRay( const ArchStructural *a, const RayPair3& rayPair ) {
     float farV = std::numeric_limits<float>::max();
     float vNear = 0.0f;
-    return a->bbox3d.intersectLine( XZY::C(rayPair.origin), XZY::C(rayPair.dir), vNear, farV);
+    return a->BBox3d().intersectLine( XZY::C(rayPair.origin), XZY::C(rayPair.dir), vNear, farV);
 }
 
 bool ArchStructuralService::intersectRayMin( const ArchStructural *a, const RayPair3& rayPair, float& tNear ) {
     float farV = std::numeric_limits<float>::max();
     float vNear = 0.0f;
-    if ( a->bbox3d.intersectLine( rayPair.origin, rayPair.dir, vNear, farV) ) {
+    if ( a->BBox3d().intersectLine( rayPair.origin, rayPair.dir, vNear, farV) ) {
         if ( vNear < tNear ) {
             tNear = vNear;
             return true;

@@ -87,7 +87,7 @@ void FloorService::updateFromNewDoorOrWindow( FloorBSData *f ) {
 void FloorService::addDoorFromData( FloorBSData *f, float _doorHeight, const UShape& w1, const UShape& w2,
                                     ArchSubTypeT /*st*/ /*= ArchSubType::NotApplicable */ ) {
 
-    std::shared_ptr<DoorBSData> d1 = DoorService::createDoor(_doorHeight, f->Height(), w1, w2);
+    auto d1 = std::make_shared<DoorBSData>(_doorHeight, f->Height(), w1, w2);
     f->doors.push_back(d1);
 
 //	auto wd = WallService::createWall( TwoUShapesBasedService::createWallVertices( d1.get() ), f->Height() - _doorHeight,
@@ -111,8 +111,7 @@ void
 FloorService::addWindowFromData( FloorBSData *f, float _windowHeight, float _defaultWindowBaseOffset, const UShape& w1,
                                  const UShape& w2 ) {
 
-    std::shared_ptr<WindowBSData> d1 = WindowService::createWindow(_windowHeight, f->Height(), _defaultWindowBaseOffset,
-                                                                   w1, w2);
+    auto d1 = std::make_shared<WindowBSData>(_windowHeight, f->Height(), _defaultWindowBaseOffset, w1, w2);
     f->windows.push_back(d1);
 
     auto wd1 = std::make_shared<WallBSData>(TwoUShapesBasedService::createFrontWallVertices2(d1.get()), d1->baseOffset,
@@ -841,40 +840,6 @@ float FloorService::area( const FloorBSData *f ) {
     for ( const auto& w : f->windows ) ret += w->Width() * w->Depth();
 
     return ret;
-}
-
-void FloorService::rescale( FloorBSData *f, float _scale ) {
-    ArchStructuralService::rescale(f, _scale);
-
-    for ( auto& vv : f->ceilingContours ) {
-        for ( auto& v : vv ) {
-            v *= { _scale, _scale, 1.0f };
-        }
-    }
-    for ( auto& v : f->mPerimeterSegments ) {
-        v *= _scale;
-    }
-    for ( auto& v : f->perimeterArchSegments ) {
-        ArchSegmentService::rescale(v, _scale);
-    }
-
-    for ( auto& i : f->windows ) WindowService::rescale(i.get(), _scale);
-    for ( auto& i : f->doors ) DoorService::rescale(i.get(), _scale);
-    for ( auto& i : f->walls ) WallService::rescale(i.get(), _scale);
-    for ( auto& i : f->rooms ) RoomService::rescale(i.get(), _scale);
-    for ( auto& usg : f->orphanedUShapes ) {
-        usg.middle *= _scale;
-    }
-    for ( auto& usg : f->orphanedWallSegments ) {
-        usg.p1 *= _scale;
-        usg.p2 *= _scale;
-    }
-
-    //	for ( auto&& i : stairs ) i->rescale();
-
-    f->calcBBox();
-
-    f->area = FloorService::area(f);
 }
 
 void FloorService::setCoving( FloorBSData *f, bool _state ) {

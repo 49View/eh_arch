@@ -29,8 +29,6 @@ namespace HouseService {
     void pushTourPath( HouseBSData *_house, const CameraSpatialsKeyFrame& csk );
     void pushKeyFrameTourPath( HouseBSData *_house, const CameraSpatialsKeyFrame& csk );
     void popTourPath( HouseBSData *_house, int i );
-    void rescale( HouseBSData *house, float scale );
-    void calcBBox( HouseBSData *house );
     void swapWindowOrDoor( HouseBSData *house, int64_t hashOfTwoShape );
     void mergePoints( HouseBSData *f, const V2fVectorOfVector& points );
     void guessFittings( HouseBSData *house, FurnitureMapStorage& furns );

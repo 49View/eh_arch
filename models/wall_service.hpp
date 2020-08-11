@@ -42,7 +42,6 @@ namespace WallService {
     // update
     void update( WallBSData *w );
     void update( WallBSData *w, const std::vector<Vector2f>& epts );
-    void rescale( WallBSData *w, float _scale );
     void updateUShapes( WallBSData *w );
     void removeUnPairedUShapes( WallBSData *w );
     void addPointAfterIndex( WallBSData *w, uint64_t pointIndex, const V2f& point );

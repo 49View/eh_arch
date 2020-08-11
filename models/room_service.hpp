@@ -568,9 +568,6 @@ namespace RoomService {
     void assignDefaultRoomFeaturesForType( RoomBSData *r, ASTypeT ast );
     std::vector<std::vector<Vector2f>> calcCovingSegments( const std::vector<std::vector<ArchSegment>>& ws );
 
-    void calcBBox( RoomBSData *r );
-    void rescale( RoomBSData *r, float _scale );
-
     void addSocketIfSafe( RoomBSData *r, const std::vector<Vector2f>& cov, size_t indexSkirting,
                           float safeSocketBoxWidth );
     void calcLongestWall( RoomBSData *r );

@@ -360,21 +360,6 @@ V2fVectorOfVector HouseService::rescaleWallInverse( const HouseBSData *house, fl
     return wallsPoints;
 }
 
-void HouseService::rescale( HouseBSData *house, float scale ) {
-    for ( auto& floor : house->mFloors ) {
-        FloorService::rescale(floor.get(), scale);
-    }
-    house->calcBBox();
-    house->walkableArea = HouseService::area(house);
-
-    // Post rescaling we might need to get feature with accurate values in cm, so this is a chance to do it
-    for ( auto& f : house->mFloors ) {
-        for ( auto& r : f->rooms ) {
-            RoomService::calcSkirtingSegments(r.get());
-        }
-    }
-}
-
 float HouseService::area( const HouseBSData *house ) {
     float ret = 0.0f;
 

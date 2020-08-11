@@ -100,6 +100,8 @@ public:
 
     [[nodiscard]] inline const std::vector<Triangle2d>& Triangles2d() const { return mTriangles2d; }
 
+    virtual void rescale( float, ArchRescaleSpaceT );
+
 protected:
     [[nodiscard]] inline float& w() { return size[0]; }
     [[nodiscard]] inline float& h() { return size[1]; }
@@ -119,8 +121,6 @@ struct ArchStructural : public ArchSpatial {
     Color4f albedo = Color4f::WHITE;
     HashEH linkedHash = 0;
     SequencePart sequencePart = 0;
-
-    friend class ArchStructuralService;
 };
 
 JSONDATA_H(UShape, ArchBase, hash, type, indices, points, edges, middle, inwardNormals, crossNormals, width,
@@ -147,7 +147,8 @@ struct TwoUShapesBased : public ArchStructural {
     float ceilingHeight = 2.75f;
     uint32_t wallFlags = WallFlags::WF_None;
 
-    friend class TwoUShapesBasedService;
+    void rescale( float, ArchRescaleSpaceT ) override;
+    void calcBBox();
 };
 
 JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, crossNormal, color, tag, sequencePart,
@@ -258,6 +259,10 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     V3f doorPivot = V3f::ZERO;
     V3f doorGeomPivot = V3f::ZERO;
     V2f doorSize = V2fc::ZERO;
+
+    DoorBSData(float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
+               ArchSubTypeT st = ArchSubType::NotApplicable);
+    void rescale( float, ArchRescaleSpaceT ) override;
 };
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
@@ -275,6 +280,8 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
     bool hasCurtains = true;
     std::string curtainGeom = "curtain";
     std::string curtainMaterial = "curtain02";
+
+    WindowBSData( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1, const UShape& w2, ArchSubTypeT = ArchSubType::NotApplicable );
 };
 
 JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size,
@@ -298,7 +305,9 @@ JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size,
                 uint32_t wf = WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving,
                 int64_t _linkedHash = 0,
                 SequencePart _sequencePart = 0 );
+    void rescale( float, ArchRescaleSpaceT ) override;
     void calcBBox();
+private:
     void makeTriangles2d();
 };
 
@@ -490,8 +499,10 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size,
     KitchenData kitchenData;
 
     RoomBSData( const RoomPreData& _preData, float _floorHeight, float _z );
-    void makeTriangles2d();
+    void rescale( float _scale, ArchRescaleSpaceT _scaleSpace );
     void calcBBox();
+private:
+    void makeTriangles2d();
 };
 
 JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size,
@@ -532,6 +543,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size,
 
     FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _defaultCeilingHeight, float _defaultGroundHeight,
                  float _doorHeight, float _defaultWindowHeight, float _defaultWindowBaseOffset );
+    void rescale( float, ArchRescaleSpaceT ) override;
     void calcBBox();
 };
 
@@ -567,9 +579,10 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size
     std::vector<CameraPath> tourPaths;
     std::vector<std::shared_ptr<FloorBSData>> mFloors;
 
-    HouseBSData( const JMATH::Rect2f& _floorPlanBBox);
+    explicit HouseBSData( const JMATH::Rect2f& _floorPlanBBox);
     inline constexpr static uint64_t Version() { return SHouseJSONVersion; }
     void calcBBox();
+    void rescale( float, ArchRescaleSpaceT ) override;
     FloorBSData *addFloorFromData( const JMATH::Rect2f& _rect );
 };
 

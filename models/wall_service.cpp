@@ -32,14 +32,12 @@ void WallService::calculateNormals( WallBSData *w ) {
 }
 
 void WallService::updateFormFactor( WallBSData *w ) {
-    w->makeTriangles2d();
     calculateNormals(w);
     w->calcBBox();
 }
 
 void WallService::update( WallBSData *w ) {
     removeCollinear(w->epoints, accuracy1Sqmm);
-    w->makeTriangles2d();
 
     // Normals
     int csize = static_cast<int>( w->epoints.size());
@@ -326,20 +324,6 @@ bool WallService::checkUShapeIndexStartIsDoorOrWindow( const WallBSData *w, size
             return true;
     }
     return false;
-}
-
-void WallService::rescale( WallBSData *w, float _scale ) {
-    ArchStructuralService::rescale(w, _scale);
-
-    for ( auto& s : w->epoints ) {
-        s *= _scale;
-    }
-    for ( auto& s : w->mUShapes ) {
-        UShapeService::rescale(s, _scale);
-    }
-
-    w->calcBBox();
-    w->makeTriangles2d();
 }
 
 float WallService::segmentLenght( const WallBSData *w, size_t index ) {

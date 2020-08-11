@@ -104,7 +104,6 @@ namespace FloorService {
     void
     changeTypeOfSelectedElementTo( FloorBSData *f, ArchStructural *source, ArchType t,
                                    ArchSubTypeT st );
-    void rescale( FloorBSData *f, float _scale );
     void setCoving( FloorBSData *f, bool _state );
     void updateFromNewDoorOrWindow( FloorBSData *f );
     std::vector<std::pair<UShape *, UShape *> > alignSuitableUShapesFromWalls( FloorBSData *f );

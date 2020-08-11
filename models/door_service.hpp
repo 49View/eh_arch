@@ -11,11 +11,6 @@
 #include "house_bsdata.hpp"
 
 namespace DoorService {
-    // Create
-    std::shared_ptr<DoorBSData>
-    createDoor( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
-                ArchSubTypeT st = ArchSubType::NotApplicable );
-
     // Query
     std::string orientationToString( const DoorBSData *d );
     void getPlasterMiddlePoints( const DoorBSData *d, std::vector<Vector3f>& mpoints );

@@ -3,6 +3,7 @@
 #include <eh_arch/models/htypes.hpp>
 #include <core/math/vector3f.h>
 #include <core/math/htypes.hpp>
+#include <utility>
 
 struct FittedFurniture;
 struct RoomBSData;
@@ -33,14 +34,14 @@ struct ArchStructuralFeatureDescriptor {
                                                                                                        elem(_elem) {}
 
     ArchStructuralFeatureDescriptor( ArchStructuralFeature feature, int64_t index, ArchBase *_elem,
-                                     const V2fVector& pointOfInterests ) : feature(feature), index(index), elem(_elem),
-                                                                           pointOfInterests(pointOfInterests) {}
+                                     V2fVector  pointOfInterests ) : feature(feature), index(index), elem(_elem),
+                                                                           pointOfInterests(std::move(pointOfInterests)) {}
 
     ArchStructuralFeatureDescriptor( ArchStructuralFeature feature, int64_t index, ArchBase *_elem,
-                                     const V2fVector& pois, const V2f& nd ) : feature(feature),
+                                     V2fVector  pointOfInterests, const V2f& nd ) : feature(feature),
                                                                               index(index),
                                                                               elem(_elem),
-                                                                              pointOfInterests(pois),
+                                                                              pointOfInterests(std::move(pointOfInterests)),
                                                                               normalDirection(nd) {}
 
     bool operator==( const ArchStructuralFeatureDescriptor& rhs ) const {
@@ -70,7 +71,6 @@ public:
     static bool isPointInside( const ArchStructural *a, const Vector3f& _pos );
     static bool isPointInside2d( const ArchStructural *a, const Vector2f& _pos );
     static bool isPointNear2d( const ArchStructural *a, const Vector2f& _pos, float radius );
-    static void rescale( ArchStructural *a, float _scale, ArchRescaleSpaceT _scaleSpace = ArchRescaleSpace::FloorplanScaling );
     static bool
     intersectLine( const ArchStructural *a, const Vector3f& linePos, const Vector3f& lineDir, float& tNear );
     static bool intersectRay( const ArchStructural *a, const RayPair3& rayPair );

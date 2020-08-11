@@ -12,27 +12,6 @@
 #include "room_service.hpp"
 #include "floor_service.hpp"
 
-std::shared_ptr<DoorBSData>
-DoorService::createDoor( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
-                         ArchSubTypeT st ) {
-    std::shared_ptr<DoorBSData> d1 = std::make_shared<DoorBSData>();
-
-    d1->type = ArchType::DoorT;
-    d1->us1 = w1;
-    d1->us2 = w2;
-    d1->us1.type = ArchType::DoorT;
-    d1->us2.type = ArchType::DoorT;
-    d1->subType = st;
-    d1->thickness = 2.0f; // this is 2 inches
-    d1->wallFlags = WallFlags::WF_HasCoving;
-    d1->ceilingHeight = _ceilingHeight;
-
-    TwoUShapesBasedService::evalData(d1.get(), _doorHeight);
-
-    return d1;
-//	openingAngle = std::make_shared<AnimType<float>>( 0.0f );
-}
-
 void DoorService::toggleOrientations( DoorBSData *d ) {
     d->dIndex = ( d->dIndex + 1 ) % 4;
     calculatePivots(d);
@@ -57,12 +36,6 @@ std::string DoorService::orientationToString( const DoorBSData *d ) {
             break;
     }
     return "";
-}
-
-
-void DoorService::rescale( DoorBSData *d, float _scale ) {
-    TwoUShapesBasedService::rescale(d, _scale);
-    calculatePivots(d);
 }
 
 bool isLeft( int index ) {
