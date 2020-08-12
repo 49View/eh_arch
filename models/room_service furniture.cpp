@@ -20,11 +20,6 @@
 #include "room_service_furniture.hpp"
 #include "kitchen_room_service.hpp"
 
-[[nodiscard]] bool FittedFurniture::checkIf( FittedFurnitureFlagsT _flag ) const {
-    return checkBitWiseFlag(flags, _flag);
-}
-
-
 bool FurnitureRuleScript::execute( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns,
                                    const FurnitureRuleFunctionContainer& funcRules ) const {
     bool completed = true;

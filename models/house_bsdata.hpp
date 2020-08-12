@@ -214,11 +214,8 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, si
     V2f widthNormal = V2fc::ZERO;
     V2f depthNormal = V2fc::ZERO;
     FittedFurnitureFlagsT flags = 0;
-    explicit FittedFurniture( const std::tuple<std::string, V3f>& args, std::string _keyTag, std::string _symbolRef ) :
-            name(std::get<0>(args)), keyTag(std::move(_keyTag)), symbolRef(std::move(_symbolRef)) {
-        type = ArchType::FittedFurnitureT;
-    }
 
+    explicit FittedFurniture( const std::tuple<std::string, V3f>& args, std::string _keyTag, std::string _symbolRef );
     [[nodiscard]] bool checkIf( FittedFurnitureFlagsT _flag ) const;
     void calcBBox();
 };

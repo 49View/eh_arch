@@ -5,6 +5,7 @@
 #include "house_bsdata.hpp"
 
 #include <core/math/triangulator.hpp>
+#include <core/util.h>
 
 #include "floor_service.hpp"
 #include "room_service.hpp"
@@ -287,6 +288,18 @@ void WallBSData::makeTriangles2d() {
 // *********************************************************************************************************************
 // Fitted Furniture
 // *********************************************************************************************************************
+
+[[nodiscard]] bool FittedFurniture::checkIf( FittedFurnitureFlagsT _flag ) const {
+
+    return checkBitWiseFlag(flags, _flag);
+}
+
+FittedFurniture::FittedFurniture( const std::tuple<std::string, V3f>& args, std::string _keyTag,
+                                  std::string _symbolRef ) :
+        name(std::get<0>(args)), keyTag(std::move(_keyTag)), symbolRef(std::move(_symbolRef)) {
+    size = std::get<1>(args);
+    type = ArchType::FittedFurnitureT;
+}
 
 void FittedFurniture::calcBBox() {
     V3f scaledHalf = half(size * scale);
