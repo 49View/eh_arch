@@ -282,7 +282,7 @@ namespace DoorRender {
         addInnerDoorFrame(sg, rootH, data);
 
         // This is the actual door, if it's a decent size
-        if ( data->Width() > 0.45f ) {
+        if ( data->Width() > 0.45f && data->Width() < 1.3f ) {
             addDoorGeom(sg, rootH, data);
         }
 
