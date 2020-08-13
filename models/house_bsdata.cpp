@@ -89,7 +89,7 @@ void FloorBSData::calcBBox() {
     for ( const auto& v : FloorService::allFloorePoints(this) ) {
         bbox.expand(v);
     }
-    bbox3d.calc(BBox(), Height(), Matrix4f({ 0.0f, 0.0f, z }));
+    bbox3d.calc(BBox(), z, z+Height(), Matrix4f({ 0.0f, 0.0f, z }));
 
     //offsetFromFloorAnchor = mHouse->getFirstFloorAnchor();
     //offsetFromFloorAnchor -= ( bbox.topLeft() + bbox.size()*0.5f );
@@ -205,7 +205,7 @@ void RoomBSData::calcBBox() {
             bbox.expand(ep.p2);
         }
     }
-    bbox3d.calc(bbox, Height(), Matrix4f::IDENTITY);
+    bbox3d.calc(bbox, z, z + Height(), Matrix4f::IDENTITY);
     centre = bbox.calcCentre();
 
     makeTriangles2d();
@@ -253,7 +253,7 @@ void WallBSData::calcBBox() {
     for ( auto& ep : epoints ) {
         bbox.expand(ep);
     }
-    bbox3d.calc(bbox, Height(), Matrix4f::IDENTITY);
+    bbox3d.calc(bbox, z, z + Height(), Matrix4f::IDENTITY);
     w() = bbox.width();
     makeTriangles2d();
 }
@@ -331,17 +331,21 @@ void ArchSpatial::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     }
 }
 
+void ArchSpatial::rotate( const Quaternion& _rot ) {
+    rot() = _rot;
+}
+
 // *********************************************************************************************************************
 // TwoUShapeBased
 // *********************************************************************************************************************
 
 void TwoUShapesBased::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
-
     UShapeService::rescale( us1, _scale );
     UShapeService::rescale( us2, _scale );
     thickness *= _scale;
 
     ArchSpatial::rescale( _scale, _scaleSpace );
+    TwoUShapesBased::calcBBox();
     calcBBox();
 }
 
@@ -349,12 +353,9 @@ void TwoUShapesBased::calcBBox() {
     Vector2f& p1 = us1.middle;
     Vector2f& p2 = us2.middle;
 
-    // Recalculate center
-    centre = XZY::C(lerp(0.5f, p1, p2), 0.0f);
-
     // Recalculate all data that might have changed
     dirWidth = normalize( p2 - p1 );
-    dirDepth = rotate( dirWidth, M_PI_2 );
+    dirDepth = ::rotate( dirWidth, M_PI_2 );
     w() = JMATH::distance( p1, p2 );
     d() = min( us1.width, us2.width );
 
@@ -363,12 +364,10 @@ void TwoUShapesBased::calcBBox() {
     Vector2f posD = dirDepth * ( HalfDepth() );
     Vector2f negW = -dirWidth * ( HalfWidth() );
     Vector2f posW = dirWidth * ( HalfWidth() );
-    bbox.expand( Center() + negD + posW );
-    bbox.expand( Center() + negD + negW );
-    bbox.expand( Center() + posD + posW );
-    bbox.expand( Center() + posD + negW );
-
-    bbox3d.calc( bbox, ceilingHeight, Matrix4f::IDENTITY );
+    bbox.expand( Center2d() + negD + posW );
+    bbox.expand( Center2d() + negD + negW );
+    bbox.expand( Center2d() + posD + posW );
+    bbox.expand( Center2d() + posD + negW );
 }
 
 // *********************************************************************************************************************
@@ -393,6 +392,14 @@ DoorBSData::DoorBSData(float _doorHeight, float _ceilingHeight, const UShape& w1
 void DoorBSData::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     TwoUShapesBased::rescale(_scale, _scaleSpace);
     DoorService::calculatePivots(this);
+}
+
+void DoorBSData::calcBBox() {
+    // Recalculate center
+    Vector2f& p1 = us1.middle;
+    Vector2f& p2 = us2.middle;
+    centre = XZY::C(lerp(0.5f, p1, p2), lerp(0.5f, 0.0f, Height()));
+    bbox3d.calc( bbox, 0.0f, Height(), Matrix4f::IDENTITY );
 }
 
 // *********************************************************************************************************************
@@ -420,4 +427,16 @@ WindowBSData::WindowBSData( float _windowHeight, float _ceilingHeight, float _de
         mainFrameWidth = Width() / 4.0f;
     }
     minPanelWidth = ( Width() - totalMainFramesWidths ) / numPanels;
+}
+
+void WindowBSData::rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    TwoUShapesBased::rescale(_scale, _scaleSpace);
+}
+
+void WindowBSData::calcBBox() {
+    // Recalculate center
+    Vector2f& p1 = us1.middle;
+    Vector2f& p2 = us2.middle;
+    centre = XZY::C(lerp(0.5f, p1, p2), lerp(0.5f, baseOffset, baseOffset + Height()));
+    bbox3d.calc( bbox, baseOffset, baseOffset + Height(), Matrix4f::IDENTITY );
 }

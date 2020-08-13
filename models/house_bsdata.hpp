@@ -26,10 +26,11 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2150;
+static const uint64_t SHouseJSONVersion = 2145;
 
 // Version log
 //
+// 2020-10-27 -    #2145 - Promoted rotation to ArchSpatial and removed it from FittedFurniture
 // 2020-10-27 -    #2144 - First draft of new ArchSpatial intermediate derived struct, to be expended for 2150 probably
 // 2020-08-27 -    #2143 - Fixed various clangd warnings and spelling mistakes before it was too late
 // 2020-07-29 -    #2142 - Moved northCompassAngle to HouseSourceData, as it's an edit param as original input
@@ -93,24 +94,29 @@ public:
     [[nodiscard]] inline V2f Center2d() const { return centre.xz(); }
     [[nodiscard]] inline const V3f& Size() const { return size; }
 
+    [[nodiscard]] inline const Quaternion& Rotation() const { return rotation; }
+
     [[nodiscard]] inline const JMATH::Rect2f& BBox() const { return bbox; }
     [[nodiscard]] inline const JMATH::AABB& BBox3d() const { return bbox3d; }
 
     [[nodiscard]] inline const std::vector<Triangle2d>& Triangles2d() const { return mTriangles2d; }
 
     virtual void rescale( float, ArchRescaleSpaceT );
+    virtual void rotate( const Quaternion& _rot );
 
 protected:
     [[nodiscard]] inline float& w() { return size[0]; }
     [[nodiscard]] inline float& h() { return size[1]; }
     [[nodiscard]] inline float& d() { return size[2]; }
     [[nodiscard]] inline V3f& center() { return centre; }
+    [[nodiscard]] inline Quaternion& rot() { return rotation; }
 
 protected:
     JMATH::Rect2f bbox = JMATH::Rect2f::INVALID;
     JMATH::AABB bbox3d = JMATH::AABB::INVALID;
     V3f size{ V3f::ZERO };
     V3f centre{ V3f::ZERO };
+    Quaternion rotation{ V3f::ZERO, 1.0f };
     std::vector<Triangle2d> mTriangles2d;
 };
 
@@ -144,7 +150,7 @@ struct TwoUShapesBased : public ArchStructural {
     uint32_t wallFlags = WallFlags::WF_None;
 
     void rescale( float, ArchRescaleSpaceT ) override;
-    void calcBBox();
+    virtual void calcBBox();
 };
 
 JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, crossNormal, color, tag, sequencePart,
@@ -198,7 +204,7 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     }
 };
 
-JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, linkedHash,
+JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, rotation, linkedHash,
            sequencePart, mTriangles2d, name, keyTag, tags, symbolRef, dependantHashList, scale, position3d,
            xyLocation, heightOffset, rotation, widthNormal, depthNormal, flags)
     std::string name;
@@ -210,7 +216,6 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, si
     Vector3f position3d = V3f::ZERO;
     Vector2f xyLocation = V2fc::ZERO;
     float heightOffset = 0.0f;
-    Quaternion rotation{ V3f::ZERO, 1.0f };
     V2f widthNormal = V2fc::ZERO;
     V2f depthNormal = V2fc::ZERO;
     FittedFurnitureFlagsT flags = 0;
@@ -221,7 +226,7 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, si
 };
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
-           bbox, bbox3d, albedo, size, centre, linkedHash, sequencePart, mTriangles2d,
+           bbox, bbox3d, albedo, size, centre, rotation, linkedHash, sequencePart, mTriangles2d,
            rooms, subType, isMainDoor, isDoorTypicallyShut, architraveProfile,
            dIndex, doorInnerBumpSize, doorGeomThickness, doorTrim, openingAngleMax, openingAngleMin,
            hingesPivot, doorHandlePivotLeft, doorHandlePivotRight, doorHandleAngle, frameHingesPivot,
@@ -253,13 +258,14 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     V3f doorGeomPivot = V3f::ZERO;
     V2f doorSize = V2fc::ZERO;
 
+    void calcBBox() override;
     DoorBSData(float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
                ArchSubTypeT st = ArchSubType::NotApplicable);
     void rescale( float, ArchRescaleSpaceT ) override;
 };
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
-           wallFlags, bbox, bbox3d, albedo, size, centre, linkedHash, sequencePart,
+           wallFlags, bbox, bbox3d, albedo, size, centre, rotation, linkedHash, sequencePart,
            mTriangles2d, rooms, numPanels, sillThickness, mainFrameWidth, minPanelWidth, baseOffset,
            rotOrientation, hasBlinds, hasCurtains, curtainGeom, curtainMaterial)
     std::vector<int64_t> rooms;
@@ -275,9 +281,11 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
     std::string curtainMaterial = "curtain02";
 
     WindowBSData( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1, const UShape& w2, ArchSubTypeT = ArchSubType::NotApplicable );
+    void calcBBox() override;
+    void rescale( float, ArchRescaleSpaceT ) override;
 };
 
-JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre,
+JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, rotation,
            linkedHash, sequencePart, mTriangles2d, epoints, enormals, slinesGHType, mUShapes, z, wallFlags,
            wrapLastPoint)
 
@@ -304,7 +312,7 @@ private:
     void makeTriangles2d();
 };
 
-JSONDATA_H(StairsBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre,
+JSONDATA_H(StairsBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, rotation,
            linkedHash, sequencePart, mTriangles2d, name)
     std::string name;
 };
@@ -437,7 +445,7 @@ JSONDATA(LightFittings, key, lightPosition)
     V3f lightPosition;
 };
 
-JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre,
+JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, rotation,
            linkedHash, sequencePart, mTriangles2d, roomTypes, windows, doors, z, mHasCoving, mBBoxCoving, floorType,
            mFittedFurniture,
            mWallSegments, mWallSegmentsSorted, mPerimeterSegments, mvCovingSegments, mvSkirtingSegments,
@@ -492,13 +500,13 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, c
     KitchenData kitchenData;
 
     RoomBSData( const RoomPreData& _preData, float _floorHeight, float _z );
-    void rescale( float _scale, ArchRescaleSpaceT _scaleSpace );
+    void rescale( float _scale, ArchRescaleSpaceT _scaleSpace ) override;
     void calcBBox();
 private:
     void makeTriangles2d();
 };
 
-JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre,
+JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, rotation,
            linkedHash, sequencePart, mTriangles2d, number, z, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
            perimeterArchSegments, anchorPoint, defaultCeilingMaterial, defaultCeilingColor, externalWallsColor,
@@ -540,7 +548,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, 
     void calcBBox();
 };
 
-JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre,
+JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, rotation,
              linkedHash, sequencePart, mTriangles2d, version, propertyId, name, source, declaredSQm, defaultSkybox,
              sourceData, bestInternalViewingPosition, bestInternalViewingAngle, bestDollyViewingPosition,
              bestDollyViewingAngle, walkableArea, doorHeight, defaultWindowHeight, defaultWindowBaseOffset,
