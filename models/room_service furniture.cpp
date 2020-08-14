@@ -202,7 +202,7 @@ namespace RoomService {
         return ret;
     }
 
-    float middleHeightFromObject( RoomBSData *r, FittedFurniture* base, FittedFurniture* dec ) {
+    float middleHeightFromObject( RoomBSData *r, FittedFurniture *base, FittedFurniture *dec ) {
         constexpr float sensibleMaxCovingHeight = 0.15f;
         return ( ( r->Height() - sensibleMaxCovingHeight - base->Height() - dec->Height() ) / 2.0f );
     }
@@ -235,58 +235,54 @@ namespace RoomService {
         return ls;
     }
 
-    void placeAroundInternal( std::shared_ptr<FittedFurniture> dest, FittedFurniture* source,
-                              PivotPointPosition where,
+    void placeAroundInternal( std::shared_ptr<FittedFurniture> dest, FittedFurniture *source, PivotPointPosition where,
                               const V2f& slack, const float _height ) {
         switch ( where ) {
             case PivotPointPosition::TopLeft:
-                dest->xyLocation =
+                dest->position(
                         source->widthNormal * ( source->HalfWidth() + dest->HalfWidth() + slack.x() ) +
-                        source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() );
+                        source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() ));
                 break;
             case PivotPointPosition::TopRight:
-                dest->xyLocation =
+                dest->position(
                         source->widthNormal * ( -source->HalfWidth() - dest->HalfWidth() + slack.x() ) +
-                        source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() );
+                        source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() ));
                 break;
             case PivotPointPosition::TopCenter:
-                dest->xyLocation =
-                        source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() );
+                dest->position(
+                        source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() ));
                 break;
             case PivotPointPosition::LeftCenter:
-                dest->xyLocation =
-                        source->widthNormal * -( source->HalfWidth() + dest->HalfWidth() + slack.x() );
+                dest->position(
+                        source->widthNormal * -( source->HalfWidth() + dest->HalfWidth() + slack.x() ));
                 break;
             case PivotPointPosition::RightCenter:
-                dest->xyLocation =
-                        source->widthNormal * ( source->HalfWidth() + dest->HalfWidth() + slack.x() );
+                dest->position(
+                        source->widthNormal * ( source->HalfWidth() + dest->HalfWidth() + slack.x() ));
                 break;
             case PivotPointPosition::BottomCenter:
-                dest->xyLocation =
-                        source->depthNormal * ( source->HalfDepth() + dest->HalfDepth() + slack.y() );
+                dest->position(
+                        source->depthNormal * ( source->HalfDepth() + dest->HalfDepth() + slack.y() ));
                 break;
             default:
                 break;
         }
-        dest->xyLocation += source->xyLocation;
-        dest->heightOffset = _height;
-        dest->rotation = source->rotation;
+        dest->move(XZY::C(source->Center2d(), _height));
+        dest->rotate(source->Rotation());
         dest->depthNormal = source->depthNormal;
         dest->widthNormal = source->widthNormal;
     }
 
-    void placeAlongWallInternal( std::shared_ptr<FittedFurniture> dest, FittedFurniture* source,
+    void placeAlongWallInternal( std::shared_ptr<FittedFurniture> dest, FittedFurniture *source,
                                  const ArchSegment *ls, WallSegmentCorner preferredCorner, const V2f& slack,
                                  const float _height ) {
 
         auto ln = preferredCorner == WSC_P2 ? ( ls->p1 - ls->p2 ) : ( ls->p2 - ls->p1 );
         ln = normalize(ln);
-        dest->xyLocation = ln * ( source->HalfWidth() + dest->HalfWidth() + slack.x() );
-        dest->xyLocation +=
-                source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() );
-        dest->xyLocation += source->xyLocation;
-        dest->heightOffset = _height;
-        dest->rotation = source->rotation;
+        V2f pos2d = ln * ( source->HalfWidth() + dest->HalfWidth() + slack.x() );
+        pos2d += ( source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() ) );
+        dest->position(XZY::C(pos2d, _height));
+        dest->rotate(source->Rotation());
         dest->depthNormal = source->depthNormal;
         dest->widthNormal = source->widthNormal;
     }
@@ -313,7 +309,7 @@ namespace RoomService {
 //            default:
 //                break;
 //        }
-//        dest->xyLocation += source->xyLocation;
+//        dest->move( source->xyLocation;
 //        dest->heightOffset = _height;
 //        dest->rotation = source->rotation;
 //        dest->depthNormal = source->depthNormal;
@@ -360,14 +356,13 @@ namespace RoomService {
              checkBitWiseFlag(params.ls->tag, WF_IsWindowPart) )
             return false;
 
-        auto cornerPoint = params.preferredCorner == WSC_P1 ? params.ls->p1 : params.ls->p2;
-        Vector2f lpn = normalize(params.ls->middle - cornerPoint);
-        Vector2f offset = params.ls->normal *
-                          ( ( params.ff->HalfDepth() ) + skirtingDepth(params.r) + params.slack.y() ) +
-                          ( lpn * ( params.ff->HalfWidth() + skirtingDepth(params.r) + params.slack.x() ) );
-        params.ff->xyLocation = cornerPoint + offset;
-        params.ff->heightOffset = params.heightOffset;
-        params.ff->rotation = Quaternion{ RoomService::furnitureAngleFromWall(params.ls), V3f::UP_AXIS };
+        V2f cornerPoint = params.preferredCorner == WSC_P1 ? params.ls->p1 : params.ls->p2;
+        V2f lpn = normalize(params.ls->middle - cornerPoint);
+        V2f offset = params.ls->normal *
+                     ( ( params.ff->HalfDepth() ) + skirtingDepth(params.r) + params.slack.y() ) +
+                     ( lpn * ( params.ff->HalfWidth() + skirtingDepth(params.r) + params.slack.x() ) );
+        params.ff->position(XZY::C(cornerPoint + offset, params.heightOffset));
+        params.ff->rotate(Quaternion{ RoomService::furnitureAngleFromWall(params.ls), V3f::UP_AXIS });
         params.ff->widthNormal = params.ls->crossNormal;
         params.ff->depthNormal = params.ls->normal;
 
@@ -379,37 +374,25 @@ namespace RoomService {
         if ( !ls ) return false;
         if ( checkBitWiseFlag(ls->tag, WF_IsDoorPart) || checkBitWiseFlag(ls->tag, WF_IsWindowPart) ) return false;
 
-        Vector2f offset =
-                ls->normal * ( ( params.ff->HalfDepth() ) + skirtingDepth(params.r) + params.slackScalar );
-        params.ff->xyLocation = ls->middle + offset;
-        params.ff->heightOffset = params.heightOffset;
-        params.ff->rotation = Quaternion{ RoomService::furnitureAngleFromWall(ls), V3f::UP_AXIS };
+        V2f offset = ls->normal * ( ( params.ff->HalfDepth() ) + skirtingDepth(params.r) + params.slackScalar );
+        params.ff->position(XZY::C(ls->middle + offset, params.heightOffset));
+        params.ff->rotate(Quaternion{ RoomService::furnitureAngleFromWall(ls), V3f::UP_AXIS });
         params.ff->widthNormal = ls->crossNormal;
         params.ff->depthNormal = ls->normal;
 
         return addFurniture(params);
     }
 
-    bool placeMiddle( FurnitureRuleParams params ) {
-        params.ff->xyLocation = params.pos;
-        params.ff->rotation = Quaternion{ 0.0f, V3f::UP_AXIS };
-        params.ff->widthNormal = V2fc::X_AXIS;
-        params.ff->depthNormal = V2fc::Y_AXIS;
-
-        return addFurniture(params);
-    }
-
     bool placeManually( FurnitureRuleParams params ) {
-        params.ff->xyLocation = params.pos;
-        params.ff->heightOffset = params.heightOffset;
-        params.ff->rotation = params.rot;
+        params.ff->position(XZY::C(params.pos, params.heightOffset));
+        params.ff->rotate(params.rot);
         params.ff->widthNormal = params.widthNormal;
         params.ff->depthNormal = params.depthNormal;
         return addFurniture(params);
     }
 
     bool
-    placeDecorations( FloorBSData *f, RoomBSData *r, FittedFurniture* mainF, FurnitureMapStorage& furns,
+    placeDecorations( FloorBSData *f, RoomBSData *r, FittedFurniture *mainF, FurnitureMapStorage& furns,
                       const FurniturePlacementRule& fpd ) {
         bool completed = true;
         if ( fpd.hasDecorations() ) {
@@ -419,7 +402,7 @@ namespace RoomService {
                         r, mainF, decF.get()) : 0.00f;
                 completed &= h1 >= 0.0f;
                 if ( h1 >= 0.0f ) {
-                    float h = mainF->Height() + h1;
+                    float h = mainF->HalfHeight() + h1;
                     completed &= RS::placeAround(
                             FurnitureRuleParams{ f, r, decF, FRPSource{ mainF }, PPP::TopCenter, h });
                 }
@@ -439,11 +422,13 @@ namespace RoomService {
         if ( completed ) {
             if ( fpd.hasBase(1) ) {
                 completed &= RS::placeAround(
-                        FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF.get() }, PPP::TopLeft });
+                        FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF.get() },
+                                             PPP::TopLeft });
             }
             if ( fpd.hasBase(2) ) {
                 completed &= RS::placeAround(
-                        FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(2)), FRPSource{ mainF.get() }, PPP::TopRight });
+                        FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(2)), FRPSource{ mainF.get() },
+                                             PPP::TopRight });
             }
         }
         completed &= RS::placeDecorations(f, r, mainF.get(), furns, fpd);
@@ -489,9 +474,8 @@ namespace RoomService {
         return completed;
     }
 
-    bool
-    cplaceSetBestFitHanged( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns,
-                            const FurniturePlacementRule& fpd ) {
+    bool cplaceSetBestFitHanged( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns,
+                                 const FurniturePlacementRule& fpd ) {
         FT main = fpd.getBase(0);
         WSLO refWall = fpd.getWallSegmentId().type;
         bool completed = true;
@@ -499,7 +483,7 @@ namespace RoomService {
         for ( uint32_t rwIndex = 0UL; rwIndex < r->mWallSegmentsSorted.size(); rwIndex++ ) {
             completed = RS::placeWallAligned(
                     FurnitureRuleParams{ f, r, mainF, FRPWSLO{ refWall }, FRPSlackScalar{ fpd.getSlack(0).x() },
-                                         rwIndex, r->HalfHeight() });
+                                         rwIndex });
             if ( completed ) break;
         }
         return completed;
@@ -589,7 +573,7 @@ namespace RoomService {
     cplaceMiddleOfRoom( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurniturePlacementRule& fpd ) {
         auto center = RS::maxEnclsingBoundingBoxCenter(r);
         auto ff = furns.spawn(fpd.getBase(0));
-        return placeMiddle(FurnitureRuleParams{ f, r, ff, center, FRPFurnitureRuleFlags{ fpd.getFlags() } });
+        return placeManually(FurnitureRuleParams{ f, r, ff, center, FRPFurnitureRuleFlags{ fpd.getFlags() } });
     }
 
     bool runRuleScript( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns, const FurnitureRuleScript& fs ) {
@@ -619,12 +603,10 @@ namespace RoomService {
     }
 
     bool addFurniture( FurnitureRuleParams& params ) {
-        params.ff->position3d = XZY::C(params.ff->xyLocation, params.ff->heightOffset);
         // If it has a source furniture add it to the dependant list, IE a table (params.source) and a glass (params.ff)
         if ( params.source ) {
             params.source->dependantHashList.emplace_back(params.ff->hash);
         }
-        params.ff->calcBBox();
 
         Rect2f subjectBBox = params.ff->BBox();
         if ( !checkBitWiseFlag(params.flags, FurnitureRuleFlags::IgnoreDoorClipping) ) {
@@ -646,9 +628,9 @@ namespace RoomService {
             if ( !params.ff->checkIf(FittedFurnitureFlags::FF_CanOverlap) &&
                  !checkBitWiseFlag(params.flags, FurnitureRuleFlags::ForceCanOverlap) ) {
                 for ( const auto& furn : params.r->mFittedFurniture ) {
-                    if ( params.ff->heightOffset != furn->heightOffset ) {
-                        if ( params.ff->heightOffset > furn->heightOffset + furn->Height() ||
-                             params.ff->heightOffset + params.ff->Height() < furn->heightOffset ) {
+                    if ( params.ff->PositionY() != furn->PositionY() ) {
+                        if ( params.ff->PositionY() > furn->PositionY() + furn->Height() ||
+                             params.ff->PositionY() + params.ff->Height() < furn->PositionY() ) {
                             continue;
                         }
                     }
@@ -850,7 +832,7 @@ void FurnitureMapStorage::addIndex( FT _ft, FittedFurniture& _ff ) {
 }
 
 void FurnitureMapStorage::addIndex( const FurnitureSet& f ) {
-    auto ff = FittedFurniture{ { f.name, f.bboxSize }, FurnitureTypeHandler::name(FT(f.ftype)), f.symbol };
+    auto ff = FittedFurniture{ { f.name, f.bbox3d }, FurnitureTypeHandler::name(FT(f.ftype)), f.symbol };
     this->addIndex(FT(f.ftype), ff);
 }
 
@@ -910,36 +892,37 @@ void RoomServiceFurniture::addDefaultFurnitureSet( const std::string& _name ) {
 
     FurnitureSetContainer furnitureSet{};
     furnitureSet.name = _name;
-    furnitureSet.set.emplace_back(FTH::FT_Bed, brimnes_bed, V3f::ZERO, queenBedIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Bedside, lauter_selije, V3f::ZERO, bedSideIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Shelf, hemnes_shelf, V3f::ZERO, shelfIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Wardrobe, hemnes_drawer, V3f::ZERO, wardrobeIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Drawer, hemnes_drawer, V3f::ZERO, wardrobeIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Sofa, soderhamn, V3f::ZERO, sofaIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Sofa, sofahoop, V3f::ZERO, sofaIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Picture, pictures_set_3, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Carpet, carpet_flottebo, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Armchair, Strandmon, V3f::ZERO, armchairIcon);
-    furnitureSet.set.emplace_back(FTH::FT_CoffeeTable, coffeeTable, V3f::ZERO, coffeeTableIcon);
-    furnitureSet.set.emplace_back(FTH::FT_CoffeeMachine, coffeeMachine, V3f::ZERO, coffeeTableIcon);
-    furnitureSet.set.emplace_back(FTH::FT_DiningTable, diningTable, V3f::ZERO, coffeeTableIcon);
-    furnitureSet.set.emplace_back(FTH::FT_SideBoard, sideBoard, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_TVWithStand, tv, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Plant, plant1, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Toilet, toilet, V3f::ZERO, toiletIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Shower, shower, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_BathTub, bathTub, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_BathroomSink, bathroomSink, V3f::ZERO, bathroomSinkIcon);
-    furnitureSet.set.emplace_back(FTH::FT_BathroomTowerRadiator, bathroomTowerRadiator, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Bed, brimnes_bed, AABB::MINVALID(), queenBedIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Bedside, lauter_selije, AABB::MINVALID(), bedSideIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Shelf, hemnes_shelf, AABB::MINVALID(), shelfIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Wardrobe, hemnes_drawer, AABB::MINVALID(), wardrobeIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Drawer, hemnes_drawer, AABB::MINVALID(), wardrobeIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Sofa, soderhamn, AABB::MINVALID(), sofaIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Sofa, sofahoop, AABB::MINVALID(), sofaIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Picture, pictures_set_3, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Carpet, carpet_flottebo, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Armchair, Strandmon, AABB::MINVALID(), armchairIcon);
+    furnitureSet.set.emplace_back(FTH::FT_CoffeeTable, coffeeTable, AABB::MINVALID(), coffeeTableIcon);
+    furnitureSet.set.emplace_back(FTH::FT_CoffeeMachine, coffeeMachine, AABB::MINVALID(), coffeeTableIcon);
+    furnitureSet.set.emplace_back(FTH::FT_DiningTable, diningTable, AABB::MINVALID(), coffeeTableIcon);
+    furnitureSet.set.emplace_back(FTH::FT_SideBoard, sideBoard, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_TVWithStand, tv, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Plant, plant1, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Toilet, toilet, AABB::MINVALID(), toiletIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Shower, shower, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_BathTub, bathTub, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_BathroomSink, bathroomSink, AABB::MINVALID(), bathroomSinkIcon);
+    furnitureSet.set.emplace_back(FTH::FT_BathroomTowerRadiator, bathroomTowerRadiator, AABB::MINVALID(),
+                                  neutralSquareIcon);
 
 
-    furnitureSet.set.emplace_back(FTH::FT_Sink, sinkModel, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_OvenPanel, ovenPanelModel, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Microwave, microwaveModel, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Cooktop, cooktopModel, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_Fridge, fridgeModel, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_ExtractorHood, extractorHoodModel, V3f::ZERO, neutralSquareIcon);
-    furnitureSet.set.emplace_back(FTH::FT_DrawersHandle, drawersHandleModel, V3f::ZERO, neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Sink, sinkModel, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_OvenPanel, ovenPanelModel, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Microwave, microwaveModel, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Cooktop, cooktopModel, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_Fridge, fridgeModel, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_ExtractorHood, extractorHoodModel, AABB::MINVALID(), neutralSquareIcon);
+    furnitureSet.set.emplace_back(FTH::FT_DrawersHandle, drawersHandleModel, AABB::MINVALID(), neutralSquareIcon);
 
     Http::post(Url{ "/furnitureset" }, furnitureSet.serialize(), []( HttpResponeParams& res ) {
         LOGRS(res.BufferString())
@@ -957,17 +940,16 @@ dependantFurnitureCallback( RoomBSData *r, FittedFurniture *ff, std::function<vo
 }
 
 void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff, const Quaternion& rot ) {
-    ff->rotation = ff->rotation * rot;
-    ff->rotation.normalise();
-    ff->calcBBox();
-//    RS::calculateFurnitureBBox(ff);
+    Quaternion newRot = ff->Rotation() * rot;
+    newRot.normalise();
+    ff->rotate(newRot);
 }
 
 void rotateFurniture( FittedFurniture *ff, const Quaternion& rot, SceneGraph& sg ) {
     RoomServiceFurniture::rotateFurniture(ff, rot);
     auto node = sg.Nodes().find(ff->linkedUUID);
     if ( node->second ) {
-        node->second->updateTransform(ff->rotation);
+        node->second->updateTransform(ff->Rotation());
     }
 }
 
@@ -980,8 +962,7 @@ RoomServiceFurniture::rotateFurniture( RoomBSData *r, FittedFurniture *ff, const
 }
 
 void RoomServiceFurniture::moveFurniture( FittedFurniture *ff, const V3f& off ) {
-    ff->position3d += off;
-    ff->calcBBox();
+    ff->move(off);
 }
 
 void moveFurniture( FittedFurniture *ff, const V3f& off, SceneGraph& sg ) {
@@ -997,11 +978,6 @@ void RoomServiceFurniture::moveFurniture( RoomBSData *r, FittedFurniture *ff, co
     dependantFurnitureCallback(r, ff, [off, &sg]( FittedFurniture *_ff ) {
         moveFurniture(_ff, off, sg);
     });
-}
-
-void RoomServiceFurniture::scaleIncrementalFurniture( FittedFurniture *ff, float scale ) {
-    ff->scale += V3f{ scale };
-    ff->calcBBox();
 }
 
 void removeFurnitureInternal( RoomBSData *r, FittedFurniture *ff, SceneGraph& sg ) {

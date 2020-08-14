@@ -16,5 +16,5 @@ public:
     static bool isMaineEdge( const V2f& p1, const V2f& p2, const UShape& rhs );
     static bool isMaineEdgeEspsilon( const V2f& p1, const V2f& p2, const UShape& rhs, float epsilon = 0.001f );
 	// Update
-	static void rescale( UShape& us, float _scale );
+	static void resize( UShape& us, float _scale );
 };

@@ -150,7 +150,7 @@ void ArchExplorer::spaceToggle( RenderOrchestrator& rsg ) {
 void ArchExplorer::replaceFurnitureFinal( const EntityMetaData& _furnitureCandidate, ArchOrchestrator& asg,
                                           RenderOrchestrator& rsg ) {
     auto ff = FittedFurniture{
-            { _furnitureCandidate.hash, _furnitureCandidate.bboxSize },
+            { _furnitureCandidate.hash, _furnitureCandidate.bbox3d },
             furnitureSelected->keyTag, furnitureSelected->symbolRef };
     ff.flags = furnitureSelected->flags;
     auto clonedFurniture = EntityFactory::cloneHashed(ff);
@@ -195,9 +195,7 @@ void ArchExplorer::cloneInternal( HouseBSData *_house, FittedFurniture *sourceFu
                                                                                       : V2fc::ZERO;
     V2f pos = XZY::C2(fd.hitPosition) + depthOffset;
     auto f = HouseService::findFloorOf(_house, fd.room->hash);
-    RS::placeManually(
-            FurnitureRuleParams{ f, fd.room, clonedFurniture, pos, sourceFurniture->heightOffset,
-                                 sourceFurniture->rotation,
+    RS::placeManually(FurnitureRuleParams{ f, fd.room, clonedFurniture, pos, sourceFurniture->Rotation(),
                                  FRPFurnitureRuleFlags{ forceManualFurnitureFlags } });
 }
 

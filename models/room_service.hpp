@@ -529,7 +529,7 @@ struct FurnitureRuleParams {
     std::shared_ptr<FittedFurniture> ff;
     FittedFurniture* source = nullptr;
     V2f pos = V2fc::ZERO;
-    Quaternion rot{};
+    Quaternion rot{ 0.0f, V3f::UP_AXIS };
     V2f widthNormal = V2fc::X_AXIS;
     V2f depthNormal = V2fc::Y_AXIS;
     const ArchSegment *ls = nullptr;

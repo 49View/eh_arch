@@ -773,7 +773,7 @@ namespace HouseMakerBitmap {
 
 //        gatherGeneralTextInformations( house.get(), g_sourceImages, house->sourceData );
         setHouseSourceDataSection(house.get(), sourceHouse);
-        house->rescale(house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
+        house->resize(house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
 
         HouseService::guessFittings(house.get(), furnitureMap);
 
@@ -790,7 +790,7 @@ namespace HouseMakerBitmap {
 
 //        gatherGeneralTextInformations( house.get(), g_sourceImages, house->sourceData );
         setHouseSourceDataSection(house.get(), sourceHouse);
-        house->rescale(house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
+        house->resize(house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
 
         HouseService::guessFittings(house.get(), furnitureMap);
 
@@ -801,17 +801,17 @@ namespace HouseMakerBitmap {
         PROFILE_BLOCK("House from wall service elaborate walls housebsdata");
         HouseService::clearHouseExcludingFloorsAndWalls(house);
 
-        house->rescale( 1.0f / house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
+        house->resize( 1.0f / house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
         RoomPreDataResultContainer rdsc = guessDoorsWindowsRooms(house, g_sourceImages);
         addAndFinaliseRooms(house, g_sourceImages, rdsc);
-        house->rescale( house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
+        house->resize( house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
     }
 
     void makeFromWallsWindowsDoors( HouseBSData *house ) {
         PROFILE_BLOCK("House from wall service elaborate walls housebsdata");
         HouseService::clearHouseRooms(house);
 
-        house->rescale( 1.0f / house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
+        house->resize( 1.0f / house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
 
         RoomPreDataResultContainer rdsc;
         for ( auto& f : house->mFloors ) {
@@ -819,7 +819,7 @@ namespace HouseMakerBitmap {
         }
 
         addAndFinaliseRooms(house, g_sourceImages, rdsc);
-        house->rescale( house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
+        house->resize( house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
     }
 
     void makeAddDoor( HouseBSData *house, const FloorUShapesPair& fus ) {
@@ -828,10 +828,10 @@ namespace HouseMakerBitmap {
         FloorService::addDoorFromData(fus.f, house->doorHeight, *fus.us1, *fus.us2);
         HouseService::clearHouseRooms(house);
 
-        house->rescale(  1.0f / house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
+        house->resize(  1.0f / house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
         auto rdsc = guessRooms(house);
         addAndFinaliseRooms(house, g_sourceImages, rdsc);
-        house->rescale(  house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
+        house->resize(  house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
     }
 
     void makeFromSwapDoorOrWindow( HouseBSData *house, HashEH hash ) {
@@ -839,10 +839,10 @@ namespace HouseMakerBitmap {
         HouseService::swapWindowOrDoor(house, hash);
         HouseService::clearHouseRooms(house);
 
-        house->rescale(  1.0f / house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
+        house->resize(  1.0f / house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
         auto rdsc = guessRooms(house);
         addAndFinaliseRooms(house, g_sourceImages, rdsc);
-        house->rescale(house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
+        house->resize(house->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
     }
 
     std::shared_ptr<HouseBSData> makeEmpty( const PropertyListing& property, const RawImage& sourceImage ) {

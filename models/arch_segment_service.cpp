@@ -9,7 +9,7 @@
 #include "house_bsdata.hpp"
 #include "floor_service.hpp"
 
-void ArchSegmentService::rescale( ArchSegment& _as, float _scale ) {
+void ArchSegmentService::resize( ArchSegment& _as, float _scale ) {
     _as.p1 *= _scale;
     _as.p2 *= _scale;
     _as.middle *= _scale;

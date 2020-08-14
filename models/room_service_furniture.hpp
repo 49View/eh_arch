@@ -8,13 +8,13 @@
 
 class SceneGraph;
 
-JSONDATA( FurnitureSet, ftype, name, bboxSize, symbol )
+JSONDATA( FurnitureSet, ftype, name, bbox3d, symbol )
     uint64_t ftype;
     std::string name;
-    V3f bboxSize;
+    AABB bbox3d;
     std::string symbol;
-    FurnitureSet( uint64_t ftype, const std::string &name, const V3f &bboxSize, const std::string &symbol ) : ftype(
-            ftype ), name( name ), bboxSize( bboxSize ), symbol( symbol ) {}
+    FurnitureSet( uint64_t ftype, const std::string &name, const AABB &_bbox3d, const std::string &symbol ) : ftype(
+            ftype ), name( name ), bbox3d( _bbox3d ), symbol( symbol ) {}
 };
 
 JSONDATA( FurnitureSetContainer, name, set )
@@ -41,6 +41,5 @@ namespace RoomServiceFurniture {
     void rotateFurniture( FittedFurniture* ff, const Quaternion& rot );
     void moveFurniture( FittedFurniture* ff, const V3f& off );
     void moveFurniture( RoomBSData* r, FittedFurniture* ff, const V3f& off, SceneGraph& sg );
-    void scaleIncrementalFurniture( FittedFurniture* ff, float scale );
     void removeFurniture( RoomBSData* r, FittedFurniture *ff, SceneGraph& sg );
 }

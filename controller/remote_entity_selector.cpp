@@ -24,10 +24,10 @@ ResourceMetadataListCallback RemoteEntitySelector::resListCallback() {
     return nullptr;
 }
 
-void RemoteEntitySelector::prepare( const FeatureIntersection& _fd, const FeatureIntersection& _fdfurniture,
+void RemoteEntitySelector::prepare( const FeatureIntersection& _fd, const FeatureIntersection& _fdFurniture,
                                     const std::string& _presets, const std::string& _resourceGroup, int _defaultTab ) {
     fd = _fd;
-    fdfurniture = _fdfurniture;
+    fdfurniture = _fdFurniture;
     label = fd.intersectedType;
     resourceGroup = _resourceGroup;
     originalTabIndex = _defaultTab;
@@ -114,7 +114,7 @@ void RemoteEntitySelector::injectColor( ArchOrchestrator& asg, const EntityMetaD
 }
 
 void RemoteEntitySelector::addNewFurniture( ArchOrchestrator& asg, EntityMetaData meta ) {
-    auto ff = FittedFurniture{ { meta.hash, meta.bboxSize },"sofa", S::SQUARE };
+    auto ff = FittedFurniture{ { meta.hash, meta.bbox3d },"sofa", S::SQUARE };
     auto clonedFurniture = EntityFactory::clone(ff);
 
     auto hitBestPoint = fd.nearV < fdfurniture.nearV ? fd.hitPosition : fdfurniture.hitPosition;

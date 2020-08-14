@@ -623,6 +623,8 @@ void FloorService::reevaluateDoorsAndWindowsAfterRoomChange( FloorBSData *f ) {
 
 void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *house ) {
     int numberOfGenericRoom = 0;
+    int numberOfKitchenOrLivingRooms = 0;
+    int numberOfBathrooms = 0;
 
     for ( auto& room : f->rooms ) {
         auto *r = room.get();
@@ -640,6 +642,19 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *h
         }
 
         if ( RoomService::hasRoomType(r, ASType::GenericRoom) ) numberOfGenericRoom++;
+        if ( RoomService::hasRoomType(r, ASType::LivingRoom) || RoomService::hasRoomType(r, ASType::Kitchen) ) numberOfKitchenOrLivingRooms++;
+        if ( RoomService::hasRoomType(r, ASType::Bathroom) || RoomService::hasRoomType(r, ASType::ToiletRoom) || RoomService::hasRoomType(r, ASType::ShowerRoom) ) numberOfBathrooms++;
+    }
+
+    if ( house->mFloors.size() == 1 && numberOfGenericRoom > 0 && numberOfBathrooms == 0 ) {
+        for ( auto& room : f->rooms ) {
+            auto *r = room.get();
+            if ( RoomService::hasRoomType(r, ASType::GenericRoom) && r->doors.size() == 1 ) {
+                RoomService::setRoomType(r, ASType::Bathroom);
+                numberOfBathrooms++;
+            }
+        }
+
     }
 
     // Guess Bedrooms and Kitchen/living rooms (with open plan) (Only for flats/apartments) (floors == 1)
@@ -647,7 +662,7 @@ void FloorService::assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *h
     // Basically the idea is that if we have between 2 and 4 unassigned rooms (a 1 to 3 bedroom flat)
     // We will guess that the biggest room is the Living/Kitchen area, the rest are the bedrooms
     // We can do this because we've already detected bathrooms and Hallways above. It's still wild, but might work.
-    if ( house->mFloors.size() == 1 && numberOfGenericRoom >= 2 && numberOfGenericRoom <= 4 ) {
+    if ( house->mFloors.size() == 1 && numberOfGenericRoom >= 2 && numberOfGenericRoom <= 4 && numberOfKitchenOrLivingRooms == 0 ) {
         std::vector<std::pair<float, RoomBSData *>> areaPairs{};
         for ( auto& room : f->rooms ) {
             auto *r = room.get();
@@ -770,8 +785,7 @@ void FloorService::moveArch( FloorBSData *f, ArchStructural *elem, const V2f& of
         for ( auto& room : f->rooms ) {
             for ( auto& ff : room->mFittedFurniture ) {
                 if ( ff.get() == elem ) {
-                    ff->position3d += XZY::C(offset2d, 0.0f);
-                    ff->calcBBox();
+                    ff->move(XZY::C(offset2d, 0.0f));
                 }
             }
         }

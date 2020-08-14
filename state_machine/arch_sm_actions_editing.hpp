@@ -189,8 +189,7 @@ struct IncrementalScaleFeatureManipulation {
         arc.toggleElementsOnSelectionList([&]( const ArchStructuralFeatureDescriptor& asf ) {
             switch ( asf.elem->type ) {
                 case FittedFurnitureT:
-                    RoomServiceFurniture::scaleIncrementalFurniture(dynamic_cast<FittedFurniture *>(asf.elem),
-                                                                    event.incrementalScaleFactor);
+                    (dynamic_cast<FittedFurniture *>(asf.elem))->scale(V3f{event.incrementalScaleFactor});
                     break;
                 default:
                     break;
@@ -213,7 +212,7 @@ struct FurnishHouse {
 struct AddFurnitureSingle {
     void operator()( const OnAddFurnitureSingleEvent& event, ArchOrchestrator& asg, RenderOrchestrator& rsg,
                      ArchRenderController& arc ) {
-        auto ff = FittedFurniture{ { event.furnitureSet.name, event.furnitureSet.bboxSize }, FurnitureTypeHandler::name(FT(event.furnitureSet.ftype)),
+        auto ff = FittedFurniture{ { event.furnitureSet.name, event.furnitureSet.bbox3d }, FurnitureTypeHandler::name(FT(event.furnitureSet.ftype)),
                                    event.furnitureSet.symbol };
         auto ffs = EntityFactory::cloneHashed(ff);
         V2f pos = RS::maxEnclsingBoundingBoxCenter(event.room);
