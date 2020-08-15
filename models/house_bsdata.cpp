@@ -387,6 +387,8 @@ void TwoUShapesBased::calcBBox() {
     w() = JMATH::distance( p1, p2 );
     d() = min( us1.width, us2.width );
 
+    centre = XZY::C(lerp(0.5f, p1, p2), lerp(0.5f, 0.0f, Height()));
+
     bbox = JMATH::Rect2f::INVALID;
     Vector2f negD = -dirDepth * ( HalfDepth() );
     Vector2f posD = dirDepth * ( HalfDepth() );
@@ -423,10 +425,7 @@ void DoorBSData::resize( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 }
 
 void DoorBSData::calcBBox() {
-    // Recalculate center
-    Vector2f& p1 = us1.middle;
-    Vector2f& p2 = us2.middle;
-    centre = XZY::C(lerp(0.5f, p1, p2), lerp(0.5f, 0.0f, Height()));
+    TwoUShapesBased::calcBBox();
     bbox3d.calc( bbox, 0.0f, Height(), Matrix4f::IDENTITY );
 }
 
@@ -462,9 +461,8 @@ void WindowBSData::resize( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 }
 
 void WindowBSData::calcBBox() {
-    // Recalculate center
-    Vector2f& p1 = us1.middle;
-    Vector2f& p2 = us2.middle;
-    centre = XZY::C(lerp(0.5f, p1, p2), lerp(0.5f, baseOffset, baseOffset + Height()));
+    TwoUShapesBased::calcBBox();
+    // Recalculate center Y, as usually a window does not start from the floor
+    centre.setY(lerp(0.5f, baseOffset, baseOffset + Height()));
     bbox3d.calc( bbox, baseOffset, baseOffset + Height(), Matrix4f::IDENTITY );
 }
