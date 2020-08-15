@@ -87,7 +87,7 @@ bool ArchStructuralService::intersectLine( const ArchStructural *a, const Vector
 bool ArchStructuralService::intersectRay( const ArchStructural *a, const RayPair3& rayPair ) {
     float farV = std::numeric_limits<float>::max();
     float vNear = 0.0f;
-    return a->BBox3d().intersectLine( XZY::C(rayPair.origin), XZY::C(rayPair.dir), vNear, farV);
+    return a->BBox3d().intersectLine( rayPair.origin, rayPair.dir, vNear, farV);
 }
 
 bool ArchStructuralService::intersectRayMin( const ArchStructural *a, const RayPair3& rayPair, float& tNear ) {
