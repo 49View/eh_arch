@@ -237,6 +237,8 @@ namespace RoomService {
 
     void placeAroundInternal( std::shared_ptr<FittedFurniture> dest, FittedFurniture *source, PivotPointPosition where,
                               const V2f& slack, const float _height ) {
+
+        V3f pivotOffset{V3f::ZERO};
         switch ( where ) {
             case PivotPointPosition::TopLeft:
                 dest->position(
@@ -249,8 +251,7 @@ namespace RoomService {
                         source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() ));
                 break;
             case PivotPointPosition::TopCenter:
-                dest->position(
-                        source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() ));
+                pivotOffset = V3f::UP_AXIS * source->Height();
                 break;
             case PivotPointPosition::LeftCenter:
                 dest->position(
@@ -261,13 +262,12 @@ namespace RoomService {
                         source->widthNormal * ( source->HalfWidth() + dest->HalfWidth() + slack.x() ));
                 break;
             case PivotPointPosition::BottomCenter:
-                dest->position(
-                        source->depthNormal * ( source->HalfDepth() + dest->HalfDepth() + slack.y() ));
+                pivotOffset = XZY::C(source->depthNormal * ( source->HalfDepth() + dest->HalfDepth() + slack.y() ), 0.0f);
                 break;
             default:
                 break;
         }
-        dest->move(XZY::C(source->Center2d(), _height));
+        dest->position( source->Center() + pivotOffset );
         dest->rotate(source->Rotation());
         dest->depthNormal = source->depthNormal;
         dest->widthNormal = source->widthNormal;
@@ -280,8 +280,7 @@ namespace RoomService {
         auto ln = preferredCorner == WSC_P2 ? ( ls->p1 - ls->p2 ) : ( ls->p2 - ls->p1 );
         ln = normalize(ln);
         V2f pos2d = ln * ( source->HalfWidth() + dest->HalfWidth() + slack.x() );
-        pos2d += ( source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() ) );
-        dest->position(XZY::C(pos2d, _height));
+        dest->position( source->Center() + XZY::C(pos2d, _height));
         dest->rotate(source->Rotation());
         dest->depthNormal = source->depthNormal;
         dest->widthNormal = source->widthNormal;
@@ -402,9 +401,7 @@ namespace RoomService {
                         r, mainF, decF.get()) : 0.00f;
                 completed &= h1 >= 0.0f;
                 if ( h1 >= 0.0f ) {
-                    float h = mainF->HalfHeight() + h1;
-                    completed &= RS::placeAround(
-                            FurnitureRuleParams{ f, r, decF, FRPSource{ mainF }, PPP::TopCenter, h });
+                    completed &= RS::placeAround(FurnitureRuleParams{ f, r, decF, FRPSource{ mainF }, PPP::TopCenter });
                 }
             }
         }
@@ -430,8 +427,8 @@ namespace RoomService {
                         FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(2)), FRPSource{ mainF.get() },
                                              PPP::TopRight });
             }
+            completed &= RS::placeDecorations(f, r, mainF.get(), furns, fpd);
         }
-        completed &= RS::placeDecorations(f, r, mainF.get(), furns, fpd);
         return completed;
     }
 
