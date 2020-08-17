@@ -38,7 +38,7 @@ namespace DoorRender {
         V2f dp = XZY::C2(door->doorPivot);
         dp.rotate(vwangle + M_PI);
 
-        auto p1 = door->Center2d() + dp;
+        auto p1 = door->Position2d() + dp;
 
         V2f dn = V2fc::X_AXIS * (door->Width());
         dn.rotate(vwangle + M_PI + door->openingAngleMax * dIndexSign);
@@ -291,7 +291,7 @@ namespace DoorRender {
 
         float vwangle = -atan2(-data->dirWidth.y(), data->dirWidth.x());
         Quaternion rot(vwangle + M_PI, V3f::UP_AXIS);
-        rootH->updateTransform(XZY::C(data->Center2d(), 0.0f), rot, V3f::ONE);
+        rootH->updateTransform(data->Position(), rot, V3f::ONE);
 
         GeomSPContainer ret;
         ret.emplace_back(rootH);

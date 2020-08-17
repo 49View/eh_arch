@@ -10,7 +10,7 @@
 #include <core/util_follower.hpp>
 
 void WindowService::getPlasterMiddlePoints( const WindowBSData* w, std::vector<Vector3f>& mPoints ) {
-	mPoints.emplace_back( w->Center2d(), w->baseOffset*0.5f );
+	mPoints.emplace_back( w->Position2d(), w->baseOffset*0.5f );
 	float ch = w->ceilingHeight - ( w->baseOffset + w->Height() );
-	mPoints.emplace_back( w->Center2d(), ( w->baseOffset + w->Height() ) + ch*0.5f );
+	mPoints.emplace_back( w->Position2d(), ( w->baseOffset + w->Height() ) + ch*0.5f );
 }

@@ -711,7 +711,7 @@ void FloorService::calcWhichRoomDoorsAndWindowsBelong( FloorBSData *f, HouseBSDa
                 w->hasCurtains = false;
                 w->hasBlinds = true;
             }
-            V2f pointCheckInsideRoom = w->Center2d() + ( w->dirDepth * ( w->Depth() * 0.51f ) );
+            V2f pointCheckInsideRoom = w->Position2d() + ( w->dirDepth * ( w->Depth() * 0.51f ) );
             w->rotOrientation = ArchStructuralService::isPointInside(r, pointCheckInsideRoom) ? M_PI : 0.0f;
         }
     }

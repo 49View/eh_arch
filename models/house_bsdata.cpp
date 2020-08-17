@@ -317,9 +317,11 @@ void ArchSpatial::resize( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     w() *= _scale;
     d() *= _scale;
     if ( _scaleSpace == ArchRescaleSpace::FloorplanScaling ) {
-        center() *= V3f{ _scale, 1.0f, _scale};
+        centre *= V3f{ _scale, 1.0f, _scale};
+        position() *= V3f{ _scale, 1.0f, _scale};
     } else {
-        center() *= _scale;
+        centre *= _scale;
+        position() *= _scale;
         h() *= _scale;
     }
 
@@ -332,20 +334,14 @@ void ArchSpatial::resize( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 
 void ArchSpatial::calcBBox() {
     V3f scaledHalf = half(size * scaling);
-    bbox3d = AABB{ centre - scaledHalf, centre + scaledHalf };
+    bbox3d = AABB{ (centre + pos) - scaledHalf, (centre + pos) + scaledHalf };
     bbox3d = bbox3d.rotate(rotation);
     bbox = bbox3d.topDown();
 }
 
 void ArchSpatial::posBBox() {
     V3f scaledHalf = half(size * scaling);
-    bbox3d = AABB{ centre - scaledHalf, centre + scaledHalf };
-    bbox = bbox3d.topDown();
-}
-
-void ArchSpatial::moveBBox( const V3f& _off ) {
-    center() += _off;
-    bbox3d.translate( _off );
+    bbox3d = AABB{ (centre + pos) - scaledHalf, (centre + pos) + scaledHalf };
     bbox = bbox3d.topDown();
 }
 
@@ -357,26 +353,26 @@ void ArchSpatial::rotateBBox( const Quaternion& _rot ) {
 
 void ArchSpatial::scaleBBox( const V3f& _scale ) {
     scale() = _scale;
-    V3f scaledHalf = half(size * scaling);
-    bbox3d = AABB{ bbox3d.centre() - scaledHalf, bbox3d.centre() + scaledHalf };
-    bbox = bbox3d.topDown();
+    posBBox();
 }
 
 void ArchSpatial::move( const V3f& _off ) {
-    moveBBox(_off);
+    position() += _off;
+    posBBox();
 }
 
 void ArchSpatial::move( const V2f& _off ) {
-    moveBBox(XZY::C(_off, 0.0f));
+    position() += XZY::C(_off, 0.0f);
+    posBBox();
 }
 
 void ArchSpatial::position( const V3f& _pos ) {
-    center() = _pos;
+    position() = _pos;
     posBBox();
 }
 
 void ArchSpatial::position( const V2f& _pos ) {
-    center() = V3f{_pos.x(), center().y(), _pos.y()};
+    position() = V3f{_pos.x(), position().y(), _pos.y()};
     posBBox();
 }
 
@@ -387,6 +383,31 @@ void ArchSpatial::rotate( const Quaternion& _rot ) {
 void ArchSpatial::scale( const V3f& _scale ) {
     scaleBBox(_scale);
 }
+
+float ArchSpatial::Width() const { return size.x(); }
+float ArchSpatial::Height() const { return size.y(); }
+float ArchSpatial::Depth() const { return size.z(); }
+float ArchSpatial::HalfWidth() const { return Width() * 0.5f; }
+float ArchSpatial::HalfHeight() const { return Height() * 0.5f; }
+float ArchSpatial::HalfDepth() const { return Depth() * 0.5f; }
+V3f ArchSpatial::Position() const { return pos; }
+float ArchSpatial::PositionX() const { return Position().x(); }
+float ArchSpatial::PositionY() const { return Position().y(); }
+float ArchSpatial::PositionZ() const { return Position().z(); }
+V2f ArchSpatial::Position2d() const { return pos.xz(); }
+V3f ArchSpatial::Center() const { return bbox3d.centre(); }
+const V3f& ArchSpatial::Size() const { return size; }
+const V3f& ArchSpatial::Scale() const { return scaling; }
+const Quaternion& ArchSpatial::Rotation() const { return rotation; }
+const JMATH::Rect2f& ArchSpatial::BBox() const { return bbox; }
+const JMATH::AABB& ArchSpatial::BBox3d() const { return bbox3d; }
+const std::vector<Triangle2d>& ArchSpatial::Triangles2d() const { return mTriangles2d; }
+float& ArchSpatial::w() { return size[0]; }
+float& ArchSpatial::h() { return size[1]; }
+float& ArchSpatial::d() { return size[2]; }
+V3f& ArchSpatial::position() { return pos; }
+Quaternion& ArchSpatial::rot() { return rotation; }
+V3f& ArchSpatial::scale() { return scaling; }
 
 // *********************************************************************************************************************
 // TwoUShapeBased
@@ -412,17 +433,18 @@ void TwoUShapesBased::calcBBox() {
     w() = JMATH::distance( p1, p2 );
     d() = min( us1.width, us2.width );
 
-    centre = XZY::C(lerp(0.5f, p1, p2), lerp(0.5f, 0.0f, Height()));
+    centre = XZY::C(V2fc::ZERO, lerp(0.5f, 0.0f, Height()));
+    pos = XZY::C(lerp(0.5f, p1, p2), 0.0f);
 
     bbox = JMATH::Rect2f::INVALID;
     Vector2f negD = -dirDepth * ( HalfDepth() );
     Vector2f posD = dirDepth * ( HalfDepth() );
     Vector2f negW = -dirWidth * ( HalfWidth() );
     Vector2f posW = dirWidth * ( HalfWidth() );
-    bbox.expand( Center2d() + negD + posW );
-    bbox.expand( Center2d() + negD + negW );
-    bbox.expand( Center2d() + posD + posW );
-    bbox.expand( Center2d() + posD + negW );
+    bbox.expand( pos.xz() + negD + posW );
+    bbox.expand( pos.xz() + negD + negW );
+    bbox.expand( pos.xz() + posD + posW );
+    bbox.expand( pos.xz() + posD + negW );
 }
 
 // *********************************************************************************************************************

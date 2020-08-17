@@ -94,7 +94,7 @@ V2f HouseService::centerOfBiggestRoom( const HouseBSData *house ) {
     }
 
     if ( roomSizes.empty() ) {
-        return house->Center2d();
+        return house->Position2d();
     }
 
     std::sort(roomSizes.begin(), roomSizes.end(),

@@ -242,29 +242,29 @@ namespace RoomService {
         switch ( where ) {
             case PivotPointPosition::TopLeft:
                 pivotOffset = source->widthNormal * ( source->HalfWidth() + dest->HalfWidth() + slack.x() );
-                dest->position(source->Center() + pivotOffset);
-                dest->move(V3f::UP_AXIS * source->Height());
+                dest->position(XZY::C(source->Position2d() + pivotOffset, source->Height()));
                 break;
             case PivotPointPosition::TopRight:
                 pivotOffset = source->widthNormal * ( -source->HalfWidth() - dest->HalfWidth() + slack.x() );
-                dest->position(source->Center() + pivotOffset);
-                dest->move(V3f::UP_AXIS * source->Height());
+                dest->position(XZY::C(source->Position2d() + pivotOffset, source->Height()));
                 break;
             case PivotPointPosition::TopCenter:
-                dest->position(source->Center() + pivotOffset);
-                dest->move(V3f::UP_AXIS * source->Height());
+                dest->position(XZY::C(source->Position2d(), source->Height() + slack.y()));
                 break;
             case PivotPointPosition::LeftCenter:
                 pivotOffset = source->widthNormal * -( source->HalfWidth() + dest->HalfWidth() + slack.x() );
-                dest->position(source->Center() + pivotOffset);
+                dest->position(source->Position2d() + pivotOffset);
                 break;
             case PivotPointPosition::RightCenter:
                 pivotOffset = source->widthNormal * ( source->HalfWidth() + dest->HalfWidth() + slack.x() );
-                dest->position(source->Center() + pivotOffset);
+                dest->position(source->Position2d() + pivotOffset);
                 break;
             case PivotPointPosition::BottomCenter:
-                pivotOffset = source->depthNormal * ( source->HalfDepth() + dest->HalfDepth() + slack.y() );
-                dest->position(source->Center() + pivotOffset);
+                dest->position(XZY::C(source->Position2d(), -(source->Height() + slack.y())));
+                break;
+            case PivotPointPosition::FrontCenter:
+                pivotOffset = source->depthNormal * ( source->HalfDepth() + dest->HalfDepth() + slack.x() );
+                dest->position(source->Position2d() + pivotOffset);
                 break;
             default:
                 break;
@@ -281,41 +281,11 @@ namespace RoomService {
         auto ln = preferredCorner == WSC_P2 ? ( ls->p1 - ls->p2 ) : ( ls->p2 - ls->p1 );
         ln = normalize(ln);
         V2f pos2d = ln * ( source->HalfWidth() + dest->HalfWidth() + slack.x() );
-        dest->position(source->Center2d() + pos2d); //, _height));
-        dest->move(V3f::UP_AXIS * _height);
+        dest->position( XZY::C(source->Position2d() + pos2d, _height) ); //, _height));
         dest->rotate(source->Rotation());
         dest->depthNormal = source->depthNormal;
         dest->widthNormal = source->widthNormal;
     }
-
-//    void placeAroundInBetweenInternal(  std::shared_ptr<FittedFurniture> dest, std::shared_ptr<FittedFurniture> source, PivotPointPosition where, const V2f& slack, const float _height ) {
-//        switch ( where ) {
-//            case PivotPointPosition::TopLeft:
-//                dest->xyLocation = source->widthNormal * ( source->HalfWidth() + dest->size.width()*0.5f + slack.x()) +
-//                                  source->depthNormal * ( -source->HalfDepth() + dest->size.depth()*0.5f + slack.y());
-//                break;
-//            case PivotPointPosition::TopRight:
-//                dest->xyLocation = source->widthNormal * ( -source->HalfWidth() - dest->size.width()*0.5f + slack.x()) +
-//                                  source->depthNormal * ( -source->HalfDepth() + dest->size.depth()*0.5f + slack.y());
-//                break;
-//            case PivotPointPosition::TopCenter:
-//                dest->xyLocation = source->depthNormal * ( -source->HalfDepth() + dest->size.depth()*0.5f + slack.y());
-//                break;
-//            case PivotPointPosition::LeftCenter:
-//                dest->xyLocation = source->widthNormal * -( source->HalfWidth() + dest->size.width()*0.5f + slack.x());
-//                break;
-//            case PivotPointPosition::RightCenter:
-//                dest->xyLocation = source->widthNormal * ( source->HalfWidth() + dest->size.width()*0.5f + slack.x());
-//                break;
-//            default:
-//                break;
-//        }
-//        dest->move( source->xyLocation;
-//        dest->heightOffset = _height;
-//        dest->rotation = source->rotation;
-//        dest->depthNormal = source->depthNormal;
-//        dest->widthNormal = source->widthNormal;
-//    }
 
     bool placeAround( FurnitureRuleParams params ) {
         placeAroundInternal(params.ff, params.source, params.where, params.slack, params.heightOffset);
@@ -359,40 +329,35 @@ namespace RoomService {
 
         V2f cornerPoint = params.preferredCorner == WSC_P1 ? params.ls->p1 : params.ls->p2;
         V2f lpn = normalize(params.ls->middle - cornerPoint);
-        V2f offset = params.ls->normal *
-                     ( ( params.ff->HalfDepth() ) + skirtingDepth(params.r) + params.slack.y() ) +
-                     ( lpn * ( params.ff->HalfWidth() + skirtingDepth(params.r) + params.slack.x() ) );
-        params.ff->position(cornerPoint + offset); //, params.heightOffset)
-        params.ff->move(V3f::UP_AXIS * params.heightOffset);
+        V2f offset = params.ls->normal * ( params.ff->HalfDepth() + skirtingDepth(params.r) + params.slack.y() );
+        offset += lpn * ( params.ff->HalfWidth() + skirtingDepth(params.r) + params.slack.x() );
+        params.ff->position(XZY::C(cornerPoint + offset, params.heightOffset));
         params.ff->rotate(Quaternion{ RoomService::furnitureAngleFromWall(params.ls), V3f::UP_AXIS });
         params.ff->widthNormal = params.ls->crossNormal;
         params.ff->depthNormal = params.ls->normal;
-
         return RS::addFurniture(params);
     }
 
     bool placeWallAligned( FurnitureRuleParams params ) {
+
         auto ls = getWallSegmentFor(params.r, params.wslo, params.exactIndex);
         if ( !ls ) return false;
         if ( checkBitWiseFlag(ls->tag, WF_IsDoorPart) || checkBitWiseFlag(ls->tag, WF_IsWindowPart) ) return false;
 
         V2f offset = ls->normal * ( ( params.ff->HalfDepth() ) + skirtingDepth(params.r) + params.slackScalar );
-        params.ff->position(ls->middle + offset);
-        params.ff->move(V3f::UP_AXIS * params.heightOffset);
+        params.ff->position(XZY::C(ls->middle + offset, params.heightOffset));
         params.ff->rotate(Quaternion{ RoomService::furnitureAngleFromWall(ls), V3f::UP_AXIS });
         params.ff->widthNormal = ls->crossNormal;
         params.ff->depthNormal = ls->normal;
-
-        return addFurniture(params);
+        return RS::addFurniture(params);
     }
 
     bool placeManually( FurnitureRuleParams params ) {
-        params.ff->position(params.pos);
-        params.ff->move(V3f::UP_AXIS * params.heightOffset);
+        params.ff->position(XZY::C(params.pos, params.heightOffset));
         params.ff->rotate(params.rot);
         params.ff->widthNormal = params.widthNormal;
         params.ff->depthNormal = params.depthNormal;
-        return addFurniture(params);
+        return RS::addFurniture(params);
     }
 
     bool
@@ -626,7 +591,8 @@ namespace RoomService {
             return true;
         }
 
-        if ( checkBBoxInsideRoom(params.r, params.ff->BBox()) ) {
+//        if ( checkBBoxInsideRoom(params.r, params.ff->BBox()) )
+        {
             if ( !params.ff->checkIf(FittedFurnitureFlags::FF_CanOverlap) &&
                  !checkBitWiseFlag(params.flags, FurnitureRuleFlags::ForceCanOverlap) ) {
                 for ( const auto& furn : params.r->mFittedFurniture ) {

@@ -93,7 +93,7 @@ void DoorService::reevaluateInRoom( DoorBSData *d, const RoomBSData* room ) {
         float vwangle = -atan2(-d->dirWidth.y(), d->dirWidth.x());
         V2f dn = V2fc::X_AXIS * d->Width();
         dn.rotate(vwangle + M_PI * 0.8f);
-        V2f checkPoint = d->Center2d() + dn;
+        V2f checkPoint = d->Position2d() + dn;
 
         bool isInsideRoom = RS::isPointInsideRoom(room, checkPoint);
         if ( isInsideRoom || ( d->isMainDoor && !isInsideRoom ) ) {

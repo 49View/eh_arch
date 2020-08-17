@@ -57,7 +57,7 @@ namespace RoomRender {
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {
             auto ffColor = arc.getFillColor(ff.get(), C4f::BLACK);
-            Matrix4f mt{ ff->Center() * V3f::MASK_Y_OUT, ff->Rotation(), ff->Size() * ff->Scale() };
+            Matrix4f mt{ ff->Position() * V3f::MASK_Y_OUT, ff->Rotation(), ff->Size() * ff->Scale() };
             mt.mult(arc.pm()());
             rr.draw<DLine>(sg.PL(ff->symbolRef), ffColor, RDSPreMult(mt), sm, lineWidth,
                            room->hashFeature("ff"+sm.hash(), ffc++));
@@ -178,7 +178,7 @@ namespace RoomRender {
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
                     ret.furnituresGB.emplace_back(furn);
-                    sg.GB<GT::Shape>(ShapeType::Cube, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale{fur->Size()} );
+                    sg.GB<GT::Shape>(ShapeType::Cube, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale{fur->Size()}, C4f::BLUE_SHADOW );
                 } else {
                     LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
                 }
