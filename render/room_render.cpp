@@ -174,12 +174,11 @@ namespace RoomRender {
         }
         for ( auto& fur : w->mFittedFurniture ) {
             if (!fur->name.empty()) {
-                auto furn = sg.GB<GT::Asset>(fur->name, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
+                auto furn = sg.GB<GT::Asset>(fur->name, fur->Position(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
-                    fur->position( furn->BBox3d()->centre() );
                     ret.furnituresGB.emplace_back(furn);
-//                    sg.GB<GT::Shape>(ShapeType::Cube, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale{fur->Size()} );
+                    sg.GB<GT::Shape>(ShapeType::Cube, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale{fur->Size()} );
                 } else {
                     LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
                 }

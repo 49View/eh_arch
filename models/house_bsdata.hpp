@@ -95,6 +95,7 @@ public:
     [[nodiscard]] inline float HalfHeight() const { return Height() * 0.5f; }
     [[nodiscard]] inline float HalfDepth() const { return Depth() * 0.5f; }
 
+    [[nodiscard]] inline V3f Position() const { return bbox3d.centreBottom(); }
     [[nodiscard]] inline const V3f& Center() const { return centre; }
     [[nodiscard]] inline V2f Center2d() const { return centre.xz(); }
     [[nodiscard]] inline const V3f& Size() const { return size; }
@@ -123,6 +124,12 @@ protected:
     [[nodiscard]] inline Quaternion& rot() { return rotation; }
     [[nodiscard]] inline V3f& scale() { return scaling; }
     virtual void calcBBox();
+
+private:
+    void posBBox();
+    void moveBBox( const V3f& _off );
+    void rotateBBox( const Quaternion& _rot );
+    void scaleBBox( const V3f& _scale );
 
 protected:
     JMATH::Rect2f bbox = JMATH::Rect2f::INVALID;
@@ -232,6 +239,7 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, si
 
     explicit FittedFurniture( const std::tuple<std::string, AABB>& args, std::string _keyTag, std::string _symbolRef );
     [[nodiscard]] bool checkIf( FittedFurnitureFlagsT _flag ) const;
+    void calcBBox() override;
 };
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,

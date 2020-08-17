@@ -263,7 +263,7 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
                 }
                 furnitureSelectionOutline = createBBoxOutline(centerBottomFurnitureSelected,
                                                               V3f::UP_AXIS * furnitureSelected->Height(),
-                                                              V3f::Z_AXIS * furnitureSelected->Depth());
+                                                              V3f::Z_AXIS * furnitureSelected->Width());
                 refNormal = fd.normal;
             } else {
                 centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreBottom();

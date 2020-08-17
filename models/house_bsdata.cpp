@@ -297,11 +297,15 @@ void WallBSData::makeTriangles2d() {
 FittedFurniture::FittedFurniture( const std::tuple<std::string, AABB>& args, std::string _keyTag,
                                   std::string _symbolRef ) :
         name(std::get<0>(args)), keyTag(std::move(_keyTag)), symbolRef(std::move(_symbolRef)) {
+
     size = std::get<1>(args).size();
     centre = std::get<1>(args).centre();
     calcBBox();
-
     type = ArchType::FittedFurnitureT;
+}
+
+void FittedFurniture::calcBBox() {
+    ArchSpatial::calcBBox();
 }
 
 // *********************************************************************************************************************
@@ -333,34 +337,55 @@ void ArchSpatial::calcBBox() {
     bbox = bbox3d.topDown();
 }
 
-void ArchSpatial::move( const V3f& _off ) {
+void ArchSpatial::posBBox() {
+    V3f scaledHalf = half(size * scaling);
+    bbox3d = AABB{ centre - scaledHalf, centre + scaledHalf };
+    bbox = bbox3d.topDown();
+}
+
+void ArchSpatial::moveBBox( const V3f& _off ) {
     center() += _off;
-    calcBBox();
+    bbox3d.translate( _off );
+    bbox = bbox3d.topDown();
+}
+
+void ArchSpatial::rotateBBox( const Quaternion& _rot ) {
+    rot() = _rot;
+    bbox3d = bbox3d.rotate(rotation);
+    bbox = bbox3d.topDown();
+}
+
+void ArchSpatial::scaleBBox( const V3f& _scale ) {
+    scale() = _scale;
+    V3f scaledHalf = half(size * scaling);
+    bbox3d = AABB{ bbox3d.centre() - scaledHalf, bbox3d.centre() + scaledHalf };
+    bbox = bbox3d.topDown();
+}
+
+void ArchSpatial::move( const V3f& _off ) {
+    moveBBox(_off);
 }
 
 void ArchSpatial::move( const V2f& _off ) {
-    center() += XZY::C(_off, 0.0f);
-    calcBBox();
-}
-
-void ArchSpatial::rotate( const Quaternion& _rot ) {
-    rot() = _rot;
-    calcBBox();
-}
-
-void ArchSpatial::scale( const V3f& _scale ) {
-    scale() = _scale;
-    calcBBox();
+    moveBBox(XZY::C(_off, 0.0f));
 }
 
 void ArchSpatial::position( const V3f& _pos ) {
     center() = _pos;
-    calcBBox();
+    posBBox();
 }
 
 void ArchSpatial::position( const V2f& _pos ) {
-    center() = {_pos.x(), center().y(), _pos.y()};
-    calcBBox();
+    center() = V3f{_pos.x(), center().y(), _pos.y()};
+    posBBox();
+}
+
+void ArchSpatial::rotate( const Quaternion& _rot ) {
+    rotateBBox(_rot);
+}
+
+void ArchSpatial::scale( const V3f& _scale ) {
+    scaleBBox(_scale);
 }
 
 // *********************************************************************************************************************
