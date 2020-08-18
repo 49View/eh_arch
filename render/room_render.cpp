@@ -178,7 +178,7 @@ namespace RoomRender {
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
                     ret.furnituresGB.emplace_back(furn);
-                    sg.GB<GT::Shape>(ShapeType::Cube, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale{fur->Size()}, C4f::BLUE_SHADOW );
+//                    sg.GB<GT::Shape>(ShapeType::Cube, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale{fur->Size()}, C4f::BLUE_SHADOW );
                 } else {
                     LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
                 }

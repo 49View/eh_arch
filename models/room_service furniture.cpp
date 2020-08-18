@@ -412,7 +412,7 @@ namespace RoomService {
         // If it has more than 1 furniture then place them in front of the main furniture, like a coffee table in front of a sofa
         if ( fpd.hasBase(1) ) {
             completed &= RS::placeAround(
-                    FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF.get() }, PPP::BottomCenter,
+                    FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF.get() }, PPP::FrontCenter,
                                          FRPSlack{ fpd.getSlack() } });
         }
         completed &= RS::placeDecorations(f, r, mainF.get(), furns, fpd);
@@ -434,7 +434,7 @@ namespace RoomService {
         // If it has more than 1 furniture then place them in front of the main furniture, like a coffee table in front of a sofa
         if ( fpd.hasBase(1) ) {
             completed &= RS::placeAround(
-                    FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF.get() }, PPP::BottomCenter,
+                    FurnitureRuleParams{ f, r, furns.spawn(fpd.getBase(1)), FRPSource{ mainF.get() }, PPP::FrontCenter,
                                          FRPSlack{ fpd.getSlack() } });
         }
         completed &= RS::placeDecorations(f, r, mainF.get(), furns, fpd);
@@ -665,7 +665,7 @@ namespace RoomService {
 
     void furnishLiving( FloorBSData *f, RoomBSData *r, FurnitureMapStorage& furns ) {
         FurnitureRuleScript ruleScript;
-        V3f inFrontOfSlack{ 0.0f, 0.2f, 0.0f };
+        V3f inFrontOfSlack{ 0.2f, 0.0f, 0.0f };
         ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedMiddle),
                                                    FurnitureRefs{ { FTH::FT_Sofa, FTH::FT_CoffeeTable } },
                                                    WallSegmentIdentifier{ WSLOH::Longest() },

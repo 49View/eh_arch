@@ -405,18 +405,20 @@ V2fVectorOfVector RoomBuilder::bespokeriseWalls() {
     SegmentStripVector2d ewp;
     V2fVectorOfVector pwallLine;
 
-    saveCachedSegments();
-    auto optSegments = segments;
-    optSegments.finalise();
+    if ( !segments.empty() ) {
+        saveCachedSegments();
+        auto optSegments = segments;
+        optSegments.finalise();
 
-    auto wallSegments = optSegments.wallSegments();
-    for ( auto pwall : wallSegments ) {
-        removeCollinear(pwall, 0.001f, CollinearWrap::False);
-        auto epts = extrudePointsWithWidth<ExtrudeComtour>(XZY::C(pwall), wallWidth, false);
-        pwallLine.emplace_back(XZY::C2(epts));
+        auto wallSegments = optSegments.wallSegments();
+        for ( auto pwall : wallSegments ) {
+            removeCollinear(pwall, 0.001f, CollinearWrap::False);
+            auto epts = extrudePointsWithWidth<ExtrudeComtour>(XZY::C(pwall), wallWidth, false);
+            pwallLine.emplace_back(XZY::C2(epts));
+        }
+
+        clear();
     }
-
-    clear();
 
     return pwallLine;
 }

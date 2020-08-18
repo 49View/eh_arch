@@ -315,7 +315,7 @@ namespace WindowRender {
         // Rescale the curtain with a % of slack so the curtain doesn't end exactly at window width
         float totalHeight = window->baseOffset + window->Height() + window->sillThickness;
         V3f curtainScale{ ( window->Width() * 1.25f ) / std::get<1>(s).x(), totalHeight / std::get<1>(s).y(), 1.0f };
-        sg.GB<GT::Asset>("curtain", mRootH, V3f{ 0.0f, 0.0f, -window->Depth()+ half(std::get<1>(s).z()) }, GT::Scale(curtainScale),
+        sg.GB<GT::Asset>("curtain", mRootH, V3f{ 0.0f, 0.07f, -window->Depth()+ half(std::get<1>(s).z()) } - 0.07f, GT::Scale(curtainScale),
                          GT::Tag(ArchType::CurtainT),
                          GT::M(window->curtainMaterial));
     }

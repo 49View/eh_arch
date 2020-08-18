@@ -51,10 +51,10 @@ namespace HouseRender {
         auto sm = arc.floorPlanShader();
 
         // Render whole house BBox flat poly
-        float padding = 0.02f;
-        auto houseRect = Rect2f{ 0.0f, 0.0f, data->BBox().bottomRight().x() + padding,
-                                 data->BBox().bottomRight().y() + padding };
-        rr.draw<DFlatPoly>(CommandBufferLimits::UI2dStart, sm, houseRect.pointscw(), C4f::WHITE, arc.pm(), "floorplanFlatPoly");
+//        float padding = 0.02f;
+//        auto houseRect = Rect2f{ 0.0f, 0.0f, data->BBox().bottomRight().x() + padding,
+//                                 data->BBox().bottomRight().y() + padding };
+//        rr.draw<DFlatPoly>(CommandBufferLimits::UI2dStart, sm, houseRect.pointscw(), C4f::WHITE, arc.pm(), "floorplanFlatPoly");
 
         // Render general house information
         auto font = sg.FM().get(S::DEFAULT_FONT).get();
