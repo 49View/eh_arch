@@ -12,8 +12,8 @@
 #include "core/serialization.hpp"
 
 JSONDATA ( PointOfInterestListing, name, type, distance )
-	std::string name = "";
-	std::string type = "";
+	std::string name;
+	std::string type;
 	float distance = -1.0f;
 };
 
@@ -23,11 +23,11 @@ JSONDATA ( HouseLocation, coordinates, type )
 };
 
 JSONDATA ( PropertyListing, _id, origin, addressLine1, addressLine2, addressLine3, buyOrLet, description, estateAgentId, keyFeatures, location, name, price, priceReadable, priceUnity, status, userId, floorplanUrl, images, thumbs )
-	std::string _id = "";
-	std::string origin = "";
-	std::string addressLine1 = "";
-	std::string addressLine2 = "";
-	std::string addressLine3 = "";
+	std::string _id;
+	std::string origin;
+	std::string addressLine1;
+	std::string addressLine2;
+	std::string addressLine3;
 	std::string buyOrLet{};
 	std::string description{};
 	std::string estateAgentId{};
