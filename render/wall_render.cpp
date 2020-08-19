@@ -1,6 +1,6 @@
 //
 //  wall_render.cpp
-//  sixthmaker
+//  49view
 //
 //  Created by Dado on 19/03/2017.
 //
@@ -81,7 +81,6 @@ namespace WallRender {
             auto color = arc.getFillColor(ArchStructuralFeature::ASF_Edge, t, wall, Color4f::PASTEL_GREEN);
             rr.draw<DLine>(p1, p2, color, width*3.f, sm, arc.pm(), wall->hashFeature("w2dEdge"+sm.hash(),t));
         }
-//        if ( wall->wrapLastPoint ) vlist.emplace_back(wall->epoints[0]);
     }
 
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *wall, const ArchRenderController& arc ) {
@@ -108,11 +107,11 @@ namespace WallRender {
     GeomSPContainer make3dGeometry( SceneGraph& sg, const WallBSData *mWall,
                                     const V3fVectorOfVector& ceilingContours ) {
         GeomSPContainer ret;
-        size_t csize = mWall->epoints.size();
+        size_t cSize = mWall->epoints.size();
         size_t wrapExtraVert = mWall->wrapLastPoint != 0 ? 0 : 1;
 
         std::vector<QuadVector3fNormal> wallQuads;
-        for ( auto t = 0u; t < csize - wrapExtraVert; t++ ) {
+        for ( auto t = 0u; t < cSize - wrapExtraVert; t++ ) {
             if ( WallService::checkUShapeIndexStartIsDoorOrWindow(mWall, t) ) {
                 continue;
             }
