@@ -26,10 +26,11 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2147;
+static const uint64_t SHouseJSONVersion = 2148;
 
 // Version log
 //
+// 2020-08-19 -    #2148 - adding balconies and removing unnecessary default materials from floors
 // 2020-08-17 -    #2147 - added pos to ArchSpatial
 // 2020-08-10 -    #2146 - Remove unnecessary spatial variables from FittedFurniture
 // 2020-08-10 -    #2145 - Promoted rotation to ArchSpatial and removed it from FittedFurniture
@@ -337,6 +338,19 @@ JSONDATA_H(StairsBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size,
     std::string name;
 };
 
+JSONDATA_H(BalconyBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
+           linkedHash, sequencePart, mTriangles2d, epoints, z)
+
+    std::vector<Vector2f> epoints;
+    float z = 0.0f;
+
+    explicit BalconyBSData(const std::vector<Vector2f>& epts);
+    void resize( float, ArchRescaleSpaceT ) override;
+    void calcBBox() override;
+private:
+    void makeTriangles2d();
+};
+
 JSONDATA(KitchenPathFlags, mainSegment, hasCooker, hasSink, hasFridge)
     bool mainSegment = false;
     bool hasCooker = false;
@@ -355,12 +369,8 @@ JSONDATA(KitchenPath, p1, p2, normal, crossNormal, depth, cookerPos, cookerPosDe
     V2f sinkPos = V2fc::ZERO;
     V2f fridgePos = V2fc::ZERO;
     KitchenPathFlags flags{};
-    KitchenPath( const V2f& p1, const V2f& p2, const V2f& normal, const V2f& crossNormal, float depth ) : p1(p1),
-                                                                                                          p2(p2),
-                                                                                                          normal(normal),
-                                                                                                          crossNormal(
-                                                                                                                  crossNormal),
-                                                                                                          depth(depth) {}
+    KitchenPath( const V2f& p1, const V2f& p2, const V2f& normal, const V2f& crossNormal, float depth ) :
+        p1(p1), p2(p2), normal(normal), crossNormal(crossNormal), depth(depth) {}
 };
 
 namespace KitchenDrawerType {
@@ -529,8 +539,7 @@ private:
 JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
            linkedHash, sequencePart, mTriangles2d, number, z, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
-           perimeterArchSegments, anchorPoint, defaultCeilingMaterial, defaultCeilingColor, externalWallsColor,
-           walls, windows, doors, stairs, rooms, orphanedUShapes)
+           perimeterArchSegments, anchorPoint, walls, windows, doors, stairs, rooms, balconies, orphanedUShapes)
 
     int32_t number = -1; // As in floor number, ground floor = 1, etc...
     float z = 0.0f;
@@ -541,14 +550,11 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, 
     float windowHeight = 1.2f;
     float windowBaseOffset = 0.6f;
     Vector2f offsetFromFloorAnchor = V2fc::ZERO;
-    Vector3f offsetFromFloorAnchor3d = V2fc::ZERO;
+    Vector3f offsetFromFloorAnchor3d = V3f::ZERO;
     V3fVectorOfVector ceilingContours;
     std::vector<Vector2f> mPerimeterSegments;
     std::vector<ArchSegment> perimeterArchSegments;
-    std::string defaultCeilingMaterial = "plaster_ultra_fine_spray";
-    C4f defaultCeilingColor = C4f::WHITE;
     MaterialAndColorProperty externalWallsMaterial = "plaster_ultra_fine_spray";
-    C4f externalWallsColor = C4f::WHITE;
 
     JMATH::Rect2fFeatureT anchorPoint = Rect2fFeature::bottomRight;
 
@@ -557,6 +563,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, 
     std::vector<std::shared_ptr<DoorBSData>> doors;
     std::vector<std::shared_ptr<StairsBSData>> stairs;
     std::vector<std::shared_ptr<RoomBSData>> rooms;
+    std::vector<std::shared_ptr<BalconyBSData>> balconies;
     std::vector<UShape> orphanedUShapes;
 
     // Debugging only, maybe put on a debug flag or something
@@ -600,6 +607,7 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size
     std::vector<CameraPath> tourPaths;
     std::vector<std::shared_ptr<FloorBSData>> mFloors;
 
+public:
     explicit HouseBSData( const JMATH::Rect2f& _floorPlanBBox );
     constexpr static uint64_t Version() { return SHouseJSONVersion; }
     void calcBBox() override;

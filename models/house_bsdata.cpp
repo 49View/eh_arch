@@ -513,3 +513,27 @@ void WindowBSData::calcBBox() {
     centre.setY(lerp(0.5f, baseOffset, baseOffset + Height()));
     bbox3d.calc( bbox, baseOffset, baseOffset + Height(), Matrix4f::IDENTITY );
 }
+
+// *********************************************************************************************************************
+// Balcony
+// *********************************************************************************************************************
+
+BalconyBSData::BalconyBSData( const std::vector<Vector2f>& epts ) {
+
+}
+
+void BalconyBSData::resize( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    ArchSpatial::resize(_scale, _scaleSpace);
+    for ( auto& s : epoints ) {
+        s *= _scale;
+    }
+    calcBBox();
+}
+
+void BalconyBSData::calcBBox() {
+    ArchSpatial::calcBBox();
+}
+
+void BalconyBSData::makeTriangles2d() {
+
+}

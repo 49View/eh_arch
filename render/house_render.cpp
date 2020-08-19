@@ -42,6 +42,7 @@ namespace HouseRender {
 
         // Clear the bucket always, because if house it's null it should show a clear/empty screen
         rr.clearBucket(CommandBufferLimits::UI2dStart);
+        rr.clearBucket(CommandBufferLimits::UnsortedCustom);
 
         // If no data clearly early exit with just clear of buckets performed
         if ( !data ) return;
