@@ -41,6 +41,7 @@ std::string GHTypeToString( uint64_t elem ) {
     if ( checkBitWiseFlag(elem, GHType::KitchenBackSplash) ) ret+="KitchenBackSplash";
     if ( checkBitWiseFlag(elem, GHType::Furniture) ) ret+="Furniture";
     if ( checkBitWiseFlag(elem, GHType::Fitting) ) ret+="Fitting";
+    if ( checkBitWiseFlag(elem, GHType::Balcony) ) ret+="Balcony";
 
     return ret;
 }

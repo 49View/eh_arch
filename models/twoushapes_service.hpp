@@ -7,10 +7,6 @@
 class TwoUShapesBasedService {
 public:
 
-	static bool intersectLine2d( const TwoUShapesBased* t, Vector2f const& p0, Vector2f const& p1, Vector2f& /*i*/ ) {
-		return t->BBox().lineIntersection( p0, p1 );
-	}
-
 	static void createGapsForSkirtingAndCoving( const TwoUShapesBased* t, std::vector<Vector2f>& fverts, FollowerGap& vGapsSkirting, FollowerGap& vGapsCoving ) {
 		fverts.push_back( t->us1.points[2] );
 		fverts.push_back( t->us1.points[1] );

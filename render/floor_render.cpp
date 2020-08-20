@@ -19,6 +19,7 @@
 #include "room_render.hpp"
 #include "window_render.hpp"
 #include "door_render.hpp"
+#include "balcony_render.hpp"
 
 namespace FloorRender {
 
@@ -36,6 +37,9 @@ namespace FloorRender {
             }
         }
 
+        for ( const auto& w : f->balconies ) {
+            BalconyRender::IMHouseRender(rr, sg, w.get(), arc);
+        }
         for ( const auto& w : f->walls ) {
             WallRender::IMHouseRender(rr, sg, w.get(), arc);
         }
@@ -68,6 +72,9 @@ namespace FloorRender {
         for ( const auto &w : f->doors ) {
             auto ws = DoorRender::make3dGeometry( sg, w.get());
             ret.doorsGB.insert( ret.doorsGB.end(), ws.begin(), ws.end());
+        }
+        for ( const auto &w : f->balconies ) {
+            BalconyRender::make3dGeometry( sg, w.get() );
         }
         for ( const auto &w : f->rooms ) {
             RoomRender::make3dGeometry( sg, w.get(), ret );

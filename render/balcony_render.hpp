@@ -4,10 +4,16 @@
 
 #pragma once
 
+#include "../models/house_bsdata.hpp"
+#include <core/resources/resource_types.hpp>
 
-class BalconyRender {
+class SceneGraph;
+class Renderer;
+class ArchRenderController;
+struct BalconyBSData;
+struct RDSPreMult;
 
+namespace BalconyRender {
+    void IMHouseRender( Renderer& rr, SceneGraph& sg, const BalconyBSData *data, const ArchRenderController& arc );
+    GeomSPContainer make3dGeometry( SceneGraph& sg, const BalconyBSData* mData );
 };
-
-
-

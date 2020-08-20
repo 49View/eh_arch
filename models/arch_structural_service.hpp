@@ -67,10 +67,12 @@ public:
     static bool typeIsDOW( const ArchStructural *a );
     static bool typeIsWall( const ArchStructural *a );
     static bool typeIsFittedFurniture( const ArchStructural *a );
+    static bool typeIsBalcony( const ArchStructural *a );
     static bool isPointInside( const ArchStructural *a, const Vector2f& _pos );
     static bool isPointInside( const ArchStructural *a, const Vector3f& _pos );
     static bool isPointInside2d( const ArchStructural *a, const Vector2f& _pos );
     static bool isPointNear2d( const ArchStructural *a, const Vector2f& _pos, float radius );
+    static bool intersectLine2d( const ArchStructural* t, Vector2f const& p0, Vector2f const& p1, Vector2f& /*i*/ );
     static bool
     intersectLine( const ArchStructural *a, const Vector3f& linePos, const Vector3f& lineDir, float& tNear );
     static bool intersectRay( const ArchStructural *a, const RayPair3& rayPair );

@@ -69,6 +69,7 @@ namespace FeatureIntersectionFlags {
     [[maybe_unused]] constexpr uint64_t FIF_Doors           = 1u << 3u;
     [[maybe_unused]] constexpr uint64_t FIF_Ceilings        = 1u << 4u;
     [[maybe_unused]] constexpr uint64_t FIF_Furnitures      = 1u << 5u;
+    [[maybe_unused]] constexpr uint64_t FIF_Balconies       = 1u << 6u;
     [[maybe_unused]] constexpr uint64_t FIF_All             = 0xffffffffffffffff;
 }
 
@@ -134,27 +135,28 @@ namespace ASType {
 	[[maybe_unused]] constexpr uint64_t Door = 2;
 	[[maybe_unused]] constexpr uint64_t Window = 3;
 	[[maybe_unused]] constexpr uint64_t Stairs = 4;
-	[[maybe_unused]] constexpr uint64_t GenericRoom = 5;
-	[[maybe_unused]] constexpr uint64_t LivingRoom = 6;
-	[[maybe_unused]] constexpr uint64_t Kitchen = 7;
-	[[maybe_unused]] constexpr uint64_t BedroomSingle = 8;
-	[[maybe_unused]] constexpr uint64_t BedroomDouble = 9;
-	[[maybe_unused]] constexpr uint64_t BedroomMaster = 10;
-	[[maybe_unused]] constexpr uint64_t Bathroom = 11;
-	[[maybe_unused]] constexpr uint64_t ShowerRoom = 12;
-	[[maybe_unused]] constexpr uint64_t ToiletRoom = 13;
-	[[maybe_unused]] constexpr uint64_t Conservatory = 14;
-	[[maybe_unused]] constexpr uint64_t GamesRoom = 15;
-	[[maybe_unused]] constexpr uint64_t Laundry = 16;
-	[[maybe_unused]] constexpr uint64_t Hallway = 17;
-	[[maybe_unused]] constexpr uint64_t Garage = 18;
-	[[maybe_unused]] constexpr uint64_t EnSuite = 19;
-	[[maybe_unused]] constexpr uint64_t DiningRoom = 20;
-	[[maybe_unused]] constexpr uint64_t Studio = 21;
-	[[maybe_unused]] constexpr uint64_t Cupboard = 22;
-	[[maybe_unused]] constexpr uint64_t Storage = 23;
-	[[maybe_unused]] constexpr uint64_t BoilerRoom = 24;
-	[[maybe_unused]] constexpr uint64_t LastRoom = 25; // if you add any room make sure LastRoom is last index + 1
+	[[maybe_unused]] constexpr uint64_t Balcony = 5;
+	[[maybe_unused]] constexpr uint64_t GenericRoom = 100;
+	[[maybe_unused]] constexpr uint64_t LivingRoom = 101;
+	[[maybe_unused]] constexpr uint64_t Kitchen = 102;
+	[[maybe_unused]] constexpr uint64_t BedroomSingle = 103;
+	[[maybe_unused]] constexpr uint64_t BedroomDouble = 104;
+	[[maybe_unused]] constexpr uint64_t BedroomMaster = 105;
+	[[maybe_unused]] constexpr uint64_t Bathroom = 106;
+	[[maybe_unused]] constexpr uint64_t ShowerRoom = 107;
+	[[maybe_unused]] constexpr uint64_t ToiletRoom = 108;
+	[[maybe_unused]] constexpr uint64_t Conservatory = 109;
+	[[maybe_unused]] constexpr uint64_t GamesRoom = 110;
+	[[maybe_unused]] constexpr uint64_t Laundry = 111;
+	[[maybe_unused]] constexpr uint64_t Hallway = 112;
+	[[maybe_unused]] constexpr uint64_t Garage = 113;
+	[[maybe_unused]] constexpr uint64_t EnSuite = 114;
+	[[maybe_unused]] constexpr uint64_t DiningRoom = 115;
+	[[maybe_unused]] constexpr uint64_t Studio = 116;
+	[[maybe_unused]] constexpr uint64_t Cupboard = 117;
+	[[maybe_unused]] constexpr uint64_t Storage = 118;
+	[[maybe_unused]] constexpr uint64_t BoilerRoom = 119;
+	[[maybe_unused]] constexpr uint64_t LastRoom = 120; // if you add any room make sure LastRoom is last index + 1
 };
 
 using ASTypeT = uint64_t;
@@ -212,7 +214,8 @@ enum ArchType : uint64_t {
 	RoomT = 1u << 14u,
 	CurtainT = 1u << 15u,
 	CeilingT = 1u << 16u,
-	FittedFurnitureT = 1u << 17u
+	FittedFurnitureT = 1u << 17u,
+	BalconyT = 1u << 18u
 };
 
 using ArchTypeT = uint64_t;
@@ -269,6 +272,7 @@ namespace GHType {
     [[maybe_unused]] constexpr uint64_t KitchenBackSplash = 1u << 27u;
     [[maybe_unused]] constexpr uint64_t Furniture = 1u << 28u;
     [[maybe_unused]] constexpr uint64_t Fitting = 1u << 29u;
+    [[maybe_unused]] constexpr uint64_t Balcony = 1u << 29u;
 };
 // ************************************************************
 // Warning: any changes here needs to update **GHTypeToString**

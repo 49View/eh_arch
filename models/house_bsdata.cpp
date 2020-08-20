@@ -122,6 +122,7 @@ void FloorBSData::resize( float _scale, ArchRescaleSpaceT _scaleSpace ) {
         usg.p1 *= _scale;
         usg.p2 *= _scale;
     }
+    for ( auto& i : balconies ) i->resize(_scale, _scaleSpace);
 
     //	for ( auto&& i : stairs ) i->resize();
 
@@ -391,7 +392,7 @@ float ArchSpatial::HalfWidth() const { return Width() * 0.5f; }
 float ArchSpatial::HalfHeight() const { return Height() * 0.5f; }
 float ArchSpatial::HalfDepth() const { return Depth() * 0.5f; }
 V3f ArchSpatial::Position() const { return pos; }
-float ArchSpatial::PositionX() const { return Position().x(); }
+[[maybe_unused]] float ArchSpatial::PositionX() const { return Position().x(); }
 float ArchSpatial::PositionY() const { return Position().y(); }
 float ArchSpatial::PositionZ() const { return Position().z(); }
 V2f ArchSpatial::Position2d() const { return pos.xz(); }

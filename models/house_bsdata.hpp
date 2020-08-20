@@ -26,10 +26,11 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2148;
+static const uint64_t SHouseJSONVersion = 2149;
 
 // Version log
 //
+// 2020-08-20 -    #2149 - added balconyFloorMaterial
 // 2020-08-19 -    #2148 - adding balconies and removing unnecessary default materials from floors
 // 2020-08-17 -    #2147 - added pos to ArchSpatial
 // 2020-08-10 -    #2146 - Remove unnecessary spatial variables from FittedFurniture
@@ -339,10 +340,11 @@ JSONDATA_H(StairsBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size,
 };
 
 JSONDATA_H(BalconyBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
-           linkedHash, sequencePart, mTriangles2d, epoints, z)
+           linkedHash, sequencePart, mTriangles2d, epoints, z, balconyFloorMaterial)
 
-    std::vector<Vector2f> epoints;
+    std::vector<Vector2f> epoints{};
     float z = 0.0f;
+    MaterialAndColorProperty balconyFloorMaterial = "wood,beech";
 
     explicit BalconyBSData(const std::vector<Vector2f>& epts);
     void resize( float, ArchRescaleSpaceT ) override;
@@ -612,6 +614,6 @@ public:
     constexpr static uint64_t Version() { return SHouseJSONVersion; }
     void calcBBox() override;
     void resize( float, ArchRescaleSpaceT ) override;
-    FloorBSData *addFloorFromData( const JMATH::Rect2f& _rect );
+    FloorBSData* addFloorFromData( const JMATH::Rect2f& _rect );
 };
 

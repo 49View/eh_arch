@@ -14,14 +14,12 @@
 #include <core/util_follower.hpp>
 #include <core/math/triangulator.hpp>
 #include <poly/polyclipping/clipper.hpp>
-#include <core/math/vector_util.hpp>
 #include <core/math/plane3f.h>
 
 #include "room_service.hpp"
 #include "wall_service.hpp"
 #include "twoushapes_service.hpp"
 #include "arch_segment_service.hpp"
-#include "window_service.hpp"
 #include "door_service.hpp"
 #include "arch_structural_service.hpp"
 
@@ -46,6 +44,11 @@ void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData *house, c
         RoomService::updateFromArchSegments(newRoom.get(), r.wallSegmentsInternal);
         f->rooms.push_back(newRoom);
     }
+}
+
+void FloorService::addBalconyFromData( FloorBSData *f, const std::shared_ptr<BalconyBSData>& _balcony ) {
+    f->balconies.emplace_back(_balcony);
+    f->calcBBox();
 }
 
 void FloorService::updateFromNewDoorOrWindow( FloorBSData *f ) {
@@ -769,6 +772,8 @@ void FloorService::removeArch( FloorBSData *f, int64_t hashToRemove ) {
         for ( auto& room : f->rooms ) {
             erase_if(room->mFittedFurniture, hashToRemove);
         }
+    } else if ( ArchStructuralService::typeIsBalcony(elem) ) {
+        erase_if(f->balconies, hashToRemove);
     } else {
         erase_if(f->stairs, hashToRemove);
     }
@@ -924,10 +929,13 @@ bool FloorService::intersectLine2d( const FloorBSData *f, Vector2f const& p0, Ve
             if ( WallService::intersectLine2d(w.get(), p0, p1, i) ) return true;
         }
         for ( const auto& w : f->windows ) {
-            if ( TwoUShapesBasedService::intersectLine2d(w.get(), p0, p1, i) ) return true;
+            if ( ArchStructuralService::intersectLine2d(w.get(), p0, p1, i) ) return true;
         }
         for ( const auto& w : f->doors ) {
-            if ( TwoUShapesBasedService::intersectLine2d(w.get(), p0, p1, i) ) return true;
+            if ( ArchStructuralService::intersectLine2d(w.get(), p0, p1, i) ) return true;
+        }
+        for ( const auto& w : f->balconies ) {
+            if ( ArchStructuralService::intersectLine2d(w.get(), p0, p1, i) ) return true;
         }
         //for ( auto& w : f->stairs ) {
         //	if ( StairsService::intersectLine2d( w, p0, p1, i ) ) return true;
@@ -1009,6 +1017,7 @@ ArchStructural *FloorService::findElementWithHash( const FloorBSData *f, int64_t
         }
     }
     for ( auto&& i : f->stairs ) if ( i->hash == _hash ) return i.get();
+    for ( const auto& i : f->balconies ) if ( i->hash == _hash ) return i.get();
 
     return nullptr;
 }
@@ -1026,6 +1035,9 @@ std::vector<ArchStructural *> FloorService::findElementWithLinkedHash( const Flo
         if ( i->linkedHash == _hash ) ret.push_back(i.get());
     }
     for ( auto&& i : f->stairs ) {
+        if ( i->linkedHash == _hash ) ret.push_back(i.get());
+    }
+    for ( auto&& i : f->balconies ) {
         if ( i->linkedHash == _hash ) ret.push_back(i.get());
     }
 
@@ -1121,6 +1133,7 @@ void FloorService::rollbackToCalculatedWalls( FloorBSData *f ) {
     f->windows.clear();
     f->doors.clear();
     f->stairs.clear();
+    f->balconies.clear();
     f->orphanedUShapes.clear();
     f->orphanedWallSegments.clear();
 }
@@ -1221,6 +1234,17 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                             fd.arch = w.get();
                             fd.room = room.get();
                             fd.intersectedType = GHType::Window;
+                        }
+                    }
+                }
+
+                // Balconies
+                if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Balconies) ) {
+                    for ( const auto& w : f->balconies ) {
+                        if ( ArchStructuralService::intersectRayMin(w.get(), rayPair, fd.nearV) ) {
+                            fd.arch = w.get();
+                            fd.room = room.get();
+                            fd.intersectedType = GHType::Balcony;
                         }
                     }
                 }

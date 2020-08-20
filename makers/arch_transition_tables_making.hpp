@@ -7,6 +7,7 @@
 #include <core/state_machine_helper.hpp>
 #include <eh_arch/state_machine/arch_sm_events__fsm.hpp>
 #include <eh_arch/makers/arch_sm_actions_bespoke_builder.hpp>
+#include <eh_arch/makers/arch_sm_actions_balcony_builder.hpp>
 #include <eh_arch/makers/arch_sm_actions_maker_builder.hpp>
 
 struct MakerStateMachine {
@@ -25,7 +26,6 @@ struct MakerStateMachine {
             ,state<class HouseMaker> + event<OnElaborateHouseBitmapEvent> / ElaborateHouseBitmap{}
             ,state<class HouseMaker> + event<OnRecalculateFurnitureEvent> / FurnishHouse{}
             ,state<class HouseMaker> + event<OnTopDownToggleEvent> / ActivateTopDownView{}
-            ,state<class HouseMaker> + event<OnKeyToggleEvent> / KeyToggleHouseMaker{}
             ,state<class HouseMaker> + event<OnUndoEvent> / UndoFeatureManipulation{}
             ,state<class HouseMaker> + event<OnRedoEvent> / RedoFeatureManipulation{}
         );
@@ -45,6 +45,15 @@ struct BespokeStateMachine {
             ,state<class BespokeState> + event<OnMakeHouse3dEvent> / MakeHouse3d{}
             ,state<class BespokeState> + event<OnElaborateHouseBitmapEvent> / ElaborateHouseBitmap{}
             ,state<class BespokeState> + event<OnRecalculateFurnitureEvent> / FurnishHouse{}
+        );
+    }
+};
+
+struct BalconyStateMachine {
+    auto operator()() const noexcept {
+        return make_transition_table(
+                *state<class Initial> / []{LOGRS("Balcony state")} = state<class BalconyState>
+                ,state<class BalconyState> + event<OnSingleTapEvent> / AddPointBalconyAction{}
         );
     }
 };

@@ -77,3 +77,5 @@ struct OnGlobalRescaleEvent {
     float currentScaleFactorMeters = 1.0f;
 };
 
+
+struct OnBalconyBuilderEvent {};

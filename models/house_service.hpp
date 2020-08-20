@@ -117,6 +117,13 @@ namespace HouseService {
                     }
                 }
             }
+            if constexpr ( std::is_same_v<T, BalconyBSData> ) {
+                for ( auto& w : f->balconies ) {
+                    if ( w->hash == hash ) {
+                        return w.get();
+                    }
+                }
+            }
         }
         return nullptr;;
     }
@@ -179,6 +186,13 @@ namespace HouseService {
                 }
                 if constexpr ( std::is_same_v<T, StairsBSData> ) {
                     for ( const auto& w : f->stairs ) {
+                        if ( checkNearOrInside(w.get()) ) {
+                            return w;
+                        }
+                    }
+                }
+                if constexpr ( std::is_same_v<T, BalconyBSData> ) {
+                    for ( const auto& w : f->balconies ) {
                         if ( checkNearOrInside(w.get()) ) {
                             return w;
                         }

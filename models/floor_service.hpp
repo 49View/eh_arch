@@ -16,6 +16,8 @@
 #include <core/math/htypes.hpp>
 #include <poly/htypes.hpp>
 
+struct BalconyBSData;
+
 struct DebugUShapeIntersection {
     UShape *s1 = nullptr;
     UShape *s2 = nullptr;
@@ -67,7 +69,7 @@ struct ArchSegmentBucket {
         return sourceIndex == lhr.sourceIndex && destIndex == lhr.destIndex;
     }
 
-    bool hasSameCoords( const ArchSegmentBucket& lhr ) {
+    [[nodiscard]] bool hasSameCoords( const ArchSegmentBucket& lhr ) const {
         return isVerySimilar(lineOrigin, lhr.lineOrigin) && isVerySimilar(lineEnd, lhr.lineEnd);
     }
 
@@ -86,15 +88,15 @@ namespace FloorService {
     const RoomBSData *findRoomWithHash( FloorBSData *f, int64_t hash );
 
     // Create
-    void
-    addWallsFromData( FloorBSData *f, const V2fVectorOfVector& floorWalls,
-                      WallLastPointWrapT wpw = WallLastPointWrap::No );
+    void addWallsFromData( FloorBSData *f, const V2fVectorOfVector& floorWalls,
+                           WallLastPointWrapT wpw = WallLastPointWrap::No );
     void addRoomsFromData( FloorBSData *f, const HouseBSData *house, const std::vector<RoomPreData>& rds );
     void addDoorFromData( FloorBSData *f, float _doorHeight, const UShape& w1, const UShape& w2,
                           ArchSubTypeT st = ArchSubType::NotApplicable );
     void addWindowFromData( FloorBSData *f, float _windowHeight, float _defaultWindowBaseOffset,
                             const UShape& w1, const UShape& w2 );
     void addCeilingContour( FloorBSData *f, const std::vector<Vector3f>& cc );
+    void addBalconyFromData( FloorBSData *f, const std::shared_ptr<BalconyBSData>& _balcony );
 
     // Update
     void assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *house );

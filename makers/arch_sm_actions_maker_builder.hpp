@@ -12,24 +12,6 @@ struct ClearEverthing {
     }
 };
 
-struct KeyToggleHouseMaker {
-    void operator()( ArchOrchestrator& asg, HouseMakerStateMachine& hm, OnKeyToggleEvent keyEvent,
-                     RenderOrchestrator& rsg ) noexcept {
-
-        if ( keyEvent.keyCode == GMK_R ) {
-            HouseMakerBitmap::makeFromWalls(asg.H());
-            asg.showIMHouse();
-        }
-        if ( keyEvent.keyCode == GMK_O ) {
-            rsg.RR().showBucket(CommandBufferLimits::PBRStart, true);
-        }
-        if ( keyEvent.keyCode == GMK_P ) {
-            rsg.RR().showBucket(CommandBufferLimits::PBRStart, false);
-        }
-
-    }
-};
-
 static inline void
 updateSourceImagesIntoScene( SceneGraph& sg, ArchOrchestrator& asg, const SourceImages& sourceImages ) {
     auto binPropertyId = asg.H()->propertyId + "_bin";

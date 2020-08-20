@@ -38,7 +38,7 @@ public:
     void setInputPoint( const V2f& _p );
 
     [[nodiscard]] V3f   bestStartingPoint() const;
-    [[nodiscard]] float WallWidth() const;
+    [[maybe_unused]] [[nodiscard]] float WallWidth() const;
 
     V2fVectorOfVector bespokeriseWalls();
 

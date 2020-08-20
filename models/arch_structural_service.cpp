@@ -31,6 +31,10 @@ bool ArchStructuralService::typeIsFittedFurniture( const ArchStructural *a ) {
     return a->type == ArchType::FittedFurnitureT;
 }
 
+bool ArchStructuralService::typeIsBalcony( const ArchStructural *a ) {
+    return a->type == ArchType::BalconyT;
+}
+
 bool ArchStructuralService::isPointInside( const ArchStructural *a, const Vector2f& _pos ) {
     if ( !a->BBox().contains(_pos) ) return false;
 
@@ -100,6 +104,11 @@ bool ArchStructuralService::intersectRayMin( const ArchStructural *a, const RayP
         }
     }
     return false;
+}
+
+bool
+ArchStructuralService::intersectLine2d( const ArchStructural *t, const Vector2f& p0, const Vector2f& p1, Vector2f& ) {
+    return t->BBox().lineIntersection( p0, p1 );
 }
 
 FeatureIntersection::FeatureIntersection() {

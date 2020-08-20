@@ -457,7 +457,7 @@ void RoomBuilder::changeSegmentType( ArchTypeT _st ) {
     refresh();
 }
 
-float RoomBuilder::WallWidth() const {
+[[maybe_unused]] float RoomBuilder::WallWidth() const {
     return wallWidth;
 }
 
