@@ -121,7 +121,7 @@ public:
     virtual void center( const V3f& _pos );
     virtual void rotate( const Quaternion& _rot );
     virtual void scale( const V3f& _scale );
-    virtual void reRoot( float, ArchRescaleSpaceT );
+    virtual void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& );
 
 protected:
     [[nodiscard]] float& w();
@@ -168,7 +168,7 @@ JSONDATA_H(UShape, ArchBase, hash, type, indices, points, edges, middle, inwardN
     bool mIsDetached = false;
     bool mIsPaired = false;
 
-    void reRoot( float, ArchRescaleSpaceT );
+    void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& );
 };
 
 struct TwoUShapesBased : public ArchStructural {
@@ -180,7 +180,7 @@ struct TwoUShapesBased : public ArchStructural {
     float ceilingHeight = 2.75f;
     uint32_t wallFlags = WallFlags::WF_None;
 
-    void reRoot( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& ) override;
     void calcBBox() override;
 };
 
@@ -208,7 +208,7 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     bool operator!=( const ArchSegment& rhs ) const;
 
     [[nodiscard]] float length() const;
-    void reRoot( float, ArchRescaleSpaceT );
+    void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& );
 };
 
 JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
@@ -264,7 +264,7 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     void calcBBox() override;
     DoorBSData( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
                 ArchSubTypeT st = ArchSubType::NotApplicable );
-    void reRoot( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& ) override;
 };
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
@@ -286,7 +286,7 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
     WindowBSData( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1,
                   const UShape& w2, ArchSubTypeT = ArchSubType::NotApplicable );
     void calcBBox() override;
-    void reRoot( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& ) override;
 };
 
 JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
@@ -310,7 +310,7 @@ JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, c
                 uint32_t wf = WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving,
                 int64_t _linkedHash = 0,
                 SequencePart _sequencePart = 0 );
-    void reRoot( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& ) override;
     void calcBBox() override;
 private:
     void makeTriangles2d();
@@ -330,7 +330,7 @@ JSONDATA_H(BalconyBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size
     MaterialAndColorProperty balconyFloorMaterial{"wood,beech"};
 
     explicit BalconyBSData(const std::vector<Vector2f>& epts);
-    void reRoot( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& ) override;
     void calcBBox() override;
 private:
     void makeTriangles2d();
@@ -515,7 +515,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, c
     KitchenData kitchenData;
 
     RoomBSData( const RoomPreData& _preData, float _floorHeight, float _z );
-    void reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) override;
+    void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& ) override;
     void calcBBox() override;
 private:
     void makeTriangles2d();
@@ -556,7 +556,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, 
 
     FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _defaultCeilingHeight, float _defaultGroundHeight,
                  float _doorHeight, float _defaultWindowHeight, float _defaultWindowBaseOffset );
-    void reRoot( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& ) override;
     void calcBBox() override;
 };
 
@@ -596,7 +596,7 @@ public:
     explicit HouseBSData( const JMATH::Rect2f& _floorPlanBBox );
     constexpr static uint64_t Version() { return SHouseJSONVersion; }
     void calcBBox() override;
-    void reRoot( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT, const V3f&, const Quaternion& ) override;
     FloorBSData* addFloorFromData( const JMATH::Rect2f& _rect );
 };
 
