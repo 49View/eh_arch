@@ -110,7 +110,7 @@ public:
     [[nodiscard]] const JMATH::Rect2f& BBox() const;
     [[nodiscard]] const JMATH::AABB& BBox3d() const;
 
-    [[nodiscard]] JMATH::AABB& BBox3dW();
+    [[maybe_unused]] [[nodiscard]] JMATH::AABB& BBox3dEmergencyWrite();
 
     [[nodiscard]] const std::vector<Triangle2d>& Triangles2d() const;
 
@@ -121,7 +121,7 @@ public:
     virtual void center( const V3f& _pos );
     virtual void rotate( const Quaternion& _rot );
     virtual void scale( const V3f& _scale );
-    virtual void resize( float, ArchRescaleSpaceT );
+    virtual void reRoot( float, ArchRescaleSpaceT );
 
 protected:
     [[nodiscard]] float& w();
@@ -167,6 +167,8 @@ JSONDATA_H(UShape, ArchBase, hash, type, indices, points, edges, middle, inwardN
     float width = -1.0f;
     bool mIsDetached = false;
     bool mIsPaired = false;
+
+    void reRoot( float, ArchRescaleSpaceT );
 };
 
 struct TwoUShapesBased : public ArchStructural {
@@ -178,7 +180,7 @@ struct TwoUShapesBased : public ArchStructural {
     float ceilingHeight = 2.75f;
     uint32_t wallFlags = WallFlags::WF_None;
 
-    void resize( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT ) override;
     void calcBBox() override;
 };
 
@@ -201,36 +203,12 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     std::vector<QuadVector3f> quads;
     MaterialAndColorProperty wallMaterial{};
 
-    friend std::ostream& operator<<( std::ostream& os, const ArchSegment& segment ) {
-        os << "iFloor: " << segment.iFloor << " iWall: " << segment.iWall << " iIndex: " << segment.iIndex
-           << " wallHash: " << segment.wallHash << " p1: " << segment.p1 << " p2: " << segment.p2 << " middle: "
-           << segment.middle << " normal: " << segment.normal << " crossNormal: " << segment.crossNormal << " tag: "
-           << segment.tag << " sequencePart: " << segment.sequencePart << " zHeights: " << segment.quads.size();
-        return os;
-    }
+    friend std::ostream& operator<<( std::ostream& os, const ArchSegment& segment );
+    bool operator==( const ArchSegment& rhs ) const;
+    bool operator!=( const ArchSegment& rhs ) const;
 
-    bool operator==( const ArchSegment& rhs ) const {
-        return iFloor == rhs.iFloor &&
-               iWall == rhs.iWall &&
-               iIndex == rhs.iIndex &&
-               wallHash == rhs.wallHash &&
-               p1 == rhs.p1 &&
-               p2 == rhs.p2 &&
-               middle == rhs.middle &&
-               normal == rhs.normal &&
-               crossNormal == rhs.crossNormal &&
-               tag == rhs.tag &&
-               quads == rhs.quads &&
-               sequencePart == rhs.sequencePart;
-    }
-
-    bool operator!=( const ArchSegment& rhs ) const {
-        return !( rhs == *this );
-    }
-
-    [[nodiscard]] float length() const {
-        return distance(p1, p2);
-    }
+    [[nodiscard]] float length() const;
+    void reRoot( float, ArchRescaleSpaceT );
 };
 
 JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
@@ -286,7 +264,7 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     void calcBBox() override;
     DoorBSData( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
                 ArchSubTypeT st = ArchSubType::NotApplicable );
-    void resize( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT ) override;
 };
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
@@ -308,7 +286,7 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
     WindowBSData( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1,
                   const UShape& w2, ArchSubTypeT = ArchSubType::NotApplicable );
     void calcBBox() override;
-    void resize( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT ) override;
 };
 
 JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
@@ -332,7 +310,7 @@ JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, c
                 uint32_t wf = WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving,
                 int64_t _linkedHash = 0,
                 SequencePart _sequencePart = 0 );
-    void resize( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT ) override;
     void calcBBox() override;
 private:
     void makeTriangles2d();
@@ -352,7 +330,7 @@ JSONDATA_H(BalconyBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size
     MaterialAndColorProperty balconyFloorMaterial{"wood,beech"};
 
     explicit BalconyBSData(const std::vector<Vector2f>& epts);
-    void resize( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT ) override;
     void calcBBox() override;
 private:
     void makeTriangles2d();
@@ -537,7 +515,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, c
     KitchenData kitchenData;
 
     RoomBSData( const RoomPreData& _preData, float _floorHeight, float _z );
-    void resize( float _scale, ArchRescaleSpaceT _scaleSpace ) override;
+    void reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) override;
     void calcBBox() override;
 private:
     void makeTriangles2d();
@@ -578,7 +556,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, 
 
     FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _defaultCeilingHeight, float _defaultGroundHeight,
                  float _doorHeight, float _defaultWindowHeight, float _defaultWindowBaseOffset );
-    void resize( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT ) override;
     void calcBBox() override;
 };
 
@@ -618,7 +596,7 @@ public:
     explicit HouseBSData( const JMATH::Rect2f& _floorPlanBBox );
     constexpr static uint64_t Version() { return SHouseJSONVersion; }
     void calcBBox() override;
-    void resize( float, ArchRescaleSpaceT ) override;
+    void reRoot( float, ArchRescaleSpaceT ) override;
     FloorBSData* addFloorFromData( const JMATH::Rect2f& _rect );
 };
 

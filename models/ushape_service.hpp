@@ -15,6 +15,4 @@ public:
 	static int64_t sharesIndexWith( const UShape& us, const UShape& rhs );
     static bool isMaineEdge( const V2f& p1, const V2f& p2, const UShape& rhs );
     static bool isMaineEdgeEspsilon( const V2f& p1, const V2f& p2, const UShape& rhs, float epsilon = 0.001f );
-	// Update
-	static void resize( UShape& us, float _scale );
 };

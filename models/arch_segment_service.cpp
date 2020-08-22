@@ -9,16 +9,6 @@
 #include "house_bsdata.hpp"
 #include "floor_service.hpp"
 
-void ArchSegmentService::resize( ArchSegment& _as, float _scale ) {
-    _as.p1 *= _scale;
-    _as.p2 *= _scale;
-    _as.middle *= _scale;
-    for ( auto& quad: _as.quads ) {
-        for ( auto& elem : quad ) {
-            elem *= V3f{_scale, 1.0f, _scale};
-        }
-    }
-}
 ArchSegment ArchSegmentService::createArchSegment( const std::vector <std::shared_ptr<WallBSData>>& floorWalls,
                                                    const int32_t _iFloor, const int32_t _iWall, const int32_t _iIndex,
                                                    const int64_t _wallHash, const Vector2f& _p1, const Vector2f& _p2,
@@ -54,16 +44,20 @@ ArchSegment ArchSegmentService::createArchSegment( const std::vector <std::share
 
     return ret;
 }
+
 float ArchSegmentService::length( const ArchSegment& _as ) {
     return distance( _as.p1, _as.p2 );
 }
+
 bool ArchSegmentService::doSegmentsEndsMeet( const ArchSegment& s1, const ArchSegment& s2 ) {
     return isVerySimilar( s1.p1, s2.p2 ) || isVerySimilar( s1.p2, s2.p1 );
 }
+
 bool ArchSegmentService::doSegmentsEndsMeet( const std::vector <ArchSegment>& segs ) {
     if ( segs.size() < 2 ) return false;
     return doSegmentsEndsMeet( segs.front(), segs.back());
 }
+
 bool ArchSegmentService::isSegmentPartOfWindowOrDoor( const ArchSegment& ls ) {
     return checkBitWiseFlag(ls.tag, WallFlags::WF_IsDoorPart) | checkBitWiseFlag(ls.tag, WallFlags::WF_IsWindowPart);
 }

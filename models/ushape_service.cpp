@@ -46,12 +46,6 @@ bool UShapeService::isTheSame( const UShape& us, const UShape& rhs ) {
 	return bSame;
 }
 
-void UShapeService::resize( UShape& us, float _scale ) {
-	for ( int64_t t = 0; t < 4; t++ ) us.points[t] *= _scale;
-	us.middle *= _scale;
-	us.width *= _scale;
-}
-
 bool UShapeService::doesShareMaineEdge( const UShape& us, const UShape& rhs ) {
 	if ( rhs.points[1] == us.points[1] || rhs.points[1] == us.points[2] ) {
 		if ( rhs.points[2] == us.points[1] || rhs.points[2] == us.points[2] ) {

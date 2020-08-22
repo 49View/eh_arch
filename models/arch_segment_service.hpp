@@ -5,8 +5,6 @@
 
 class ArchSegmentService {
 public:
-	static void resize( ArchSegment& _as, float _scale );
-
 	//static bool operator==( const ArchSegment& rhs ) const {
 	//	if ( isVerySimilar( p1, rhs.p1 ) && isVerySimilar( p2, rhs.p2 ) ) return true;
 	//	return false;
