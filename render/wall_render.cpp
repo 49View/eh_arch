@@ -138,7 +138,7 @@ namespace WallRender {
         return wallQuads;
     }
 
-    GeomSPContainer renderWalls( SceneGraph& sg, const std::vector<ArchSegment>& wss, const MaterialAndColorProperty &wallMaterial ) {
+    GeomSPContainer make3dGeometry( SceneGraph& sg, const std::vector<ArchSegment>& wss, const MaterialAndColorProperty &wallMaterial ) {
         GeomSPContainer ret;
         GeomMappingData mapping{ V2f{ 1.0f } };
         mapping.direction = MappingDirection::Y_POS;

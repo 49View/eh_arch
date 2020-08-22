@@ -53,6 +53,7 @@ public:
     void setFloorPlanView( FloorPlanRenderMode );
     void setTopDownView();
     void setDollHouseView();
+    void toggleCollisions();
 
     ArchPositionalDot& PositionalDot();
     ArchExplorer& Explorer();

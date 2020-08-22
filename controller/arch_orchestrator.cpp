@@ -396,3 +396,7 @@ ArchPositionalDot& ArchOrchestrator::PositionalDot() {
 ArchExplorer& ArchOrchestrator::Explorer() {
     return archExplorer;
 }
+
+void ArchOrchestrator::toggleCollisions() {
+    sg.setCollisionEnabled(!sg.isCollisionEnabled());
+}

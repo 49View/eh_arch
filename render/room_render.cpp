@@ -146,16 +146,16 @@ namespace RoomRender {
     void make3dGeometry( SceneGraph& sg, RoomBSData *w, HouseRenderContainer& ret ) {
         auto wc = RoomRender::createCovingSegments(sg, w);
         auto ws = RoomRender::createSkirtingSegments(sg, w);
-        WallRender::renderWalls(sg, w->mWallSegmentsSorted, w->wallsMaterial);
+        WallRender::make3dGeometry(sg, w->mWallSegmentsSorted, w->wallsMaterial);
         ret.covingGB.insert(ret.covingGB.end(), wc.begin(), wc.end());
         ret.skirtingGB.insert(ret.skirtingGB.end(), ws.begin(), ws.end());
 
         float zPull = 0.001f;
         auto outline = PolyOutLine{ XZY::C(w->mPerimeterSegments), V3f::UP_AXIS, zPull };
-        ret.floor = sg.GB<GT::Extrude>(outline,
+        ret.floorsGB.emplace_back(sg.GB<GT::Extrude>(outline,
                                        V3f{ V3f::UP_AXIS * -zPull },
                                        w->floorMaterial,
-                                       GT::Tag(ArchType::FloorT));
+                                       GT::Tag(ArchType::FloorT)));
 
         for ( const auto& lf : w->mLightFittings ) {
             auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, XZY::C(lf.lightPosition) + V3f::UP_AXIS * 0.023f);
@@ -188,9 +188,9 @@ namespace RoomRender {
             KitchenRender::render(sg, w, ret);
         }
 
-        ret.ceiling = sg.GB<GT::Extrude>(outline,
+        ret.ceilingsGB.emplace_back(sg.GB<GT::Extrude>(outline,
                                          V3f{ V3f::UP_AXIS * (w->Height() - zPull) },
                                          w->ceilingMaterial,
-                                         GT::Tag(ArchType::CeilingT));
+                                         GT::Tag(ArchType::CeilingT)));
     }
 }

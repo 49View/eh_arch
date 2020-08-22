@@ -19,20 +19,20 @@ struct HouseBSData;
 class HouseRenderContainer {
 public:
     HouseRenderContainer() = default;
-    HouseRenderContainer( const std::string& houseId ) : houseId(houseId) {}
+    explicit HouseRenderContainer( std::string  houseId ) : houseId(std::move(houseId)) {}
     std::vector<GeomSP> wallsGB;
     std::vector<GeomSP> covingGB;
     std::vector<GeomSP> skirtingGB;
     std::vector<GeomSP> windowsGB;
+    std::vector<GeomSP> outdoorSpacesGB;
     std::vector<GeomSP> doorsGB;
     std::vector<GeomSP> furnituresGB;
-    GeomSP floor;
-    GeomSP ceiling;
+    std::vector<GeomSP> floorsGB;
+    std::vector<GeomSP> ceilingsGB;
     std::string houseId{};
 };
 
 namespace HouseRender {
-
     void IMHouseDrawSourceDataFloorPlan( Renderer& rr, SceneGraph& sg, const HouseBSData *data, const ArchRenderController& arc );
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const HouseBSData *mData, const ArchRenderController& arc );
     HouseRenderContainer make3dGeometry( Renderer& rr, SceneGraph& sg, const HouseBSData *mData );

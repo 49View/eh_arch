@@ -8,7 +8,6 @@
 #include <poly/scene_graph.h>
 #include <render_scene_graph/render_orchestrator.h>
 #include <eh_arch/models/house_bsdata.hpp>
-#include <eh_arch/models/floor_service.hpp>
 
 void BalconyBuilder::refresh() {
     Renderer& rr = rsg.RR();
