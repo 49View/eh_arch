@@ -9,8 +9,6 @@
 #include <core/math/path_util.h>
 #include <core/resources/resource_builder.hpp>
 #include <poly/scene_graph.h>
-#include <poly/vdata_assembler.h>
-#include <poly/poly_services.hpp>
 #include <graphics/renderer.h>
 
 #include <eh_arch/controller/arch_render_controller.hpp>
@@ -28,12 +26,12 @@ namespace FloorRender {
         auto sm = arc.floorPlanShader();
 
         if ( drawDebug ) {
-            int ousc = 0;
+            int oCounter = 0;
             for ( const auto& seg : f->orphanedUShapes ) {
-                rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, sm, 0.075f, arc.pm(), seg.hashFeature("orphanedUshape"+sm.hash(), ousc++));
+                rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, sm, 0.075f, arc.pm(), seg.hashFeature("orphanedUShape"+sm.hash(), oCounter++));
             }
             for ( const auto& seg : f->orphanedWallSegments ) {
-                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), Color4f::RED, sm, 0.075f, arc.pm(), f->hashFeature("orphanedWallSegments"+sm.hash(), ousc++));
+                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), Color4f::RED, sm, 0.075f, arc.pm(), f->hashFeature("orphanedWallSegments"+sm.hash(), oCounter++));
             }
         }
 
@@ -56,21 +54,26 @@ namespace FloorRender {
 
     void make3dGeometry( SceneGraph &sg, const FloorBSData *f, HouseRenderContainer &ret ) {
         // External walls of this floor
-        ret.wallsGB = WallRender::make3dGeometry( sg, f->perimeterArchSegments, f->externalWallsMaterial );
+        auto eRootH = EF::create<Geom>("Floor");
+
+        auto ws = WallRender::make3dGeometry( sg, eRootH, f->perimeterArchSegments, f->externalWallsMaterial );
+        ret.windowsGB.insert( ret.externalWallsGB.end(), ws.begin(), ws.end());
 
         for ( const auto &w : f->windows ) {
-            auto ws = WindowRender::make3dGeometry( sg, w.get());
+            auto ws = WindowRender::make3dGeometry( sg, eRootH,w.get());
             ret.windowsGB.insert( ret.windowsGB.end(), ws.begin(), ws.end());
         }
         for ( const auto &w : f->doors ) {
-            auto ws = DoorRender::make3dGeometry( sg, w.get());
+            auto ws = DoorRender::make3dGeometry( sg, eRootH,w.get());
             ret.doorsGB.insert( ret.doorsGB.end(), ws.begin(), ws.end());
         }
         for ( const auto &w : f->balconies ) {
-            BalconyRender::make3dGeometry( sg, w.get() );
+            auto ws = BalconyRender::make3dGeometry( sg, eRootH, w.get());
+            ret.outdoorSpacesGB.insert( ret.outdoorSpacesGB.end(), ws.begin(), ws.end());
         }
         for ( const auto &w : f->rooms ) {
-            RoomRender::make3dGeometry( sg, w.get(), ret );
+            RoomRender::make3dGeometry( sg, eRootH, w.get(), ret );
         }
+        sg.addNode(eRootH);
     }
 }

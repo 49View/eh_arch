@@ -320,7 +320,7 @@ namespace WindowRender {
                          GT::M(window->curtainMaterial));
     }
 
-    GeomSPContainer make3dGeometry( SceneGraph& sg, WindowBSData *window ) {
+    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, WindowBSData *window ) {
 
         auto mRootH = EF::create<Geom>("Window");
 

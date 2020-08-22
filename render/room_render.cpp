@@ -143,10 +143,10 @@ namespace RoomRender {
         return ret;
     }
 
-    void make3dGeometry( SceneGraph& sg, RoomBSData *w, HouseRenderContainer& ret ) {
+    void make3dGeometry( SceneGraph& sg, GeomSP eRootH, RoomBSData *w, HouseRenderContainer& ret ) {
         auto wc = RoomRender::createCovingSegments(sg, w);
         auto ws = RoomRender::createSkirtingSegments(sg, w);
-        WallRender::make3dGeometry(sg, w->mWallSegmentsSorted, w->wallsMaterial);
+        WallRender::make3dGeometry(sg, eRootH, w->mWallSegmentsSorted, w->wallsMaterial);
         ret.covingGB.insert(ret.covingGB.end(), wc.begin(), wc.end());
         ret.skirtingGB.insert(ret.skirtingGB.end(), ws.begin(), ws.end());
 

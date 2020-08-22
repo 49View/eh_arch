@@ -271,7 +271,7 @@ namespace DoorRender {
                            V3f::UP_AXIS * -0.001f);
     }
 
-    GeomSPContainer make3dGeometry( SceneGraph& sg, const DoorBSData *data ) {
+    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const DoorBSData *data ) {
 
         auto rootH = EF::create<Geom>("Door");
 

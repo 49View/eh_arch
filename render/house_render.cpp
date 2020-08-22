@@ -92,7 +92,7 @@ namespace HouseRender {
 
         // Infinite plane
         sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,
-                         GT::Scale(500.0f, 0.1f, 500.0f));
+                         GT::Scale(5000.0f, 0.1f, 5000.0f));
 
         for ( const auto& f : data->mFloors ) {
             FloorRender::make3dGeometry(sg, f.get(), ret);

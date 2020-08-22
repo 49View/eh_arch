@@ -19,14 +19,10 @@ namespace BalconyRender {
         rr.draw<DFlatPoly>(w->epoints, color, sm, w->hashFeature("balconyFlatBseIM", 0));
     }
 
-    GeomSPContainer make3dGeometry( SceneGraph& sg, const BalconyBSData *w ) {
-        auto mRootH = EF::create<Geom>("Balcony");
-
-        sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(w->epoints, w->z), V3f::UP_AXIS, w->floorHeight }, w->balconyFloorMaterial, mRootH);
-
+    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const BalconyBSData *w ) {
+        auto geom = sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(w->epoints, w->z), V3f::UP_AXIS, w->floorHeight }, w->balconyFloorMaterial, eRootH);
         GeomSPContainer ret;
-        ret.emplace_back(mRootH);
-        sg.addNode(mRootH);
+        ret.emplace_back(geom);
         return ret;
     }
 }

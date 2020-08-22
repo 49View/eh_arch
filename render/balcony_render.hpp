@@ -15,5 +15,5 @@ struct RDSPreMult;
 
 namespace BalconyRender {
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const BalconyBSData *data, const ArchRenderController& arc );
-    GeomSPContainer make3dGeometry( SceneGraph& sg, const BalconyBSData* mData );
+    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const BalconyBSData* mData );
 };

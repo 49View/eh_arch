@@ -20,6 +20,7 @@ class HouseRenderContainer {
 public:
     HouseRenderContainer() = default;
     explicit HouseRenderContainer( std::string  houseId ) : houseId(std::move(houseId)) {}
+    std::vector<GeomSP> externalWallsGB;
     std::vector<GeomSP> wallsGB;
     std::vector<GeomSP> covingGB;
     std::vector<GeomSP> skirtingGB;

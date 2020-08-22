@@ -138,13 +138,13 @@ namespace WallRender {
         return wallQuads;
     }
 
-    GeomSPContainer make3dGeometry( SceneGraph& sg, const std::vector<ArchSegment>& wss, const MaterialAndColorProperty &wallMaterial ) {
+    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const std::vector<ArchSegment>& wss, const MaterialAndColorProperty &wallMaterial ) {
         GeomSPContainer ret;
         GeomMappingData mapping{ V2f{ 1.0f } };
         mapping.direction = MappingDirection::Y_POS;
         WallMapper wallQuads = createArchSegmentQuads(wss, wallMaterial);
         for ( const auto& [mat, quads] : wallQuads ) {
-            auto mainWall = sg.GB<GT::Mesh>(quads, mat, mapping, GT::Tag(ArchType::WallT));
+            auto mainWall = sg.GB<GT::Mesh>(quads, eRootH, mat, mapping, GT::Tag(ArchType::WallT));
             ret.emplace_back(mainWall);
         }
         return ret;
