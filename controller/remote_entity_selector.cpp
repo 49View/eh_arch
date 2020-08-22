@@ -234,7 +234,11 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
         ImGui::Columns(2, "mcpCols");
         ImGui::SetColumnWidth(0, columnCurrentMcp);
         ImGui::SetColumnWidth(1, columnOptionsMcp);
+
         slimMaterialAndColorPropertyMemo( rsg, materialAndColorTarget );
+        if ( ImGui::SliderFloat("Alpha", &materialAndColorTarget->color[3], 0.0f, 1.0f) ) {
+            applyInjection(asg);
+        }
 
         if ( RS::hasRoomType( fd.room, ASType::Kitchen ) ) {
             if (ImGui::Button("Kitchen worktop")) {

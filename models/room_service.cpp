@@ -14,10 +14,10 @@
 #include "arch_structural_service.hpp"
 #include "wall_service.hpp"
 
-static MaterialAndColorProperty defaultKitchenFloorMaterial = "parquet,american";
-static MaterialAndColorProperty defaultBedroomFloorMaterial = "carpet,grey";
-static MaterialAndColorProperty defaultBathroomFloorMaterial = "pavonazzo,tiles";
-static MaterialAndColorProperty defaultBathroomWallMaterial = "yule,weave,tiles";
+static MaterialAndColorProperty defaultKitchenFloorMaterial{"parquet,american"};
+static MaterialAndColorProperty defaultBedroomFloorMaterial{"carpet,grey"};
+static MaterialAndColorProperty defaultBathroomFloorMaterial{"pavonazzo,tiles"};
+static MaterialAndColorProperty defaultBathroomWallMaterial{"yule,weave,tiles"};
 
 namespace RoomService {
 

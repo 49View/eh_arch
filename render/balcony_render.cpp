@@ -22,7 +22,7 @@ namespace BalconyRender {
     GeomSPContainer make3dGeometry( SceneGraph& sg, const BalconyBSData *w ) {
         auto mRootH = EF::create<Geom>("Balcony");
 
-        sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(w->epoints, w->z), V3f::UP_AXIS, 0.1f }, w->balconyFloorMaterial, mRootH);
+        sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(w->epoints, w->z), V3f::UP_AXIS, w->floorHeight }, w->balconyFloorMaterial, mRootH);
 
         GeomSPContainer ret;
         ret.emplace_back(mRootH);

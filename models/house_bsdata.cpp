@@ -377,6 +377,11 @@ void ArchSpatial::position( const V2f& _pos ) {
     posBBox();
 }
 
+void ArchSpatial::center( const V3f& _center ) {
+    centre = _center;
+    posBBox();
+}
+
 void ArchSpatial::rotate( const Quaternion& _rot ) {
     rotateBBox(_rot);
 }
@@ -409,6 +414,9 @@ float& ArchSpatial::d() { return size[2]; }
 V3f& ArchSpatial::position() { return pos; }
 Quaternion& ArchSpatial::rot() { return rotation; }
 V3f& ArchSpatial::scale() { return scaling; }
+JMATH::AABB& ArchSpatial::BBox3dW() {
+    return bbox3d;
+}
 
 // *********************************************************************************************************************
 // TwoUShapeBased
@@ -520,7 +528,8 @@ void WindowBSData::calcBBox() {
 // *********************************************************************************************************************
 
 BalconyBSData::BalconyBSData( const std::vector<Vector2f>& epts ) {
-
+    epoints = epts;
+    calcBBox();
 }
 
 void BalconyBSData::resize( float _scale, ArchRescaleSpaceT _scaleSpace ) {
@@ -532,9 +541,16 @@ void BalconyBSData::resize( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 }
 
 void BalconyBSData::calcBBox() {
-    ArchSpatial::calcBBox();
+    makeTriangles2d();
+    for ( const auto& ep : epoints ) {
+        bbox3d.expand( XZY::C(ep, z) );
+        bbox3d.expand( XZY::C(ep, z+floorHeight) );
+    }
+    bbox = bbox3d.topDown();
 }
 
 void BalconyBSData::makeTriangles2d() {
-
+    mTriangles2d.clear();
+    Triangulator tri(epoints);
+    mTriangles2d = tri.get2dTrianglesTuple();
 }

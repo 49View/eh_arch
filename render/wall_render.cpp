@@ -101,30 +101,29 @@ namespace WallRender {
                 drawWallPoints2d(rr, wall, width*0.5f, sm, arc);
             }
         }
-
     }
 
-    GeomSPContainer make3dGeometry( SceneGraph& sg, const WallBSData *mWall,
-                                    const V3fVectorOfVector& ceilingContours ) {
-        GeomSPContainer ret;
-        size_t cSize = mWall->epoints.size();
-        size_t wrapExtraVert = mWall->wrapLastPoint != 0 ? 0 : 1;
-
-        std::vector<QuadVector3fNormal> wallQuads;
-        for ( auto t = 0u; t < cSize - wrapExtraVert; t++ ) {
-            if ( WallService::checkUShapeIndexStartIsDoorOrWindow(mWall, t) ) {
-                continue;
-            }
-            for ( const auto& quad : WallService::vertsForWallAt(mWall, t, ceilingContours) ) {
-                wallQuads.emplace_back(QuadVector3fNormal{ quad, XZY::C(mWall->enormals[t], 0.0f) });
-            }
-        }
-
-        auto mainWall = sg.GB<GT::Mesh>(wallQuads, GeomMappingData{ V2f{ 1.0f } }, GT::Tag(ArchType::WallT));
-        ret.emplace_back(mainWall);
-
-        return ret;
-    }
+//    GeomSPContainer make3dGeometry( SceneGraph& sg, const WallBSData *mWall,
+//                                    const V3fVectorOfVector& ceilingContours ) {
+//        GeomSPContainer ret;
+//        size_t cSize = mWall->epoints.size();
+//        size_t wrapExtraVert = mWall->wrapLastPoint != 0 ? 0 : 1;
+//
+//        std::vector<QuadVector3fNormal> wallQuads;
+//        for ( auto t = 0u; t < cSize - wrapExtraVert; t++ ) {
+//            if ( WallService::checkUShapeIndexStartIsDoorOrWindow(mWall, t) ) {
+//                continue;
+//            }
+//            for ( const auto& quad : WallService::vertsForWallAt(mWall, t, ceilingContours) ) {
+//                wallQuads.emplace_back(QuadVector3fNormal{ quad, XZY::C(mWall->enormals[t], 0.0f) });
+//            }
+//        }
+//
+//        auto mainWall = sg.GB<GT::Mesh>(wallQuads, GeomMappingData{ V2f{ 1.0f } }, GT::Tag(ArchType::WallT));
+//        ret.emplace_back(mainWall);
+//
+//        return ret;
+//    }
 
     using WallMapper = std::map<MaterialAndColorProperty, std::vector<QuadVector3fNormal>>;
 

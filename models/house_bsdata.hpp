@@ -26,10 +26,11 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2149;
+static const uint64_t SHouseJSONVersion = 2150;
 
 // Version log
 //
+// 2020-08-21 -    #2150 - added BalconyBSData floorHeight
 // 2020-08-20 -    #2149 - added balconyFloorMaterial
 // 2020-08-19 -    #2148 - adding balconies and removing unnecessary default materials from floors
 // 2020-08-17 -    #2147 - added pos to ArchSpatial
@@ -109,12 +110,15 @@ public:
     [[nodiscard]] const JMATH::Rect2f& BBox() const;
     [[nodiscard]] const JMATH::AABB& BBox3d() const;
 
+    [[nodiscard]] JMATH::AABB& BBox3dW();
+
     [[nodiscard]] const std::vector<Triangle2d>& Triangles2d() const;
 
     virtual void move( const V3f& _off );
     virtual void move( const V2f& _off );
     virtual void position( const V3f& _pos );
     virtual void position( const V2f& _pos );
+    virtual void center( const V3f& _pos );
     virtual void rotate( const Quaternion& _rot );
     virtual void scale( const V3f& _scale );
     virtual void resize( float, ArchRescaleSpaceT );
@@ -257,7 +261,7 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     ArchSubTypeT subType = ArchSubType::DoorSingle;
     bool isMainDoor = false;
     bool isDoorTypicallyShut = false;
-    std::string architraveProfile = "architrave,ovolo";
+    std::string architraveProfile{"architrave,ovolo"};
 
     // Internal door data
     int dIndex = 1;
@@ -298,8 +302,8 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
     float rotOrientation = 0.0f;
     bool hasBlinds = false;
     bool hasCurtains = true;
-    std::string curtainGeom = "curtain";
-    std::string curtainMaterial = "curtain02";
+    std::string curtainGeom{"curtain"};
+    std::string curtainMaterial{"curtain02"};
 
     WindowBSData( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1,
                   const UShape& w2, ArchSubTypeT = ArchSubType::NotApplicable );
@@ -340,11 +344,12 @@ JSONDATA_H(StairsBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size,
 };
 
 JSONDATA_H(BalconyBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
-           linkedHash, sequencePart, mTriangles2d, epoints, z, balconyFloorMaterial)
+           linkedHash, sequencePart, mTriangles2d, epoints, z, floorHeight, balconyFloorMaterial)
 
     std::vector<Vector2f> epoints{};
     float z = 0.0f;
-    MaterialAndColorProperty balconyFloorMaterial = "wood,beech";
+    float floorHeight = 0.1f;
+    MaterialAndColorProperty balconyFloorMaterial{"wood,beech"};
 
     explicit BalconyBSData(const std::vector<Vector2f>& epts);
     void resize( float, ArchRescaleSpaceT ) override;
@@ -455,16 +460,16 @@ JSONDATA(KitchenData, kitchenWorktopPath, kitchenSkirtingPath, kitchenUnitsPath,
     Vector2f longDrawersSize = V2f{ 0.6f, 0.9f };
 
     // Materials
-    MaterialAndColorProperty worktopMaterial = "marble,anemone";
-    MaterialAndColorProperty unitsMaterial = "wood,beech";
-    MaterialAndColorProperty backSplashMaterial = "yule,flemish,tiles";
-    std::string sinkModel = "ktc,sink,double,chrome";
-    std::string ovenPanelModel = "ktc,oven,flat";
-    std::string microwaveModel = "ktc,microwave";
-    std::string cooktopModel = "ktc,cooktop";
-    std::string fridgeModel = "ktc,fridge,single";
-    std::string extractorHoodModel = "ktc,extractor,hood";
-    std::string drawersHandleModel = "ktc,handle,long,contemporary";
+    MaterialAndColorProperty worktopMaterial{"marble,anemone"};
+    MaterialAndColorProperty unitsMaterial{"wood,beech"};
+    MaterialAndColorProperty backSplashMaterial{"yule,flemish,tiles"};
+    std::string sinkModel{"ktc,sink,double,chrome"};
+    std::string ovenPanelModel{"ktc,oven,flat"};
+    std::string microwaveModel{"ktc,microwave"};
+    std::string cooktopModel{"ktc,cooktop"};
+    std::string fridgeModel{"ktc,fridge,single"};
+    std::string extractorHoodModel{"ktc,extractor,hood"};
+    std::string drawersHandleModel{"ktc,handle,long,contemporary"};
 
     // Settings and Indices
     KitchenShape kitchenShape = KS_Straight;
@@ -525,9 +530,9 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, c
     MaterialAndColorProperty ceilingMaterial{ "plaster_ultra_fine_spray", C4f{ 0.99f, 0.99f, 0.99f, 1.0f } };
     MaterialAndColorProperty skirtingMaterial{ S::WHITE_PBR, C4f::WHITE };
     MaterialAndColorProperty covingMaterial{ S::WHITE_PBR, C4f::PASTEL_GRAYLIGHT };
-    std::string covingProfile = "coving,model1";
-    std::string skirtingProfile = "skirting,kensington";
-    std::string spotlightGeom = "spotlight_basic";
+    std::string covingProfile{"coving,model1"};
+    std::string skirtingProfile{"skirting,kensington"};
+    std::string spotlightGeom{"spotlight_basic"};
     // Ad-hoc room type data, it's a bit redundant but I'll leave it here until I found a better place
     KitchenData kitchenData;
 
@@ -556,7 +561,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, 
     V3fVectorOfVector ceilingContours;
     std::vector<Vector2f> mPerimeterSegments;
     std::vector<ArchSegment> perimeterArchSegments;
-    MaterialAndColorProperty externalWallsMaterial = "plaster_ultra_fine_spray";
+    MaterialAndColorProperty externalWallsMaterial{"plaster_ultra_fine_spray"};
 
     JMATH::Rect2fFeatureT anchorPoint = Rect2fFeature::bottomRight;
 

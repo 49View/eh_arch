@@ -10,12 +10,14 @@
 struct BalconyBSData;
 class SceneGraph;
 class RenderOrchestrator;
+class ArchOrchestrator;
 
 class BalconyBuilder {
 public:
     BalconyBuilder( SceneGraph& sg, RenderOrchestrator& rsg );
     void addPoint( const V2f& _p );
     [[nodiscard]] const std::shared_ptr<BalconyBSData>& BalconyData() const;
+    void finalize();
 private:
     void refresh();
 

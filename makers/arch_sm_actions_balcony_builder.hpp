@@ -23,9 +23,10 @@ struct AddPointBalconyAction {
 };
 
 struct FinaliseBalcony {
-    void operator()( HouseMakerStateMachine& hm, BalconyBuilder* bb, ArchOrchestrator& asg ) noexcept {
+    void operator()( BalconyBuilder* bb, ArchOrchestrator& asg ) noexcept {
         if ( asg.H() ) {
-            FloorService::addBalconyFromData( asg.H()->mFloors[0].get(), bb->BalconyData());
+            bb->finalize();
+            FloorService::addBalconyFromData( asg.H()->mFloors[0].get(), bb->BalconyData() );
             asg.showIMHouse();
         }
     }

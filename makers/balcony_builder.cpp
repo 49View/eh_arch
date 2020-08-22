@@ -8,6 +8,7 @@
 #include <poly/scene_graph.h>
 #include <render_scene_graph/render_orchestrator.h>
 #include <eh_arch/models/house_bsdata.hpp>
+#include <eh_arch/models/floor_service.hpp>
 
 void BalconyBuilder::refresh() {
     Renderer& rr = rsg.RR();
@@ -29,6 +30,7 @@ void BalconyBuilder::refresh() {
 
 void BalconyBuilder::addPoint( const V2f& _p ) {
     balconyData->epoints.emplace_back(_p);
+    balconyData->calcBBox();
     refresh();
 }
 
@@ -40,4 +42,9 @@ BalconyBuilder::BalconyBuilder( SceneGraph& sg, RenderOrchestrator& rsg ) :
 
 const std::shared_ptr<BalconyBSData>& BalconyBuilder::BalconyData() const {
     return balconyData;
+}
+
+void BalconyBuilder::finalize() {
+    Renderer& rr = rsg.RR();
+    rr.clearBucket(rrBucket);
 }

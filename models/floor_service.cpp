@@ -1133,7 +1133,6 @@ void FloorService::rollbackToCalculatedWalls( FloorBSData *f ) {
     f->windows.clear();
     f->doors.clear();
     f->stairs.clear();
-    f->balconies.clear();
     f->orphanedUShapes.clear();
     f->orphanedWallSegments.clear();
 }
