@@ -52,6 +52,10 @@ void HouseBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 
 void HouseBSData::reElevate( float _elevation ) {
     elevation = _elevation;
+    for ( auto& floor : mFloors ) {
+        floor->elevate(floor->number + elevation);
+    }
+    reRoot(1.0f, ArchRescaleSpace::FloorplanScaling);
 }
 
 FloorBSData *HouseBSData::addFloorFromData( const JMATH::Rect2f& _rect ) {
@@ -79,7 +83,7 @@ FloorBSData::FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _d
     anchorPoint = JMATH::Rect2fFeature::bottomRight;
     number = _floorNumber;
     ceilingContours.push_back(BBox().points3d(Height()));
-    z = number * ( _defaultGroundHeight + _defaultCeilingHeight );
+    elevation = number * ( _defaultGroundHeight + _defaultCeilingHeight );
     concreteHeight = _defaultGroundHeight;
     doorHeight = _doorHeight;
     windowHeight = _defaultWindowHeight;
@@ -92,7 +96,7 @@ void FloorBSData::calcBBox() {
     for ( const auto& v : FloorService::allFloorePoints(this) ) {
         bbox.expand(v);
     }
-    bbox3d.calc(BBox(), z, z+Height(), Matrix4f({ 0.0f, 0.0f, z }));
+    bbox3d.calc(BBox(), elevation, elevation + Height(), Matrix4f({ 0.0f, 0.0f, elevation }));
 
     //offsetFromFloorAnchor = mHouse->getFirstFloorAnchor();
     //offsetFromFloorAnchor -= ( bbox.topLeft() + bbox.size()*0.5f );
@@ -100,11 +104,13 @@ void FloorBSData::calcBBox() {
 }
 
 void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    center({ Center().x(), elevation + half(Height()), Center().z() });
     ArchSpatial::reRoot(_scale, _scaleSpace);
 
     for ( auto& vv : ceilingContours ) {
         for ( auto& v : vv ) {
             v *= { _scale, _scale, 1.0f };
+            v.setZ(elevation + Height());
         }
     }
     for ( auto& v : mPerimeterSegments ) {
@@ -114,10 +120,22 @@ void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
         v.reRoot(_scale, _scaleSpace);
     }
 
-    for ( auto& i : windows ) i->reRoot(_scale, _scaleSpace);
-    for ( auto& i : doors ) i->reRoot(_scale, _scaleSpace);
-    for ( auto& i : walls ) i->reRoot(_scale, _scaleSpace);
-    for ( auto& i : rooms ) i->reRoot(_scale, _scaleSpace);
+    for ( auto& i : windows ) {
+        i->elevate(elevation);
+        i->reRoot(_scale, _scaleSpace);
+    }
+    for ( auto& i : doors ) {
+        i->elevate(elevation);
+        i->reRoot(_scale, _scaleSpace);
+    }
+    for ( auto& i : walls ) {
+        i->elevate(elevation);
+        i->reRoot(_scale, _scaleSpace);
+    }
+    for ( auto& i : rooms ) {
+        i->elevate(elevation);
+        i->reRoot(_scale, _scaleSpace);
+    }
     for ( auto& usg : orphanedUShapes ) {
         usg.middle *= _scale;
     }
@@ -125,7 +143,10 @@ void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
         usg.p1 *= _scale;
         usg.p2 *= _scale;
     }
-    for ( auto& i : balconies ) i->reRoot(_scale, _scaleSpace);
+    for ( auto& i : balconies ) {
+        i->elevate(elevation);
+        i->reRoot(_scale, _scaleSpace);
+    }
 
     //	for ( auto&& i : stairs ) i->reRoot();
 
@@ -138,14 +159,14 @@ void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 // Room
 // *********************************************************************************************************************
 
-RoomBSData::RoomBSData( const RoomPreData& _preData, const float _floorHeight, const float _z ) {
+RoomBSData::RoomBSData( const RoomPreData& _preData, const float _floorHeight, const float _elevation ) {
     type = ArchType::RoomT;
     for ( const auto& rt: _preData.rtypes ) {
         RoomService::addRoomType(this, rt);
     }
     mHasCoving = !RS::hasRoomType(this, ASType::Kitchen);
     size = V3f{ _preData.bboxInternal.calcWidth(), _floorHeight, _preData.bboxInternal.calcHeight() };
-    z = _z;
+    elevation = _elevation;
 }
 
 void RoomBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
@@ -162,6 +183,9 @@ void RoomBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     }
     for ( auto& s : mPerimeterSegments ) {
         s *= _scale;
+    }
+    for ( auto& s : mFittedFurniture ) {
+        s->elevate(elevation);
     }
     mPerimeter *= _scale;
     for ( auto& s : mMaxEnclosingBoundingBox ) {
@@ -209,7 +233,7 @@ void RoomBSData::calcBBox() {
             bbox.expand(ep.p2);
         }
     }
-    bbox3d.calc(bbox, z, z + Height(), Matrix4f::IDENTITY);
+    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY);
     centre = bbox.calcCentre();
 
     makeTriangles2d();
@@ -223,7 +247,7 @@ void RoomBSData::calcBBox() {
 WallBSData::WallBSData( const std::vector<Vector2f>& epts,
                         float _height,
                         WallLastPointWrapT wlpw,
-                        float _z,
+                        float _elevation,
                         uint32_t wf,
                         int64_t _linkedHash,
                         SequencePart _sequencePart ) {
@@ -231,7 +255,7 @@ WallBSData::WallBSData( const std::vector<Vector2f>& epts,
     wrapLastPoint = wlpw;
     linkedHash = _linkedHash;
     sequencePart = _sequencePart;
-    z = _z;
+    elevation = _elevation;
     wallFlags = wf;
     size.setY(_height);
     WallService::update(this, epts);
@@ -257,7 +281,7 @@ void WallBSData::calcBBox() {
     for ( auto& ep : epoints ) {
         bbox.expand(ep);
     }
-    bbox3d.calc(bbox, z, z + Height(), Matrix4f::IDENTITY);
+    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY);
     w() = bbox.width();
     makeTriangles2d();
 }
@@ -321,8 +345,8 @@ void ArchSpatial::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     w() *= _scale;
     d() *= _scale;
     if ( _scaleSpace == ArchRescaleSpace::FloorplanScaling ) {
-        centre *= V3f{ _scale, 1.0f, _scale};
-        position() *= V3f{ _scale, 1.0f, _scale};
+        centre *= V3f{ _scale, 1.0f, _scale };
+        position() *= V3f{ _scale, 1.0f, _scale };
     } else {
         centre *= _scale;
         position() *= _scale;
@@ -338,14 +362,14 @@ void ArchSpatial::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 
 void ArchSpatial::calcBBox() {
     V3f scaledHalf = half(size * scaling);
-    bbox3d = AABB{ (centre + pos) - scaledHalf, (centre + pos) + scaledHalf };
+    bbox3d = AABB{ ( centre + pos ) - scaledHalf, ( centre + pos ) + scaledHalf };
     bbox3d = bbox3d.rotate(rotation);
     bbox = bbox3d.topDown();
 }
 
 void ArchSpatial::posBBox() {
     V3f scaledHalf = half(size * scaling);
-    bbox3d = AABB{ (centre + pos) - scaledHalf, (centre + pos) + scaledHalf };
+    bbox3d = AABB{ ( centre + pos ) - scaledHalf, ( centre + pos ) + scaledHalf };
     bbox = bbox3d.topDown();
 }
 
@@ -376,7 +400,7 @@ void ArchSpatial::position( const V3f& _pos ) {
 }
 
 void ArchSpatial::position( const V2f& _pos ) {
-    position() = V3f{_pos.x(), position().y(), _pos.y()};
+    position() = V3f{ _pos.x(), position().y(), _pos.y() };
     posBBox();
 }
 
@@ -393,8 +417,20 @@ void ArchSpatial::scale( const V3f& _scale ) {
     scaleBBox(_scale);
 }
 
+void ArchSpatial::offset( const V2f& _offset ) {
+    planeOffset = _offset;
+}
+
+void ArchSpatial::elevate( float _elevation ) {
+    elevation = _elevation;
+}
+
 [[maybe_unused]] JMATH::AABB& ArchSpatial::BBox3dEmergencyWrite() {
     return bbox3d;
+}
+
+V3f ArchSpatial::PositionReal3d() const {
+    return Position() + XZY::C(planeOffset, elevation);
 }
 
 float ArchSpatial::Width() const { return size.x(); }
@@ -421,17 +457,19 @@ float& ArchSpatial::d() { return size[2]; }
 V3f& ArchSpatial::position() { return pos; }
 Quaternion& ArchSpatial::rot() { return rotation; }
 V3f& ArchSpatial::scale() { return scaling; }
+float ArchSpatial::Elevation() const { return elevation; }
+V2f ArchSpatial::PlaneOffset() const { return planeOffset; }
 
 // *********************************************************************************************************************
 // TwoUShapeBased
 // *********************************************************************************************************************
 
 void TwoUShapesBased::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
-    us1.reRoot( _scale, _scaleSpace );
-    us2.reRoot( _scale, _scaleSpace );
+    us1.reRoot(_scale, _scaleSpace);
+    us2.reRoot(_scale, _scaleSpace);
     thickness *= _scale;
 
-    ArchSpatial::reRoot( _scale, _scaleSpace );
+    ArchSpatial::reRoot(_scale, _scaleSpace);
     TwoUShapesBased::calcBBox();
     calcBBox();
 }
@@ -441,10 +479,10 @@ void TwoUShapesBased::calcBBox() {
     Vector2f& p2 = us2.middle;
 
     // Recalculate all data that might have changed
-    dirWidth = normalize( p2 - p1 );
-    dirDepth = ::rotate( dirWidth, M_PI_2 );
-    w() = JMATH::distance( p1, p2 );
-    d() = min( us1.width, us2.width );
+    dirWidth = normalize(p2 - p1);
+    dirDepth = ::rotate(dirWidth, M_PI_2);
+    w() = JMATH::distance(p1, p2);
+    d() = min(us1.width, us2.width);
 
     centre = XZY::C(V2fc::ZERO, lerp(0.5f, 0.0f, Height()));
     pos = XZY::C(lerp(0.5f, p1, p2), 0.0f);
@@ -454,17 +492,17 @@ void TwoUShapesBased::calcBBox() {
     Vector2f posD = dirDepth * ( HalfDepth() );
     Vector2f negW = -dirWidth * ( HalfWidth() );
     Vector2f posW = dirWidth * ( HalfWidth() );
-    bbox.expand( pos.xz() + negD + posW );
-    bbox.expand( pos.xz() + negD + negW );
-    bbox.expand( pos.xz() + posD + posW );
-    bbox.expand( pos.xz() + posD + negW );
+    bbox.expand(pos.xz() + negD + posW);
+    bbox.expand(pos.xz() + negD + negW);
+    bbox.expand(pos.xz() + posD + posW);
+    bbox.expand(pos.xz() + posD + negW);
 }
 
 // *********************************************************************************************************************
 // Door
 // *********************************************************************************************************************
 
-DoorBSData::DoorBSData(float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2, ArchSubTypeT st) {
+DoorBSData::DoorBSData( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2, ArchSubTypeT st ) {
     type = ArchType::DoorT;
     us1 = w1;
     us2 = w2;
@@ -486,14 +524,15 @@ void DoorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 
 void DoorBSData::calcBBox() {
     TwoUShapesBased::calcBBox();
-    bbox3d.calc( bbox, 0.0f, Height(), Matrix4f::IDENTITY );
+    bbox3d.calc(bbox, 0.0f, Height(), Matrix4f::IDENTITY);
 }
 
 // *********************************************************************************************************************
 // Window
 // *********************************************************************************************************************
 
-WindowBSData::WindowBSData( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1, const UShape& w2, ArchSubTypeT /*st*/ /*= ArchSubType::NotApplicable */ ) {
+WindowBSData::WindowBSData( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1,
+                            const UShape& w2, ArchSubTypeT /*st*/ /*= ArchSubType::NotApplicable */ ) {
     type = ArchType::WindowT;
     wallFlags = WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving;
     us1 = w1;
@@ -524,7 +563,7 @@ void WindowBSData::calcBBox() {
     TwoUShapesBased::calcBBox();
     // Recalculate center Y, as usually a window does not start from the floor
     centre.setY(lerp(0.5f, baseOffset, baseOffset + Height()));
-    bbox3d.calc( bbox, baseOffset, baseOffset + Height(), Matrix4f::IDENTITY );
+    bbox3d.calc(bbox, baseOffset, baseOffset + Height(), Matrix4f::IDENTITY);
 }
 
 // *********************************************************************************************************************
@@ -547,8 +586,8 @@ void BalconyBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 void BalconyBSData::calcBBox() {
     makeTriangles2d();
     for ( const auto& ep : epoints ) {
-        bbox3d.expand( XZY::C(ep, z) );
-        bbox3d.expand( XZY::C(ep, z+floorHeight) );
+        bbox3d.expand(XZY::C(ep, elevation));
+        bbox3d.expand(XZY::C(ep, elevation + floorHeight));
     }
     bbox = bbox3d.topDown();
 }
@@ -597,7 +636,7 @@ void ArchSegment::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     for ( auto& quad: quads ) {
         for ( auto& elem : quad ) {
             if ( _scaleSpace == ArchRescaleSpace::FloorplanScaling ) {
-                elem *= V3f{_scale, 1.0f, _scale};
+                elem *= V3f{ _scale, 1.0f, _scale };
             } else {
                 elem *= _scale;
             }
@@ -606,7 +645,7 @@ void ArchSegment::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     }
 }
 
-void UShape::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+void UShape::reRoot( float _scale, [[maybe_unused]] ArchRescaleSpaceT _scaleSpace ) {
     for ( int64_t t = 0; t < 4; t++ ) points[t] *= _scale;
     middle *= _scale;
     width *= _scale;

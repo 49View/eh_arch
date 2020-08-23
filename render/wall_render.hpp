@@ -21,6 +21,6 @@ struct MaterialAndColorProperty;
 
 namespace WallRender {
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const WallBSData *mWall, const ArchRenderController& arc );
-    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const std::vector<ArchSegment>& wss,
+    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const V3f& _pos, const std::vector<ArchSegment>& wss,
                                     const MaterialAndColorProperty& wallMaterial );
 };

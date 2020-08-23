@@ -110,7 +110,7 @@ namespace RoomRender {
 
                 if ( auto profile = sg.PL(w->covingProfile); profile ) {
                     ret.emplace_back(
-                            sg.GB<GT::Follower>(profile, XZY::C(cov, w->Height()), ff, PolyRaise::VerticalNeg,
+                            sg.GB<GT::Follower>(profile, w->PositionReal3d(), XZY::C(cov, w->Height()), ff, PolyRaise::VerticalNeg,
                                                 GT::ForceNormalAxis(Vector3f::UP_AXIS),
                                                 GT::Flip(V2fc::X_AXIS), w->covingMaterial));
                 }
@@ -135,7 +135,7 @@ namespace RoomRender {
 
                 if ( auto profile = sg.PL(w->skirtingProfile); profile ) {
                     ret.emplace_back(
-                            sg.GB<GT::Follower>(profile, XZY::C(cov, 0.0f), GT::ForceNormalAxis(Vector3f::UP_AXIS),
+                            sg.GB<GT::Follower>(profile, w->PositionReal3d(), XZY::C(cov, 0.0f), GT::ForceNormalAxis(Vector3f::UP_AXIS),
                                                 ff, GT::Flip(V2fc::X_AXIS), w->skirtingMaterial));
                 }
             }
@@ -146,35 +146,35 @@ namespace RoomRender {
     void make3dGeometry( SceneGraph& sg, GeomSP eRootH, RoomBSData *w, HouseRenderContainer& ret ) {
         auto wc = RoomRender::createCovingSegments(sg, w);
         auto ws = RoomRender::createSkirtingSegments(sg, w);
-        WallRender::make3dGeometry(sg, eRootH, w->mWallSegmentsSorted, w->wallsMaterial);
+        WallRender::make3dGeometry(sg, eRootH, w->PositionReal3d(), w->mWallSegmentsSorted, w->wallsMaterial);
         ret.covingGB.insert(ret.covingGB.end(), wc.begin(), wc.end());
         ret.skirtingGB.insert(ret.skirtingGB.end(), ws.begin(), ws.end());
 
         float zPull = 0.001f;
         auto outline = PolyOutLine{ XZY::C(w->mPerimeterSegments), V3f::UP_AXIS, zPull };
         ret.floorsGB.emplace_back(sg.GB<GT::Extrude>(outline,
-                                       V3f{ V3f::UP_AXIS * -zPull },
+                                       V3f{ V3f::UP_AXIS * -zPull } + w->PositionReal3d(),
                                        w->floorMaterial,
                                        GT::Tag(ArchType::FloorT)));
 
         for ( const auto& lf : w->mLightFittings ) {
-            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, XZY::C(lf.lightPosition) + V3f::UP_AXIS * 0.023f);
+            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, w->PositionReal3d() + XZY::C(lf.lightPosition) + V3f::UP_AXIS * 0.023f);
             auto lKey = lf.key;
             sg.add<Light>(lKey,
-                          Light{ LightType_Point, lf.key, w->spotlightGeom, XZY::C(lf.lightPosition) + V3f::UP_AXIS_NEG * w->spotLightYOffset*2.0f,
+                          Light{ LightType_Point, lf.key, w->spotlightGeom, XZY::C(lf.lightPosition) + V3f::UP_AXIS_NEG * w->spotLightYOffset*2.0f + w->PositionReal3d(),
                                  3.5f, 0.0f, V3f::Y_AXIS * .5f });
         }
         for ( const auto& lf : w->mSwitchesLocators ) {
-            sg.GB<GT::Asset>("lightswitch", V3f{ lf.x(), 1.2f, lf.y() },
+            sg.GB<GT::Asset>("lightswitch", V3f{ lf.x(), 1.2f, lf.y() } + w->PositionReal3d(),
                              GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
         }
         for ( const auto& lf : w->mSocketLocators ) {
-            sg.GB<GT::Asset>("powerSocket", V3f{ lf.x(), .252f, lf.y() },
+            sg.GB<GT::Asset>("powerSocket", V3f{ lf.x(), .252f, lf.y() } + w->PositionReal3d(),
                              GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
         }
         for ( auto& fur : w->mFittedFurniture ) {
             if (!fur->name.empty()) {
-                auto furn = sg.GB<GT::Asset>(fur->name, fur->Position(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
+                auto furn = sg.GB<GT::Asset>(fur->name, fur->PositionReal3d(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
                     ret.furnituresGB.emplace_back(furn);
@@ -189,7 +189,7 @@ namespace RoomRender {
         }
 
         ret.ceilingsGB.emplace_back(sg.GB<GT::Extrude>(outline,
-                                         V3f{ V3f::UP_AXIS * (w->Height() - zPull) },
+                                         V3f{ V3f::UP_AXIS * (w->Height() - zPull) } + w->PositionReal3d(),
                                          w->ceilingMaterial,
                                          GT::Tag(ArchType::CeilingT)));
     }

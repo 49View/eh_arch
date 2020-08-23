@@ -36,7 +36,7 @@ ArchSegment ArchSegmentService::createArchSegment( const std::vector <std::share
                 auto p1 = w->epoints[t];
                 auto p2 = w->epoints[cai( t + 1, csize )];
                 if ( p1 == _p1 && p2 == _p2 ) {
-                    ret.quads.emplace_back( makeQuadV3f(XZY::C(_p1, w->z), XZY::C(_p2, w->z),  w->Height() ) );
+                    ret.quads.emplace_back( makeQuadV3f(XZY::C(_p1, w->Elevation()), XZY::C(_p2, w->Elevation()),  w->Height() ) );
                 }
             }
         }

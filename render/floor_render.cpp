@@ -56,7 +56,7 @@ namespace FloorRender {
         // External walls of this floor
         auto eRootH = EF::create<Geom>("Floor");
 
-        auto ews = WallRender::make3dGeometry( sg, eRootH, f->perimeterArchSegments, f->externalWallsMaterial );
+        auto ews = WallRender::make3dGeometry( sg, eRootH, f->PositionReal3d(), f->perimeterArchSegments, f->externalWallsMaterial );
         ret.windowsGB.insert( ret.externalWallsGB.end(), ews.begin(), ews.end());
 
         for ( const auto &w : f->windows ) {

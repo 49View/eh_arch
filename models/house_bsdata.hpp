@@ -26,15 +26,16 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2151;
+static const uint64_t SHouseJSONVersion = 2152;
 
 // Version log
 //
-// 2020-08-21 -    #2151 - added HouseBSData geoCoordinates and elevation
-// 2020-08-21 -    #2150 - added BalconyBSData floorHeight
-// 2020-08-20 -    #2149 - added balconyFloorMaterial
-// 2020-08-19 -    #2148 - adding balconies and removing unnecessary default materials from floors
-// 2020-08-17 -    #2147 - added pos to ArchSpatial
+// 2020-08-23 -    #2152 - Added planeOffset and elevation to ArchStructural
+// 2020-08-21 -    #2151 - Added HouseBSData geoCoordinates and elevation
+// 2020-08-21 -    #2150 - Added BalconyBSData floorHeight
+// 2020-08-20 -    #2149 - Added balconyFloorMaterial
+// 2020-08-19 -    #2148 - Adding balconies and removing unnecessary default materials from floors
+// 2020-08-17 -    #2147 - Added pos to ArchSpatial
 // 2020-08-10 -    #2146 - Remove unnecessary spatial variables from FittedFurniture
 // 2020-08-10 -    #2145 - Promoted rotation to ArchSpatial and removed it from FittedFurniture
 // 2020-08-10 -    #2144 - First draft of new ArchSpatial intermediate derived struct, to be expended for 2150 probably
@@ -97,11 +98,14 @@ public:
     [[nodiscard]] float HalfDepth() const;
 
     [[nodiscard]] V3f Position() const;
+    [[nodiscard]] V3f PositionReal3d() const;
     [[maybe_unused]] [[nodiscard]] float PositionX() const;
     [[maybe_unused]] [[nodiscard]] float PositionY() const;
     [[maybe_unused]] [[nodiscard]] float PositionZ() const;
     [[nodiscard]] V2f Position2d() const;
     [[nodiscard]] V3f Center() const;
+    [[nodiscard]] float Elevation() const;
+    [[nodiscard]] V2f PlaneOffset() const;
 //    [[nodiscard]] V2f Center2d() const { return centre.xz(); }
     [[nodiscard]] const V3f& Size() const;
     [[nodiscard]] const V3f& Scale() const;
@@ -122,6 +126,8 @@ public:
     virtual void center( const V3f& _pos );
     virtual void rotate( const Quaternion& _rot );
     virtual void scale( const V3f& _scale );
+    virtual void offset( const V2f& );
+    virtual void elevate( float );
     virtual void reRoot( float, ArchRescaleSpaceT);
 
 protected:
@@ -147,6 +153,8 @@ protected:
     V3f centre{ V3f::ZERO };
     Vector3f scaling = Vector3f::ONE;
     Quaternion rotation{ V3f::ZERO, 1.0f };
+    V2f planeOffset{0.0f, 0.0f}; // These are extra offsets required to be able to convert from 2d floorplan (with floors that span the whole image) to a real 3d space (floors stacked on top of each other not sideways as in 2d)
+    float elevation = 0.0f; // These are extra offsets required to be able to convert from 2d floorplan (with floors that span the whole image) to a real 3d space (floors stacked on top of each other not sideways as in 2d)
     std::vector<Triangle2d> mTriangles2d;
 };
 
@@ -291,7 +299,7 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
 };
 
 JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
-           linkedHash, sequencePart, mTriangles2d, epoints, enormals, slinesGHType, mUShapes, z, wallFlags,
+           linkedHash, sequencePart, mTriangles2d, epoints, enormals, slinesGHType, mUShapes, planeOffset, elevation,wallFlags,
            wrapLastPoint)
 
     // epoints are needed when the wall structure has got non-simplifiable shape lie boxing or curved walls, in those cases we just save the contours of the wall shape
@@ -302,7 +310,7 @@ JSONDATA_H(WallBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, c
     std::vector<uint64_t> slinesGHType;
     // Change of plan again, UShapes are now store per wall!
     std::vector<UShape> mUShapes;
-    float z = 0.0f;
+
     uint32_t wallFlags = 0;
     WallLastPointWrapT wrapLastPoint = true;
 
@@ -323,10 +331,10 @@ JSONDATA_H(StairsBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size,
 };
 
 JSONDATA_H(BalconyBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
-           linkedHash, sequencePart, mTriangles2d, epoints, z, floorHeight, balconyFloorMaterial)
+           linkedHash, sequencePart, mTriangles2d, epoints, planeOffset, elevation, floorHeight, balconyFloorMaterial)
 
     std::vector<Vector2f> epoints{};
-    float z = 0.0f;
+
     float floorHeight = 0.1f;
     MaterialAndColorProperty balconyFloorMaterial{"wood,beech"};
 
@@ -462,7 +470,7 @@ JSONDATA(LightFittings, key, lightPosition)
 };
 
 JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
-           linkedHash, sequencePart, mTriangles2d, roomTypes, windows, doors, z, mHasCoving, mBBoxCoving, floorType,
+           linkedHash, sequencePart, mTriangles2d, roomTypes, windows, doors, planeOffset, elevation, mHasCoving, mBBoxCoving, floorType,
            mFittedFurniture,
            mWallSegments, mWallSegmentsSorted, mPerimeterSegments, mvCovingSegments, mvSkirtingSegments,
            mMaxEnclosingBoundingBox, mLightFittings, mSocketLocators, mSwitchesLocators, maxSizeEnclosedHP1,
@@ -473,7 +481,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, c
     std::vector<ASTypeT> roomTypes{};
     std::vector<int64_t> windows;
     std::vector<int64_t> doors;
-    float z = 0.0f;
+
     bool mHasCoving = true;
     Rect2f mBBoxCoving = Rect2f::INVALID;
     FloorMatTypeT floorType = 0;
@@ -523,12 +531,12 @@ private:
 };
 
 JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
-           linkedHash, sequencePart, mTriangles2d, number, z, area, concreteHeight, hasCoving, doorHeight, windowHeight,
+           linkedHash, sequencePart, mTriangles2d, number, planeOffset, elevation, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
            perimeterArchSegments, anchorPoint, walls, windows, doors, stairs, rooms, balconies, orphanedUShapes)
 
     int32_t number = -1; // As in floor number, ground floor = 1, etc...
-    float z = 0.0f;
+
     float area = 0.0f;
     float concreteHeight = 0.0f;
     bool hasCoving = true;
@@ -563,7 +571,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, 
 
 JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
              linkedHash, sequencePart, mTriangles2d, version, propertyId, name, source, declaredSQm, defaultSkybox,
-             geoCoordinates, elevation, sourceData, bestInternalViewingPosition, bestInternalViewingAngle,
+             planeOffset, elevation, sourceData, bestInternalViewingPosition, bestInternalViewingAngle,
              bestDollyViewingPosition, bestDollyViewingAngle, walkableArea, doorHeight, defaultWindowHeight,
              defaultWindowBaseOffset, defaultCeilingHeight, windowsillExpansion, windowFrameThickness,
              defaultGroundHeight, worktopHeight, bathRoomSinkHeight, defaultWallColor, accuracy, tourPaths, mFloors)
@@ -573,8 +581,6 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type, bbox, bbox3d, albedo, size
     std::string source;
     std::string declaredSQm;
     std::string defaultSkybox;
-    V2f geoCoordinates{0.0f, 0.0f};
-    float elevation = 0.0f;
     HouseSourceData sourceData;
     V3f bestInternalViewingPosition = V3f::ZERO;
     Quaternion bestInternalViewingAngle;

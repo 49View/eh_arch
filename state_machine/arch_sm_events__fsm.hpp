@@ -43,7 +43,7 @@ struct OnCreateHouseTexturesEvent {
 struct OnUpdateHMBEvent {
 };
 struct OnHouseChangeElevationEvent {
-
+    float elevation = 0.0f;
 };
 struct OnMakeHouse3dEvent {
 };

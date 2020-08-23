@@ -343,7 +343,7 @@ namespace WindowRender {
 
         float vwangle = -atan2(-window->dirWidth.y(), window->dirWidth.x());
         Quaternion rot(vwangle + window->rotOrientation, V3f::UP_AXIS);
-        mRootH->updateTransform( window->Position(), rot, V3f::ONE); //
+        mRootH->updateTransform( window->PositionReal3d(), rot, V3f::ONE); //
 
 //        sg.GB<GT::Shape>(ShapeType::Cube, window->Center(), GT::Scale{window->Size()} );
         GeomSPContainer ret;

@@ -20,7 +20,7 @@ namespace BalconyRender {
     }
 
     GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const BalconyBSData *w ) {
-        auto geom = sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(w->epoints, w->z), V3f::UP_AXIS, w->floorHeight }, w->balconyFloorMaterial, eRootH);
+        auto geom = sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(w->epoints, 0.0f), V3f::UP_AXIS, w->floorHeight }, w->PositionReal3d(), w->balconyFloorMaterial, eRootH);
         GeomSPContainer ret;
         ret.emplace_back(geom);
         return ret;

@@ -35,8 +35,9 @@ struct UpdateHMB {
 };
 
 struct ChangeElevation {
-    void operator()( ArchOrchestrator& asg ) {
-        asg.H()->reElevate(asg.H()->elevation);
+    void operator()( ArchOrchestrator& asg, const OnHouseChangeElevationEvent& event ) {
+        asg.H()->reElevate(event.elevation);
+        asg.make3dHouse([]() {});
         asg.showIMHouse();
         asg.pushHouseChange();
     }

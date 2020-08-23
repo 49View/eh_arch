@@ -183,8 +183,8 @@ bool checkTraspassingSegments( const std::vector<std::vector<Vector3f>>& cd, con
 //
 //	float topZ1 = w->height;
 //	float topZ2 = w->height;
-//	Vector3f v1 = { w->epoints[t], w->z };
-//	Vector3f v2 = { w->epoints[getCircularArrayIndex( t + 1, static_cast<int>( w->epoints.size() ) )], w->z };
+//	Vector3f v1 = { w->epoints[t], w->elevation };
+//	Vector3f v2 = { w->epoints[getCircularArrayIndex( t + 1, static_cast<int>( w->epoints.size() ) )], w->elevation };
 //
 //	Vector3f v3 = Vector3f::ZERO;
 //	Vector3f v4 = Vector3f::ZERO;
@@ -257,8 +257,8 @@ QuadVector3fList WallService::vertsForWallAt( const WallBSData *w, int t,
 
     float topZ1 = w->Height();
     float topZ2 = w->Height();
-    Vector3f v1 = XZY::C(w->epoints[t], w->z);
-    Vector3f v2 = XZY::C(w->epoints[getCircularArrayIndex(t + 1, static_cast<int>( w->epoints.size()))], w->z);
+    Vector3f v1 = XZY::C(w->epoints[t], w->Elevation());
+    Vector3f v2 = XZY::C(w->epoints[getCircularArrayIndex(t + 1, static_cast<int>( w->epoints.size()))], w->Elevation());
 
     Vector3f v3 = Vector3f::ZERO;
     Vector3f v4 = Vector3f::ZERO;
