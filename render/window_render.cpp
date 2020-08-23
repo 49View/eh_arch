@@ -116,7 +116,7 @@ namespace WindowRender {
         return ProfileMaker{ _name }.sd(10).o().lx(w1).ay(bump).ly(w2).ay(bump).lx(-w1).make();
     }
 
-    void addBlinds( SceneGraph& sg, GeomSP mRootH, WindowBSData *window, const Rect2f& _rect ) {
+    void addBlinds( SceneGraph& sg, GeomSP eRootH, WindowBSData *window, const Rect2f& _rect ) {
 
         if ( !window->hasBlinds ) return;
 
@@ -144,31 +144,31 @@ namespace WindowRender {
         float ladderOff = ( bw - ( numLadderStrings - 1 ) * ladderStringGapLength ) * 0.5f;
 
         // new Blind group
-//    auto blindH = mRootH->addChildren<V3f>( V3f{0.0f, _rect.bottom(), -window->HalfDepth() + bd*0.5f });
+//    auto blindH = eRootH->addChildren<V3f>( V3f{0.0f, _rect.bottom(), -window->HalfDepth() + bd*0.5f });
         auto bp = V3f{ 0.0f, _rect.bottom(), -window->HalfDepth() + bd * 0.5f };
 
         auto valProfile = makeValanceProfile("valence", valanceSize);
-        sg.GB<GT::Follower>(valProfile, lineLR(V3f::X_AXIS, bw), GT::Direction(V3f::UP_AXIS), mRootH,
+        sg.GB<GT::Follower>(valProfile, lineLR(V3f::X_AXIS, bw), GT::Direction(V3f::UP_AXIS), eRootH,
                             valancePos + bp);
 //    GeomBuilder{ mPrefs.sg, ProfileBuilder{}.cv2(valanceSize).func(makeValanceProfile),
-//                 lineLR(V3f::X_AXIS, bw), V3f::UP_AXIS }.inj(mRootH->addChildren()).at(valancePos).build();
+//                 lineLR(V3f::X_AXIS, bw), V3f::UP_AXIS }.inj(eRootH->addChildren()).at(valancePos).build();
 
-        sg.GB<GT::Shape>(ShapeType::Cube, GT::Scale(headRailSize), mRootH, headRailPos + bp);
-//    GeomBuilder{ mPrefs.sg, ShapeType::Cube }.s(headRailSize).inj(mRootH->addChildren()).at(headRailPos).build();
+        sg.GB<GT::Shape>(ShapeType::Cube, GT::Scale(headRailSize), eRootH, headRailPos + bp);
+//    GeomBuilder{ mPrefs.sg, ShapeType::Cube }.s(headRailSize).inj(eRootH->addChildren()).at(headRailPos).build();
 
         float deltaInc = 1.0f / static_cast<float>(numslats);
         float delta = 0.0f;
         for ( int t = 1; t < numslats; t++ ) {
-            sg.GB<GT::Shape>(ShapeType::Pillow, GT::Scale(slat3dSize), mRootH,
+            sg.GB<GT::Shape>(ShapeType::Pillow, GT::Scale(slat3dSize), eRootH,
                              Vector3f::UP_AXIS * ( delta * bh ) + bp);
-//        GeomBuilder{ mPrefs.sg, ShapeType::Pillow }.inj(mRootH->addChildren()).s(slat3dSize).at(Vector3f::UP_AXIS*(delta*bh)).build();
+//        GeomBuilder{ mPrefs.sg, ShapeType::Pillow }.inj(eRootH->addChildren()).s(slat3dSize).at(Vector3f::UP_AXIS*(delta*bh)).build();
             delta += deltaInc;
         }
 
-        sg.GB<GT::Shape>(ShapeType::Pillow, GT::Scale(slat3dSizeBig), bp, mRootH);
-        sg.GB<GT::Shape>(ShapeType::Cylinder, GT::Scale(wandSize), wandPos, bp, mRootH);
-//    GeomBuilder{ mPrefs.sg, ShapeType::Pillow }.inj(mRootH->addChildren()).s(slat3dSizeBig).build();
-//    GeomBuilder{ mPrefs.sg, ShapeType::Cylinder }.inj(mRootH->addChildren()).s(wandSize).at(wandPos).build();
+        sg.GB<GT::Shape>(ShapeType::Pillow, GT::Scale(slat3dSizeBig), bp, eRootH);
+        sg.GB<GT::Shape>(ShapeType::Cylinder, GT::Scale(wandSize), wandPos, bp, eRootH);
+//    GeomBuilder{ mPrefs.sg, ShapeType::Pillow }.inj(eRootH->addChildren()).s(slat3dSizeBig).build();
+//    GeomBuilder{ mPrefs.sg, ShapeType::Cylinder }.inj(eRootH->addChildren()).s(wandSize).at(wandPos).build();
 
         // LadderStrings
         for ( int q = 0; q < numLadderStrings; q++ ) {
@@ -178,8 +178,8 @@ namespace WindowRender {
                     V3f{ -bw * 0.5f + ( ladderOff + q * ladderStringGapLength ), bh * 0.5f, -lz },
             };
             for ( size_t i = 0; i < lpos.size(); i++ ) {
-                sg.GB<GT::Shape>(ShapeType::Cylinder, GT::Scale(ladderStringSize), lpos[i] + bp, mRootH);
-//            GeomBuilder{ mPrefs.sg, ShapeType::Cylinder }.inj(mRootH->addChildren()).s(ladderStringSize).at(lpos[i]).build();
+                sg.GB<GT::Shape>(ShapeType::Cylinder, GT::Scale(ladderStringSize), lpos[i] + bp, eRootH);
+//            GeomBuilder{ mPrefs.sg, ShapeType::Cylinder }.inj(eRootH->addChildren()).s(ladderStringSize).at(lpos[i]).build();
             }
         }
     }
@@ -188,7 +188,7 @@ namespace WindowRender {
         return Vector3f::Z_AXIS * ( ( window->Depth() * 0.5f ) - _off );
     }
 
-    void addPlastersAroundEdges( SceneGraph& sg, GeomSP mRootH, WindowBSData *window, float currBaseOffset ) {
+    void addPlastersAroundEdges( SceneGraph& sg, GeomSP eRootH, WindowBSData *window, float currBaseOffset ) {
 
         auto fverts2 = utilGenerateFlatRect(Vector2f(window->Width(), window->Height()),
                                             WindingOrder::CCW,
@@ -209,7 +209,7 @@ namespace WindowRender {
 
             float off = window->Depth() * 0.25f * ( ( t == 0 ) ? 1.0f : -1.0f );
 
-            sg.GB<GT::Follower>(profile, fverts2, V3f::Z_AXIS * off, mRootH);
+            sg.GB<GT::Follower>(profile, fverts2, V3f::Z_AXIS * off, eRootH);
         }
     }
 
@@ -247,7 +247,7 @@ namespace WindowRender {
                          GT::Scale{ window->Width() * 1.02f, windowsSillDepth, window->Depth() * 1.12f }, root);
     }
 
-    void addWindowMeshes( SceneGraph& sg, GeomSP mRootH, WindowBSData *window, const Rect2f& _windowRect,
+    void addWindowMeshes( SceneGraph& sg, GeomSP eRootH, WindowBSData *window, const Rect2f& _windowRect,
                           [[maybe_unused]] float windowsSillDepth ) {
 
         // steam profile
@@ -260,7 +260,7 @@ namespace WindowRender {
         auto pf = makeBottomWindowFrameProfile("WindowFrameProfile", stemTrunk);
 
         sg.GB<GT::Follower>(centralStemProfile, _windowRect.pointscw(), depthOffset(window, wppSize.x()),
-                            FollowerFlags::WrapPath, GT::Flip(V2fc::X_AXIS), mRootH);
+                            FollowerFlags::WrapPath, GT::Flip(V2fc::X_AXIS), eRootH);
 
         float panelsWidth = ( window->Width() - stemTrunk );
         int numPanels = static_cast<int>( ceil(panelsWidth / 0.60f));
@@ -273,7 +273,7 @@ namespace WindowRender {
 
             sg.GB<GT::Follower>(centralStemProfile, depthOffset(window, wppSize.x()),
                                 GT::Direction(Vector3f::Z_AXIS),
-                                V3fVector{ p1, p2 }, mRootH);
+                                V3fVector{ p1, p2 }, eRootH);
         }
 
         // Window panel profile
@@ -282,19 +282,19 @@ namespace WindowRender {
 //    uint32_t numHandles = numPanels > 1 ? 2 : 1;
 
         for ( int t = 0; t < numPanels; t++ ) {
-//        auto panelH = mRootH->addChildren();
+//        auto panelH = eRootH->addChildren();
             float delta = ( static_cast<float>(t) / numPanels ) - stp;
             float deltan = ( static_cast<float>(t + 1) / numPanels ) + stp;
             auto panelRect = _windowRect.verticalSlice(delta, deltan);
 
             sg.GB<GT::Follower>(wpp, panelRect, GT::Direction(Vector3f::Z_AXIS),
-                                FollowerFlags::WrapPath, depthOffset(window, wppSize.x() * 0.5f), mRootH);
+                                FollowerFlags::WrapPath, depthOffset(window, wppSize.x() * 0.5f), eRootH);
 
 //        GeomBuilder{mPrefs.sg,wpp, panelRect, Vector3f::Z_AXIS}.ff(FollowerFlags::WrapPath).inj(panelH).
 //                                                      at(depthOffset(wppSize.x()*0.5f)).
 //                                                      g(GHType::Window).build();
             // Get the handle on first and last panels
-//        This needs to be a children of the panel abouve, not mRootH!
+//        This needs to be a children of the panel abouve, not eRootH!
 //        bool bFirst = t == 0;
 //        bool bLast = (numHandles > 1 && t == numPanels-1);
 //        if ( bFirst || bLast ) {
@@ -308,48 +308,44 @@ namespace WindowRender {
         }
     }
 
-    void addCurtains( SceneGraph& sg, GeomSP mRootH, WindowBSData *window, const Rect2f& _windowRect, [[maybe_unused]] float baseOff ) {
+    void addCurtains( SceneGraph& sg, GeomSP eRootH, WindowBSData *window, const Rect2f& _windowRect, [[maybe_unused]] float baseOff ) {
         if ( !window->hasCurtains ) return;
 
         auto s = sg.getGeomNameSize("curtain");
         // Rescale the curtain with a % of slack so the curtain doesn't end exactly at window width
         float totalHeight = window->baseOffset + window->Height() + window->sillThickness;
         V3f curtainScale{ ( window->Width() * 1.25f ) / std::get<1>(s).x(), totalHeight / std::get<1>(s).y(), 1.0f };
-        sg.GB<GT::Asset>("curtain", mRootH, V3f{ 0.0f, 0.07f, -window->Depth()+ half(std::get<1>(s).z()) } - 0.07f, GT::Scale(curtainScale),
+        sg.GB<GT::Asset>("curtain", eRootH, V3f{ 0.0f, 0.07f, -window->Depth()+ half(std::get<1>(s).z()) } - 0.07f, GT::Scale(curtainScale),
                          GT::Tag(ArchType::CurtainT),
                          GT::M(window->curtainMaterial));
     }
 
-    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, WindowBSData *window ) {
+    GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, WindowBSData *window ) {
 
-        auto mRootH = EF::create<Geom>("Window");
+        auto lRootH = eRootH->addChildren("Window"+ std::to_string(window->hash));
 
         float windowsSillDepth = 0.04f;
         float currBaseOffset = window->baseOffset < window->ceilingHeight ? window->baseOffset : window->ceilingHeight;
         Rect2f windowRect(Vector2f(window->Width(), window->Height() - windowsSillDepth));
         windowRect.translate({ window->Width() * -0.5f, currBaseOffset + windowsSillDepth });
 
-        addWindowSill(sg, mRootH, window, windowsSillDepth, currBaseOffset);
+        addWindowSill(sg, lRootH, window, windowsSillDepth, currBaseOffset);
 
         Rect2f windowRectInclusive(Vector2f(window->Width(), window->Height()));
         windowRectInclusive.translate({ window->Width() * -0.5f, currBaseOffset });
 
-        addPlastersAroundEdges(sg, mRootH, window, currBaseOffset);
-        addTopBottomWallPieces(sg, mRootH, window);
-        addBlinds(sg, mRootH, window, windowRect);
-        addWindowMeshes(sg, mRootH, window, windowRect, windowsSillDepth);
+        addPlastersAroundEdges(sg, lRootH, window, currBaseOffset);
+        addTopBottomWallPieces(sg, lRootH, window);
+        addBlinds(sg, lRootH, window, windowRect);
+        addWindowMeshes(sg, lRootH, window, windowRect, windowsSillDepth);
 
-        addCurtains(sg, mRootH, window, windowRect, currBaseOffset + windowsSillDepth);
+        addCurtains(sg, lRootH, window, windowRect, currBaseOffset + windowsSillDepth);
 
         float vwangle = -atan2(-window->dirWidth.y(), window->dirWidth.x());
         Quaternion rot(vwangle + window->rotOrientation, V3f::UP_AXIS);
-        mRootH->updateTransform( window->PositionReal3d(), rot, V3f::ONE); //
+        lRootH->updateTransform( window->PositionReal3d(), rot, V3f::ONE); //
 
-//        sg.GB<GT::Shape>(ShapeType::Cube, window->Center(), GT::Scale{window->Size()} );
-        GeomSPContainer ret;
-        ret.emplace_back(mRootH);
-        sg.addNode(mRootH);
-        return ret;
+        return lRootH;
     }
 
 }

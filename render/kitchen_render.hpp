@@ -15,7 +15,7 @@ class HouseRenderContainer;
 enum class FloorPlanRenderMode;
 
 namespace KitchenRender {
-    void render( SceneGraph& sg, RoomBSData* r, HouseRenderContainer& ret );
+    GeomSP render( SceneGraph& sg, GeomSP eRootH, RoomBSData* r );
 }
 
 

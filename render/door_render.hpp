@@ -18,5 +18,5 @@ struct RDSPreMult;
 
 namespace DoorRender {
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const DoorBSData *data, const ArchRenderController& arc );
-    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const DoorBSData* mData );
+    GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const DoorBSData* mData );
 }

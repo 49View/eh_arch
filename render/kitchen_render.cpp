@@ -39,7 +39,7 @@ namespace KitchenRender {
         }
     }
 
-    void drawFlatDoubleDrawer( SceneGraph& sg, KitchenData& kd, const KitchenDrawer& kup ) {
+    void drawFlatDoubleDrawer( SceneGraph& sg, GeomSP eRootH, KitchenData& kd, const KitchenDrawer& kup ) {
         auto rotation = Quaternion{ RoomService::furnitureAngleFromNormal(kup.normal), V3f::UP_AXIS };
         float dp = kd.drawersPadding.x();
         float unitYSizeAvailable = kup.unitHeight;
@@ -63,30 +63,32 @@ namespace KitchenRender {
                     mixHandlePos.setX(0.15f);
                     mixHandlePos.setY(0.15f);
                 }
-                sg.GB<GT::Asset>(kd.drawersHandleModel,
+                sg.GB<GT::Asset>(kd.drawersHandleModel,eRootH,
                                  XZY::C(mix(kup.p1, kup.p2, mixHandlePos) + kup.normal * kd.drawersThickness * 0.5f,
                                         uz + unitHeight * 0.5f), GT::Rotate(rotationHandle));
             }
         }
 
-        sg.GB<GT::Extrude>(drawerOutlines, kd.unitsMaterial);
+        sg.GB<GT::Extrude>(drawerOutlines, kd.unitsMaterial, eRootH);
     }
 
-    void drawFillerDrawer( SceneGraph& sg, KitchenData& kd, const KitchenDrawer& kuw ) {
+    void drawFillerDrawer( SceneGraph& sg, GeomSP eRootH, KitchenData& kd, const KitchenDrawer& kuw ) {
         auto linex = FollowerService::createLinePath(kuw.p1, kuw.p2, kd.drawersThickness, kuw.z);
-        sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kuw.unitHeight }, kd.unitsMaterial);
+        sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kuw.unitHeight }, eRootH, kd.unitsMaterial);
     }
 
-    void render( SceneGraph& sg, RoomBSData *w, HouseRenderContainer& ret ) {
+    GeomSP render( SceneGraph& sg, GeomSP eRootH, RoomBSData *w ) {
         KitchenData kd = w->kitchenData;
+
+        auto lRootH = eRootH->addChildren("Kitchen"+ std::to_string(w->hash));
 
         for ( const auto& kwd : kd.kitchenDrawers ) {
             switch ( kwd.shape.type ) {
                 case KitchenDrawerType::Filler:
-                    drawFillerDrawer(sg, kd, kwd);
+                    drawFillerDrawer(sg, lRootH, kd, kwd);
                     break;
                 case KitchenDrawerType::FlatBasic:
-                    drawFlatDoubleDrawer(sg, kd, kwd);
+                    drawFlatDoubleDrawer(sg, lRootH, kd, kwd);
                     break;
             }
         }
@@ -95,7 +97,7 @@ namespace KitchenRender {
             if ( !kwp.flags.hasSink ) {
                 auto linex = FollowerService::createLinePath(kwp.p1, kwp.p2, kd.kitchenWorktopDepth,
                                                              kd.kitchenWorktopHeight);
-                sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
+                sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.worktopThickness }, lRootH, kd.worktopMaterial);
             } else {
                 // I've decided to split the worktop in 4 pieces (like having a frame around the sink)
                 // instead of clipping an hole through it as I still don't trust booleans they are still too risky
@@ -111,12 +113,12 @@ namespace KitchenRender {
                 // Left side of the worktop
                 auto linex = FollowerService::createLinePath(kwp.p1, sinkp1, kd.kitchenWorktopDepth,
                                                              kd.kitchenWorktopHeight);
-                sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
+                sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.worktopThickness }, lRootH, kd.worktopMaterial);
 
                 // Right side of the worktop
                 auto linex2 = FollowerService::createLinePath(sinkp2, kwp.p2, kd.kitchenWorktopDepth,
                                                               kd.kitchenWorktopHeight);
-                sg.GB<GT::Extrude>(PolyOutLine{ linex2, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
+                sg.GB<GT::Extrude>(PolyOutLine{ linex2, V3f::UP_AXIS, kd.worktopThickness }, lRootH, kd.worktopMaterial);
 
                 // Add some filling (0.02f) for the top/bottom also
                 float topAndBottomDepth = ( ( kd.kitchenWorktopDepth - sinkHalfDepth * 2.0f ) * 0.5f ) + 0.02f;
@@ -127,20 +129,20 @@ namespace KitchenRender {
                 auto sinkp3b = sinkp2 + topSideOffset;
                 auto linex3 = FollowerService::createLinePath(sinkp3b, sinkp3a, topAndBottomDepth,
                                                               kd.kitchenWorktopHeight);
-                sg.GB<GT::Extrude>(PolyOutLine{ linex3, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
+                sg.GB<GT::Extrude>(PolyOutLine{ linex3, V3f::UP_AXIS, kd.worktopThickness }, lRootH, kd.worktopMaterial);
 
                 // Bottom side of the worktop
                 auto sinkp4a = sinkp1 - topSideOffset;
                 auto sinkp4b = sinkp2 - topSideOffset;
                 auto linex4 = FollowerService::createLinePath(sinkp4b, sinkp4a, topAndBottomDepth,
                                                               kd.kitchenWorktopHeight);
-                sg.GB<GT::Extrude>(PolyOutLine{ linex4, V3f::UP_AXIS, kd.worktopThickness }, kd.worktopMaterial);
+                sg.GB<GT::Extrude>(PolyOutLine{ linex4, V3f::UP_AXIS, kd.worktopThickness }, lRootH, kd.worktopMaterial);
             }
         }
 
         for ( const auto& kwp : kd.kitchenSkirtingPath ) {
             auto linex = FollowerService::createLinePath(kwp.p1, kwp.p2, 0.02f, 0.0f);
-            sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.skirtingHeight }, kd.unitsMaterial);
+            sg.GB<GT::Extrude>(PolyOutLine{ linex, V3f::UP_AXIS, kd.skirtingHeight }, lRootH, kd.unitsMaterial);
         }
 
         float topOfWorktop = kd.kitchenWorktopHeight + kd.worktopThickness;
@@ -149,23 +151,25 @@ namespace KitchenRender {
             if ( kup.flags.hasCooker ) {
                 auto mp = kup.cookerPos;
                 auto extractorHeight = sg.GM(kd.extractorHoodModel)->BBox3d()->calcHeight();
-                sg.GB<GT::Asset>(kd.cooktopModel,
+                sg.GB<GT::Asset>(kd.cooktopModel, lRootH,
                                  XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, topOfWorktop),
                                  GT::Rotate(rotation));
-                sg.GB<GT::Asset>(kd.extractorHoodModel,
+                sg.GB<GT::Asset>(kd.extractorHoodModel, lRootH,
                                  XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, w->Height() - extractorHeight),
                                  GT::Rotate(rotation));
-                sg.GB<GT::Asset>(kd.ovenPanelModel,
+                sg.GB<GT::Asset>(kd.ovenPanelModel, lRootH,
                                  XZY::C(mp + kup.normal * ( kd.kitchenWorktopDepth - kd.kitchenUnitsRecess ),
                                         topOfWorktop - kd.worktopThickness - kd.drawersPadding.y()),
                                  GT::Rotate(rotation));
             }
             if ( kup.flags.hasSink ) {
-                sg.GB<GT::Asset>(kd.sinkModel,
+                sg.GB<GT::Asset>(kd.sinkModel, lRootH,
                                  XZY::C(kup.sinkPos + kup.normal * kd.kitchenWorktopDepth * 0.5f, topOfWorktop),
                                  GT::Rotate(rotation));
             }
         }
+
+        return lRootH;
     }
 
 }

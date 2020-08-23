@@ -143,41 +143,39 @@ namespace RoomRender {
         return ret;
     }
 
-    void make3dGeometry( SceneGraph& sg, GeomSP eRootH, RoomBSData *w, HouseRenderContainer& ret ) {
+    GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, RoomBSData *w ) {
+
+        auto lRootH = eRootH->addChildren("Room"+ std::to_string(w->hash));
+
         auto wc = RoomRender::createCovingSegments(sg, w);
         auto ws = RoomRender::createSkirtingSegments(sg, w);
-        WallRender::make3dGeometry(sg, eRootH, w->PositionReal3d(), w->mWallSegmentsSorted, w->wallsMaterial);
-        ret.covingGB.insert(ret.covingGB.end(), wc.begin(), wc.end());
-        ret.skirtingGB.insert(ret.skirtingGB.end(), ws.begin(), ws.end());
+        WallRender::make3dGeometry(sg, lRootH, w->PositionReal3d(), w->mWallSegmentsSorted, w->wallsMaterial);
 
         float zPull = 0.001f;
         auto outline = PolyOutLine{ XZY::C(w->mPerimeterSegments), V3f::UP_AXIS, zPull };
-        ret.floorsGB.emplace_back(sg.GB<GT::Extrude>(outline,
-                                       V3f{ V3f::UP_AXIS * -zPull } + w->PositionReal3d(),
-                                       w->floorMaterial,
-                                       GT::Tag(ArchType::FloorT)));
+        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3f::UP_AXIS * -zPull } + w->PositionReal3d(), w->floorMaterial,
+                                       GT::Tag(ArchType::FloorT));
 
         for ( const auto& lf : w->mLightFittings ) {
-            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, w->PositionReal3d() + XZY::C(lf.lightPosition) + V3f::UP_AXIS * 0.023f);
+            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, lRootH, w->PositionReal3d() + XZY::C(lf.lightPosition) + V3f::UP_AXIS * 0.023f);
             auto lKey = lf.key;
             sg.add<Light>(lKey,
                           Light{ LightType_Point, lf.key, w->spotlightGeom, XZY::C(lf.lightPosition) + V3f::UP_AXIS_NEG * w->spotLightYOffset*2.0f + w->PositionReal3d(),
                                  3.5f, 0.0f, V3f::Y_AXIS * .5f });
         }
         for ( const auto& lf : w->mSwitchesLocators ) {
-            sg.GB<GT::Asset>("lightswitch", V3f{ lf.x(), 1.2f, lf.y() } + w->PositionReal3d(),
+            sg.GB<GT::Asset>("lightswitch", lRootH, V3f{ lf.x(), 1.2f, lf.y() } + w->PositionReal3d(),
                              GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
         }
         for ( const auto& lf : w->mSocketLocators ) {
-            sg.GB<GT::Asset>("powerSocket", V3f{ lf.x(), .252f, lf.y() } + w->PositionReal3d(),
+            sg.GB<GT::Asset>("powerSocket", lRootH, V3f{ lf.x(), .252f, lf.y() } + w->PositionReal3d(),
                              GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
         }
         for ( auto& fur : w->mFittedFurniture ) {
             if (!fur->name.empty()) {
-                auto furn = sg.GB<GT::Asset>(fur->name, fur->PositionReal3d(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
+                auto furn = sg.GB<GT::Asset>(fur->name, lRootH, fur->PositionReal3d(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
-                    ret.furnituresGB.emplace_back(furn);
 //                    sg.GB<GT::Shape>(ShapeType::Cube, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale{fur->Size()}, C4f::BLUE_SHADOW );
                 } else {
                     LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
@@ -185,12 +183,12 @@ namespace RoomRender {
             }
         }
         if ( RoomService::hasRoomType(w, ASType::Kitchen) ) {
-            KitchenRender::render(sg, w, ret);
+            KitchenRender::render(sg, lRootH, w);
         }
 
-        ret.ceilingsGB.emplace_back(sg.GB<GT::Extrude>(outline,
-                                         V3f{ V3f::UP_AXIS * (w->Height() - zPull) } + w->PositionReal3d(),
+        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3f::UP_AXIS * (w->Height() - zPull) } + w->PositionReal3d(),
                                          w->ceilingMaterial,
-                                         GT::Tag(ArchType::CeilingT)));
+                                         GT::Tag(ArchType::CeilingT));
+        return lRootH;
     }
 }

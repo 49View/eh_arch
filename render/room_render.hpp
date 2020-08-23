@@ -15,11 +15,10 @@ struct RoomBSData;
 class Renderer;
 struct RoomBSData;
 struct RDSPreMult;
-class HouseRenderContainer;
 class ArchRenderController;
 
 namespace RoomRender {
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *data, const ArchRenderController& arc );
-    void make3dGeometry( SceneGraph& sg, GeomSP eRootH, RoomBSData* r, HouseRenderContainer& ret );
+    GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, RoomBSData* r );
 }
 

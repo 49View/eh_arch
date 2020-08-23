@@ -271,32 +271,29 @@ namespace DoorRender {
                            V3f::UP_AXIS * -0.001f);
     }
 
-    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const DoorBSData *data ) {
+    GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const DoorBSData *data ) {
 
-        auto rootH = EF::create<Geom>("Door");
+        auto lRootH = eRootH->addChildren("Door"+ std::to_string(data->hash));
 
-        addDoorArchitrave(sg, rootH, data, -1.0f);
-        addDoorArchitrave(sg, rootH, data, 1.0f);
+        addDoorArchitrave(sg, lRootH, data, -1.0f);
+        addDoorArchitrave(sg, lRootH, data, 1.0f);
 
         // This is the frame plus the bump bit to stop the door on close
-        addInnerDoorFrame(sg, rootH, data);
+        addInnerDoorFrame(sg, lRootH, data);
 
         // This is the actual door, if it's a decent size
         if ( data->Width() > 0.45f && data->Width() < 1.3f ) {
-            addDoorGeom(sg, rootH, data);
+            addDoorGeom(sg, lRootH, data);
         }
 
         // Add a bit of the missing floor between the rooms connecting this door
-        addFloorUnderDoor(sg, data, rootH);
+        addFloorUnderDoor(sg, data, lRootH);
 
         float vwangle = -atan2(-data->dirWidth.y(), data->dirWidth.x());
         Quaternion rot(vwangle + M_PI, V3f::UP_AXIS);
-        rootH->updateTransform(data->PositionReal3d(), rot, V3f::ONE);
+        lRootH->updateTransform(data->PositionReal3d(), rot, V3f::ONE);
 
-        GeomSPContainer ret;
-        ret.emplace_back(rootH);
-        sg.addNode(rootH);
-        return ret;
+        return lRootH;
     }
 
 }
