@@ -95,7 +95,7 @@ namespace HouseRender {
                          GT::Scale(5000.0f, 0.1f, 5000.0f));
 
         auto houseRootH = EntityFactory::create<Geom>("House");
-        houseRootH->updateTransform(data->PositionReal3d());
+        houseRootH->updateTransform(data->GeoOffset());
 
         for ( const auto& f : data->mFloors ) {
             FloorRender::make3dGeometry(sg, houseRootH, f.get());

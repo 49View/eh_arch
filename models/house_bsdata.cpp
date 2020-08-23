@@ -50,6 +50,10 @@ void HouseBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     }
 }
 
+V3f HouseBSData::GeoOffset() const {
+    return XZY::C(planeOffset, elevation);
+}
+
 void HouseBSData::reElevate( float _elevation ) {
     elevation = _elevation;
     for ( auto& floor : mFloors ) {
@@ -427,10 +431,6 @@ void ArchSpatial::elevate( float _elevation ) {
 
 [[maybe_unused]] JMATH::AABB& ArchSpatial::BBox3dEmergencyWrite() {
     return bbox3d;
-}
-
-V3f ArchSpatial::PositionReal3d() const {
-    return Position() + XZY::C(planeOffset, elevation);
 }
 
 float ArchSpatial::Width() const { return size.x(); }

@@ -98,7 +98,6 @@ public:
     [[nodiscard]] float HalfDepth() const;
 
     [[nodiscard]] V3f Position() const;
-    [[nodiscard]] V3f PositionReal3d() const;
     [[maybe_unused]] [[nodiscard]] float PositionX() const;
     [[maybe_unused]] [[nodiscard]] float PositionY() const;
     [[maybe_unused]] [[nodiscard]] float PositionZ() const;
@@ -619,6 +618,7 @@ public:
     explicit HouseBSData( const JMATH::Rect2f& _floorPlanBBox );
     constexpr static uint64_t Version() { return SHouseJSONVersion; }
     void calcBBox() override;
+    [[nodiscard]] V3f GeoOffset() const;
     void reRoot( float, ArchRescaleSpaceT ) override;
     void reElevate( float _elevation );
     FloorBSData *addFloorFromData( const JMATH::Rect2f& _rect );
