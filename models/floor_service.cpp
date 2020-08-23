@@ -40,7 +40,7 @@ void FloorService::addWallsFromData( FloorBSData *f, const V2fVectorOfVector& fl
 void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData *house, const std::vector<RoomPreData>& rds ) {
     // finally insert in floor
     for ( auto& r : rds ) {
-        auto newRoom = std::make_shared<RoomBSData>(r, f->Height(), f->Elevation());
+        auto newRoom = std::make_shared<RoomBSData>(r, f->Height(), 0.0f);
         RoomService::updateFromArchSegments(newRoom.get(), r.wallSegmentsInternal);
         f->rooms.push_back(newRoom);
     }
@@ -1165,11 +1165,11 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
 
                 // Floors
                 if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Floors) ) {
-                    V3f a = XZY::C(std::get<0>(room->Triangles2d()[0]), f->Elevation());
-                    V3f b = XZY::C(std::get<2>(room->Triangles2d()[0]), f->Elevation());
-                    V3f c = XZY::C(std::get<1>(room->Triangles2d()[0]), f->Elevation());
+                    V3f a = XZY::C(std::get<0>(room->Triangles2d()[0]), f->BBox3d().centreBottom().y());
+                    V3f b = XZY::C(std::get<2>(room->Triangles2d()[0]), f->BBox3d().centreBottom().y());
+                    V3f c = XZY::C(std::get<1>(room->Triangles2d()[0]), f->BBox3d().centreBottom().y());
                     Plane3f planeFloor{ a, b, c };
-                    if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->Triangles2d(), f->Elevation(), fd.nearV) ) {
+                    if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->Triangles2d(), f->BBox3d().centreBottom().y(), fd.nearV) ) {
                         fd.normal = planeFloor.n;
                         fd.arch = room.get();
                         fd.room = room.get();
@@ -1187,9 +1187,9 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
                                 fd.normal = plane.n;
                                 fd.archSegment = &wd;
                                 fd.room = room.get();
-                                if ( distance(iPoint.y(), f->Elevation()) < 0.15f ) {
+                                if ( distance(iPoint.y(), f->BBox3d().centreBottom().y()) < 0.15f ) {
                                     fd.intersectedType = GHType::Skirting;
-                                } else if ( room->mHasCoving && distance(iPoint.y(), f->Elevation() + f->Height()) < 0.15f ) {
+                                } else if ( room->mHasCoving && distance(iPoint.y(), f->BBox3d().centreBottom().y() + f->Height()) < 0.15f ) {
                                     fd.intersectedType = GHType::Coving;
                                 } else {
                                     fd.intersectedType = GHType::Wall;
@@ -1202,11 +1202,11 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
 
                 // Ceilings
                 if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Ceilings) ) {
-                    V3f a = XZY::C(std::get<0>(room->Triangles2d()[0]), f->Elevation() + f->Height());
-                    V3f b = XZY::C(std::get<1>(room->Triangles2d()[0]), f->Elevation() + f->Height());
-                    V3f c = XZY::C(std::get<2>(room->Triangles2d()[0]), f->Elevation() + f->Height());
+                    V3f a = XZY::C(std::get<0>(room->Triangles2d()[0]), f->BBox3d().centreBottom().y() + f->Height());
+                    V3f b = XZY::C(std::get<1>(room->Triangles2d()[0]), f->BBox3d().centreBottom().y() + f->Height());
+                    V3f c = XZY::C(std::get<2>(room->Triangles2d()[0]), f->BBox3d().centreBottom().y() + f->Height());
                     Plane3f planeFloor{ a, b, c };
-                    if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->Triangles2d(), f->Elevation() + f->Height(),
+                    if ( planeFloor.intersectRayOnTriangles2dMin(rayPair, room->Triangles2d(), f->BBox3d().centreBottom().y() + f->Height(),
                                                                  fd.nearV, WindingOrder::CW) ) {
                         fd.normal = -planeFloor.n;
                         fd.arch = room.get();

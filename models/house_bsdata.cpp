@@ -35,6 +35,14 @@ void HouseBSData::calcBBox() {
     size = BBox3d().size();
 }
 
+float HouseBSData::Elevation() const {
+    return elevation;
+}
+
+V2f HouseBSData::PlaneOffset() const {
+    return planeOffset;
+}
+
 void HouseBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     for ( auto& floor : mFloors ) {
         floor->reRoot(_scale, _scaleSpace);
@@ -56,10 +64,10 @@ V3f HouseBSData::GeoOffset() const {
 
 void HouseBSData::reElevate( float _elevation ) {
     elevation = _elevation;
-    for ( auto& floor : mFloors ) {
-        floor->elevate(floor->number + elevation);
-    }
-    reRoot(1.0f, ArchRescaleSpace::FloorplanScaling);
+//    for ( auto& floor : mFloors ) {
+//        floor->elevate(floor->number + elevation);
+//    }
+//    reRoot(1.0f, ArchRescaleSpace::FloorplanScaling);
 }
 
 FloorBSData *HouseBSData::addFloorFromData( const JMATH::Rect2f& _rect ) {
@@ -87,7 +95,6 @@ FloorBSData::FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _d
     anchorPoint = JMATH::Rect2fFeature::bottomRight;
     number = _floorNumber;
     ceilingContours.push_back(BBox().points3d(Height()));
-    elevation = number * ( _defaultGroundHeight + _defaultCeilingHeight );
     concreteHeight = _defaultGroundHeight;
     doorHeight = _doorHeight;
     windowHeight = _defaultWindowHeight;
@@ -100,6 +107,7 @@ void FloorBSData::calcBBox() {
     for ( const auto& v : FloorService::allFloorePoints(this) ) {
         bbox.expand(v);
     }
+    float elevation = number * ( concreteHeight + Height() );
     bbox3d.calc(BBox(), elevation, elevation + Height(), Matrix4f({ 0.0f, 0.0f, elevation }));
 
     //offsetFromFloorAnchor = mHouse->getFirstFloorAnchor();
@@ -108,13 +116,11 @@ void FloorBSData::calcBBox() {
 }
 
 void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
-    center({ Center().x(), elevation + half(Height()), Center().z() });
     ArchSpatial::reRoot(_scale, _scaleSpace);
 
     for ( auto& vv : ceilingContours ) {
         for ( auto& v : vv ) {
             v *= { _scale, _scale, 1.0f };
-            v.setZ(elevation + Height());
         }
     }
     for ( auto& v : mPerimeterSegments ) {
@@ -125,19 +131,15 @@ void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     }
 
     for ( auto& i : windows ) {
-        i->elevate(elevation);
         i->reRoot(_scale, _scaleSpace);
     }
     for ( auto& i : doors ) {
-        i->elevate(elevation);
         i->reRoot(_scale, _scaleSpace);
     }
     for ( auto& i : walls ) {
-        i->elevate(elevation);
         i->reRoot(_scale, _scaleSpace);
     }
     for ( auto& i : rooms ) {
-        i->elevate(elevation);
         i->reRoot(_scale, _scaleSpace);
     }
     for ( auto& usg : orphanedUShapes ) {
@@ -148,7 +150,6 @@ void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
         usg.p2 *= _scale;
     }
     for ( auto& i : balconies ) {
-        i->elevate(elevation);
         i->reRoot(_scale, _scaleSpace);
     }
 
@@ -187,9 +188,6 @@ void RoomBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     }
     for ( auto& s : mPerimeterSegments ) {
         s *= _scale;
-    }
-    for ( auto& s : mFittedFurniture ) {
-        s->elevate(elevation);
     }
     mPerimeter *= _scale;
     for ( auto& s : mMaxEnclosingBoundingBox ) {
@@ -317,6 +315,10 @@ void WallBSData::makeTriangles2d() {
     }
 }
 
+float WallBSData::Elevation() const {
+    return elevation;
+}
+
 // *********************************************************************************************************************
 // Fitted Furniture
 // *********************************************************************************************************************
@@ -421,14 +423,6 @@ void ArchSpatial::scale( const V3f& _scale ) {
     scaleBBox(_scale);
 }
 
-void ArchSpatial::offset( const V2f& _offset ) {
-    planeOffset = _offset;
-}
-
-void ArchSpatial::elevate( float _elevation ) {
-    elevation = _elevation;
-}
-
 [[maybe_unused]] JMATH::AABB& ArchSpatial::BBox3dEmergencyWrite() {
     return bbox3d;
 }
@@ -457,8 +451,6 @@ float& ArchSpatial::d() { return size[2]; }
 V3f& ArchSpatial::position() { return pos; }
 Quaternion& ArchSpatial::rot() { return rotation; }
 V3f& ArchSpatial::scale() { return scaling; }
-float ArchSpatial::Elevation() const { return elevation; }
-V2f ArchSpatial::PlaneOffset() const { return planeOffset; }
 
 // *********************************************************************************************************************
 // TwoUShapeBased
