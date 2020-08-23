@@ -7,12 +7,10 @@
 #include "floor_render.hpp"
 
 #include <core/math/path_util.h>
-#include <core/resources/resource_builder.hpp>
 #include <poly/scene_graph.h>
 #include <graphics/renderer.h>
 
 #include <eh_arch/controller/arch_render_controller.hpp>
-#include "house_render.hpp"
 #include "wall_render.hpp"
 #include "room_render.hpp"
 #include "window_render.hpp"
@@ -54,27 +52,26 @@ namespace FloorRender {
         }
     }
 
-    void make3dGeometry( SceneGraph& sg, const FloorBSData *f, HouseRenderContainer& ret ) {
-        // External walls of this floor
-        auto eRootH = EF::create<Geom>("Floor");
+    GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const FloorBSData *f ) {
+        auto lRootH = eRootH->addChildren("Floor"+ std::to_string(f->hash));
 
-        auto ews = WallRender::make3dGeometry(sg, eRootH, f->PositionReal3d(), f->perimeterArchSegments,
+        // External walls of this floor
+        auto ews = WallRender::make3dGeometry(sg, lRootH, f->perimeterArchSegments,
                                               f->externalWallsMaterial);
-        ret.externalWallsGB.insert(ret.externalWallsGB.end(), ews.begin(), ews.end());
 
         for ( const auto& w : f->windows ) {
-            ret.windowsGB.emplace_back(WindowRender::make3dGeometry(sg, eRootH, w.get()));
+            WindowRender::make3dGeometry(sg, lRootH, w.get());
         }
         for ( const auto& w : f->doors ) {
-            ret.doorsGB.emplace_back(DoorRender::make3dGeometry(sg, eRootH, w.get()));
+            DoorRender::make3dGeometry(sg, lRootH, w.get());
         }
         for ( const auto& w : f->balconies ) {
-            auto ws = BalconyRender::make3dGeometry(sg, eRootH, w.get());
-            ret.outdoorSpacesGB.insert(ret.outdoorSpacesGB.end(), ws.begin(), ws.end());
+            BalconyRender::make3dGeometry(sg, lRootH, w.get());
         }
         for ( const auto& w : f->rooms ) {
-            RoomRender::make3dGeometry(sg, eRootH, w.get());
+            RoomRender::make3dGeometry(sg, lRootH, w.get());
         }
-        sg.addNode(eRootH);
+
+        return lRootH;
     }
 }

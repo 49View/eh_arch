@@ -343,7 +343,7 @@ namespace WindowRender {
 
         float vwangle = -atan2(-window->dirWidth.y(), window->dirWidth.x());
         Quaternion rot(vwangle + window->rotOrientation, V3f::UP_AXIS);
-        lRootH->updateTransform( window->PositionReal3d(), rot, V3f::ONE); //
+        lRootH->updateTransform( window->Position(), rot, V3f::ONE); //
 
         return lRootH;
     }

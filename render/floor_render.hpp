@@ -6,13 +6,14 @@
 
 #pragma once
 
+#include <core/resources/resource_types.hpp>
+
 class SceneGraph;
 class Renderer;
 struct FloorBSData;
-class HouseRenderContainer;
 class ArchRenderController;
 
 namespace FloorRender {
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const FloorBSData *data, const ArchRenderController& arc );
-    void make3dGeometry( SceneGraph& sg, const FloorBSData* f, HouseRenderContainer& ret );
+    GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const FloorBSData* f );
 }

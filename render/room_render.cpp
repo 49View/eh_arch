@@ -97,8 +97,7 @@ namespace RoomRender {
 //        }
     }
 
-    GeomSPContainer createCovingSegments( SceneGraph& sg, RoomBSData *w ) {
-        GeomSPContainer ret;
+    void createCovingSegments( SceneGraph& sg, GeomSP eRootH, RoomBSData *w ) {
 
         // Only add geometry if room type needs is
         if ( RoomService::roomNeedsCoving(w) && w->mHasCoving ) {
@@ -109,18 +108,15 @@ namespace RoomRender {
                 FollowerFlags ff = bWrap ? FollowerFlags::WrapPath : FollowerFlags::Defaults;
 
                 if ( auto profile = sg.PL(w->covingProfile); profile ) {
-                    ret.emplace_back(
-                            sg.GB<GT::Follower>(profile, w->PositionReal3d(), XZY::C(cov, w->Height()), ff, PolyRaise::VerticalNeg,
-                                                GT::ForceNormalAxis(Vector3f::UP_AXIS),
-                                                GT::Flip(V2fc::X_AXIS), w->covingMaterial));
+                    sg.GB<GT::Follower>(profile, w->Position(), eRootH, XZY::C(cov, w->Height()), ff, PolyRaise::VerticalNeg,
+                                        GT::ForceNormalAxis(Vector3f::UP_AXIS),
+                                        GT::Flip(V2fc::X_AXIS), w->covingMaterial);
                 }
             }
         }
-        return ret;
     }
 
-    GeomSPContainer createSkirtingSegments( SceneGraph& sg, RoomBSData *w ) {
-        GeomSPContainer ret;
+    void createSkirtingSegments( SceneGraph& sg, GeomSP eRootH, RoomBSData *w ) {
         if ( RoomService::roomNeedsCoving(w) ) {
             for ( auto& cov : w->mvSkirtingSegments ) {
                 ASSERT(cov.size() >= 2);
@@ -134,46 +130,44 @@ namespace RoomRender {
                 FollowerFlags ff = bWrap ? FollowerFlags::WrapPath : FollowerFlags::Defaults;
 
                 if ( auto profile = sg.PL(w->skirtingProfile); profile ) {
-                    ret.emplace_back(
-                            sg.GB<GT::Follower>(profile, w->PositionReal3d(), XZY::C(cov, 0.0f), GT::ForceNormalAxis(Vector3f::UP_AXIS),
-                                                ff, GT::Flip(V2fc::X_AXIS), w->skirtingMaterial));
+                    sg.GB<GT::Follower>(profile, w->Position(), eRootH, XZY::C(cov, 0.0f), GT::ForceNormalAxis(Vector3f::UP_AXIS),
+                                        ff, GT::Flip(V2fc::X_AXIS), w->skirtingMaterial);
                 }
             }
         }
-        return ret;
     }
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, RoomBSData *w ) {
 
         auto lRootH = eRootH->addChildren("Room"+ std::to_string(w->hash));
 
-        auto wc = RoomRender::createCovingSegments(sg, w);
-        auto ws = RoomRender::createSkirtingSegments(sg, w);
-        WallRender::make3dGeometry(sg, lRootH, w->PositionReal3d(), w->mWallSegmentsSorted, w->wallsMaterial);
+        RoomRender::createCovingSegments(sg, lRootH, w);
+        RoomRender::createSkirtingSegments(sg, lRootH, w);
+        WallRender::make3dGeometry(sg, lRootH, w->mWallSegmentsSorted, w->wallsMaterial);
 
         float zPull = 0.001f;
         auto outline = PolyOutLine{ XZY::C(w->mPerimeterSegments), V3f::UP_AXIS, zPull };
-        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3f::UP_AXIS * -zPull } + w->PositionReal3d(), w->floorMaterial,
+        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3f::UP_AXIS * -zPull } + w->Position(), w->floorMaterial,
                                        GT::Tag(ArchType::FloorT));
 
         for ( const auto& lf : w->mLightFittings ) {
-            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, lRootH, w->PositionReal3d() + XZY::C(lf.lightPosition) + V3f::UP_AXIS * 0.023f);
+            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, lRootH, w->Position() + XZY::C(lf.lightPosition) + V3f::UP_AXIS * 0.023f);
             auto lKey = lf.key;
             sg.add<Light>(lKey,
-                          Light{ LightType_Point, lf.key, w->spotlightGeom, XZY::C(lf.lightPosition) + V3f::UP_AXIS_NEG * w->spotLightYOffset*2.0f + w->PositionReal3d(),
+                          Light{ LightType_Point, lf.key, w->spotlightGeom, XZY::C(lf.lightPosition) + V3f::UP_AXIS_NEG * w->spotLightYOffset*2.0f + w->Position(),
                                  3.5f, 0.0f, V3f::Y_AXIS * .5f });
         }
         for ( const auto& lf : w->mSwitchesLocators ) {
-            sg.GB<GT::Asset>("lightswitch", lRootH, V3f{ lf.x(), 1.2f, lf.y() } + w->PositionReal3d(),
+            sg.GB<GT::Asset>("lightswitch", lRootH, V3f{ lf.x(), 1.2f, lf.y() } + w->Position(),
                              GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
         }
         for ( const auto& lf : w->mSocketLocators ) {
-            sg.GB<GT::Asset>("powerSocket", lRootH, V3f{ lf.x(), .252f, lf.y() } + w->PositionReal3d(),
+            sg.GB<GT::Asset>("powerSocket", lRootH, V3f{ lf.x(), .252f, lf.y() } + w->Position(),
                              GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
         }
         for ( auto& fur : w->mFittedFurniture ) {
             if (!fur->name.empty()) {
-                auto furn = sg.GB<GT::Asset>(fur->name, lRootH, fur->PositionReal3d(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
+                auto furn = sg.GB<GT::Asset>(fur->name, lRootH, fur->Position(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
 //                    sg.GB<GT::Shape>(ShapeType::Cube, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale{fur->Size()}, C4f::BLUE_SHADOW );
@@ -186,7 +180,7 @@ namespace RoomRender {
             KitchenRender::render(sg, lRootH, w);
         }
 
-        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3f::UP_AXIS * (w->Height() - zPull) } + w->PositionReal3d(),
+        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3f::UP_AXIS * (w->Height() - zPull) } + w->Position(),
                                          w->ceilingMaterial,
                                          GT::Tag(ArchType::CeilingT));
         return lRootH;

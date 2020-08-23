@@ -291,7 +291,7 @@ namespace DoorRender {
 
         float vwangle = -atan2(-data->dirWidth.y(), data->dirWidth.x());
         Quaternion rot(vwangle + M_PI, V3f::UP_AXIS);
-        lRootH->updateTransform(data->PositionReal3d(), rot, V3f::ONE);
+        lRootH->updateTransform(data->Position(), rot, V3f::ONE);
 
         return lRootH;
     }
