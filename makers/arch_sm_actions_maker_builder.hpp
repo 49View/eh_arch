@@ -34,6 +34,14 @@ struct UpdateHMB {
     }
 };
 
+struct ChangeElevation {
+    void operator()( ArchOrchestrator& asg ) {
+        asg.H()->reElevate(asg.H()->elevation);
+        asg.showIMHouse();
+        asg.pushHouseChange();
+    }
+};
+
 
 static inline void
 prepareProperty( const PropertyListing& property, ArchOrchestrator& asg, SceneGraph& sg,
@@ -127,9 +135,9 @@ struct GlobalRescale {
             // The reason why we need to do 2 rescale is that we do not have a "1.0" scale factor as that depends
             // on the result of the ocr scan of the floorplan, so first we need to invert the current scale
             // then apply the new scale. It's a bit awkward but works.
-            asg.H()->reRoot(1.0f / oldScaleFactor, ArchRescaleSpace::FloorplanScaling, V3f::ZERO, Quaternion{});
+            asg.H()->reRoot(1.0f / oldScaleFactor, ArchRescaleSpace::FloorplanScaling);
             asg.H()->sourceData.rescaleFactor = metersToCentimeters(currentScaleFactorMeters);
-            asg.H()->reRoot(asg.H()->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling, V3f::ZERO, Quaternion{});
+            asg.H()->reRoot(asg.H()->sourceData.rescaleFactor, ArchRescaleSpace::FloorplanScaling);
             // We need a full rebuild of the fittings because scaling doesn't go well with furnitures, IE we cannot
             // scale a sofa, hence only scaling the position will move the sofa away from it's desired location
             // which for example would be "against a wall". So because we cannot apply "scale" to furnitures we need

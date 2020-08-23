@@ -35,9 +35,9 @@ void HouseBSData::calcBBox() {
     size = BBox3d().size();
 }
 
-void HouseBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
+void HouseBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     for ( auto& floor : mFloors ) {
-        floor->reRoot(_scale, _scaleSpace, _pos, _rot);
+        floor->reRoot(_scale, _scaleSpace);
     }
     calcBBox();
     walkableArea = HouseService::area(this);
@@ -48,6 +48,10 @@ void HouseBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f
             RoomService::calcSkirtingSegments(r.get());
         }
     }
+}
+
+void HouseBSData::reElevate( float _elevation ) {
+    elevation = _elevation;
 }
 
 FloorBSData *HouseBSData::addFloorFromData( const JMATH::Rect2f& _rect ) {
@@ -95,8 +99,8 @@ void FloorBSData::calcBBox() {
     //offsetFromFloorAnchor3d = Vector3f( offsetFromFloorAnchor, z );
 }
 
-void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
-    ArchSpatial::reRoot(_scale, _scaleSpace, _pos, _rot);
+void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    ArchSpatial::reRoot(_scale, _scaleSpace);
 
     for ( auto& vv : ceilingContours ) {
         for ( auto& v : vv ) {
@@ -107,13 +111,13 @@ void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f
         v *= _scale;
     }
     for ( auto& v : perimeterArchSegments ) {
-        v.reRoot(_scale, _scaleSpace, _pos, _rot);
+        v.reRoot(_scale, _scaleSpace);
     }
 
-    for ( auto& i : windows ) i->reRoot(_scale, _scaleSpace, _pos, _rot);
-    for ( auto& i : doors ) i->reRoot(_scale, _scaleSpace, _pos, _rot);
-    for ( auto& i : walls ) i->reRoot(_scale, _scaleSpace, _pos, _rot);
-    for ( auto& i : rooms ) i->reRoot(_scale, _scaleSpace, _pos, _rot);
+    for ( auto& i : windows ) i->reRoot(_scale, _scaleSpace);
+    for ( auto& i : doors ) i->reRoot(_scale, _scaleSpace);
+    for ( auto& i : walls ) i->reRoot(_scale, _scaleSpace);
+    for ( auto& i : rooms ) i->reRoot(_scale, _scaleSpace);
     for ( auto& usg : orphanedUShapes ) {
         usg.middle *= _scale;
     }
@@ -121,7 +125,7 @@ void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f
         usg.p1 *= _scale;
         usg.p2 *= _scale;
     }
-    for ( auto& i : balconies ) i->reRoot(_scale, _scaleSpace, _pos, _rot);
+    for ( auto& i : balconies ) i->reRoot(_scale, _scaleSpace);
 
     //	for ( auto&& i : stairs ) i->reRoot();
 
@@ -144,17 +148,17 @@ RoomBSData::RoomBSData( const RoomPreData& _preData, const float _floorHeight, c
     z = _z;
 }
 
-void RoomBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
-    ArchSpatial::reRoot(_scale, _scaleSpace, _pos, _rot);
+void RoomBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    ArchSpatial::reRoot(_scale, _scaleSpace);
 
     Vector3f scale3f = { _scale, _scale, 1.0f };
     for ( auto& covs : mWallSegments ) {
         for ( auto& s : covs ) {
-            s.reRoot(_scale, _scaleSpace, _pos, _rot);
+            s.reRoot(_scale, _scaleSpace);
         }
     }
     for ( auto& s : mWallSegmentsSorted ) {
-        s.reRoot(_scale, _scaleSpace, _pos, _rot);
+        s.reRoot(_scale, _scaleSpace);
     }
     for ( auto& s : mPerimeterSegments ) {
         s *= _scale;
@@ -233,14 +237,14 @@ WallBSData::WallBSData( const std::vector<Vector2f>& epts,
     WallService::update(this, epts);
 }
 
-void WallBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
-    ArchSpatial::reRoot(_scale, _scaleSpace, _pos, _rot);
+void WallBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    ArchSpatial::reRoot(_scale, _scaleSpace);
 
     for ( auto& s : epoints ) {
         s *= _scale;
     }
     for ( auto& s : mUShapes ) {
-        s.reRoot(_scale, _scaleSpace, _pos, _rot);
+        s.reRoot(_scale, _scaleSpace);
     }
 
     calcBBox();
@@ -312,7 +316,7 @@ void FittedFurniture::calcBBox() {
 // ArchSpatial
 // *********************************************************************************************************************
 
-void ArchSpatial::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
+void ArchSpatial::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     //height *= _scale;
     w() *= _scale;
     d() *= _scale;
@@ -422,12 +426,12 @@ V3f& ArchSpatial::scale() { return scaling; }
 // TwoUShapeBased
 // *********************************************************************************************************************
 
-void TwoUShapesBased::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
-    us1.reRoot( _scale, _scaleSpace, _pos, _rot );
-    us2.reRoot( _scale, _scaleSpace, _pos, _rot );
+void TwoUShapesBased::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    us1.reRoot( _scale, _scaleSpace );
+    us2.reRoot( _scale, _scaleSpace );
     thickness *= _scale;
 
-    ArchSpatial::reRoot( _scale, _scaleSpace, _pos, _rot );
+    ArchSpatial::reRoot( _scale, _scaleSpace );
     TwoUShapesBased::calcBBox();
     calcBBox();
 }
@@ -475,8 +479,8 @@ DoorBSData::DoorBSData(float _doorHeight, float _ceilingHeight, const UShape& w1
     calcBBox();
 }
 
-void DoorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
-    TwoUShapesBased::reRoot(_scale, _scaleSpace, _pos, _rot);
+void DoorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    TwoUShapesBased::reRoot(_scale, _scaleSpace);
     DoorService::calculatePivots(this);
 }
 
@@ -512,8 +516,8 @@ WindowBSData::WindowBSData( float _windowHeight, float _ceilingHeight, float _de
     minPanelWidth = ( Width() - totalMainFramesWidths ) / numPanels;
 }
 
-void WindowBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
-    TwoUShapesBased::reRoot(_scale, _scaleSpace, _pos, _rot);
+void WindowBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    TwoUShapesBased::reRoot(_scale, _scaleSpace);
 }
 
 void WindowBSData::calcBBox() {
@@ -532,8 +536,8 @@ BalconyBSData::BalconyBSData( const std::vector<Vector2f>& epts ) {
     calcBBox();
 }
 
-void BalconyBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
-    ArchSpatial::reRoot(_scale, _scaleSpace, _pos, _rot);
+void BalconyBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    ArchSpatial::reRoot(_scale, _scaleSpace);
     for ( auto& s : epoints ) {
         s *= _scale;
     }
@@ -586,7 +590,7 @@ float ArchSegment::length() const {
     return distance(p1, p2);
 }
 
-void ArchSegment::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
+void ArchSegment::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     p1 *= _scale;
     p2 *= _scale;
     middle *= _scale;
@@ -602,7 +606,7 @@ void ArchSegment::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f
     }
 }
 
-void UShape::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace, const V3f& _pos, [[maybe_unused]] const Quaternion& _rot ) {
+void UShape::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     for ( int64_t t = 0; t < 4; t++ ) points[t] *= _scale;
     middle *= _scale;
     width *= _scale;

@@ -42,6 +42,9 @@ struct OnCreateHouseTexturesEvent {
 };
 struct OnUpdateHMBEvent {
 };
+struct OnHouseChangeElevationEvent {
+
+};
 struct OnMakeHouse3dEvent {
 };
 struct OnElaborateHouseBitmapEvent {
