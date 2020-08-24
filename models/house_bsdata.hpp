@@ -31,9 +31,9 @@ static const uint64_t SHouseJSONVersion = 2151;
 // Version log
 //
 // 2020-08-21 -    #2151 - Added HouseBSData geoCoordinates and elevation, also elevation for some Archs
-// 2020-08-21 -    #2150 - Added BalconyBSData floorHeight
-// 2020-08-20 -    #2149 - Added balconyFloorMaterial
-// 2020-08-19 -    #2148 - Adding balconies and removing unnecessary default materials from floors
+// 2020-08-21 -    #2150 - Added OutdoorAreaBSData floorHeight
+// 2020-08-20 -    #2149 - Added externalFloorMaterial
+// 2020-08-19 -    #2148 - Adding outdoorAreas and removing unnecessary default materials from floors
 // 2020-08-17 -    #2147 - Added pos to ArchSpatial
 // 2020-08-10 -    #2146 - Remove unnecessary spatial variables from FittedFurniture
 // 2020-08-10 -    #2145 - Promoted rotation to ArchSpatial and removed it from FittedFurniture
@@ -111,8 +111,6 @@ public:
     [[nodiscard]] const JMATH::Rect2f& BBox() const;
     [[nodiscard]] const JMATH::AABB& BBox3d() const;
 
-    [[maybe_unused]] [[nodiscard]] JMATH::AABB& BBox3dEmergencyWrite();
-
     [[nodiscard]] const std::vector<Triangle2d>& Triangles2d() const;
 
     virtual void move( const V3f& _off );
@@ -132,7 +130,7 @@ protected:
 //    [[nodiscard]] V3f& center() { return centre; }
     [[nodiscard]] Quaternion& rot();
     [[nodiscard]] V3f& scale();
-    virtual void calcBBox();
+    virtual void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY());
 
 private:
     void posBBox();
@@ -182,7 +180,7 @@ struct TwoUShapesBased : public ArchStructural {
     uint32_t wallFlags = WallFlags::WF_None;
 
     void reRoot( float, ArchRescaleSpaceT ) override;
-    void calcBBox() override;
+    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
 };
 
 JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, crossNormal, color, tag, sequencePart,
@@ -226,7 +224,7 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, si
 
     explicit FittedFurniture( const std::tuple<std::string, AABB>& args, std::string _keyTag, std::string _symbolRef );
     [[nodiscard]] bool checkIf( FittedFurnitureFlagsT _flag ) const;
-    void calcBBox() override;
+    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
 };
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
@@ -263,7 +261,7 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     V3f doorGeomPivot = V3f::ZERO;
     V2f doorSize = V2fc::ZERO;
 
-    void calcBBox() override;
+    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
     DoorBSData( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
                 ArchSubTypeT st = ArchSubType::NotApplicable );
     void reRoot( float, ArchRescaleSpaceT ) override;
@@ -289,7 +287,7 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
 
     WindowBSData( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1,
                   const UShape& w2, ArchSubTypeT = ArchSubType::NotApplicable );
-    void calcBBox() override;
+    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
     void reRoot( float, ArchRescaleSpaceT ) override;
 };
 
@@ -316,7 +314,7 @@ JSONDATA_H(WallBSData, ArchStructural, hash, type,
                 int64_t _linkedHash = 0,
                 SequencePart _sequencePart = 0 );
     void reRoot( float, ArchRescaleSpaceT ) override;
-    void calcBBox() override;
+    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
     [[nodiscard]] float Elevation() const;
 private:
     void makeTriangles2d();
@@ -329,19 +327,19 @@ JSONDATA_H(StairsBSData, ArchStructural, hash, type,
     std::string name;
 };
 
-JSONDATA_H(BalconyBSData, ArchStructural, hash, type,
+JSONDATA_H(OutdoorAreaBSData, ArchStructural, hash, type,
            bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
-           epoints, elevation, floorHeight, balconyFloorMaterial)
+           epoints, elevation, floorHeight, externalFloorMaterial)
 
     std::vector<Vector2f> epoints{};
 
     float elevation = 0.0f;
     float floorHeight = 0.1f;
-    MaterialAndColorProperty balconyFloorMaterial{ "wood,beech" };
+    MaterialAndColorProperty externalFloorMaterial{ "wood,beech" };
 
-    explicit BalconyBSData( const std::vector<Vector2f>& epts );
+    explicit OutdoorAreaBSData( const std::vector<Vector2f>& epts );
     void reRoot( float, ArchRescaleSpaceT ) override;
-    void calcBBox() override;
+    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
 private:
     void makeTriangles2d();
 };
@@ -527,7 +525,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type,
 
     RoomBSData( const RoomPreData& _preData, float _floorHeight, float _z );
     void reRoot( float, ArchRescaleSpaceT ) override;
-    void calcBBox() override;
+    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
 private:
     void makeTriangles2d();
 };
@@ -537,7 +535,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type,
            sequencePart,
            number, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
-           perimeterArchSegments, anchorPoint, walls, windows, doors, stairs, rooms, balconies, orphanedUShapes)
+           perimeterArchSegments, anchorPoint, walls, windows, doors, stairs, rooms, outdoorAreas, orphanedUShapes)
 
     int32_t number = -1; // As in floor number, ground floor = 1, etc...
 
@@ -561,7 +559,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type,
     std::vector<std::shared_ptr<DoorBSData>> doors;
     std::vector<std::shared_ptr<StairsBSData>> stairs;
     std::vector<std::shared_ptr<RoomBSData>> rooms;
-    std::vector<std::shared_ptr<BalconyBSData>> balconies;
+    std::vector<std::shared_ptr<OutdoorAreaBSData>> outdoorAreas;
     std::vector<UShape> orphanedUShapes;
 
     // Debugging only, maybe put on a debug flag or something
@@ -570,7 +568,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type,
     FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _defaultCeilingHeight, float _defaultGroundHeight,
                  float _doorHeight, float _defaultWindowHeight, float _defaultWindowBaseOffset );
     void reRoot( float, ArchRescaleSpaceT ) override;
-    void calcBBox() override;
+    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
 };
 
 JSONDATA_R_H(HouseBSData, ArchStructural, hash, type,
@@ -610,15 +608,18 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type,
     std::vector<CameraPath> tourPaths;
     std::vector<std::shared_ptr<FloorBSData>> mFloors;
 
+private:
+    void recalcSkirtingSegments();
+
 public:
     explicit HouseBSData( const JMATH::Rect2f& _floorPlanBBox );
     constexpr static uint64_t Version() { return SHouseJSONVersion; }
-    void calcBBox() override;
+    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
     [[nodiscard]] float Elevation() const;
     [[nodiscard]] V2f PlaneOffset() const;
     [[nodiscard]] V3f GeoOffset() const;
     void reRoot( float, ArchRescaleSpaceT ) override;
-    void reElevate( float _elevation );
+    void elevate( float _elevation );
     FloorBSData *addFloorFromData( const JMATH::Rect2f& _rect );
 };
 

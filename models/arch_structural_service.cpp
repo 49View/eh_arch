@@ -31,8 +31,8 @@ bool ArchStructuralService::typeIsFittedFurniture( const ArchStructural *a ) {
     return a->type == ArchType::FittedFurnitureT;
 }
 
-bool ArchStructuralService::typeIsBalcony( const ArchStructural *a ) {
-    return a->type == ArchType::BalconyT;
+bool ArchStructuralService::typeIsOutdoorArea( const ArchStructural *a ) {
+    return a->type == ArchType::OutdoorAreaT;
 }
 
 bool ArchStructuralService::isPointInside( const ArchStructural *a, const Vector2f& _pos ) {

@@ -54,7 +54,7 @@ namespace HouseService {
     std::shared_ptr<CollisionMesh> createCollisionMesh( const HouseBSData *_house );
     [[nodiscard]] bool hasTour(const HouseBSData *_house);
     float area( const HouseBSData *_house );
-    V2f centerOfBiggestRoom( const HouseBSData *house );
+    V3f centerOfBiggestRoom( const HouseBSData *house, float _preferredHeight );
     void bestStartingPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot );
     void bestDollyPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot );
     int getNumberOfePoints( std::shared_ptr<HouseBSData> _house );
@@ -117,8 +117,8 @@ namespace HouseService {
                     }
                 }
             }
-            if constexpr ( std::is_same_v<T, BalconyBSData> ) {
-                for ( auto& w : f->balconies ) {
+            if constexpr ( std::is_same_v<T, OutdoorAreaBSData> ) {
+                for ( auto& w : f->outdoorAreas ) {
                     if ( w->hash == hash ) {
                         return w.get();
                     }
@@ -191,8 +191,8 @@ namespace HouseService {
                         }
                     }
                 }
-                if constexpr ( std::is_same_v<T, BalconyBSData> ) {
-                    for ( const auto& w : f->balconies ) {
+                if constexpr ( std::is_same_v<T, OutdoorAreaBSData> ) {
+                    for ( const auto& w : f->outdoorAreas ) {
                         if ( checkNearOrInside(w.get()) ) {
                             return w;
                         }

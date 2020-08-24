@@ -67,7 +67,7 @@ public:
     static bool typeIsDOW( const ArchStructural *a );
     static bool typeIsWall( const ArchStructural *a );
     static bool typeIsFittedFurniture( const ArchStructural *a );
-    static bool typeIsBalcony( const ArchStructural *a );
+    static bool typeIsOutdoorArea( const ArchStructural *a );
     static bool isPointInside( const ArchStructural *a, const Vector2f& _pos );
     static bool isPointInside( const ArchStructural *a, const Vector3f& _pos );
     static bool isPointInside2d( const ArchStructural *a, const Vector2f& _pos );

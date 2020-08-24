@@ -81,4 +81,4 @@ struct OnGlobalRescaleEvent {
 };
 
 
-struct OnBalconyBuilderEvent {};
+struct OnOutdoorAreaBuilderEvent {};
