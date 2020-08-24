@@ -26,13 +26,14 @@
 
 #include "htypes.hpp"
 
-static const uint64_t SHouseJSONVersion = 2151;
+static const uint64_t SHouseJSONVersion = 2152;
 
 // Version log
 //
+// 2020-08-24 -    #2152 - Replaced BalconyBSData with OutdoorAreaBSData, also added few structs in between
 // 2020-08-21 -    #2151 - Added HouseBSData geoCoordinates and elevation, also elevation for some Archs
 // 2020-08-21 -    #2150 - Added OutdoorAreaBSData floorHeight
-// 2020-08-20 -    #2149 - Added externalFloorMaterial
+// 2020-08-20 -    #2149 - Added outdoorMainFloorMaterial
 // 2020-08-19 -    #2148 - Adding outdoorAreas and removing unnecessary default materials from floors
 // 2020-08-17 -    #2147 - Added pos to ArchSpatial
 // 2020-08-10 -    #2146 - Remove unnecessary spatial variables from FittedFurniture
@@ -327,19 +328,29 @@ JSONDATA_H(StairsBSData, ArchStructural, hash, type,
     std::string name;
 };
 
+JSONDATA(OutdoorBoundary, bPoints, elevation, zPull, extrusionType, outdoorBoundaryMaterial)
+    explicit OutdoorBoundary( const std::vector<Vector2f>& epts );
+    std::vector<Vector2f> bPoints{};
+    float elevation = 0.0f;
+    float zPull = 0.1f;
+    int extrusionType = 0; // We'll have at least "Extrude" (flat poly) and "Follower" (like a skirting board)
+    MaterialAndColorProperty outdoorBoundaryMaterial{"wood,beech"};
+};
+
 JSONDATA_H(OutdoorAreaBSData, ArchStructural, hash, type,
            bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
-           epoints, elevation, floorHeight, externalFloorMaterial)
+           outdoorBoundaries)
 
-    std::vector<Vector2f> epoints{};
+    std::vector<OutdoorBoundary> outdoorBoundaries{};
 
-    float elevation = 0.0f;
-    float floorHeight = 0.1f;
-    MaterialAndColorProperty externalFloorMaterial{ "wood,beech" };
-
+public:
     explicit OutdoorAreaBSData( const std::vector<Vector2f>& epts );
+    [[nodiscard]] const std::vector<OutdoorBoundary>& Boundaries() const;
+    std::vector<OutdoorBoundary>& Boundaries();
+    OutdoorBoundary& Boundary( std::size_t _index );
     void reRoot( float, ArchRescaleSpaceT ) override;
     void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
+    void addBoundary( const OutdoorBoundary& _ob );
 private:
     void makeTriangles2d();
 };

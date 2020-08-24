@@ -18,16 +18,16 @@ struct ExitOutdoorArea {
 
 struct AddPointOutdoorAreaAction {
     void operator()( OutdoorAreaBuilder* bb, const OnSingleTapEvent& mouseEvent ) noexcept {
-        bb->addPoint(mouseEvent.mousePos);
+        bb->addPoint(mouseEvent.mousePos, 0);
     }
 };
 
 struct FinaliseOutdoorArea {
     void operator()( OutdoorAreaBuilder* bb, ArchOrchestrator& asg ) noexcept {
         if ( asg.H() ) {
-            bb->finalize();
             FloorService::addOutdoorAreaFromData( asg.H()->mFloors[0].get(), bb->OutdoorAreaData() );
             asg.showIMHouse();
+            bb->clear();
         }
     }
 };

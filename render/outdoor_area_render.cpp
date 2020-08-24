@@ -15,14 +15,21 @@ namespace OutdoorAreaRender {
 
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const OutdoorAreaBSData* w, const ArchRenderController& arc ) {
         auto sm = arc.floorPlanShader();
-        auto color = arc.getFillColor(w, Color4f::LIGHT_GREY);
-        rr.draw<DFlatPoly>(w->epoints, color, sm, w->hashFeature("outdoorAreaFlatBseIM", 0));
+        int cc = 0;
+        for ( const auto& oa : w->Boundaries() ) {
+            auto color = arc.getFillColor(w, Color4f::LIGHT_GREY);
+            rr.draw<DFlatPoly>(oa.bPoints, color, sm, w->hashFeature("outdoorAreaFlatBseIM", cc++));
+        }
     }
 
-    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const OutdoorAreaBSData *w ) {
-        auto geom = sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(w->epoints, 0.0f), V3f::UP_AXIS, w->floorHeight }, w->Position(), w->externalFloorMaterial, eRootH);
-        GeomSPContainer ret;
-        ret.emplace_back(geom);
-        return ret;
+    GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const OutdoorAreaBSData *w ) {
+        auto lRootH = eRootH->addChildren("OutdoorArea"+ std::to_string(w->hash));
+
+        for ( const auto& oa : w->Boundaries() ) {
+            sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(oa.bPoints, 0.0f), V3f::UP_AXIS, oa.zPull },
+                               w->Position(), oa.outdoorBoundaryMaterial, lRootH);
+        }
+
+        return lRootH;
     }
 }

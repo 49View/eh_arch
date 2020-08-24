@@ -15,5 +15,5 @@ struct RDSPreMult;
 
 namespace OutdoorAreaRender {
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const OutdoorAreaBSData *data, const ArchRenderController& arc );
-    GeomSPContainer make3dGeometry( SceneGraph& sg, GeomSP eRootH, const OutdoorAreaBSData* mData );
+    GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const OutdoorAreaBSData* mData );
 };
