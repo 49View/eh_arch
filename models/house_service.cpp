@@ -150,7 +150,7 @@ FloorBSData *HouseService::findFloorOf( HouseBSData *_house, const int64_t _hash
                 return f.get();
             }
         }
-        for ( auto& w : f->balconies ) {
+        for ( auto& w : f->outdoorAreas ) {
             if ( w->hash == _hash ) {
                 return f.get();
             }
@@ -236,7 +236,7 @@ HouseService::rayIntersect( const HouseBSData *_house, const Vector3f& origin, c
             rayIntersectInternal(_house, floor->doors, origin, dir, nearV, found);
             rayIntersectInternal(_house, floor->windows, origin, dir, nearV, found);
             rayIntersectInternal(_house, floor->stairs, origin, dir, nearV, found);
-            rayIntersectInternal(_house, floor->balconies, origin, dir, nearV, found);
+            rayIntersectInternal(_house, floor->outdoorAreas, origin, dir, nearV, found);
         }
     }
 

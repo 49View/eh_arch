@@ -46,8 +46,8 @@ void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData *house, c
     }
 }
 
-void FloorService::addBalconyFromData( FloorBSData *f, const std::shared_ptr<BalconyBSData>& _balcony ) {
-    f->balconies.emplace_back(_balcony);
+void FloorService::addOutdoorAreaFromData( FloorBSData *f, const std::shared_ptr<OutdoorAreaBSData>& _outdoorArea ) {
+    f->outdoorAreas.emplace_back(_outdoorArea);
     f->calcBBox();
 }
 
@@ -772,8 +772,8 @@ void FloorService::removeArch( FloorBSData *f, int64_t hashToRemove ) {
         for ( auto& room : f->rooms ) {
             erase_if(room->mFittedFurniture, hashToRemove);
         }
-    } else if ( ArchStructuralService::typeIsBalcony(elem) ) {
-        erase_if(f->balconies, hashToRemove);
+    } else if ( ArchStructuralService::typeIsOutdoorArea(elem) ) {
+        erase_if(f->outdoorAreas, hashToRemove);
     } else {
         erase_if(f->stairs, hashToRemove);
     }
@@ -934,7 +934,7 @@ bool FloorService::intersectLine2d( const FloorBSData *f, Vector2f const& p0, Ve
         for ( const auto& w : f->doors ) {
             if ( ArchStructuralService::intersectLine2d(w.get(), p0, p1, i) ) return true;
         }
-        for ( const auto& w : f->balconies ) {
+        for ( const auto& w : f->outdoorAreas ) {
             if ( ArchStructuralService::intersectLine2d(w.get(), p0, p1, i) ) return true;
         }
         //for ( auto& w : f->stairs ) {
@@ -1017,7 +1017,7 @@ ArchStructural *FloorService::findElementWithHash( const FloorBSData *f, int64_t
         }
     }
     for ( auto&& i : f->stairs ) if ( i->hash == _hash ) return i.get();
-    for ( const auto& i : f->balconies ) if ( i->hash == _hash ) return i.get();
+    for ( const auto& i : f->outdoorAreas ) if ( i->hash == _hash ) return i.get();
 
     return nullptr;
 }
@@ -1037,7 +1037,7 @@ std::vector<ArchStructural *> FloorService::findElementWithLinkedHash( const Flo
     for ( auto&& i : f->stairs ) {
         if ( i->linkedHash == _hash ) ret.push_back(i.get());
     }
-    for ( auto&& i : f->balconies ) {
+    for ( auto&& i : f->outdoorAreas ) {
         if ( i->linkedHash == _hash ) ret.push_back(i.get());
     }
 
@@ -1239,11 +1239,11 @@ void FloorService::rayFeatureIntersect( const FloorBSData *f, const RayPair3& ra
 
                 // Balconies
                 if ( checkBitWiseFlag(fif, FeatureIntersectionFlags::FIF_Balconies) ) {
-                    for ( const auto& w : f->balconies ) {
+                    for ( const auto& w : f->outdoorAreas ) {
                         if ( ArchStructuralService::intersectRayMin(w.get(), rayPair, fd.nearV) ) {
                             fd.arch = w.get();
                             fd.room = room.get();
-                            fd.intersectedType = GHType::Balcony;
+                            fd.intersectedType = GHType::OutdoorArea;
                         }
                     }
                 }

@@ -7,7 +7,7 @@
 #include <core/state_machine_helper.hpp>
 #include <eh_arch/state_machine/arch_sm_events__fsm.hpp>
 #include <eh_arch/makers/arch_sm_actions_bespoke_builder.hpp>
-#include <eh_arch/makers/arch_sm_actions_balcony_builder.hpp>
+#include <eh_arch/makers/arch_sm_actions_outdoor_area_builder.hpp>
 #include <eh_arch/makers/arch_sm_actions_maker_builder.hpp>
 
 struct MakerStateMachine {
@@ -50,11 +50,11 @@ struct BespokeStateMachine {
     }
 };
 
-struct BalconyStateMachine {
+struct OutdoorAreaStateMachine {
     auto operator()() const noexcept {
         return make_transition_table(
-                *state<class Initial> / []{LOGRS("Balcony state")} = state<class BalconyState>
-                ,state<class BalconyState> + event<OnSingleTapEvent> / AddPointBalconyAction{}
+                *state<class Initial> / []{LOGRS("OutdoorArea state")} = state<class OutdoorAreaState>
+                ,state<class OutdoorAreaState> + event<OnSingleTapEvent> / AddPointOutdoorAreaAction{}
         );
     }
 };

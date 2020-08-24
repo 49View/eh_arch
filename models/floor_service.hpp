@@ -16,7 +16,7 @@
 #include <core/math/htypes.hpp>
 #include <poly/htypes.hpp>
 
-struct BalconyBSData;
+struct OutdoorAreaBSData;
 
 struct DebugUShapeIntersection {
     UShape *s1 = nullptr;
@@ -96,7 +96,7 @@ namespace FloorService {
     void addWindowFromData( FloorBSData *f, float _windowHeight, float _defaultWindowBaseOffset,
                             const UShape& w1, const UShape& w2 );
     void addCeilingContour( FloorBSData *f, const std::vector<Vector3f>& cc );
-    void addBalconyFromData( FloorBSData *f, const std::shared_ptr<BalconyBSData>& _balcony );
+    void addOutdoorAreaFromData( FloorBSData *f, const std::shared_ptr<OutdoorAreaBSData>& _outdoorArea );
 
     // Update
     void assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *house );

@@ -84,8 +84,8 @@ namespace HOD { // HighOrderDependency
                 ret.addDep(sg, ResourceGroup::Geom, window->curtainGeom);
                 ret.addDep(sg, ResourceGroup::Material, window->curtainMaterial);
             }
-            for ( const auto& balcony : floor->balconies ) {
-                ret.addDep(sg, ResourceGroup::Material, balcony->balconyFloorMaterial.materialHash);
+            for ( const auto& outdoorArea : floor->outdoorAreas ) {
+                ret.addDep(sg, ResourceGroup::Material, outdoorArea->externalFloorMaterial.materialHash);
             }
         }
 

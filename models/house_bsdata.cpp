@@ -128,7 +128,7 @@ void FloorBSData::calcBBox( const Matrix4f& _mat ) {
         bbox.merge(i->BBox());
         bbox3d.merge(i->BBox3d());
     }
-    for ( auto& i : balconies ) {
+    for ( auto& i : outdoorAreas ) {
         i->calcBBox(matCompose);
         bbox.merge(i->BBox());
         bbox3d.merge(i->BBox3d());
@@ -175,7 +175,7 @@ void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
         usg.p1 *= _scale;
         usg.p2 *= _scale;
     }
-    for ( auto& i : balconies ) {
+    for ( auto& i : outdoorAreas ) {
         i->reRoot(_scale, _scaleSpace);
     }
 
@@ -581,15 +581,15 @@ void WindowBSData::calcBBox( const Matrix4f& _mat ) {
 }
 
 // *********************************************************************************************************************
-// Balcony
+// OutdoorArea
 // *********************************************************************************************************************
 
-BalconyBSData::BalconyBSData( const std::vector<Vector2f>& epts ) {
+OutdoorAreaBSData::OutdoorAreaBSData( const std::vector<Vector2f>& epts ) {
     epoints = epts;
     calcBBox();
 }
 
-void BalconyBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+void OutdoorAreaBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     ArchSpatial::reRoot(_scale, _scaleSpace);
     for ( auto& s : epoints ) {
         s *= _scale;
@@ -597,7 +597,7 @@ void BalconyBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     calcBBox();
 }
 
-void BalconyBSData::calcBBox( const Matrix4f& _mat ) {
+void OutdoorAreaBSData::calcBBox( const Matrix4f& _mat ) {
     makeTriangles2d();
     for ( const auto& ep : epoints ) {
         bbox3d.expand(XZY::C(ep, elevation));
@@ -606,7 +606,7 @@ void BalconyBSData::calcBBox( const Matrix4f& _mat ) {
     bbox = bbox3d.topDown();
 }
 
-void BalconyBSData::makeTriangles2d() {
+void OutdoorAreaBSData::makeTriangles2d() {
     mTriangles2d.clear();
     Triangulator tri(epoints);
     mTriangles2d = tri.get2dTrianglesTuple();

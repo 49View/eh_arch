@@ -135,7 +135,7 @@ namespace ASType {
 	[[maybe_unused]] constexpr uint64_t Door = 2;
 	[[maybe_unused]] constexpr uint64_t Window = 3;
 	[[maybe_unused]] constexpr uint64_t Stairs = 4;
-	[[maybe_unused]] constexpr uint64_t Balcony = 5;
+	[[maybe_unused]] constexpr uint64_t OutdoorArea = 5;
 	[[maybe_unused]] constexpr uint64_t GenericRoom = 100;
 	[[maybe_unused]] constexpr uint64_t LivingRoom = 101;
 	[[maybe_unused]] constexpr uint64_t Kitchen = 102;
@@ -215,7 +215,7 @@ enum ArchType : uint64_t {
 	CurtainT = 1u << 15u,
 	CeilingT = 1u << 16u,
 	FittedFurnitureT = 1u << 17u,
-	BalconyT = 1u << 18u
+	OutdoorAreaT = 1u << 18u
 };
 
 using ArchTypeT = uint64_t;
@@ -272,7 +272,7 @@ namespace GHType {
     [[maybe_unused]] constexpr uint64_t KitchenBackSplash = 1u << 27u;
     [[maybe_unused]] constexpr uint64_t Furniture = 1u << 28u;
     [[maybe_unused]] constexpr uint64_t Fitting = 1u << 29u;
-    [[maybe_unused]] constexpr uint64_t Balcony = 1u << 29u;
+    [[maybe_unused]] constexpr uint64_t OutdoorArea = 1u << 29u;
 };
 // ************************************************************
 // Warning: any changes here needs to update **GHTypeToString**

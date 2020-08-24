@@ -15,7 +15,7 @@
 #include "room_render.hpp"
 #include "window_render.hpp"
 #include "door_render.hpp"
-#include "balcony_render.hpp"
+#include "outdoor_area_render.hpp"
 
 namespace FloorRender {
 
@@ -35,8 +35,8 @@ namespace FloorRender {
             }
         }
 
-        for ( const auto& w : f->balconies ) {
-            BalconyRender::IMHouseRender(rr, sg, w.get(), arc);
+        for ( const auto& w : f->outdoorAreas ) {
+            OutdoorAreaRender::IMHouseRender(rr, sg, w.get(), arc);
         }
         for ( const auto& w : f->walls ) {
             WallRender::IMHouseRender(rr, sg, w.get(), arc);
@@ -64,8 +64,8 @@ namespace FloorRender {
         for ( const auto& w : f->doors ) {
             DoorRender::make3dGeometry(sg, lRootH, w.get());
         }
-        for ( const auto& w : f->balconies ) {
-            BalconyRender::make3dGeometry(sg, lRootH, w.get());
+        for ( const auto& w : f->outdoorAreas ) {
+            OutdoorAreaRender::make3dGeometry(sg, lRootH, w.get());
         }
         for ( const auto& w : f->rooms ) {
             RoomRender::make3dGeometry(sg, lRootH, w.get());

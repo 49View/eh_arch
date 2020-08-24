@@ -31,9 +31,9 @@ static const uint64_t SHouseJSONVersion = 2151;
 // Version log
 //
 // 2020-08-21 -    #2151 - Added HouseBSData geoCoordinates and elevation, also elevation for some Archs
-// 2020-08-21 -    #2150 - Added BalconyBSData floorHeight
-// 2020-08-20 -    #2149 - Added balconyFloorMaterial
-// 2020-08-19 -    #2148 - Adding balconies and removing unnecessary default materials from floors
+// 2020-08-21 -    #2150 - Added OutdoorAreaBSData floorHeight
+// 2020-08-20 -    #2149 - Added externalFloorMaterial
+// 2020-08-19 -    #2148 - Adding outdoorAreas and removing unnecessary default materials from floors
 // 2020-08-17 -    #2147 - Added pos to ArchSpatial
 // 2020-08-10 -    #2146 - Remove unnecessary spatial variables from FittedFurniture
 // 2020-08-10 -    #2145 - Promoted rotation to ArchSpatial and removed it from FittedFurniture
@@ -327,17 +327,17 @@ JSONDATA_H(StairsBSData, ArchStructural, hash, type,
     std::string name;
 };
 
-JSONDATA_H(BalconyBSData, ArchStructural, hash, type,
+JSONDATA_H(OutdoorAreaBSData, ArchStructural, hash, type,
            bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
-           epoints, elevation, floorHeight, balconyFloorMaterial)
+           epoints, elevation, floorHeight, externalFloorMaterial)
 
     std::vector<Vector2f> epoints{};
 
     float elevation = 0.0f;
     float floorHeight = 0.1f;
-    MaterialAndColorProperty balconyFloorMaterial{ "wood,beech" };
+    MaterialAndColorProperty externalFloorMaterial{ "wood,beech" };
 
-    explicit BalconyBSData( const std::vector<Vector2f>& epts );
+    explicit OutdoorAreaBSData( const std::vector<Vector2f>& epts );
     void reRoot( float, ArchRescaleSpaceT ) override;
     void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
 private:
@@ -535,7 +535,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type,
            sequencePart,
            number, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
-           perimeterArchSegments, anchorPoint, walls, windows, doors, stairs, rooms, balconies, orphanedUShapes)
+           perimeterArchSegments, anchorPoint, walls, windows, doors, stairs, rooms, outdoorAreas, orphanedUShapes)
 
     int32_t number = -1; // As in floor number, ground floor = 1, etc...
 
@@ -559,7 +559,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type,
     std::vector<std::shared_ptr<DoorBSData>> doors;
     std::vector<std::shared_ptr<StairsBSData>> stairs;
     std::vector<std::shared_ptr<RoomBSData>> rooms;
-    std::vector<std::shared_ptr<BalconyBSData>> balconies;
+    std::vector<std::shared_ptr<OutdoorAreaBSData>> outdoorAreas;
     std::vector<UShape> orphanedUShapes;
 
     // Debugging only, maybe put on a debug flag or something

@@ -117,8 +117,8 @@ namespace HouseService {
                     }
                 }
             }
-            if constexpr ( std::is_same_v<T, BalconyBSData> ) {
-                for ( auto& w : f->balconies ) {
+            if constexpr ( std::is_same_v<T, OutdoorAreaBSData> ) {
+                for ( auto& w : f->outdoorAreas ) {
                     if ( w->hash == hash ) {
                         return w.get();
                     }
@@ -191,8 +191,8 @@ namespace HouseService {
                         }
                     }
                 }
-                if constexpr ( std::is_same_v<T, BalconyBSData> ) {
-                    for ( const auto& w : f->balconies ) {
+                if constexpr ( std::is_same_v<T, OutdoorAreaBSData> ) {
+                    for ( const auto& w : f->outdoorAreas ) {
                         if ( checkNearOrInside(w.get()) ) {
                             return w;
                         }
