@@ -111,7 +111,7 @@ Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( float screenRatio, 
 }
 
 void ArchOrchestrator::centerCameraMiddleOfHouseWithFloorplanInfoOffset( float floorplanOffset, float slack ) {
-    if ( houseJson()->BBox().isValid() ) {
+    if ( houseJson()->BBox3d().isValid() ) {
         Rect2f fpBBox = houseJson()->BBox();
         fpBBox.expand(houseJson()->BBox().centreTop() + V2fc::Y_AXIS * floorplanOffset);
         Timeline::play(rsg.DC()->PosAnim(), 0,
@@ -140,8 +140,7 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
             if ( ccf ) ccf();
             rsg.RR().setLoadingFlag(false);
             rsg.changeTime("14:00", H()->sourceData.northCompassAngle);
-            V3f probePos = XZY::C( HouseService::centerOfBiggestRoom(H()));
-            probePos.setY(1.25f);
+            V3f probePos = HouseService::centerOfBiggestRoom(H(), 1.25f);
             rsg.setProbePosition(probePos);
             loadingMutex = false;
         });
@@ -323,7 +322,7 @@ void ArchOrchestrator::setFloorPlanView( FloorPlanRenderMode fprm ) {
     if ( H() ) {
         auto quat = quatCompose(quatAngles);
         Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ 0.9f, quat });
-        centerCameraMiddleOfHouseWithFloorplanInfoOffset(1.3f, 0.2f);;
+        centerCameraMiddleOfHouseWithFloorplanInfoOffset(1.3f, 0.2f);
         showIMHouse();
     }
 

@@ -56,8 +56,7 @@ namespace FloorRender {
         auto lRootH = eRootH->addChildren("Floor"+ std::to_string(f->hash));
 
         // External walls of this floor
-        auto ews = WallRender::make3dGeometry(sg, lRootH, f->perimeterArchSegments,
-                                              f->externalWallsMaterial);
+        WallRender::make3dGeometry(sg, lRootH, f->perimeterArchSegments, f->externalWallsMaterial);
 
         for ( const auto& w : f->windows ) {
             WindowRender::make3dGeometry(sg, lRootH, w.get());

@@ -22,11 +22,11 @@ HouseBSData::HouseBSData( const Rect2f& _floorPlanBBox ) {
     bbox = _floorPlanBBox;
 }
 
-void HouseBSData::calcBBox() {
+void HouseBSData::calcBBox( const Matrix4f& _mat ) {
     bbox = Rect2f::INVALID;
     bbox3d = AABB::INVALID;
     for ( auto& floor : mFloors ) {
-        floor->calcBBox();
+        floor->calcBBox(Matrix4f{GeoOffset()});
         bbox.merge(floor->BBox());
         bbox3d.merge(floor->BBox3d());
     }
@@ -43,14 +43,7 @@ V2f HouseBSData::PlaneOffset() const {
     return planeOffset;
 }
 
-void HouseBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
-    for ( auto& floor : mFloors ) {
-        floor->reRoot(_scale, _scaleSpace);
-    }
-    calcBBox();
-    walkableArea = HouseService::area(this);
-
-    // Post rescaling we might need to get feature with accurate values in cm, so this is a chance to do it
+void HouseBSData::recalcSkirtingSegments() {
     for ( auto& f : mFloors ) {
         for ( auto& r : f->rooms ) {
             RoomService::calcSkirtingSegments(r.get());
@@ -58,16 +51,23 @@ void HouseBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     }
 }
 
+void HouseBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
+    for ( auto& floor : mFloors ) {
+        floor->reRoot(_scale, _scaleSpace);
+    }
+    calcBBox();
+    walkableArea = HouseService::area(this);
+    // Post rescaling we might need to get feature with accurate values in cm, so this is a chance to do it
+    recalcSkirtingSegments();
+}
+
 V3f HouseBSData::GeoOffset() const {
     return XZY::C(planeOffset, elevation);
 }
 
-void HouseBSData::reElevate( float _elevation ) {
+void HouseBSData::elevate( float _elevation ) {
     elevation = _elevation;
-//    for ( auto& floor : mFloors ) {
-//        floor->elevate(floor->number + elevation);
-//    }
-//    reRoot(1.0f, ArchRescaleSpace::FloorplanScaling);
+    calcBBox();
 }
 
 FloorBSData *HouseBSData::addFloorFromData( const JMATH::Rect2f& _rect ) {
@@ -102,13 +102,39 @@ FloorBSData::FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _d
     hasCoving = true;
 }
 
-void FloorBSData::calcBBox() {
+void FloorBSData::calcBBox( const Matrix4f& _mat ) {
     bbox = Rect2f::INVALID;
-    for ( const auto& v : FloorService::allFloorePoints(this) ) {
-        bbox.expand(v);
-    }
+    bbox3d = AABB::INVALID;
     float elevation = number * ( concreteHeight + Height() );
-    bbox3d.calc(BBox(), elevation, elevation + Height(), Matrix4f({ 0.0f, 0.0f, elevation }));
+    Matrix4f matCompose = Matrix4f({ 0.0f, 0.0f, elevation }) * _mat;
+
+    for ( auto& i : windows ) {
+        i->calcBBox(matCompose);
+        bbox.merge(i->BBox());
+        bbox3d.merge(i->BBox3d());
+    }
+    for ( auto& i : doors ) {
+        i->calcBBox(matCompose);
+        bbox.merge(i->BBox());
+        bbox3d.merge(i->BBox3d());
+    }
+    for ( auto& i : walls ) {
+        i->calcBBox(matCompose);
+        bbox.merge(i->BBox());
+        bbox3d.merge(i->BBox3d());
+    }
+    for ( auto& i : rooms ) {
+        i->calcBBox(matCompose);
+        bbox.merge(i->BBox());
+        bbox3d.merge(i->BBox3d());
+    }
+    for ( auto& i : balconies ) {
+        i->calcBBox(matCompose);
+        bbox.merge(i->BBox());
+        bbox3d.merge(i->BBox3d());
+    }
+
+    bbox3d.calc(BBox(), 0.0f, Height(), matCompose);
 
     //offsetFromFloorAnchor = mHouse->getFirstFloorAnchor();
     //offsetFromFloorAnchor -= ( bbox.topLeft() + bbox.size()*0.5f );
@@ -226,7 +252,7 @@ void RoomBSData::makeTriangles2d() {
     mTriangles2d = tri.get2dTrianglesTuple();
 }
 
-void RoomBSData::calcBBox() {
+void RoomBSData::calcBBox( const Matrix4f& _mat ) {
     bbox = Rect2f::INVALID;
 
     for ( auto& ws : mWallSegments ) {
@@ -276,7 +302,7 @@ void WallBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     calcBBox();
 }
 
-void WallBSData::calcBBox() {
+void WallBSData::calcBBox( const Matrix4f& _mat ) {
     if ( epoints.empty() ) return;
 
     bbox = Rect2f::INVALID;
@@ -338,7 +364,7 @@ FittedFurniture::FittedFurniture( const std::tuple<std::string, AABB>& args, std
     type = ArchType::FittedFurnitureT;
 }
 
-void FittedFurniture::calcBBox() {
+void FittedFurniture::calcBBox( const Matrix4f& _mat ) {
     ArchSpatial::calcBBox();
 }
 
@@ -366,7 +392,7 @@ void ArchSpatial::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     }
 }
 
-void ArchSpatial::calcBBox() {
+void ArchSpatial::calcBBox( const Matrix4f& _mat ) {
     V3f scaledHalf = half(size * scaling);
     bbox3d = AABB{ ( centre + pos ) - scaledHalf, ( centre + pos ) + scaledHalf };
     bbox3d = bbox3d.rotate(rotation);
@@ -423,10 +449,6 @@ void ArchSpatial::scale( const V3f& _scale ) {
     scaleBBox(_scale);
 }
 
-[[maybe_unused]] JMATH::AABB& ArchSpatial::BBox3dEmergencyWrite() {
-    return bbox3d;
-}
-
 float ArchSpatial::Width() const { return size.x(); }
 float ArchSpatial::Height() const { return size.y(); }
 float ArchSpatial::Depth() const { return size.z(); }
@@ -466,7 +488,7 @@ void TwoUShapesBased::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     calcBBox();
 }
 
-void TwoUShapesBased::calcBBox() {
+void TwoUShapesBased::calcBBox( const Matrix4f& _mat ) {
     Vector2f& p1 = us1.middle;
     Vector2f& p2 = us2.middle;
 
@@ -514,7 +536,7 @@ void DoorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     DoorService::calculatePivots(this);
 }
 
-void DoorBSData::calcBBox() {
+void DoorBSData::calcBBox( const Matrix4f& _mat ) {
     TwoUShapesBased::calcBBox();
     bbox3d.calc(bbox, 0.0f, Height(), Matrix4f::IDENTITY);
 }
@@ -551,7 +573,7 @@ void WindowBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     TwoUShapesBased::reRoot(_scale, _scaleSpace);
 }
 
-void WindowBSData::calcBBox() {
+void WindowBSData::calcBBox( const Matrix4f& _mat ) {
     TwoUShapesBased::calcBBox();
     // Recalculate center Y, as usually a window does not start from the floor
     centre.setY(lerp(0.5f, baseOffset, baseOffset + Height()));
@@ -575,7 +597,7 @@ void BalconyBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     calcBBox();
 }
 
-void BalconyBSData::calcBBox() {
+void BalconyBSData::calcBBox( const Matrix4f& _mat ) {
     makeTriangles2d();
     for ( const auto& ep : epoints ) {
         bbox3d.expand(XZY::C(ep, elevation));

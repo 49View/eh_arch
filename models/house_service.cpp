@@ -78,18 +78,20 @@ rayIntersectInternal( const HouseBSData *_house, const std::vector<std::shared_p
     return bHasBeenFound;
 }
 
-V2f HouseService::centerOfBiggestRoom( const HouseBSData *house ) {
+V3f HouseService::centerOfBiggestRoom( const HouseBSData *house, float _preferredHeight ) {
 
     if ( house->mFloors.empty() ) {
         return V2fc::ZERO;
     }
 
-    using floatV2fPair = std::pair<float, V2f>;
-    std::vector<floatV2fPair> roomSizes;
+    using floatV3fPair = std::pair<float, V3f>;
+    std::vector<floatV3fPair> roomSizes;
 
     for ( const auto& f : house->mFloors ) {
         for ( const auto& room : f->rooms ) {
-            roomSizes.emplace_back(room->mPerimeter, RS::maxEnclsingBoundingBoxCenter(room.get()));
+            auto cc = RS::maxEnclsingBoundingBoxCenter(room.get());
+            V3f cc3 = V3f{cc.x(), room->BBox3d().centreBottom().y() + _preferredHeight, cc.y()};
+            roomSizes.emplace_back(room->mPerimeter, cc3);
         }
     }
 
@@ -98,7 +100,7 @@ V2f HouseService::centerOfBiggestRoom( const HouseBSData *house ) {
     }
 
     std::sort(roomSizes.begin(), roomSizes.end(),
-              []( const floatV2fPair& a, const floatV2fPair& b ) -> bool { return a.first > b.first; });
+              []( const floatV3fPair& a, const floatV3fPair& b ) -> bool { return a.first > b.first; });
 
     return roomSizes[0].second;
 }
@@ -391,7 +393,7 @@ HouseService::findRoomArchSegmentWithWallHash( HouseBSData *house, HashEH hashTo
 
 void HouseService::bestStartingPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot ) {
     if ( house->bestInternalViewingPosition == V3f::ZERO ) {
-        pos = XZY::C(HouseService::centerOfBiggestRoom(house), 1.48f);
+        pos = HouseService::centerOfBiggestRoom(house, 1.48f);
         rot = quatCompose(V3f{ 0.08f, -0.70f, 0.0f });
     } else {
         pos = house->bestInternalViewingPosition;

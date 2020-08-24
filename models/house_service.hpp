@@ -54,7 +54,7 @@ namespace HouseService {
     std::shared_ptr<CollisionMesh> createCollisionMesh( const HouseBSData *_house );
     [[nodiscard]] bool hasTour(const HouseBSData *_house);
     float area( const HouseBSData *_house );
-    V2f centerOfBiggestRoom( const HouseBSData *house );
+    V3f centerOfBiggestRoom( const HouseBSData *house, float _preferredHeight );
     void bestStartingPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot );
     void bestDollyPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot );
     int getNumberOfePoints( std::shared_ptr<HouseBSData> _house );
