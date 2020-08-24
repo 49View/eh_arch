@@ -27,16 +27,16 @@ const getHeightsByTags = (tags) => {
     let minHeight,maxHeight,minRoofHeight,maxRoofHeight;
 
     if (tags.min_height) {
-        minHeight=Number(tags.min_height);
+        minHeight=Number(tags.min_height.replace("m",""));
     } else if (tags.min_levels) {
-        minHeight=Number(tags.min_levels)*HEIGHT_FOR_LEVEL;
+        minHeight=Number(tags.min_levels.replace("m",""))*HEIGHT_FOR_LEVEL;
     } else {
         minHeight=0;
     }
     if (tags.height) {
-        maxHeight=Number(tags.height);
+        maxHeight=Number(tags.height.replace("m",""));
     } else if (tags.levels) {
-        maxHeight=Number(tags.levels)*HEIGHT_FOR_LEVEL;
+        maxHeight=Number(tags.levels.replace("m",""))*HEIGHT_FOR_LEVEL;
     } else {
         maxHeight=HEIGHT_FOR_LEVEL;
     }
@@ -68,11 +68,17 @@ const createSimpleBuildings = (ways) => {
                 const roofPoly = [];
 
                 const {minHeight,maxHeight,minRoofHeight,maxRoofHeight} = getHeightsByTags(w.tags);
-                for (let i=0;i<w.nodes.length-2;i++) {
+                for (let i=0;i<w.nodes.length-1;i++) {
                     const n=w.nodes[i];
                     groundPoly.push({x:n.x,y:n.y,z:minHeight});
                     roofPoly.push({x:n.x,y:n.y,z:maxHeight});
                 }
+
+                roofPoly.forEach(p => {
+                    if (p.z===NaN) {
+                        console.log("Null z in way "+w.id);
+                    }
+                });
 
                 //const groundFaces = getTriangles(groundPoly);
                 try {

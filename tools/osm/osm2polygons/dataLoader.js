@@ -52,8 +52,10 @@ const calcCoordinate = (bbox, nodes) => {
     const lonCenter = bbox[1]+(bbox[3]-bbox[1])/2;
 
     nodes.forEach(n => {
-        n.x = calcDistance(latCenter,lonCenter,latCenter,n.lon);
-        n.y = calcDistance(latCenter,lonCenter,n.lat,lonCenter);
+        // n.x = calcDistance(bbox[0],bbox[1],bbox[0],n.lon);
+        // n.y = calcDistance(bbox[0],bbox[1],n.lat,bbox[1]);
+        n.x = calcDistance(0,0,0,n.lon);
+        n.y = calcDistance(0,0,n.lat,0);
     })
 }
 
