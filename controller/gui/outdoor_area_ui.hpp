@@ -9,5 +9,9 @@ class RenderOrchestrator;
 
 class OutdoorAreaUI {
 public:
+    void activate( bool _flag );
     void update( ArchOrchestrator& asg, RenderOrchestrator& rsg );
+
+private:
+    bool activated = false;
 };

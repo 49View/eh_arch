@@ -17,6 +17,12 @@ struct MakeHouse3d {
     }
 };
 
+struct ActivateOutdoorAreaUI {
+    void operator()( OutdoorAreaUI& oaUI ) {
+        oaUI.activate(true);
+    }
+};
+
 struct EnterFeatureManipulation {
     void operator()( ArchOrchestrator& asg ) noexcept {
         asg.showIMHouse();

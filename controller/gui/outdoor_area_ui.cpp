@@ -20,7 +20,14 @@
 #include "eh_arch/state_machine/arch_sm_events__fsm.hpp"
 
 void OutdoorAreaUI::update( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+
+    if ( !activated ) return;
+
     ImGui::Begin("Outdoor Area");
     ImGui::Text("%s", "lalala");
     ImGui::End();
+}
+
+void OutdoorAreaUI::activate( bool _flag ) {
+    activated = _flag;
 }

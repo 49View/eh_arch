@@ -81,4 +81,4 @@ struct OnGlobalRescaleEvent {
 };
 
 
-struct OnOutdoorAreaBuilderEvent {};
+struct OnActivateOutdoorAreaBuilderEvent {};

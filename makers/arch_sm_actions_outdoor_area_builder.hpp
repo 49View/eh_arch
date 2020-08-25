@@ -11,8 +11,9 @@ struct UndoOutdoorArea {
 };
 
 struct ExitOutdoorArea {
-    void operator()( OutdoorAreaBuilder* bb ) noexcept {
+    void operator()( OutdoorAreaUI& oaUI, OutdoorAreaBuilder* bb ) noexcept {
         // On Exit, we might need to save some states, cache or whatever, do it here
+        oaUI.activate(false);
         bb->clear();
     }
 };
