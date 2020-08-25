@@ -1,3 +1,5 @@
+const Decimal = require('decimal.js');
+Decimal.set({ precision: 20, rounding: 1 })
 poly2tri = require('poly2tri');
 
 
@@ -56,33 +58,84 @@ const extrudePolyStripe = (poly, minHeight, maxHeight) => {
     return triStripe;
 }
 
+const isCollinear = (pa,pb,pc) => {
+    // const pax = new Decimal(pa.x);
+    // const pay = new Decimal(pa.y);
+    // const pbx = new Decimal(pb.x);
+    // const pby = new Decimal(pb.y);
+    // const pcx = new Decimal(pc.x);
+    // const pcy = new Decimal(pc.y);
+    const pax = pa.lon;
+    const pay = pa.lat;
+    const pbx = pb.lon;
+    const pby = pb.lat;
+    const pcx = pc.lon;
+    const pcy = pc.lat;
+    //let cp = Math.abs( pa.x * (pb.y - pc.y) + pb.x * (pc.y - pa.y) + pc.x * (pa.y - pb.y) );
+    let cp = Math.abs( pax * (pby - pcy) + pbx * (pcy - pay) + pcx * (pay - pby) );
+    //let cp = Decimal.abs( pax.mul((pby.sub(pcy))).add(pbx.mul((pcy.sub(pay)))).add(pcx.mul((pay.sub(pby)))) );
+
+    console.log(cp);
+    // return cp.lt(new Decimal(0.01));
+    return cp<1e-10;
+}
+
+const removeCollinearPoints = (nodes) => {
+
+    let points = [...nodes.slice(0,nodes.length-1)];
+
+    if (points.length>3) {
+
+        let pointToRemove = 0;
+        while (pointToRemove>-1 && points.length>=3) {
+            pointToRemove = -1;
+            for (let ia=0;ia<points.length;ia++) {
+                let ib=(ia+1)%points.length;
+                let ic=(ia+2)%points.length;
+
+                let pa=points[ia];
+                let pb=points[ib];
+                let pc=points[ic];
+
+                if (isCollinear(pa,pb,pc)) {
+                    pointToRemove=ib;
+                    break;
+                }
+            }
+            if (pointToRemove>-1) {
+                //console.log("Remove point "+points[pointToRemove].id)
+                points.splice(pointToRemove, 1);
+            }
+        }
+    }    
+//console.log(points);
+    return points;
+}
+
 const createSimpleBuildings = (ways) => {
 
     const buildings=[];
-    ways.filter(w => !w.inRelation).forEach(w => {
+    ways.filter(w => !w.inRelation && w.id===26471659).forEach(w => {
         //Min 2 points
         if (w.nodes.length>2) {
             //Only closed path (first point id must be equal to last point id)
             if (w.nodes[0].id===w.nodes[w.nodes.length-1].id) {
+
+                const points = removeCollinearPoints(w.nodes);
+
                 const groundPoly = [];
                 const roofPoly = [];
 
                 const {minHeight,maxHeight,minRoofHeight,maxRoofHeight} = getHeightsByTags(w.tags);
-                for (let i=0;i<w.nodes.length-1;i++) {
-                    const n=w.nodes[i];
-                    groundPoly.push({x:n.x,y:n.y,z:minHeight});
-                    roofPoly.push({x:n.x,y:n.y,z:maxHeight});
+                for (let i=0;i<points.length;i++) {
+                    const n=points[i];
+                    groundPoly.push({x:n.x.toNumber(),y:n.y.toNumber(),z:minHeight});
+                    roofPoly.push({x:n.x.toNumber(),y:n.y.toNumber(),z:maxHeight});
                 }
-
-                roofPoly.forEach(p => {
-                    if (p.z===NaN) {
-                        console.log("Null z in way "+w.id);
-                    }
-                });
 
                 //const groundFaces = getTriangles(groundPoly);
                 try {
-                    const roofTriangles = getTriangles(roofPoly.reverse());
+                    const roofTriangles = getTriangles(roofPoly);
                     const lateralTrianglesStrip = extrudePolyStripe(groundPoly, minHeight, maxHeight);
 
                     const building={
@@ -92,7 +145,7 @@ const createSimpleBuildings = (ways) => {
 
                     buildings.push(building);
                 } catch (ex) {
-                    console.log(`Error in ${w.id} way`);
+                    console.log(`Error in ${w.id} way`, ex);
                 }
             }
         }
