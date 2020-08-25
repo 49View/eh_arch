@@ -584,33 +584,64 @@ void WindowBSData::calcBBox( const Matrix4f& _mat ) {
 // OutdoorArea
 // *********************************************************************************************************************
 
+OutdoorBoundary::OutdoorBoundary( const std::vector<Vector2f>& epts ) {
+    bPoints = epts;
+}
+
 OutdoorAreaBSData::OutdoorAreaBSData( const std::vector<Vector2f>& epts ) {
-    epoints = epts;
+    outdoorBoundaries.emplace_back(OutdoorBoundary{epts});
     calcBBox();
 }
 
 void OutdoorAreaBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
     ArchSpatial::reRoot(_scale, _scaleSpace);
-    for ( auto& s : epoints ) {
-        s *= _scale;
+    for ( auto& boundary : outdoorBoundaries ) {
+        for ( auto& ep : boundary.bPoints ) {
+            ep *= _scale;
+        }
     }
     calcBBox();
 }
 
 void OutdoorAreaBSData::calcBBox( const Matrix4f& _mat ) {
     makeTriangles2d();
-    for ( const auto& ep : epoints ) {
-        bbox3d.expand(XZY::C(ep, elevation));
-        bbox3d.expand(XZY::C(ep, elevation + floorHeight));
+    for ( const auto& boundary : outdoorBoundaries ) {
+        for ( const auto& ep : boundary.bPoints ) {
+            bbox3d.expand(XZY::C(ep, boundary.elevation));
+            bbox3d.expand(XZY::C(ep, boundary.elevation + boundary.zPull));
+        }
     }
     bbox = bbox3d.topDown();
 }
 
+void OutdoorAreaBSData::addBoundary( const OutdoorBoundary& _ob ) {
+    outdoorBoundaries.emplace_back(_ob);
+    calcBBox();
+}
+
 void OutdoorAreaBSData::makeTriangles2d() {
     mTriangles2d.clear();
-    Triangulator tri(epoints);
-    mTriangles2d = tri.get2dTrianglesTuple();
+    if ( !outdoorBoundaries.empty() && !outdoorBoundaries[0].bPoints.empty() ) {
+        Triangulator tri(outdoorBoundaries[0].bPoints);
+        mTriangles2d = tri.get2dTrianglesTuple();
+    }
 }
+
+const std::vector<OutdoorBoundary>& OutdoorAreaBSData::Boundaries() const {
+    return outdoorBoundaries;
+}
+
+std::vector<OutdoorBoundary>& OutdoorAreaBSData::Boundaries() {
+    return outdoorBoundaries;
+}
+
+OutdoorBoundary& OutdoorAreaBSData::Boundary( std::size_t _index ) {
+    return outdoorBoundaries[_index];
+}
+
+// *********************************************************************************************************************
+// ArchSegment
+// *********************************************************************************************************************
 
 std::ostream& operator<<( std::ostream& os, const ArchSegment& segment ) {
     os << "iFloor: " << segment.iFloor << " iWall: " << segment.iWall << " iIndex: " << segment.iIndex
@@ -658,6 +689,10 @@ void ArchSegment::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
         }
     }
 }
+
+// *********************************************************************************************************************
+// UShape
+// *********************************************************************************************************************
 
 void UShape::reRoot( float _scale, [[maybe_unused]] ArchRescaleSpaceT _scaleSpace ) {
     for ( int64_t t = 0; t < 4; t++ ) points[t] *= _scale;

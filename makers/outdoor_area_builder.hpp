@@ -6,8 +6,8 @@
 
 #include <memory>
 #include <core/math/vector2f.h>
+#include <eh_arch/models/house_bsdata.hpp>
 
-struct OutdoorAreaBSData;
 class SceneGraph;
 class RenderOrchestrator;
 class ArchOrchestrator;
@@ -15,9 +15,9 @@ class ArchOrchestrator;
 class OutdoorAreaBuilder {
 public:
     OutdoorAreaBuilder( SceneGraph& sg, RenderOrchestrator& rsg );
-    void addPoint( const V2f& _p );
+    void addPoint( const V2f& _p, int bIndex );
     [[nodiscard]] const std::shared_ptr<OutdoorAreaBSData>& OutdoorAreaData() const;
-    void finalize();
+    void clear();
 private:
     void refresh();
 
