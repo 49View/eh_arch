@@ -1,13 +1,13 @@
 const poly2tri = require('poly2tri');
 const fs=require('fs');
-const {getData}=require("./dataLoader");
+const {getDataLocal}=require("./dataLoader");
 const {createBuildings}=require("./buildings");
 
 const bbox=[51.49634,-0.12999,51.50088,-0.11995];
 
 
 const main = async () => {
-    const {nodes,ways,rels} = await getData(bbox);
+    const {nodes,ways,rels} = await getDataLocal(bbox);
     // extendData(nodes,ways,rels);
     const buildings = createBuildings(nodes,ways,rels);
 

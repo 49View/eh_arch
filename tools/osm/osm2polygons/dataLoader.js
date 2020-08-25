@@ -1,7 +1,8 @@
 const axios = require('axios')
 const qs = require('qs');
 const fs = require('fs');
-
+const Decimal = require('decimal.js');
+Decimal.set({ precision: 20, rounding: 1 })
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
 const getData = async (bbox) => {
@@ -59,19 +60,40 @@ const calcCoordinate = (bbox, nodes) => {
     })
 }
 
-const calcDistance = (lat1,lon1,lat2,lon2) => {
-    const R = 6371e3; // metres
-    const phi1 = lat1 * Math.PI/180; // φ, λ in radians
-    const phi2 = lat2 * Math.PI/180;
-    const deltaPhi = (lat2-lat1) * Math.PI/180;
-    const deltaLambda = (lon2-lon1) * Math.PI/180;
+const calcDistance = (latitude1,longitude1,latitude2,longitude2) => {
     
-    const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
-              Math.cos(phi1) * Math.cos(phi2) *
-              Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+
+    const toRadians = new Decimal(Math.PI).div(new Decimal(180));
+    const lat1 = new Decimal(latitude1);
+    const lon1 = new Decimal(longitude1);
+    const lat2 = new Decimal(latitude2);
+    const lon2 = new Decimal(longitude2);
+    const R = new Decimal(6372.797e3); // metres
+
+    // const R = 6371e3; // metres
+    // const phi1 = lat1 * Math.PI/180; // φ, λ in radians
+    // const phi2 = lat2 * Math.PI/180;
+    // const deltaPhi = (lat2-lat1) * Math.PI/180;
+    // const deltaLambda = (lon2-lon1) * Math.PI/180;
+
+    const phi1 = lat1.mul(toRadians); // φ, λ in radians
+    const phi2 = lat2.mul(toRadians);
+    const deltaPhi = (lat2.sub(lat1)).mul(toRadians);
+    const deltaLambda = (lon2.sub(lon1)).mul(toRadians);
     
-    const d = R * c; // in metres   
+    // const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
+    //           Math.cos(phi1) * Math.cos(phi2) *
+    //           Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
+    // const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    
+    // const d = R * c; // in metres   
+    let a = Decimal.sin(deltaPhi.div(2)).mul(Decimal.sin(deltaPhi.div(2)))
+        .add(Decimal.cos(phi1).mul(Decimal.cos(phi2)).mul(Decimal.sin(deltaLambda.div(2))).mul(Decimal.sin(deltaLambda.div(2))))
+
+    const c = Decimal.atan2(Decimal.sqrt(a),Decimal.sqrt(new Decimal(1).sub(a))).mul(2);
+    
+    const d = R.mul(c); // in metres   
     
     return d;
 }
