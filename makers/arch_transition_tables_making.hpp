@@ -14,21 +14,21 @@ struct MakerStateMachine {
     auto operator()() const noexcept {
         return make_transition_table(
             *state<class Initial> / [] {} = state<class HouseMaker>
-            ,state<class HouseMaker> + event<OnGlobalRescaleEvent> / GlobalRescale{}
-            ,state<class HouseMaker> + event<OnClearEvent> / ClearEverthing{}
-            ,state<class HouseMaker> + event<OnHouseMakerToggleEvent> / ActivateFloorplanView{FloorPlanRenderMode::Debug3d}
-            ,state<class HouseMaker> + event<OnLoadFloorPlanEvent> / LoadFloorPlan{}
-            ,state<class HouseMaker> + event<OnCreateNewPropertyFromFloorplanImageEvent> / CreateNewPropertyFromFloorplanImage{}
-            ,state<class HouseMaker> + event<OnUpdateHMBEvent> / UpdateHMB{}
-            ,state<class HouseMaker> + event<OnHouseChangeElevationEvent> / ChangeElevation{}
-            ,state<class HouseMaker> + event<OnMakeHouse3dEvent> / MakeHouse3d{}
-            ,state<class HouseMaker> + event<OnImportExcaliburLinkEvent> / ImportExcaliburLink{}
-            ,state<class HouseMaker> + event<OnCreateHouseTexturesEvent> / CreateHouseTextures{}
-            ,state<class HouseMaker> + event<OnElaborateHouseBitmapEvent> / ElaborateHouseBitmap{}
-            ,state<class HouseMaker> + event<OnRecalculateFurnitureEvent> / FurnishHouse{}
-            ,state<class HouseMaker> + event<OnTopDownToggleEvent> / ActivateTopDownView{}
-            ,state<class HouseMaker> + event<OnUndoEvent> / UndoFeatureManipulation{}
-            ,state<class HouseMaker> + event<OnRedoEvent> / RedoFeatureManipulation{}
+            ,state<HouseMaker> + event<OnGlobalRescaleEvent> / GlobalRescale{}
+            ,state<HouseMaker> + event<OnClearEvent> / ClearEverthing{}
+            ,state<HouseMaker> + event<OnHouseMakerToggleEvent> / ActivateFloorplanView{FloorPlanRenderMode::Debug3d}
+            ,state<HouseMaker> + event<OnLoadFloorPlanEvent> / LoadFloorPlan{}
+            ,state<HouseMaker> + event<OnCreateNewPropertyFromFloorplanImageEvent> / CreateNewPropertyFromFloorplanImage{}
+            ,state<HouseMaker> + event<OnUpdateHMBEvent> / UpdateHMB{}
+            ,state<HouseMaker> + event<OnHouseChangeElevationEvent> / ChangeElevation{}
+            ,state<HouseMaker> + event<OnMakeHouse3dEvent> / MakeHouse3d{}
+            ,state<HouseMaker> + event<OnImportExcaliburLinkEvent> / ImportExcaliburLink{}
+            ,state<HouseMaker> + event<OnCreateHouseTexturesEvent> / CreateHouseTextures{}
+            ,state<HouseMaker> + event<OnElaborateHouseBitmapEvent> / ElaborateHouseBitmap{}
+            ,state<HouseMaker> + event<OnRecalculateFurnitureEvent> / FurnishHouse{}
+            ,state<HouseMaker> + event<OnTopDownToggleEvent> / ActivateTopDownView{}
+            ,state<HouseMaker> + event<OnUndoEvent> / UndoFeatureManipulation{}
+            ,state<HouseMaker> + event<OnRedoEvent> / RedoFeatureManipulation{}
         );
     }
 };
@@ -37,15 +37,15 @@ struct BespokeStateMachine {
     auto operator()() const noexcept {
         return make_transition_table(
             *state<class Initial> / []{} = state<class BespokeState>
-            ,state<class BespokeState> + event<OnUndoEvent> / UndoBespoke{}
-            ,state<class BespokeState> + event<OnClearEvent> / ClearBespoke{}
-            ,state<class BespokeState> + event<OnTouchMoveEvent> / TouchMoveBespoke{}
-            ,state<class BespokeState> + event<OnTouchUpEvent> / TouchUpEventBespoke{}
-            ,state<class BespokeState> + event<OnKeyToggleEvent> / KeyToggleBespoke{}
-            ,state<class BespokeState> + event<OnLoadFloorPlanEvent> / LoadFloorPlan{}
-            ,state<class BespokeState> + event<OnMakeHouse3dEvent> / MakeHouse3d{}
-            ,state<class BespokeState> + event<OnElaborateHouseBitmapEvent> / ElaborateHouseBitmap{}
-            ,state<class BespokeState> + event<OnRecalculateFurnitureEvent> / FurnishHouse{}
+            ,state<BespokeState> + event<OnUndoEvent> / UndoBespoke{}
+            ,state<BespokeState> + event<OnClearEvent> / ClearBespoke{}
+            ,state<BespokeState> + event<OnTouchMoveEvent> / TouchMoveBespoke{}
+            ,state<BespokeState> + event<OnTouchUpEvent> / TouchUpEventBespoke{}
+            ,state<BespokeState> + event<OnKeyToggleEvent> / KeyToggleBespoke{}
+            ,state<BespokeState> + event<OnLoadFloorPlanEvent> / LoadFloorPlan{}
+            ,state<BespokeState> + event<OnMakeHouse3dEvent> / MakeHouse3d{}
+            ,state<BespokeState> + event<OnElaborateHouseBitmapEvent> / ElaborateHouseBitmap{}
+            ,state<BespokeState> + event<OnRecalculateFurnitureEvent> / FurnishHouse{}
         );
     }
 };
@@ -53,8 +53,9 @@ struct BespokeStateMachine {
 struct OutdoorAreaStateMachine {
     auto operator()() const noexcept {
         return make_transition_table(
-                *state<class Initial> / []{LOGRS("OutdoorArea state")} = state<class OutdoorAreaState>
-                ,state<class OutdoorAreaState> + event<OnSingleTapEvent> / AddPointOutdoorAreaAction{}
+            *state<class Initial> / []{} = state<class OutdoorAreaState>
+            ,state<OutdoorAreaState> + event<OnFinaliseEvent> / FinaliseOutdoorArea{}
+            ,state<OutdoorAreaState> + event<OnSingleTapEvent> / AddPointOutdoorAreaAction{}
         );
     }
 };

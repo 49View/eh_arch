@@ -20,9 +20,9 @@
 #include "eh_arch/state_machine/arch_sm_events__fsm.hpp"
 
 namespace MaterialAndColorPropertyChangeScope {
-    static constexpr int ScopeSingle = 0;
-    static constexpr int ScopeRoom = 1;
-    static constexpr int ScopeHouse = 2;
+    [[maybe_unused]] static constexpr auto ScopeSingle = 0;
+    static constexpr auto ScopeRoom = 1;
+    [[maybe_unused]] static constexpr auto ScopeHouse = 2;
 };
 
 using MaterialAndColorPropertyChangeScopeT = int;
@@ -31,7 +31,7 @@ class RemoteEntitySelector {
 public:
 
     ResourceMetadataListCallback resListCallback();
-    void prepare( const FeatureIntersection& _fd, const FeatureIntersection& _fdfurniture, const std::string& _presets, const std::string& _resourceGroup,
+    void prepare( const FeatureIntersection& _fd, const FeatureIntersection& _fdFurniture, const std::string& _presets, const std::string& _resourceGroup,
                   int _defaultTab );
     static std::vector<std::string>
     tagsSanitisedFor( const std::string& query, const std::string& group, const std::vector<std::string>& tags );
@@ -45,12 +45,12 @@ private:
     void addNewFurniture( ArchOrchestrator& asg, EntityMetaData meta );
 private:
     FeatureIntersection fd;
-    FeatureIntersection fdfurniture;
+    FeatureIntersection fdFurniture;
     GHTypeT label{ GHType::None };
     std::string resourceGroup{};
     int originalTabIndex = 0;
     int defaultTabIndex = 0;
-    bool bKichenElementSelected = false;
+    bool bKitchenElementSelected = false;
     MaterialAndColorPropertyChangeScopeT changeScope = MaterialAndColorPropertyChangeScope::ScopeRoom;
     MaterialAndColorProperty *materialAndColorTarget = nullptr;
     ResourceMetadataList metadataGeomList{};

@@ -4,7 +4,7 @@
 
 #include "remote_entity_selector.hpp"
 #include <graphics/render_light_manager.h>
-#include <eh_arch/render/ui/house_ui_material_properties.hpp>
+#include <eh_arch/controller/gui/house_ui_material_properties.hpp>
 
 int RemoteEntitySelector::groupIndex() const {
     return originalTabIndex;
@@ -27,7 +27,7 @@ ResourceMetadataListCallback RemoteEntitySelector::resListCallback() {
 void RemoteEntitySelector::prepare( const FeatureIntersection& _fd, const FeatureIntersection& _fdFurniture,
                                     const std::string& _presets, const std::string& _resourceGroup, int _defaultTab ) {
     fd = _fd;
-    fdfurniture = _fdFurniture;
+    fdFurniture = _fdFurniture;
     label = fd.intersectedType;
     resourceGroup = _resourceGroup;
     originalTabIndex = _defaultTab;
@@ -39,7 +39,7 @@ void RemoteEntitySelector::prepare( const FeatureIntersection& _fd, const Featur
         ResourceMetaData::getListOf(resourceGroup, presets, resListCallback());
     }
 
-    materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.archSegment, fd.room, bKichenElementSelected );
+    materialAndColorTarget = getCommonMaterialChangeMapping(label, fd.archSegment, fd.room, bKitchenElementSelected );
 }
 
 std::vector<std::string> RemoteEntitySelector::tagsSanitisedFor( const std::string& query, const std::string& group,
@@ -58,7 +58,7 @@ std::vector<std::string> RemoteEntitySelector::tagsSanitisedFor( const std::stri
 
 void RemoteEntitySelector::applyInjection( ArchOrchestrator& asg ) {
 
-    if ( !bKichenElementSelected ) {
+    if ( !bKitchenElementSelected ) {
         if ( changeScope == MaterialAndColorPropertyChangeScope::ScopeRoom ) {
             if ( fd.intersectedType == GHType::Floor ) {
                 RoomService::changeFloorsMaterial(fd.room, *materialAndColorTarget);
@@ -117,11 +117,11 @@ void RemoteEntitySelector::addNewFurniture( ArchOrchestrator& asg, EntityMetaDat
     auto ff = FittedFurniture{ { meta.hash, meta.bbox3d },"sofa", S::SQUARE };
     auto clonedFurniture = EntityFactory::clone(ff);
 
-    auto hitBestPoint = fd.nearV < fdfurniture.nearV ? fd.hitPosition : fdfurniture.hitPosition;
-    float heightOffset = fd.nearV < fdfurniture.nearV ? 0.0f : fdfurniture.arch->Height();
+    auto hitBestPoint = fd.nearV < fdFurniture.nearV ? fd.hitPosition : fdFurniture.hitPosition;
+    float heightOffset = fd.nearV < fdFurniture.nearV ? 0.0f : fdFurniture.arch->Height();
     V2f pos = XZY::C2(hitBestPoint);// + depthOffset;
     auto f = HouseService::findFloorOf(asg.H(), fd.room->hash);
-    RS::placeManually(FurnitureRuleParams{ f, fd.room, clonedFurniture, pos, heightOffset, FRPSource{reinterpret_cast<FittedFurniture*>(fdfurniture.arch)},
+    RS::placeManually(FurnitureRuleParams{ f, fd.room, clonedFurniture, pos, heightOffset, FRPSource{reinterpret_cast<FittedFurniture*>(fdFurniture.arch)},
                                            FRPFurnitureRuleFlags{ forceManualFurnitureFlags } });
     asg.make3dHouse([]() {});
     asg.pushHouseChange();
@@ -242,15 +242,15 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
 
         if ( RS::hasRoomType( fd.room, ASType::Kitchen ) ) {
             if (ImGui::Button("Kitchen worktop")) {
-                bKichenElementSelected = true;
+                bKitchenElementSelected = true;
                 materialAndColorTarget = &fd.room->kitchenData.worktopMaterial;
             }
             if (ImGui::Button("Kitchen units")) {
-                bKichenElementSelected = true;
+                bKitchenElementSelected = true;
                 materialAndColorTarget = &fd.room->kitchenData.unitsMaterial;
             }
             if (ImGui::Button("Kitchen back splash")) {
-                bKichenElementSelected = true;
+                bKitchenElementSelected = true;
                 materialAndColorTarget = &fd.room->kitchenData.backSplashMaterial;
             }
         }

@@ -11,8 +11,9 @@ struct UndoOutdoorArea {
 };
 
 struct ExitOutdoorArea {
-    void operator()() noexcept {
+    void operator()( OutdoorAreaBuilder* bb ) noexcept {
         // On Exit, we might need to save some states, cache or whatever, do it here
+        bb->clear();
     }
 };
 
@@ -27,7 +28,6 @@ struct FinaliseOutdoorArea {
         if ( asg.H() ) {
             FloorService::addOutdoorAreaFromData( asg.H()->mFloors[0].get(), bb->OutdoorAreaData() );
             asg.showIMHouse();
-            bb->clear();
         }
     }
 };
