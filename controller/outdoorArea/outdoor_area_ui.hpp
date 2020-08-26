@@ -22,5 +22,6 @@ public:
     [[nodiscard]] const std::shared_ptr<OutdoorAreaBSData>& OutdoorAreaData() const;
 private:
     bool activated = false;
+    int boundaryIndex = 0;
     OutdoorAreaBuilder& bb;
 };

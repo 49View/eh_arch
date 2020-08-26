@@ -29,9 +29,15 @@ void OutdoorAreaUI::update( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
     if ( !activated ) return;
 
     ImGui::Begin("Outdoor Area");
-    ImGui::Button("Add Boundary");
-
-    ImGui::Text("%s", "lalala");
+    if ( ImGui::Button("Add Boundary") ) {
+        boundaryIndex++;
+        bb.OutdoorAreaData()->Boundaries().emplace_back(OutdoorBoundary{});
+    }
+    for ( auto& boundary : bb.OutdoorAreaData()->Boundaries() ) {
+        ImGui::InputFloat("Elevation", &boundary.elevation);
+        ImGui::InputFloat("Height", &boundary.zPull);
+        ImGui::Button("Material");
+    }
     ImGui::End();
 //    float elevation = 0.0f;
 //    float zPull = 0.1f;
@@ -45,7 +51,7 @@ void OutdoorAreaUI::activate( bool _flag ) {
 }
 
 void OutdoorAreaUI::addPoint( const V2f& _p ) {
-    bb.addPoint( _p, 0 );
+    bb.addPoint( _p, boundaryIndex );
 }
 
 const std::shared_ptr<OutdoorAreaBSData>& OutdoorAreaUI::OutdoorAreaData() const {
