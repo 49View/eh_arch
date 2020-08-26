@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react'
+import * as THREE from 'three/src/Three'
 import { Canvas, useFrame } from 'react-three-fiber'
 
 function Box(props) {
@@ -10,10 +11,21 @@ function Box(props) {
   const [active, setActive] = useState(false)
 
   // Rotate mesh every frame, this is outside of React without overhead
-  useFrame(() => (mesh.current.rotation.x = mesh.current.rotation.y += 0.01))
+  // useFrame(() => (mesh.current.rotation.x = mesh.current.rotation.y += 0.01))
+
+  const vertices = [[-1, 0, 0], [0, 1, 0], [1, 0, 0], [0, -1, 0], [-1, 0, 0]];
 
   return (
-    <mesh
+    <group>
+      <line>
+        <geometry
+          name="geometry"
+          vertices={vertices.map(v => new THREE.Vector3(...v))}
+          onUpdate={self => (self.verticesNeedUpdate = true)}
+        />
+        <lineBasicMaterial name="material" color="red" />
+      </line>
+      {/* <mesh
       {...props}
       ref={mesh}
       scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
@@ -22,7 +34,8 @@ function Box(props) {
       onPointerOut={(e) => setHover(false)}>
       <boxBufferGeometry attach="geometry" args={[5, 5, 5]} />
       <meshStandardMaterial attach="material" color={hovered ? 'hotpink' : 'orange'} />
-    </mesh>
+    </mesh> */}
+  </group>
   )
 }
 
