@@ -7,7 +7,7 @@
 #include <core/state_machine_helper.hpp>
 #include <eh_arch/state_machine/arch_sm_events__fsm.hpp>
 #include <eh_arch/makers/arch_sm_actions_bespoke_builder.hpp>
-#include <eh_arch/controller/outdoorArea/arch_sm_actions_outdoor_area_builder.hpp>
+#include <eh_arch/controller/outdoorArea/outdoor_area_builder_sm_actions.hpp>
 #include <eh_arch/makers/arch_sm_actions_maker_builder.hpp>
 
 struct MakerStateMachine {

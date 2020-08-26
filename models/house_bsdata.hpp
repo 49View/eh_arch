@@ -328,12 +328,13 @@ JSONDATA_H(StairsBSData, ArchStructural, hash, type,
     std::string name;
 };
 
-JSONDATA(OutdoorBoundary, bPoints, elevation, zPull, extrusionType, outdoorBoundaryMaterial)
+JSONDATA(OutdoorBoundary, bPoints, elevation, zPull, followerWidth, extrusionType, outdoorBoundaryMaterial)
     explicit OutdoorBoundary( const std::vector<Vector2f>& epts );
     std::vector<Vector2f> bPoints{};
     float elevation = 0.0f;
     float zPull = 0.1f;
-    int extrusionType = 0; // We'll have at least "Extrude" (flat poly) and "Follower" (like a skirting board)
+    float followerWidth = 0.2f;
+    int extrusionType = 0; // We'll have at least "Extrude" (flat poly) and "Follower" (like a skirting board), zero based
     MaterialAndColorProperty outdoorBoundaryMaterial{"wood,beech"};
 };
 

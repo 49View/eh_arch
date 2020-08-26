@@ -15,7 +15,7 @@ struct OutdoorAreaBSData;
 
 class OutdoorAreaUI {
 public:
-    OutdoorAreaUI( OutdoorAreaBuilder& bb );
+    [[maybe_unused]] explicit OutdoorAreaUI( OutdoorAreaBuilder& bb );
     void activate( bool _flag );
     void update( ArchOrchestrator& asg, RenderOrchestrator& rsg );
     void addPoint( const Vector2f& _p);
