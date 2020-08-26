@@ -14,10 +14,8 @@
 #include <eh_arch/models/htypes.hpp>
 #include <eh_arch/models/arch_structural_service.hpp>
 #include <eh_arch/controller/gui/remote_entity_selector.hpp>
-#include <eh_arch/controller/gui/outdoor_area_ui.hpp>
 
 class RenderOrchestrator;
-
 class ArchOrchestrator;
 
 struct HouseBSData;
@@ -41,7 +39,7 @@ private:
 
 class ArchExplorer {
 public:
-    ArchExplorer( RemoteEntitySelector& res, OutdoorAreaUI& outUI ) : res(res), outdoorAreaUI(outUI) {}
+    ArchExplorer( RemoteEntitySelector& res ) : res(res) {}
     void tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rsg, const AggregatedInputData& aid, const std::string& mediaFolder );
 
     // Events
@@ -67,7 +65,6 @@ private:
                         const std::shared_ptr<FittedFurniture>& clonedFurniture );
 private:
     RemoteEntitySelector& res;
-    OutdoorAreaUI& outdoorAreaUI;
     FeatureIntersection fd;
 
     FadeInOutSwitch furnitureSelectionAlphaAnim{ explorerFullDotOpacityValue, explorerDotFadeTime };

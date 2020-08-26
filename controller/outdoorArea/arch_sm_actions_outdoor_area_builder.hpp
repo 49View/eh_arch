@@ -11,23 +11,22 @@ struct UndoOutdoorArea {
 };
 
 struct ExitOutdoorArea {
-    void operator()( OutdoorAreaUI& oaUI, OutdoorAreaBuilder* bb ) noexcept {
+    void operator()( OutdoorAreaUI& oaUI ) noexcept {
         // On Exit, we might need to save some states, cache or whatever, do it here
         oaUI.activate(false);
-        bb->clear();
     }
 };
 
 struct AddPointOutdoorAreaAction {
-    void operator()( OutdoorAreaBuilder* bb, const OnSingleTapEvent& mouseEvent ) noexcept {
-        bb->addPoint(mouseEvent.mousePos, 0);
+    void operator()( OutdoorAreaUI& oaUI, const OnSingleTapEvent& mouseEvent ) noexcept {
+        oaUI.addPoint(mouseEvent.mousePos);
     }
 };
 
 struct FinaliseOutdoorArea {
-    void operator()( OutdoorAreaBuilder* bb, ArchOrchestrator& asg ) noexcept {
+    void operator()( OutdoorAreaUI& oaUI, ArchOrchestrator& asg ) noexcept {
         if ( asg.H() ) {
-            FloorService::addOutdoorAreaFromData( asg.H()->mFloors[0].get(), bb->OutdoorAreaData() );
+            FloorService::addOutdoorAreaFromData( asg.H()->mFloors[0].get(), oaUI.OutdoorAreaData() );
             asg.showIMHouse();
         }
     }
