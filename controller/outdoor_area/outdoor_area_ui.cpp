@@ -27,6 +27,7 @@ void OutdoorAreaUI::update( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         bb.OutdoorAreaData()->Boundaries().emplace_back(OutdoorBoundary{});
     }
     int i = 0;
+    int bc = 0;
     for ( auto& boundary : bb.OutdoorAreaData()->Boundaries() ) {
         ImGui::PushID(i++);
         ImGui::SameLine();
@@ -46,6 +47,14 @@ void OutdoorAreaUI::update( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         ImGui::PushID(i++);
         ImGui::Button("Material");
         ImGui::PopID();
+        ImGui::PushID(i++);
+        if ( ImGui::Button("Clone") ) {
+            bb.cloneBoundary(bc);
+        }
+        ImGui::PopID();
+        ImGui::Separator();
+        ImGui::Separator();
+        ++bc;
     }
     ImGui::End();
 }

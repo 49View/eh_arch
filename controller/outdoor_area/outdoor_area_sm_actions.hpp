@@ -13,7 +13,7 @@ struct ActivateOutdoorAreaUI {
 };
 
 struct UndoOutdoorArea {
-    void operator()( OutdoorAreaBuilder* rb ) noexcept {
+    void operator()( OutdoorAreaUI& oaUI ) noexcept {
 //        rb->undo();
     }
 };

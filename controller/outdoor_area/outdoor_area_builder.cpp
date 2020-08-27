@@ -9,30 +9,36 @@
 #include <render_scene_graph/render_orchestrator.h>
 #include <eh_arch/models/house_bsdata.hpp>
 
+static constexpr float snapThresholdOutdoorArea = 0.2f;
+
 void OutdoorAreaBuilder::refresh() {
     Renderer& rr = rsg.RR();
     rr.clearBucket(rrBucket);
 
+    std::size_t cc = 0;
     for ( const auto& ob : outdoorAreaData->Boundaries() ) {
         if ( ob.bPoints.size() == 2 ) {
-            rr.draw<DLine>(rrBucket, ob.bPoints, "outdoorAreaBase");
+            rr.draw<DLine>(rrBucket, ob.bPoints, "outdoorAreaBaseP1" + std::to_string(cc++));
         } else if ( ob.bPoints.size() > 2 ) {
-            rr.draw<DFlatPoly>(rrBucket, ob.bPoints, "outdoorAreaBase");
+            rr.draw<DFlatPoly>(rrBucket, ob.bPoints, "outdoorAreaBaseL1" + std::to_string(cc++));
         }
-        int cc = 0;
+        auto dotColor = cc == outdoorAreaData->Boundaries().size() - 1 ? C4f::PASTEL_ORANGE : C4f::STEEL_BLUE;
         for ( const auto& p : ob.bPoints ) {
-            rr.draw<DCircleFilled>(rrBucket, p, 0.02f, C4f::STEEL_BLUE, std::to_string(cc++) + "outdoorAreaBase" );
+            rr.draw<DCircleFilled>(rrBucket, p, 0.04f, dotColor, std::to_string(cc++) + "outdoorAreaBase");
         }
     }
 
 }
 
 void OutdoorAreaBuilder::addPoint( const V2f& _p, int _bIndex ) {
-    outdoorAreaData->Boundary(_bIndex).bPoints.emplace_back( _p );
+    auto snapped = XZY::C2(snapTo(XZY::C(_p, outdoorAreaData->Boundary(_bIndex).elevation), computedSnapPoints,
+                                  snapThresholdOutdoorArea));
+    outdoorAreaData->Boundary(_bIndex).bPoints.emplace_back(snapped);
+    computedSnapPoints.emplace_back(XZY::C(snapped, outdoorAreaData->Boundary(_bIndex).elevation));
     refresh();
 }
 
-OutdoorAreaBuilder::OutdoorAreaBuilder( SceneGraph& sg, RenderOrchestrator& rsg ) : sg(sg), rsg(rsg) {
+[[maybe_unused]] OutdoorAreaBuilder::OutdoorAreaBuilder( SceneGraph& sg, RenderOrchestrator& rsg ) : sg(sg), rsg(rsg) {
     rrBucket = CommandBufferLimits::UnsortedStart + 3;
     clear();
 }
@@ -48,5 +54,11 @@ void OutdoorAreaBuilder::OutdoorAreaData( std::shared_ptr<OutdoorAreaBSData> _ou
 void OutdoorAreaBuilder::clear() {
     Renderer& rr = rsg.RR();
     rr.clearBucket(rrBucket);
+    computedSnapPoints.clear();
+}
+
+void OutdoorAreaBuilder::cloneBoundary( std::size_t _index ) {
+    outdoorAreaData->Boundaries().emplace_back(outdoorAreaData->Boundary(_index));
+    refresh();
 }
 
