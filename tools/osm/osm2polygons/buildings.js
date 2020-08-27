@@ -4,6 +4,9 @@ poly2tri = require('poly2tri');
 
 
 const HEIGHT_FOR_LEVEL = 3;
+const DEFAULT_ROOF_COLOUR = "#cccccc";
+const DEFAULT_BUILDING_COLOUR = "#eeeeee";
+const USE_TRIANGLES_STRIP = false;
 
 const createBuildings = (nodes,ways,rels) => {
     const triangles=createSimpleBuildings(ways);
@@ -31,8 +34,9 @@ const getTriangles = (polyPoints) => {
     return points;
 }
 
-const getHeightsByTags = (tags) => {
-    let minHeight,maxHeight,minRoofHeight,maxRoofHeight;
+const getBuildingInfo = (tags) => {
+    let minHeight,maxHeight,colour;
+    let roofOrientation,roofHeight,roofShape,roofColour;
 
     if (tags.min_height) {
         minHeight=Number(tags.min_height.replace("m",""));
@@ -48,20 +52,92 @@ const getHeightsByTags = (tags) => {
     } else {
         maxHeight=HEIGHT_FOR_LEVEL;
     }
+    if (tags["building:colour"]) {
+        colour=tags["building:colour"];
+    } else {
+        colour=DEFAULT_BUILDING_COLOUR;
+    }
 
-    return {minHeight,maxHeight,minRoofHeight,maxRoofHeight}
+    if (tags["roof:shape"]==="pyramidal") {
+        roofShape="pyramidal";
+    } else if (tags["roof:shape"]==="gabled") {
+        roofShape="gabled";
+    } else { //FLAT 
+        roofShape="flat";
+    }
+
+    if (tags["roof:height"]) {
+        roofHeight=Number(tags["roof:height"].replace("m",""));        
+    } else if (tags["roof:levels"]) {
+        roofHeight=Number(tags["roof:levels"].replace("m",""))*HEIGHT_FOR_LEVEL;
+    } else {
+        roofHeight=HEIGHT_FOR_LEVEL;
+    }
+
+    if (tags["roof:orientation"]) {
+        roofOrientation=tags["roof:orientation"];
+    } else {
+        roofOrientation="across";
+    }
+
+    if (tags["roof:colour"]) {
+        roofColour=tags["roof:colour"];
+    } else if (tags["building:colour"]) {
+        roofColour=tags["building:colour"];
+    } else {        
+        roofColour=DEFAULT_ROOF_COLOUR;
+    }
+
+    if (maxHeight-roofHeight<=minHeight) {
+        roofHeight=0;
+        roofShape="flat";
+    } else {
+        maxHeight=maxHeight-roofHeight;
+    }
+    roofMinHeight=maxHeight;
+    roofMaxHeight=maxHeight+roofHeight;
+
+    return {
+        minHeight: minHeight,
+        maxHeight: maxHeight,
+        colour: colour,
+        roof: {
+            minHeight: roofMinHeight,
+            maxHeight: roofMaxHeight,
+            shape: roofShape,
+            orientation: roofOrientation,
+            colour: roofColour
+        }
+    }
 }
 
-const extrudePolyStripe = (poly, minHeight, maxHeight) => {
+const extrudePoly = (poly, minHeight, maxHeight, useTrianglesStrip) => {
     
-    const triStripe = [];
+    const result = [];
 
-    poly.forEach(p => {
-        triStripe.push({x:p.x, y:p.y, z:minHeight});
-        triStripe.push({x:p.x, y:p.y, z:maxHeight});
-    });
+    if (useTrianglesStrip) {
+        poly.forEach(p => {
+            result.push({x:p.x, y:p.y, z:minHeight});
+            result.push({x:p.x, y:p.y, z:maxHeight});
+        });
+    } else {
+        for (let i=0;i<poly.length;i++) {
+            const nextI = (i+1)%poly.length;
 
-    return triStripe;
+            const point = poly[i];
+            const nextPoint = poly[nextI];
+            //First triangle for lateral face
+            result.push({x: point.x, y: point.y, z: minHeight});
+            result.push({x: nextPoint.x, y: nextPoint.y, z: minHeight});
+            result.push({x: nextPoint.x, y: nextPoint.y, z: maxHeight});
+            //Second triangle for lateral face
+            result.push({x: point.x, y: point.y, z: minHeight});
+            result.push({x: nextPoint.x, y: nextPoint.y, z: maxHeight});
+            result.push({x: point.x, y: point.y, z: maxHeight});
+        }
+    }
+
+    return result;
 }
 
 const isCollinear = (pa,pb,pc) => {
@@ -153,44 +229,104 @@ const removeCollinearPoints = (nodes) => {
     return points;
 }
 
+const createBasePolygon = (points) => {
+    const polygon = [];
+
+    points.forEach(p => {
+        polygon.push({
+            x: p.x.toNumber(),
+            y: p.y.toNumber()
+        });
+    });
+
+    return polygon;
+}
+
+const createBuildingMesh = (lateralFaces, roofFaces, boundingBox, buildingInfo, tags, id) => {
+    return {
+        id: id,
+        center: {
+            x: boundingBox.centerX.toNumber(),
+            y: boundingBox.centerY.toNumber()
+        },
+        lateralFaces: {
+            faces: lateralFaces,
+            colour: buildingInfo.colour,
+            isTriangleStrip: USE_TRIANGLES_STRIP
+        },
+        roofFaces: {
+            faces: roofFaces,
+            colour: buildingInfo.roof.colour
+        },
+        tags: tags
+    }
+}
+
+const createRoof = (polygon, roofInfo) => {
+    if (roofInfo.shape==="pyramidal") {
+        return createPyramidalRoof(polygon, roofInfo);
+    } else {
+        return createFlatRoof(polygon, roofInfo);
+    }
+}
+
+const createPyramidalRoof = (polygon, roofInfo) => {
+    let faces=[];
+
+    for (let i=0;i<polygon.length;i++) {
+        const nextI = (i+1)%polygon.length;
+        const point=polygon[i];
+        const nextPoint=polygon[nextI];
+
+        faces.push({x: point.x, y: point.y, z: roofInfo.minHeight});
+        faces.push({x: nextPoint.x, y: nextPoint.y, z: roofInfo.minHeight});
+        faces.push({x: 0, y: 0, z: roofInfo.maxHeight});
+    }
+
+    return faces;
+}
+
+const createFlatRoof = (polygon, roofInfo) => {
+    let faces=[];
+    if (roofInfo.minHeight!==roofInfo.maxHeight) {
+        //If required, compute lateral roof face
+        faces=faces.concat(extrudePoly(polygon, roofInfo.minHeight, roofInfo.maxHeight, false));
+    }
+    //
+    const topFace = getTriangles(polygon);
+    topFace.forEach(t => t.z=roofInfo.maxHeight);
+
+    return faces.concat(topFace);
+}
+
 const createSimpleBuildings = (ways) => {
 
     const buildings=[];
-    ways.filter(w => !w.inRelation && w.id===364313092).forEach(w => {
+    ways.filter(w => !w.inRelation).forEach(w => {
         //Min 2 points
         if (w.nodes.length>2) {
             //Only closed path (first point id must be equal to last point id)
             if (w.nodes[0].id===w.nodes[w.nodes.length-1].id) {
 
-                const points = removeCollinearPoints(w.nodes);
-                let localBoundingBox = computeBoundingBox(points);
-                convertToLocalCoordinate(points, localBoundingBox.centerX, localBoundingBox.centerY);
-
-                const groundPoly = [];
-                const roofPoly = [];
-
-                const {minHeight,maxHeight,minRoofHeight,maxRoofHeight} = getHeightsByTags(w.tags);
-                for (let i=0;i<points.length;i++) {
-                    const n=points[i];
-                    groundPoly.push({x:n.x.toNumber(),y:n.y.toNumber()});
-                    roofPoly.push({x:n.x.toNumber(),y:n.y.toNumber()});
-                }
-
-                //const groundFaces = getTriangles(groundPoly);
                 try {
-                    const roofTriangles = getTriangles(roofPoly);
-                    roofTriangles.forEach(t => t.z=maxHeight);
-                    const lateralTrianglesStrip = extrudePolyStripe(groundPoly, minHeight, maxHeight);
+                    const points = removeCollinearPoints(w.nodes);
+                    let localBoundingBox = computeBoundingBox(points);
+                    convertToLocalCoordinate(points, localBoundingBox.centerX, localBoundingBox.centerY);
 
-                    const building={
-                        boundingBox: localBoundingBox,
-                        triangles: roofTriangles,
-                        trianglesStrip: lateralTrianglesStrip
-                    }
+                    const buildingInfo = getBuildingInfo(w.tags);
+                    const basePolygon = createBasePolygon(points);
+
+                    //Compute lateral faces
+                    const lateralFaces = extrudePoly(basePolygon, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP);
+                    //Compute roof faces
+                    const roofFaces = createRoof(basePolygon, buildingInfo.roof);
+
+                    //Create building mesh
+                    const building = createBuildingMesh(lateralFaces, roofFaces, localBoundingBox, buildingInfo, w.tags, w.id);
 
                     buildings.push(building);
                 } catch (ex) {
-                    console.log(`Error in ${w.id} way`, ex);
+                    console.log(`Error in ${w.id} way`);
                 }
             }
         }
