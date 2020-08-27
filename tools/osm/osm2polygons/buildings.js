@@ -71,7 +71,11 @@ const getBuildingInfo = (tags) => {
     } else if (tags["roof:levels"]) {
         roofHeight=Number(tags["roof:levels"].replace("m",""))*HEIGHT_FOR_LEVEL;
     } else {
-        roofHeight=HEIGHT_FOR_LEVEL;
+        if (roofShape==="flat") {
+            roofHeight=0;
+        } else {
+            roofHeight=HEIGHT_FOR_LEVEL;
+        }
     }
 
     if (tags["roof:orientation"]) {
@@ -199,7 +203,11 @@ const convertToLocalCoordinate = (points, originX, originY) => {
 
 const removeCollinearPoints = (nodes) => {
 
-    let points = [...nodes.slice(0,nodes.length-1)];
+    let points = [];
+
+    nodes.slice(0,nodes.length-1).forEach(n => {
+        points.push({ ...n});
+    })
 
     if (points.length>3) {
 
@@ -313,6 +321,10 @@ const createSimpleBuildings = (ways) => {
                     let localBoundingBox = computeBoundingBox(points);
                     convertToLocalCoordinate(points, localBoundingBox.centerX, localBoundingBox.centerY);
 
+                    if (w.tags["roof:shape"] && w.tags["roof:shape"]==="gabled" && points.length!==4) {
+                        console.log("Invalid roof "+w.id);
+                    }
+
                     const buildingInfo = getBuildingInfo(w.tags);
                     const basePolygon = createBasePolygon(points);
 
@@ -326,7 +338,7 @@ const createSimpleBuildings = (ways) => {
 
                     buildings.push(building);
                 } catch (ex) {
-                    console.log(`Error in ${w.id} way`);
+                    console.log(`Error in ${w.id} way`, ex);
                 }
             }
         }

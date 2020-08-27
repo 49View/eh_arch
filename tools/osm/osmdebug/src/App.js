@@ -20,7 +20,7 @@ const App = () => {
         {
           buildings.map(b => {
             return (
-              <option key={b.id} value={b.id}>{b.tags.name || b.id}</option>
+              <option key={b.id} value={b.id}>{b.id}</option>
             )
           })
         }
