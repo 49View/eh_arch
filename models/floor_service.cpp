@@ -46,7 +46,7 @@ void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData *house, c
     }
 }
 
-void FloorService::addOutdoorAreaFromData( FloorBSData *f, const std::shared_ptr<OutdoorAreaBSData>& _outdoorArea ) {
+void FloorService::addOutdoorAreaFromData( FloorBSData *f, std::shared_ptr<OutdoorAreaBSData> _outdoorArea ) {
     f->outdoorAreas.emplace_back(_outdoorArea);
     f->calcBBox();
 }

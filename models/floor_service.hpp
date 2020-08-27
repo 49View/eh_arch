@@ -96,7 +96,7 @@ namespace FloorService {
     void addWindowFromData( FloorBSData *f, float _windowHeight, float _defaultWindowBaseOffset,
                             const UShape& w1, const UShape& w2 );
     void addCeilingContour( FloorBSData *f, const std::vector<Vector3f>& cc );
-    void addOutdoorAreaFromData( FloorBSData *f, const std::shared_ptr<OutdoorAreaBSData>& _outdoorArea );
+    void addOutdoorAreaFromData( FloorBSData *f, std::shared_ptr<OutdoorAreaBSData> _outdoorArea );
 
     // Update
     void assignRoomTypeFromBeingClever( FloorBSData *f, HouseBSData *house );
