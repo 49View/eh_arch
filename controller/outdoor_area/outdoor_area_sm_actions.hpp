@@ -4,6 +4,14 @@
 
 #pragma once
 
+struct ActivateOutdoorAreaUI {
+    void operator()( OutdoorAreaUI& oaUI, ArchOrchestrator& asg ) {
+        auto oa = EntityFactory::create<OutdoorAreaBSData>();
+        FloorService::addOutdoorAreaFromData( asg.H()->mFloors[0].get(), oa );
+        oaUI.activate(oa);
+    }
+};
+
 struct UndoOutdoorArea {
     void operator()( OutdoorAreaBuilder* rb ) noexcept {
 //        rb->undo();
@@ -11,9 +19,10 @@ struct UndoOutdoorArea {
 };
 
 struct ExitOutdoorArea {
-    void operator()( OutdoorAreaUI& oaUI ) noexcept {
+    void operator()( OutdoorAreaUI& oaUI, ArchOrchestrator& asg ) noexcept {
         // On Exit, we might need to save some states, cache or whatever, do it here
-        oaUI.activate(false);
+        oaUI.activate(nullptr);
+        asg.showIMHouse();
     }
 };
 
@@ -23,11 +32,3 @@ struct AddPointOutdoorAreaAction {
     }
 };
 
-struct FinaliseOutdoorArea {
-    void operator()( OutdoorAreaUI& oaUI, ArchOrchestrator& asg ) noexcept {
-        if ( asg.H() ) {
-            FloorService::addOutdoorAreaFromData( asg.H()->mFloors[0].get(), oaUI.OutdoorAreaData() );
-            asg.showIMHouse();
-        }
-    }
-};

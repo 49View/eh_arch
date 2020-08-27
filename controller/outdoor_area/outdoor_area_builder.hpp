@@ -17,6 +17,7 @@ public:
     OutdoorAreaBuilder( SceneGraph& sg, RenderOrchestrator& rsg );
     void addPoint( const V2f& _p, int bIndex );
     [[nodiscard]] const std::shared_ptr<OutdoorAreaBSData>& OutdoorAreaData() const;
+    void OutdoorAreaData( std::shared_ptr<OutdoorAreaBSData> outdoorAreaData );
     void clear();
 private:
     void refresh();

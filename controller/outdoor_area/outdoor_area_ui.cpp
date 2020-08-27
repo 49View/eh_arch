@@ -19,7 +19,7 @@
 
 void OutdoorAreaUI::update( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
 
-    if ( !activated ) return;
+    if ( !bb.OutdoorAreaData() ) return;
 
     ImGui::Begin("Outdoor Area");
     if ( ImGui::Button("Add Boundary") ) {
@@ -50,12 +50,15 @@ void OutdoorAreaUI::update( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
     ImGui::End();
 }
 
-void OutdoorAreaUI::activate( bool _flag ) {
-    activated = _flag;
+void OutdoorAreaUI::activate( std::shared_ptr<OutdoorAreaBSData> _oa ) {
+    bb.OutdoorAreaData(_oa);
     bb.clear();
 }
 
 void OutdoorAreaUI::addPoint( const V2f& _p ) {
+    if ( bb.OutdoorAreaData()->Boundaries().empty() ) {
+        bb.OutdoorAreaData()->Boundaries().emplace_back(OutdoorBoundary{});
+    }
     bb.addPoint( _p, boundaryIndex );
 }
 

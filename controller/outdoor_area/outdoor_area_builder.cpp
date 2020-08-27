@@ -41,9 +41,12 @@ const std::shared_ptr<OutdoorAreaBSData>& OutdoorAreaBuilder::OutdoorAreaData() 
     return outdoorAreaData;
 }
 
+void OutdoorAreaBuilder::OutdoorAreaData( std::shared_ptr<OutdoorAreaBSData> _outdoorAreaData ) {
+    outdoorAreaData = _outdoorAreaData;
+}
+
 void OutdoorAreaBuilder::clear() {
     Renderer& rr = rsg.RR();
     rr.clearBucket(rrBucket);
-    outdoorAreaData = std::make_shared<OutdoorAreaBSData>();
-    outdoorAreaData->addBoundary(OutdoorBoundary{});
 }
+

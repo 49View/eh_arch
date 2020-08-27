@@ -14,7 +14,6 @@ struct OutdoorAreaStateMachine {
     auto operator()() const noexcept {
         return make_transition_table(
             *state<class Initial> / []{} = state<class OutdoorAreaState>
-            ,state<OutdoorAreaState> + event<OnFinaliseEvent> / FinaliseOutdoorArea{}
             ,state<OutdoorAreaState> + event<OnSingleTapEvent> / AddPointOutdoorAreaAction{}
         );
     }
