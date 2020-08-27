@@ -19,16 +19,16 @@
 
 void OutdoorAreaUI::update( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
 
-    if ( !bb.OutdoorAreaData() ) return;
+    if ( !bb.isActive() ) return;
 
     ImGui::Begin("Outdoor Area");
     if ( ImGui::Button("Add Boundary") ) {
         boundaryIndex++;
-        bb.OutdoorAreaData()->Boundaries().emplace_back(OutdoorBoundary{});
+        bb.addBoundary(OutdoorBoundary{});
     }
     int i = 0;
     int bc = 0;
-    for ( auto& boundary : bb.OutdoorAreaData()->Boundaries() ) {
+    for ( auto& boundary : bb.Boundaries() ) {
         ImGui::PushID(i++);
         ImGui::SameLine();
         ImGui::RadioButton("Flat", &boundary.extrusionType, 0);
@@ -59,14 +59,19 @@ void OutdoorAreaUI::update( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
     ImGui::End();
 }
 
-void OutdoorAreaUI::activate( std::shared_ptr<OutdoorAreaBSData> _oa ) {
-    bb.OutdoorAreaData(_oa);
+void OutdoorAreaUI::activate() {
+    bb.OutdoorAreaData(EntityFactory::create<OutdoorAreaBSData>());
     bb.clear();
 }
 
+void OutdoorAreaUI::deactivate() {
+    bb.reset();
+}
+
 void OutdoorAreaUI::addPoint( const V2f& _p ) {
-    if ( bb.OutdoorAreaData()->Boundaries().empty() ) {
-        bb.OutdoorAreaData()->Boundaries().emplace_back(OutdoorBoundary{});
+    if ( bb.empty() ) {
+        activate();
+        bb.addBoundary(OutdoorBoundary{});
     }
     bb.addPoint( _p, boundaryIndex );
 }
@@ -74,3 +79,12 @@ void OutdoorAreaUI::addPoint( const V2f& _p ) {
 const std::shared_ptr<OutdoorAreaBSData>& OutdoorAreaUI::OutdoorAreaData() const {
     return bb.OutdoorAreaData();
 }
+
+void OutdoorAreaUI::undo() {
+    bb.undo();
+}
+
+void OutdoorAreaUI::redo() {
+    bb.redo();
+}
+

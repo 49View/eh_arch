@@ -12,29 +12,32 @@
 static constexpr float snapThresholdOutdoorArea = 0.2f;
 
 void OutdoorAreaBuilder::refresh() {
+
     Renderer& rr = rsg.RR();
     rr.clearBucket(rrBucket);
 
+    if ( empty() ) return;
+
     std::size_t cc = 0;
-    for ( const auto& ob : outdoorAreaData->Boundaries() ) {
+    for ( const auto& ob : outdoorAreaData()->Boundaries() ) {
         if ( ob.bPoints.size() == 2 ) {
             rr.draw<DLine>(rrBucket, ob.bPoints, "outdoorAreaBaseP1" + std::to_string(cc++));
         } else if ( ob.bPoints.size() > 2 ) {
             rr.draw<DFlatPoly>(rrBucket, ob.bPoints, "outdoorAreaBaseL1" + std::to_string(cc++));
         }
-        auto dotColor = cc == outdoorAreaData->Boundaries().size() - 1 ? C4f::PASTEL_ORANGE : C4f::STEEL_BLUE;
+        auto dotColor = cc == outdoorAreaData()->Boundaries().size() - 1 ? C4f::PASTEL_ORANGE : C4f::STEEL_BLUE;
         for ( const auto& p : ob.bPoints ) {
             rr.draw<DCircleFilled>(rrBucket, p, 0.04f, dotColor, std::to_string(cc++) + "outdoorAreaBase");
         }
     }
-
 }
 
 void OutdoorAreaBuilder::addPoint( const V2f& _p, int _bIndex ) {
-    auto snapped = XZY::C2(snapTo(XZY::C(_p, outdoorAreaData->Boundary(_bIndex).elevation), computedSnapPoints,
+    auto snapped = XZY::C2(snapTo(XZY::C(_p, outdoorAreaData()->Boundary(_bIndex).elevation), computedSnapPoints,
                                   snapThresholdOutdoorArea));
-    outdoorAreaData->Boundary(_bIndex).bPoints.emplace_back(snapped);
-    computedSnapPoints.emplace_back(XZY::C(snapped, outdoorAreaData->Boundary(_bIndex).elevation));
+    outdoorAreaData()->Boundary(_bIndex).bPoints.emplace_back(snapped);
+    outdoorAreaData.push();
+    computedSnapPoints.emplace_back(XZY::C(snapped, outdoorAreaData()->Boundary(_bIndex).elevation));
     refresh();
 }
 
@@ -44,11 +47,11 @@ void OutdoorAreaBuilder::addPoint( const V2f& _p, int _bIndex ) {
 }
 
 const std::shared_ptr<OutdoorAreaBSData>& OutdoorAreaBuilder::OutdoorAreaData() const {
-    return outdoorAreaData;
+    return outdoorAreaData();
 }
 
 void OutdoorAreaBuilder::OutdoorAreaData( std::shared_ptr<OutdoorAreaBSData> _outdoorAreaData ) {
-    outdoorAreaData = _outdoorAreaData;
+    outdoorAreaData.push(_outdoorAreaData);
 }
 
 void OutdoorAreaBuilder::clear() {
@@ -58,7 +61,42 @@ void OutdoorAreaBuilder::clear() {
 }
 
 void OutdoorAreaBuilder::cloneBoundary( std::size_t _index ) {
-    outdoorAreaData->Boundaries().emplace_back(outdoorAreaData->Boundary(_index));
+    outdoorAreaData()->Boundaries().emplace_back(outdoorAreaData()->Boundary(_index));
     refresh();
 }
 
+bool OutdoorAreaBuilder::isActive() const {
+    return outdoorAreaData() != nullptr;
+}
+
+std::vector<OutdoorBoundary>& OutdoorAreaBuilder::Boundaries() {
+    return outdoorAreaData()->Boundaries();
+}
+
+bool OutdoorAreaBuilder::empty() const {
+    return !outdoorAreaData() || outdoorAreaData()->Boundaries().empty();
+}
+
+void OutdoorAreaBuilder::addBoundary( const OutdoorBoundary& _boundary ) {
+    if ( !outdoorAreaData() ) {
+        outdoorAreaData.push();
+    }
+    outdoorAreaData()->Boundaries().emplace_back(_boundary);
+}
+
+void OutdoorAreaBuilder::undo() {
+    if ( outdoorAreaData.undo() ) {
+        refresh();
+    }
+}
+
+void OutdoorAreaBuilder::redo() {
+    if ( outdoorAreaData.redo() ) {
+        refresh();
+    }
+}
+
+void OutdoorAreaBuilder::reset() {
+    outdoorAreaData.reset();
+    clear();
+}
