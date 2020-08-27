@@ -1,52 +1,37 @@
-import React, { useRef, useState } from 'react'
-import * as THREE from 'three/src/Three'
-import { Canvas, useFrame } from 'react-three-fiber'
+import React, {useState} from "react";
+import OsmScene from './components/OsmScene'
+// Styles
+import "./styles.css";
+import {buildings} from './buildings.json'
 
-function Box(props) {
-  // This reference will give us direct access to the mesh
-  const mesh = useRef()
 
-  // Set up state for the hovered and active state
-  const [hovered, setHover] = useState(false)
-  const [active, setActive] = useState(false)
+const App = () => {
 
-  // Rotate mesh every frame, this is outside of React without overhead
-  // useFrame(() => (mesh.current.rotation.x = mesh.current.rotation.y += 0.01))
-
-  const vertices = [[-1, 0, 0], [0, 1, 0], [1, 0, 0], [0, -1, 0], [-1, 0, 0]];
+  const [bldWireframe, setBldWireframe] = useState(true);
+  const [roofWireframe, setRoofWireframe] = useState(true);
+  const [buildingId, setBuildingId] = useState(buildings[0].id);
 
   return (
-    <group>
-      <line>
-        <geometry
-          name="geometry"
-          vertices={vertices.map(v => new THREE.Vector3(...v))}
-          onUpdate={self => (self.verticesNeedUpdate = true)}
-        />
-        <lineBasicMaterial name="material" color="red" />
-      </line>
-      {/* <mesh
-      {...props}
-      ref={mesh}
-      scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
-      onClick={(e) => setActive(!active)}
-      onPointerOver={(e) => setHover(true)}
-      onPointerOut={(e) => setHover(false)}>
-      <boxBufferGeometry attach="geometry" args={[5, 5, 5]} />
-      <meshStandardMaterial attach="material" color={hovered ? 'hotpink' : 'orange'} />
-    </mesh> */}
-  </group>
-  )
-}
-
-function App() {
-  return (
-    <Canvas>
-      <ambientLight />
-      <pointLight position={[10, 10, 10]} />
-      <Box position={[-6, 0, 0]} />
-      <Box position={[6, 0, 0]} />
-    </Canvas>
+    <div id="mainContainer">
+      BUILDING: <select value={buildingId} onChange={e => {
+        setBuildingId(e.target.value);
+        console.log(buildings.find(b => b.id.toString()===e.target.value.toString()))
+      }}>
+        {
+          buildings.map(b => {
+            return (
+              <option key={b.id} value={b.id}>{b.tags.name || b.id}</option>
+            )
+          })
+        }
+      </select>
+      <input type="checkbox" checked={bldWireframe} onChange={e => setBldWireframe(e.target.checked)}></input> FACES WIREFRAME
+      <input type="checkbox" checked={roofWireframe} onChange={e => setRoofWireframe(e.target.checked)}></input> ROOF WIREFRAME
+       { 
+         buildingId && 
+         <OsmScene building={buildings.find(b => b.id.toString()===buildingId.toString())} buildingWireframe={bldWireframe} roofWireframe={roofWireframe}/> 
+       }     
+    </div>
   );
 }
 
