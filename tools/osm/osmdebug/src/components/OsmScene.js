@@ -35,7 +35,9 @@ const OsmScene = (props) => {
         camera={{ position: [0, 50, 50] }}
         onCreated={({ gl }) => gl.setClearColor("#f0f0f0")}
         >
-        
+          {/* <ambientLight />*/}
+          <pointLight position={[0, 100, 0]} /> 
+
           {Content}
           <GridHelper />
           <Controls />

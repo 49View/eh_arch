@@ -13,19 +13,28 @@ const Triangles = (props) => {
   );
 
   return (
-    <mesh position={props.position}>
+    <mesh position={props.position} castShadow>
       <bufferGeometry attach="geometry">
         <bufferAttribute
           attachObject={["attributes", "position"]}
           args={[f32array, 3]}
         />
       </bufferGeometry>
-      <meshBasicMaterial
+      {
+        !props.wireframe ? <meshStandardMaterial 
+          attach="material"
+          color={props.color}
+          shading={THREE.FlatShading}
+          side={THREE.DoubleSide}
+          castShadow
+        />
+        : <meshBasicMaterial 
         attach="material"
         color={props.color}
         wireframe={props.wireframe}
         side={THREE.DoubleSide}
-      />
+        />
+      }
     </mesh>
   );
 };
