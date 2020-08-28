@@ -19,9 +19,9 @@ const OsmScene = (props) => {
     );
   } else {
     Content = (
-      <Building 
+      <Building
         position={[0,0,0]}
-        building={props.building} 
+        building={props.building}
         buildingWireframe={props.buildingWireframe}
         roofWireframe={props.roofWireframe}
       />
@@ -32,12 +32,12 @@ const OsmScene = (props) => {
     <div style={{height: "calc(100vh - 80px)"}}>
         <Canvas
         pixelRatio={window.devicePixelRatio}
-        camera={{ position: [0, 50, 50] }}
+        camera={{ position: [0, 50, 50], fov: 45.0, far:10000.0}}
         onCreated={({ gl }) => gl.setClearColor("#f0f0f0")}
         >
           {/* <ambientLight />*/}
-          <pointLight position={[0, 100, 0]} /> 
-
+          <pointLight position={[1000, 1000, 1000]} castShadow={true} />
+          <pointLight position={[-1000, -100, -1000]} castShadow={true} />
           {Content}
           <GridHelper />
           <Controls />
