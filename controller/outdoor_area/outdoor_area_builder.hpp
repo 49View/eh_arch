@@ -28,8 +28,11 @@ public:
     [[nodiscard]]bool empty() const;
     void addBoundary( const OutdoorBoundary& _boundary);
     [[nodiscard]] bool isActive() const;
-private:
     void refresh();
+
+    void makeBalcony();
+    void makeGarden();
+    void makeTerrace();
 
 private:
     SceneGraph& sg;

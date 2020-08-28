@@ -19,16 +19,33 @@ void OutdoorAreaBuilder::refresh() {
     if ( empty() ) return;
 
     std::size_t cc = 0;
-    for ( const auto& ob : outdoorAreaData()->Boundaries() ) {
-        if ( ob.bPoints.size() == 2 ) {
-            rr.draw<DLine>(rrBucket, ob.bPoints, "outdoorAreaBaseP1" + std::to_string(cc++));
-        } else if ( ob.bPoints.size() > 2 ) {
-            rr.draw<DFlatPoly>(rrBucket, ob.bPoints, "outdoorAreaBaseL1" + std::to_string(cc++));
+
+//    for ( const auto& oa : w->Boundaries() ) {
+//        if ( oa.extrusionType == 0 ) {
+//            auto color = arc.getFillColor(w, Color4f::LIGHT_GREY);
+//            rr.draw<DFlatPoly>(oa.bPoints, color, sm, w->hashFeature("outdoorAreaFlatBseIM", cc++));
+//        } else if ( oa.extrusionType == 1 ) {
+//            auto color = arc.getFillColor(w, Color4f::SKY_BLUE);
+//            rr.draw<DLine>(oa.bPoints, color, sm, w->hashFeature("outdoorAreaFlatBseIM", cc++), oa.followerWidth);
+//        }
+//    }
+
+    std::size_t bc = 0;
+    for ( const auto& oa : outdoorAreaData()->Boundaries() ) {
+        if ( oa.extrusionType == 0 ) {
+            if ( oa.bPoints.size() > 2 ) {
+                rr.draw<DFlatPoly>(rrBucket, oa.bPoints, "outdoorAreaBaseP1" + std::to_string(cc++));
+            }
+        } else if ( oa.extrusionType == 1 ) {
+            if ( oa.bPoints.size() > 1 ) {
+                rr.draw<DLine>(rrBucket, oa.bPoints, Color4f::SKY_BLUE, "outdoorAreaBaseL1" + std::to_string(cc++), oa.followerWidth);
+            }
         }
-        auto dotColor = cc == outdoorAreaData()->Boundaries().size() - 1 ? C4f::PASTEL_ORANGE : C4f::STEEL_BLUE;
-        for ( const auto& p : ob.bPoints ) {
+        auto dotColor = bc == outdoorAreaData()->Boundaries().size() - 1 ? C4f::PASTEL_ORANGE : C4f::STEEL_BLUE;
+        for ( const auto& p : oa.bPoints ) {
             rr.draw<DCircleFilled>(rrBucket, p, 0.04f, dotColor, std::to_string(cc++) + "outdoorAreaBase");
         }
+        ++bc;
     }
 }
 
@@ -61,7 +78,11 @@ void OutdoorAreaBuilder::clear() {
 }
 
 void OutdoorAreaBuilder::cloneBoundary( std::size_t _index ) {
-    outdoorAreaData()->Boundaries().emplace_back(outdoorAreaData()->Boundary(_index));
+    auto newOutdoor = outdoorAreaData()->Boundary(_index);
+    newOutdoor.elevation += newOutdoor.zPull;
+    newOutdoor.outdoorBoundaryMaterial = MaterialAndColorProperty{"fence"};
+    newOutdoor.extrusionType = 1;
+    outdoorAreaData()->Boundaries().emplace_back(newOutdoor);
     refresh();
 }
 
@@ -99,4 +120,16 @@ void OutdoorAreaBuilder::redo() {
 void OutdoorAreaBuilder::reset() {
     outdoorAreaData.reset();
     clear();
+}
+
+void OutdoorAreaBuilder::makeBalcony() {
+
+}
+
+void OutdoorAreaBuilder::makeGarden() {
+
+}
+
+void OutdoorAreaBuilder::makeTerrace() {
+
 }

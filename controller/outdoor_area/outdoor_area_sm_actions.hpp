@@ -27,7 +27,9 @@ struct ExitOutdoorArea {
         // On Exit, we might need to save some states, cache or whatever, do it here
         FloorService::addOutdoorAreaFromData( asg.H()->mFloors[0].get(), oaUI.OutdoorAreaData() );
         oaUI.deactivate();
+        asg.make3dHouse([]() {});
         asg.showIMHouse();
+        asg.pushHouseChange();
     }
 };
 

@@ -22,30 +22,56 @@ void OutdoorAreaUI::update( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
     if ( !bb.isActive() ) return;
 
     ImGui::Begin("Outdoor Area");
-    if ( ImGui::Button("Add Boundary") ) {
-        boundaryIndex++;
-        bb.addBoundary(OutdoorBoundary{});
+    if ( !bb.empty() ) {
+        if ( ImGui::Button("Garden") ) {
+            bb.makeGarden();
+        }
+        ImGui::SameLine();
+        if ( ImGui::Button("Balcony") ) {
+            bb.makeBalcony();
+        }
+        ImGui::SameLine();
+        if ( ImGui::Button("Terrace") ) {
+            bb.makeTerrace();
+        }
+        ImGui::Separator();
+        if ( ImGui::Button("Add Boundary") ) {
+            boundaryIndex++;
+            bb.addBoundary(OutdoorBoundary{});
+        }
     }
     int i = 0;
     int bc = 0;
     for ( auto& boundary : bb.Boundaries() ) {
         ImGui::PushID(i++);
         ImGui::SameLine();
-        ImGui::RadioButton("Flat", &boundary.extrusionType, 0);
+        if ( ImGui::RadioButton("Flat", &boundary.extrusionType, 0) ) {
+            bb.refresh();
+        }
         ImGui::SameLine();
-        ImGui::RadioButton("Contour", &boundary.extrusionType, 1);
+        if ( ImGui::RadioButton("Contour", &boundary.extrusionType, 1) ) {
+            bb.refresh();
+        }
         ImGui::PopID();
         ImGui::PushID(i++);
-        ImGui::InputFloat("Elevation", &boundary.elevation);
+        if ( ImGui::InputFloat("Elevation", &boundary.elevation) ) {
+            bb.refresh();
+        }
         ImGui::PopID();
         ImGui::PushID(i++);
-        ImGui::InputFloat("Height", &boundary.zPull);
+        if ( ImGui::InputFloat("Height", &boundary.zPull) ) {
+            bb.refresh();
+        }
         ImGui::PopID();
         ImGui::PushID(i++);
-        ImGui::InputFloat("Contour Width", &boundary.followerWidth);
+        if ( ImGui::InputFloat("Contour Width", &boundary.followerWidth) ) {
+            bb.refresh();
+        }
         ImGui::PopID();
         ImGui::PushID(i++);
-        ImGui::Button("Material");
+        if ( ImGui::Button("Material") ) {
+            bb.refresh();
+        }
         ImGui::PopID();
         ImGui::PushID(i++);
         if ( ImGui::Button("Clone") ) {
