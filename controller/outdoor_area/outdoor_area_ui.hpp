@@ -16,7 +16,10 @@ struct OutdoorAreaBSData;
 class OutdoorAreaUI {
 public:
     [[maybe_unused]] explicit OutdoorAreaUI( OutdoorAreaBuilder& bb );
-    void activate( std::shared_ptr<OutdoorAreaBSData> _oa );
+    void activate();
+    void deactivate();
+    void undo();
+    void redo();
     void update( ArchOrchestrator& asg, RenderOrchestrator& rsg );
     void addPoint( const Vector2f& _p);
     [[nodiscard]] const std::shared_ptr<OutdoorAreaBSData>& OutdoorAreaData() const;

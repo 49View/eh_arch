@@ -15,6 +15,8 @@ struct OutdoorAreaStateMachine {
         return make_transition_table(
             *state<class Initial> / []{} = state<class OutdoorAreaState>
             ,state<OutdoorAreaState> + event<OnSingleTapEvent> / AddPointOutdoorAreaAction{}
+            ,state<OutdoorAreaState> + event<OnUndoEvent> / UndoOutdoorArea{}
+            ,state<OutdoorAreaState> + event<OnRedoEvent> / RedoOutdoorArea{}
         );
     }
 };

@@ -335,7 +335,7 @@ JSONDATA(OutdoorBoundary, bPoints, elevation, zPull, followerWidth, extrusionTyp
     float zPull = 0.1f;
     float followerWidth = 0.2f;
     int extrusionType = 0; // We'll have at least "Extrude" (flat poly) and "Follower" (like a skirting board), zero based
-    MaterialAndColorProperty outdoorBoundaryMaterial{"wood,beech"};
+    MaterialAndColorProperty outdoorBoundaryMaterial{"grass,countryside"};
 };
 
 JSONDATA_H(OutdoorAreaBSData, ArchStructural, hash, type,

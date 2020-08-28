@@ -6,23 +6,30 @@
 
 struct ActivateOutdoorAreaUI {
     void operator()( OutdoorAreaUI& oaUI, ArchOrchestrator& asg ) {
-        auto oa = EntityFactory::create<OutdoorAreaBSData>();
-        FloorService::addOutdoorAreaFromData( asg.H()->mFloors[0].get(), oa );
-        oaUI.activate(oa);
+        oaUI.activate();
     }
 };
 
 struct UndoOutdoorArea {
     void operator()( OutdoorAreaUI& oaUI ) noexcept {
-//        rb->undo();
+        oaUI.undo();
+    }
+};
+
+struct RedoOutdoorArea {
+    void operator()( OutdoorAreaUI& oaUI ) noexcept {
+        oaUI.redo();
     }
 };
 
 struct ExitOutdoorArea {
     void operator()( OutdoorAreaUI& oaUI, ArchOrchestrator& asg ) noexcept {
         // On Exit, we might need to save some states, cache or whatever, do it here
-        oaUI.activate(nullptr);
+        FloorService::addOutdoorAreaFromData( asg.H()->mFloors[0].get(), oaUI.OutdoorAreaData() );
+        oaUI.deactivate();
+        asg.make3dHouse([]() {});
         asg.showIMHouse();
+        asg.pushHouseChange();
     }
 };
 
@@ -31,4 +38,3 @@ struct AddPointOutdoorAreaAction {
         oaUI.addPoint(mouseEvent.mousePos);
     }
 };
-
