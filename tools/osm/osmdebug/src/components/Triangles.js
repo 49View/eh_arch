@@ -13,7 +13,7 @@ const Triangles = (props) => {
   );
 
   return (
-    <mesh position={[0, 0, 0]}>
+    <mesh position={props.position}>
       <bufferGeometry attach="geometry">
         <bufferAttribute
           attachObject={["attributes", "position"]}
