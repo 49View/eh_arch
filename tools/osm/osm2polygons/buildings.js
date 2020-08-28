@@ -1,4 +1,7 @@
 const Decimal = require('decimal.js');
+const { calcConvexHull } = require('./convexhull');
+const { calcOmbb } = require('./ombb');
+const { Vector} = require('./Vector');
 Decimal.set({ precision: 20, rounding: 1 })
 poly2tri = require('poly2tri');
 
@@ -38,29 +41,30 @@ const getBuildingInfo = (tags) => {
     let minHeight,maxHeight,colour;
     let roofOrientation,roofHeight,roofShape,roofColour;
 
-    if (tags.min_height) {
-        minHeight=Number(tags.min_height.replace("m",""));
-    } else if (tags.min_levels) {
-        minHeight=Number(tags.min_levels.replace("m",""))*HEIGHT_FOR_LEVEL;
+    if (tags["min_height"]) {
+        minHeight=Number(tags["min_height"].replace("m",""));
+    } else if (tags["building:min_level"]) {
+        minHeight=Number(tags["building:min_level"].replace("m",""))*HEIGHT_FOR_LEVEL;
     } else {
         minHeight=0;
     }
-    if (tags.height) {
-        maxHeight=Number(tags.height.replace("m",""));
-    } else if (tags.levels) {
-        maxHeight=Number(tags.levels.replace("m",""))*HEIGHT_FOR_LEVEL;
+    if (tags["height"]) {
+        maxHeight=Number(tags["height"].replace("m",""));
+    } else if (tags["building:levels"]) {
+        maxHeight=Number(tags["building:levels"].replace("m",""))*HEIGHT_FOR_LEVEL;
     } else {
         maxHeight=HEIGHT_FOR_LEVEL;
     }
+
     if (tags["building:colour"]) {
         colour=tags["building:colour"];
     } else {
         colour=DEFAULT_BUILDING_COLOUR;
     }
 
-    if (tags["roof:shape"]==="pyramidal") {
+    if (tags["roof:shape"]==="pyramidal" || tags["building:roof:shape"]==="pyramidal") {
         roofShape="pyramidal";
-    } else if (tags["roof:shape"]==="gabled") {
+    } else if (tags["roof:shape"]==="gabled" || tags["building:roof:shape"]==="gabled") {
         roofShape="gabled";
     } else { //FLAT 
         roofShape="flat";
@@ -68,8 +72,12 @@ const getBuildingInfo = (tags) => {
 
     if (tags["roof:height"]) {
         roofHeight=Number(tags["roof:height"].replace("m",""));        
+    } else if (tags["building:roof:height"]) {
+        roofHeight=Number(tags["building:roof:height"].replace("m",""));  
     } else if (tags["roof:levels"]) {
         roofHeight=Number(tags["roof:levels"].replace("m",""))*HEIGHT_FOR_LEVEL;
+    } else if (tags["building:roof:levels"]) {
+        roofHeight=Number(tags["building:roof:levels"].replace("m",""))*HEIGHT_FOR_LEVEL;
     } else {
         if (roofShape==="flat") {
             roofHeight=0;
@@ -167,28 +175,28 @@ const isCollinear = (pa,pb,pc) => {
 }
 
 const computeBoundingBox = (points) => {
-    let minX=new Decimal(Number.MAX_VALUE);
-    let minY=new Decimal(Number.MAX_VALUE);
-    let maxX=new Decimal(-Number.MAX_VALUE);
-    let maxY=new Decimal(-Number.MAX_VALUE);
+    let minX=Number.MAX_VALUE;
+    let minY=Number.MAX_VALUE;
+    let maxX=-Number.MAX_VALUE;
+    let maxY=-Number.MAX_VALUE;
 
-    let centerX = new Decimal(0);
-    let centerY = new Decimal(0);
-    let sizeX = new Decimal(0);
-    let sizeY = new Decimal(0);
+    let centerX = 0;
+    let centerY = 0;
+    let sizeX = 0;
+    let sizeY = 0;
     points.forEach(p => {
-        centerX = centerX.add(p.x);
-        centerY = centerY.add(p.y);
-        minX=Decimal.min(p.x,minX);
-        minY=Decimal.min(p.y,minY);
-        maxX=Decimal.max(p.x,maxX);
-        maxY=Decimal.max(p.y,maxY);
+        centerX = centerX+p.x;
+        centerY = centerY+p.y;
+        minX=Math.min(p.x,minX);
+        minY=Math.min(p.y,minY);
+        maxX=Math.max(p.x,maxX);
+        maxY=Math.max(p.y,maxY);
     });
 
-    centerX = centerX.div(points.length);
-    centerY = centerY.div(points.length);
-    sizeX = maxX.sub(minX);
-    sizeY = maxY.sub(minY);
+    centerX = centerX/points.length;
+    centerY = centerY/points.length;
+    sizeX = maxX-minX;
+    sizeY = maxY-minY;
 
     return {minX,minY,maxX,maxY,centerX,centerY,sizeX,sizeY}
 }
@@ -196,8 +204,8 @@ const computeBoundingBox = (points) => {
 const convertToLocalCoordinate = (points, originX, originY) => {
 
     points.forEach(p => {
-        p.x=p.x.sub(originX);
-        p.y=p.y.sub(originY);
+        p.x=p.x-originX;
+        p.y=p.y-originY;
     });
 }
 
@@ -206,7 +214,10 @@ const removeCollinearPoints = (nodes) => {
     let points = [];
 
     nodes.slice(0,nodes.length-1).forEach(n => {
-        points.push({ ...n});
+        const point = { ...n };
+        point.x=n.x.toNumber();
+        point.y=n.y.toNumber();
+        points.push(point);
     })
 
     if (points.length>3) {
@@ -232,7 +243,17 @@ const removeCollinearPoints = (nodes) => {
                 points.splice(pointToRemove, 1);
             }
         }
-    }    
+    }  
+    
+    if (points.length<3) {
+        points=[];
+        nodes.slice(0,nodes.length-1).forEach(n => {
+            const point = { ...n };
+            point.x=n.x.toNumber();
+            point.y=n.y.toNumber();
+            points.push(point);
+        })
+    }
 //console.log(points);
     return points;
 }
@@ -242,8 +263,8 @@ const createBasePolygon = (points) => {
 
     points.forEach(p => {
         polygon.push({
-            x: p.x.toNumber(),
-            y: p.y.toNumber()
+            x: p.x,
+            y: p.y
         });
     });
 
@@ -254,8 +275,8 @@ const createBuildingMesh = (lateralFaces, roofFaces, boundingBox, buildingInfo, 
     return {
         id: id,
         center: {
-            x: boundingBox.centerX.toNumber(),
-            y: boundingBox.centerY.toNumber()
+            x: boundingBox.centerX,
+            y: boundingBox.centerY
         },
         lateralFaces: {
             faces: lateralFaces,
@@ -270,9 +291,12 @@ const createBuildingMesh = (lateralFaces, roofFaces, boundingBox, buildingInfo, 
     }
 }
 
-const createRoof = (polygon, roofInfo) => {
+const createRoof = (polygon, roofInfo, convexHull, ombb) => {
     if (roofInfo.shape==="pyramidal") {
         return createPyramidalRoof(polygon, roofInfo);
+    } else if (roofInfo.shape==="gabled") {
+        return createGabledRoof(polygon, roofInfo, ombb);
+        //return createFlatRoof(polygon, roofInfo);
     } else {
         return createFlatRoof(polygon, roofInfo);
     }
@@ -307,36 +331,165 @@ const createFlatRoof = (polygon, roofInfo) => {
     return faces.concat(topFace);
 }
 
+
+const calcPointProjection = (pointLineA, pointLineB, point) => {
+    let prj;
+    if (pointLineA.x===pointLineB.x) {
+        //Horizontal aligned
+        prj = { x: pointLineA.y, y: point.y};
+    } else if (pointLineA.y===pointLineB.y) {
+        //Vertical aligned
+        prj = { x: point.y, y: pointLineA.y};
+    } else {
+        const dx = (pointLineB.x-pointLineA.x);
+        const dy = (pointLineB.y-pointLineA.y);
+        const rxy = dx/dy; 
+
+        const t = (point.y+point.x*rxy-pointLineA.x*rxy-pointLineA.y)/(dy+rxy*dx);
+
+        prj = { x: pointLineA.x+dx*t, y: pointLineA.y+dy*t};
+    }
+    return prj;
+}
+
+const createGabledRoof = (polygon, roofInfo, ombb) => {
+
+    const axes=[];
+    let pointA, pointB;
+    let startIndex;
+        
+    //OMBB Axis
+    axes.push(new Vector(ombb[1].x-ombb[0].x, ombb[1].y-ombb[0].y));
+    axes.push(new Vector(ombb[2].x-ombb[1].x, ombb[2].y-ombb[1].y));
+    axes.push(new Vector(ombb[3].x-ombb[2].x, ombb[3].y-ombb[2].y));
+    axes.push(new Vector(ombb[0].x-ombb[3].x, ombb[0].y-ombb[3].y));
+
+    if (roofInfo.orientation==="along") {
+        if (axes[0].length()>axes[1].length()) {
+            startIndex=1;
+        } else {
+            startIndex=0;
+        }
+    } else {
+        if (axes[0].length()<axes[1].length()) {
+            startIndex=1;
+        } else {
+            startIndex=0;
+        }
+    }
+
+    pointA=ombb[startIndex].lerp(ombb[startIndex+1], 0.5);
+    pointB=ombb[startIndex+2].lerp(ombb[(startIndex+3)%4], 0.5);
+
+    const axis = new Vector(pointB.x-pointA.x,pointB.y-pointA.y);
+
+    let faces=[];
+    for (let i=0;i<polygon.length;i++) {
+        const nextI=(i+1)%polygon.length;
+        const p = polygon[i];
+        const nextP = polygon[nextI];
+        const prj = calcPointProjection(pointA, pointB, p);
+        const nextPrj = calcPointProjection(pointA, pointB, nextP);
+
+        const dir = new Vector(prj.x-p.x,prj.y-p.y).cross(axis);
+        const nextDir = new Vector(prj.x-nextP.x,prj.y-nextP.y).cross(axis);
+
+        if (Math.sign(dir)===Math.sign(nextDir)) {
+            faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
+            faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
+            faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
+
+            faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
+            faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
+            faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
+        } else {
+            if (prj.x===nextPrj.x && prj.y===nextPrj.y) {
+                faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
+                faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
+                faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
+            } else {
+                faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
+                faces.push({x: prj.x, y: prj.y, z:roofInfo.minHeight});
+                faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
+
+                faces.push({x: prj.x, y: prj.y, z:roofInfo.minHeight});
+                faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.minHeight});
+                faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
+
+                faces.push({x: prj.x, y: prj.y, z:roofInfo.minHeight});
+                faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
+                faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
+
+                faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.minHeight});
+                faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
+                faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});                
+            }
+        }
+
+        //console.log("PRJ", prj);
+    }
+
+    return faces;
+}
+
+const checkPointsOrder = (points,convexHull) => {
+
+    let i1,i2,i3;
+
+    //console.log(convexHull.length);
+
+    i1 = points.findIndex(p => p.id==convexHull[0].id);
+    i2 = points.findIndex(p => p.id==convexHull[1].id);
+    i3 = points.findIndex(p => p.id==convexHull[2].id);
+
+    if (i2<i1) i2=i2+points.length;
+    if (i3<i1) i3=i3+points.length;
+
+    if (i1<i2 && i2<i3) {
+        //console.log("Point order correct");
+        return points;
+    } else {
+        //console.log("Reverse point list order");
+        return points.reverse();
+    }
+}
+
 const createSimpleBuildings = (ways) => {
 
     const buildings=[];
-    ways.filter(w => !w.inRelation).forEach(w => {
+    ways.filter(w => !w.inRelation).forEach(w => {  // && w.id===364313092
         //Min 2 points
         if (w.nodes.length>2) {
             //Only closed path (first point id must be equal to last point id)
             if (w.nodes[0].id===w.nodes[w.nodes.length-1].id) {
 
                 try {
-                    const points = removeCollinearPoints(w.nodes);
-                    let localBoundingBox = computeBoundingBox(points);
-                    convertToLocalCoordinate(points, localBoundingBox.centerX, localBoundingBox.centerY);
+                    const points = removeCollinearPoints(w.nodes); 
+                    if (points.length<3) {
+                        console.log("Invalid way", w.id);
+                    }  else {
+                        let localBoundingBox = computeBoundingBox(points);
+                        convertToLocalCoordinate(points, localBoundingBox.centerX, localBoundingBox.centerY);
+                        //Using: https://github.com/geidav/ombb-rotating-calipers
+                        //with some modifications
+                        
+                        const convexHull = calcConvexHull(points);
+                        checkPointsOrder(points,convexHull);
+                        const orientedMinBoundingBox = calcOmbb(convexHull);
 
-                    if (w.tags["roof:shape"] && w.tags["roof:shape"]==="gabled" && points.length!==4) {
-                        console.log("Invalid roof "+w.id);
+                        const buildingInfo = getBuildingInfo(w.tags);
+                        const basePolygon = createBasePolygon(points);
+
+                        //Compute lateral faces
+                        const lateralFaces = extrudePoly(basePolygon, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP);
+                        //Compute roof faces
+                        const roofFaces = createRoof(basePolygon, buildingInfo.roof, convexHull, orientedMinBoundingBox);
+
+                        //Create building mesh
+                        const building = createBuildingMesh(lateralFaces, roofFaces, localBoundingBox, buildingInfo, w.tags, w.id);
+
+                        buildings.push(building);
                     }
-
-                    const buildingInfo = getBuildingInfo(w.tags);
-                    const basePolygon = createBasePolygon(points);
-
-                    //Compute lateral faces
-                    const lateralFaces = extrudePoly(basePolygon, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP);
-                    //Compute roof faces
-                    const roofFaces = createRoof(basePolygon, buildingInfo.roof);
-
-                    //Create building mesh
-                    const building = createBuildingMesh(lateralFaces, roofFaces, localBoundingBox, buildingInfo, w.tags, w.id);
-
-                    buildings.push(building);
                 } catch (ex) {
                     console.log(`Error in ${w.id} way`, ex);
                 }

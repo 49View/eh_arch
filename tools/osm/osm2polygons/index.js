@@ -11,8 +11,8 @@ const main = async () => {
   // extendData(nodes,ways,rels);
   const buildings = createBuildings(nodes, ways, rels);
 
-  fs.writeFileSync("dataExtend.json", JSON.stringify({nodes, ways, rels}, null, 4), {options: "utf8"});
-  fs.writeFileSync("buildings.json", JSON.stringify({buildings}, null, 4), {options: "utf8"});
+  fs.writeFileSync("dataExtend.json", JSON.stringify({nodes,ways,rels},null,4), {options:"utf8"});
+  fs.writeFileSync("../osmdebug/src/buildings.json", JSON.stringify({buildings},null,4), {options:"utf8"});
 
   console.log(`Found ${nodes.length} nodes`);
   console.log(`Found ${ways.filter(w => w.inRelation === true).length} ways in relation`);
