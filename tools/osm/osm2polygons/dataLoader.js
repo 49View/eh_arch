@@ -6,7 +6,7 @@ Decimal.set({ precision: 20, rounding: 1 })
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
 const getData = async (bbox) => {
-    
+
     const query=`
     [out:json][timeout:25];
     (
@@ -48,9 +48,15 @@ const prepareData = (bbox,osmData) => {
     return {nodes,ways,rels}
 }
 
+RAD2DEG = 180 / Math.PI;
+PI_4 = Math.PI / 4;
+const lat2y = lat => { return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG; }
+// lon2x is basically lon because the mercator is a cilyndrical projection so longitude doesn't change it's ratio
+//const lon2x = lon => { return lon; }
+
 const calcCoordinate = (bbox, nodes) => {
-    const latCenter = bbox[0]+(bbox[2]-bbox[0])/2;
-    const lonCenter = bbox[1]+(bbox[3]-bbox[1])/2;
+    // const latCenter = bbox[0]+(bbox[2]-bbox[0])/2;
+    // const lonCenter = bbox[1]+(bbox[3]-bbox[1])/2;
 
     nodes.forEach(n => {
         // n.x = calcDistance(bbox[0],bbox[1],bbox[0],n.lon);
@@ -58,12 +64,12 @@ const calcCoordinate = (bbox, nodes) => {
         // n.x = new Decimal(calcDistance(0,0,0,n.lon)*Math.sign(n.lon));
         // n.y = new Decimal(calcDistance(0,0,n.lat,0)*Math.sign(n.lat));
         n.x=new Decimal(Math.sign(n.lon)).mul(calcDistance(0,0,0,n.lon));
-        n.y=new Decimal(Math.sign(n.lat)).mul(calcDistance(0,0,n.lat,0));
+        n.y=new Decimal(Math.sign(n.lat)).mul(calcDistance(0,0,lat2y(n.lat),0));
     })
 }
 
 const calcDistance = (latitude1,longitude1,latitude2,longitude2) => {
-    
+
     const toRadians = new Decimal(Math.PI).div(new Decimal(180));
     const lat1 = new Decimal(latitude1);
     const lon1 = new Decimal(longitude1);
@@ -80,8 +86,8 @@ const calcDistance = (latitude1,longitude1,latitude2,longitude2) => {
         .add(Decimal.cos(phi1).mul(Decimal.cos(phi2)).mul(Decimal.sin(deltaLambda.div(2))).mul(Decimal.sin(deltaLambda.div(2))))
 
     const c = Decimal.atan2(Decimal.sqrt(a),Decimal.sqrt(new Decimal(1).sub(a))).mul(2);
-    
-    const d = R.mul(c); // in metres  
+
+    const d = R.mul(c); // in metres
 
     // const lat1 = latitude1;
     // const lon1 = longitude1;
@@ -92,15 +98,15 @@ const calcDistance = (latitude1,longitude1,latitude2,longitude2) => {
     // const phi2 = lat2 * Math.PI/180;
     // const deltaPhi = (lat2-lat1) * Math.PI/180;
     // const deltaLambda = (lon2-lon1) * Math.PI/180;
-    
+
     // const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
     //           Math.cos(phi1) * Math.cos(phi2) *
     //           Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
     // const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    
-    // const d = (R * c); // in metres   
- 
-    
+
+    // const d = (R * c); // in metres
+
+
     return d;
 }
 

@@ -7,10 +7,10 @@ import {buildings} from './buildings.json'
 
 const App = () => {
 
-  const [bldWireframe, setBldWireframe] = useState(true);
-  const [roofWireframe, setRoofWireframe] = useState(true);
+  const [bldWireframe, setBldWireframe] = useState(false);
+  const [roofWireframe, setRoofWireframe] = useState(false);
   const [buildingId, setBuildingId] = useState(buildings[0].id);
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(true);
 
   return (
     <div id="mainContainer">
@@ -26,16 +26,16 @@ const App = () => {
       <input type="checkbox" checked={bldWireframe} onChange={e => setBldWireframe(e.target.checked)}></input> FACES WIREFRAME
       <input type="checkbox" checked={roofWireframe} onChange={e => setRoofWireframe(e.target.checked)}></input> ROOF WIREFRAME
       <input type="checkbox" checked={showAll} onChange={e => setShowAll(e.target.checked)}></input> SHOW ALL BUILDINGS
-       { 
-         buildingId && 
+       {
+         buildingId &&
          <OsmScene
-          buildings={buildings} 
-          building={buildings.find(b => b.id.toString()===buildingId.toString())} 
-          buildingWireframe={bldWireframe} 
+          buildings={buildings}
+          building={buildings.find(b => b.id.toString()===buildingId.toString())}
+          buildingWireframe={bldWireframe}
           roofWireframe={roofWireframe}
           showAll={showAll}
-          /> 
-       }     
+          />
+       }
     </div>
   );
 }
