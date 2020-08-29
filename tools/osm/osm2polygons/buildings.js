@@ -13,13 +13,13 @@ const USE_TRIANGLES_STRIP = false;
 
 const createBuildings = (nodes,ways,rels) => {
     const simpleBuildings=createSimpleBuildings(ways);
-    //const simpleBuildings=[];
+    // const simpleBuildings=[];
     const complexBuildings=createComplexBuildings(rels);
 
     return simpleBuildings.concat(complexBuildings);
 }
 
-const getTriangles = (polyPoints) => {
+const getTrianglesFromPolygon = (polyPoints) => {
     const intPoints = [];
 
     polyPoints.forEach(p => {
@@ -27,6 +27,38 @@ const getTriangles = (polyPoints) => {
     });
 
     const swctx = new poly2tri.SweepContext(intPoints);
+    swctx.triangulate();
+    const tri= swctx.getTriangles()
+    const points=[];
+    tri.forEach(t => {
+        points.push({x: t.points_[0].x/100000, y: t.points_[0].y/100000});
+        points.push({x: t.points_[1].x/100000, y: t.points_[1].y/100000});
+        points.push({x: t.points_[2].x/100000, y: t.points_[2].y/100000});
+    });
+
+    return points;
+}
+
+const getTrianglesFromComplexPolygon = (outerPolyPoints, innerPolys) => {
+    const intOuterPoints = [];
+    const intInnersPoints = [];
+
+    outerPolyPoints.forEach(p => {
+        intOuterPoints.push({x: p.x*100000, y: p.y*100000})
+    });
+
+    innerPolys.forEach(i => {
+        const intInnerPoint = [];
+        i.points.forEach(p => {
+            intInnerPoint.push({x: p.x*100000, y: p.y*100000})
+        });
+        intInnersPoints.push(intInnerPoint);
+    });
+
+    const swctx = new poly2tri.SweepContext(intOuterPoints);
+    intInnersPoints.forEach(i => {
+        swctx.addHole(i);
+    });
     swctx.triangulate();
     const tri= swctx.getTriangles()
     const points=[];
@@ -173,7 +205,7 @@ const isCollinear = (pa,pb,pc) => {
 
     //console.log(cp);
     // return cp.lt(new Decimal(0.01));
-    return cp<1e-10;
+    return cp<1e-20;
 }
 
 const computeBoundingBox = (points) => {
@@ -327,7 +359,7 @@ const createFlatRoof = (polygon, roofInfo) => {
         faces=faces.concat(extrudePoly(polygon, roofInfo.minHeight, roofInfo.maxHeight, false));
     }
     //
-    const topFace = getTriangles(polygon);
+    const topFace = getTrianglesFromPolygon(polygon);
     topFace.forEach(t => t.z=roofInfo.maxHeight);
 
     return faces.concat(topFace);
@@ -488,7 +520,7 @@ const createSimpleBuildings = (ways) => {
                         const roofFaces = createRoof(basePolygon, buildingInfo.roof, convexHull, orientedMinBoundingBox);
 
                         //Create building mesh
-                        const building = createBuildingMesh(lateralFaces, roofFaces, localBoundingBox, buildingInfo, w.tags, w.id);
+                        const building = createBuildingMesh(lateralFaces, roofFaces, localBoundingBox, buildingInfo, w.tags, "w-"+w.id);
 
                         buildings.push(building);
                     }
@@ -541,6 +573,44 @@ const createClosedPath = (member, members) => {
     return connectedMembers;
 }
 
+const checkPointInsidePolygon = (polygon, point) => {
+
+    let intersect = 0;
+    for (let i=0;i<polygon.length;i++) {
+        const nextI=(i+1)%polygon.length;
+        const p=polygon[i];
+        const nextP=polygon[nextI];
+
+        if ((point.y>=p.y && point.y<nextP.y) || (point.y>=nextP.y && point.y<p.y)) {
+            if (point.x>(p.x+(nextP.x-p.x)*(point.y-p.y)/(nextP.y-p.y))) {
+                intersect++;
+            }
+        }
+    }
+    return intersect%2!==0;
+}
+
+const checkPolygonInsidePolygon = (outerPolygon, polygon) => {
+
+    let inside=true;
+    for (let i=0;i<polygon.length;i++) {
+        if (!checkPointInsidePolygon(outerPolygon, polygon[i])) {
+            inside=false;
+            break;
+        }
+    }
+
+    return inside;
+}
+
+const createComplexPolygonRoof = (outerPolygon, innerPolygons, roofInfo) => {
+
+    const topFace=getTrianglesFromComplexPolygon(outerPolygon.points, innerPolygons);
+    topFace.forEach(t => t.z=roofInfo.maxHeight);
+
+    return topFace;
+}
+
 const createComplexBuildings = (rels) => {
     const buildings=[];
 
@@ -555,11 +625,11 @@ const createComplexBuildings = (rels) => {
                     m.processed=true;
                     const polygon = {
                         role: m.role,
-                        points: []
+                        nodes: []
                     }
                     //Copy point but not last (same than first)
                     for (let i=0;i<m.ref.nodes.length-1;i++) {
-                        polygon.points.push({...m.ref.nodes[i]});
+                        polygon.nodes.push({...m.ref.nodes[i]});
                     }
                     polygons.push(polygon);
                 }
@@ -574,11 +644,11 @@ const createComplexBuildings = (rels) => {
                             console.log("Create polygon");
                             const polygon = {
                                 role: connectedMembers[0].role,
-                                points: []
+                                nodes: []
                             }
                             connectedMembers.forEach(m => {
                                 for (let i=0;i<m.ref.nodes.length-1;i++) {
-                                    polygon.points.push({...m.ref.nodes[i]});
+                                    polygon.nodes.push({...m.ref.nodes[i]});
                                 }
                             });
                             polygons.push(polygon);
@@ -589,9 +659,43 @@ const createComplexBuildings = (rels) => {
 
             //
             console.log("Found "+polygons.length+" polygons");
-            //Determine inner and outer relation
 
-            //Create faces
+            let relPoints = [];
+            polygons.forEach(p => {
+                p.points=[];
+                p.nodes.forEach(n => p.points.push({x: Number(n.x), y: Number(n.y)}));
+                relPoints=relPoints.concat(p.points);               
+            });
+            const localBoundingBox=computeBoundingBox(relPoints);
+            polygons.forEach(p => {
+                convertToLocalCoordinate(p.points, localBoundingBox.centerX, localBoundingBox.centerY);
+                const convexHull = calcConvexHull(p.points);
+                checkPointsOrder(p.points,convexHull);
+            });
+
+            const buildingInfo = getBuildingInfo(r.tags);
+
+            let roofFaces=[];
+            let lateralFaces=[];
+            polygons.filter(p => p.role==="outer").forEach(o => {
+                o.holes=[];
+                polygons.filter(p => p.role==="inner" && p.container===undefined).forEach(i => {
+                    if (checkPolygonInsidePolygon(o.points, i.points)) {
+                        i.container=o;
+                        o.holes.push(i);
+                    }
+                });
+
+                lateralFaces = lateralFaces.concat(extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP));
+                o.holes.forEach(h => {
+                    lateralFaces = lateralFaces.concat(extrudePoly(h.points, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP));
+                })
+                //Compute roof faces
+                const roofFaces = createComplexPolygonRoof(o, o.holes, buildingInfo.roof);
+                const building = createBuildingMesh(lateralFaces, roofFaces, localBoundingBox, buildingInfo, r.tags, "r-"+r.id);
+
+                buildings.push(building);
+            })
 
         } catch (ex) {
             console.log(`Error in ${r.id} relation`, ex);
