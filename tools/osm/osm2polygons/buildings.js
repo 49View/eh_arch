@@ -1,7 +1,7 @@
 const Decimal = require('decimal.js');
 const { calcConvexHull } = require('./convexhull');
 const { calcOmbb } = require('./ombb');
-const { Vector} = require('./Vector');
+const { Vector} = require('./vector');
 Decimal.set({ precision: 20, rounding: 1 })
 poly2tri = require('poly2tri');
 
@@ -12,9 +12,11 @@ const DEFAULT_BUILDING_COLOUR = "#eeeeee";
 const USE_TRIANGLES_STRIP = false;
 
 const createBuildings = (nodes,ways,rels) => {
-    const triangles=createSimpleBuildings(ways);
+    const simpleBuildings=createSimpleBuildings(ways);
+    //const simpleBuildings=[];
+    const complexBuildings=createComplexBuildings(rels);
 
-    return triangles;
+    return simpleBuildings.concat(complexBuildings);
 }
 
 const getTriangles = (polyPoints) => {
@@ -497,6 +499,104 @@ const createSimpleBuildings = (ways) => {
         }
     });
 
+    return buildings;
+}
+
+const checkPathClosed = (member) => {
+    const firstNodeId=member.nodes[0].id;
+    const lastNodeId=member.nodes[member.nodes.length-1].id;
+    return firstNodeId===lastNodeId;
+}
+
+const createClosedPath = (member, members) => {
+
+    const connectedMembers=[member];
+    const role=member.role;
+    const firstId =member.ref.id;
+    let lastNodeId=member.ref.nodes[member.ref.nodes.length-1].id;
+
+    let closed=false;
+    while (!closed) {
+        const nextMember=members.find(m => m.role===role && m.ref.nodes[0].id===lastNodeId);
+        if (nextMember!==null) {
+            if (nextMember.ref.id===firstId) {
+                closed=true;
+            } else {
+                //Search for next node
+                lastNodeId=nextMember.ref.nodes[nextMember.ref.nodes.length-1].id;
+                connectedMembers.push(nextMember);
+            }
+        } else {
+            //Can't close path, INVALID!
+            break;
+        }
+    }
+    //Mark members connected as processed
+    connectedMembers.forEach(m=>m.processed=true);
+    //If not closed,  return nothing
+    if (!closed) {
+        return [];
+    }
+    
+    return connectedMembers;
+}
+
+const createComplexBuildings = (rels) => {
+    const buildings=[];
+
+    rels.forEach(r => {
+        try {
+            //Clone members for elaboration
+            const polygons = [];
+            const members = JSON.parse(JSON.stringify(r.members));
+            //Create polygons from closed ways
+            members.forEach(m => {
+                if (checkPathClosed(m.ref)) {
+                    m.processed=true;
+                    const polygon = {
+                        role: m.role,
+                        points: []
+                    }
+                    //Copy point but not last (same than first)
+                    for (let i=0;i<m.ref.nodes.length-1;i++) {
+                        polygon.points.push({...m.ref.nodes[i]});
+                    }
+                    polygons.push(polygon);
+                }
+            });
+
+            while (members.filter(m=>m.processed===true).length<members.length) 
+            {
+                for (i=0;i<members.length;i++) {
+                    if (!members[i].processed) {
+                        const connectedMembers = createClosedPath(members[i], members);
+                        if (connectedMembers.length>0) {
+                            console.log("Create polygon");
+                            const polygon = {
+                                role: connectedMembers[0].role,
+                                points: []
+                            }
+                            connectedMembers.forEach(m => {
+                                for (let i=0;i<m.ref.nodes.length-1;i++) {
+                                    polygon.points.push({...m.ref.nodes[i]});
+                                }
+                            });
+                            polygons.push(polygon);
+                        }
+                    }
+                }
+            } 
+
+            //
+            console.log("Found "+polygons.length+" polygons");
+            //Determine inner and outer relation
+
+            //Create faces
+
+        } catch (ex) {
+            console.log(`Error in ${r.id} relation`, ex);
+        }
+    });
     return buildings;
 }
 
