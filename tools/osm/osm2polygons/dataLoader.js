@@ -13,6 +13,10 @@ const getData = async (bbox) => {
         rel["building"](${bbox.join(",")});
         way["building"](${bbox.join(",")});
         way["building:part"](${bbox.join(",")});
+        rel["leisure"="park"](${bbox.join(",")});
+        rel["leisure"="garden"](${bbox.join(",")});
+        way["leisure"="park"](${bbox.join(",")});
+        way["leisure"="garden"](${bbox.join(",")});
     );
     (
         ._;
@@ -29,6 +33,7 @@ const getData = async (bbox) => {
     //console.log(qs.stringify({data: query}));
     const response=await axios(OVERPASSAPI_URL, options);
     osmData=response.data;
+    //fs.writeFileSync("testData.json", JSON.stringify(osmData), { encoding: "utf8"});
     return prepareData(bbox,osmData);
 }
 

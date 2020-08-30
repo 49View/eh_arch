@@ -34,3 +34,5 @@
 # Misc
 node_modules/
 .idea/
+tools/osm/osmdebug/src/elements.json
+tools/osm/osm2polygons/dataExtend.json
