@@ -4,11 +4,11 @@ Decimal.set({ precision: 20, rounding: 1 });
 const {
     getTrianglesFromPolygon,
     getTrianglesFromComplexPolygon,
-    extrudePoly,
-    calcPointProjection,
     getPolygonFromWay,
     getPolygonsFromMultipolygonRelation,
-    createMesh
+    createMesh,
+    createElementsFromWays,
+    createElementsFromRels
 } = require('./osmHelper.js');
 
 const createParks = (nodes,ways,rels) => {
@@ -16,10 +16,14 @@ const createParks = (nodes,ways,rels) => {
     console.log("PARKS");
     console.log("----------------------------------------------");
 
-    const simpleParks=createSimpleParks(ways.filter(w => w.tags && w.tags["leisure"] && (w.tags["leisure"]==="park" || w.tags["leisure"]==="garden")));
+    const simpleParks=createElementsFromWays(ways
+        , w => w.tags && w.tags["leisure"] && (w.tags["leisure"]==="park" || w.tags["leisure"]==="garden")
+        , parkFromWay);
     // const simpleBuildings=[];
-    const complexParks=createComplexParks(rels.filter(r => r.tags && r.tags["leisure"] && (r.tags["leisure"]==="park" || r.tags["leisure"]==="garden")));
-
+    const complexParks=createElementsFromRels(rels
+        , r => r.tags && r.tags["leisure"] && (r.tags["leisure"]==="park" || r.tags["leisure"]==="garden")
+        , parkFromRel);
+    
     console.log(`Found ${simpleParks.length} simple parks`);
     console.log(`Found ${complexParks.length} complex parks`);
     console.log("----------------------------------------------");
@@ -27,12 +31,39 @@ const createParks = (nodes,ways,rels) => {
     return simpleParks.concat(complexParks);
 }
 
-const createSimpleParks = (ways) => {
-    return [];
+const createParkMesh = (id, tags, boundingBox, faces) => {
+
+    const groups=[];
+
+    groups.push({
+        faces: faces,
+        colour: "#CDF7C9",
+        isTriangleStrip: false
+    });
+    
+    return createMesh(id, tags, "park", boundingBox, groups);    
 }
 
-const createComplexParks = (rels) => {
-    return [];
+const parkFromWay = (way) => {
+
+    const {polygon,localBoundingBox,convexHull,orientedMinBoundingBox}=getPolygonFromWay(way);
+    const faces = getTrianglesFromPolygon(polygon);
+
+    const park = createParkMesh("w-"+way.id, way.tags, localBoundingBox, faces);
+    return park;
+}
+
+const parkFromRel = (rel) => {
+
+    const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(rel);
+    let faces=[];
+    polygons.filter(p => p.role==="outer").forEach(o => {
+        faces = faces.concat(getTrianglesFromComplexPolygon(o.points, o.holes));
+    });
+
+    const park = createParkMesh("r-"+rel.id, rel.tags, localBoundingBox, faces);
+
+    return park;
 }
 
 module.exports = { createParks }

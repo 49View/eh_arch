@@ -5,7 +5,6 @@ const { calcConvexHull } = require('./convexhull');
 const { calcOmbb } = require('./ombb');
 
 
-
 const getTrianglesFromPolygon = (polyPoints) => {
     const intPoints = [];
 
@@ -265,16 +264,27 @@ const createClosedPath = (member, members) => {
     const connectedMembers=[member];
     const role=member.role;
     const firstId =member.ref.id;
+    let currentId=member.ref.id;
     let lastNodeId=member.ref.nodes[member.ref.nodes.length-1].id;
 
     let closed=false;
     while (!closed) {
-        const nextMember=members.find(m => m.role===role && m.ref.nodes[0].id===lastNodeId);
-        if (nextMember!==null) {
+        //Search for next member (lastNode = firstNode)
+        let nextMember=members.find(m => m.role===role && m.ref.nodes[0].id===lastNodeId);
+        if  (nextMember===undefined) {
+            //Search for next member (lastNode = lastNode)
+            nextMember=members.find(m => m.role===role && m.ref.id!==currentId && m.ref.nodes[m.ref.nodes.length-1].id===lastNodeId);
+            if (nextMember!==undefined) {
+                //Reverse nextMember nodes order
+                nextMember.ref.nodes.reverse();
+            }
+        }
+        if (nextMember!==undefined) {
             if (nextMember.ref.id===firstId) {
                 closed=true;
             } else {
                 //Search for next node
+                currentId=nextMember.id;
                 lastNodeId=nextMember.ref.nodes[nextMember.ref.nodes.length-1].id;
                 connectedMembers.push(nextMember);
             }
@@ -404,7 +414,7 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
     let relPoints = [];
     polygons.forEach(p => {
         p.points=[];
-        p.nodes.forEach(n => p.points.push({x: Number(n.x), y: Number(n.y)}));
+        p.nodes.forEach(n => p.points.push({x: Number(n.x), y: Number(n.y), lat: n.lat, lon:n.lon}));
         relPoints=relPoints.concat(p.points);               
     });
     //Compute local bounding box and correct point direction
@@ -428,6 +438,45 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
     return {polygons,localBoundingBox};
 }
 
+const createElementsFromWays = (ways, filter, elementCreator) => {
+    const elements=[];
+    ways.filter(filter)
+        .filter(w => !w.inRelation && w.nodes.length>2 && w.nodes[0].id===w.nodes[w.nodes.length-1].id)
+        .forEach(w => {  // && w.id===364313092
+            try {
+                const {polygon,localBoundingBox,convexHull,orientedMinBoundingBox} = getPolygonFromWay(w);
+
+                const element = elementCreator(w, polygon, localBoundingBox, convexHull, orientedMinBoundingBox);
+
+                elements.push(element);                    
+            } catch (ex) {
+                console.log(`Error in ${w.id} way`, ex);
+            }
+        }
+    );
+
+    return elements;
+}
+
+const createElementsFromRels = (rels, filter, elementCreator) => {
+    const elements=[];
+
+    rels.filter(filter)
+        .forEach(r => {
+            try {
+                const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(r);
+                const element = elementCreator(r, polygons, localBoundingBox);
+                elements.push(element);       
+
+            } catch (ex) {
+                console.log(`Error in ${r.id} relation`, ex);
+            }
+        }
+    );
+
+    return elements;
+}
+
 module.exports = {
     getTrianglesFromPolygon,
     getTrianglesFromComplexPolygon,
@@ -443,5 +492,7 @@ module.exports = {
     checkPolygonInsidePolygon,
     createMesh,
     getPolygonsFromMultipolygonRelation,
-    getPolygonFromWay
+    getPolygonFromWay,
+    createElementsFromWays,
+    createElementsFromRels
 }

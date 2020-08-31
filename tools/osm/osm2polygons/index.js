@@ -1,6 +1,6 @@
 const poly2tri = require('poly2tri');
 const fs = require('fs');
-const {getDataLocal} = require("./dataLoader");
+const {getData} = require("./dataLoader");
 const {createBuildings} = require("./buildings");
 const {createParks} = require("./parks");
 
@@ -8,7 +8,7 @@ const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
 
 
 const main = async () => {
-  const {nodes, ways, rels} = await getDataLocal(bbox);
+  const {nodes, ways, rels} = await getData(bbox);
   // extendData(nodes,ways,rels);
   let elements = [];
   

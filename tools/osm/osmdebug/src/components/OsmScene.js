@@ -2,7 +2,7 @@ import React from "react";
 import { Canvas } from "react-three-fiber";
 import GridHelper from "./GridHelper";
 import Controls from "./Controls";
-import Building from "./Building";
+import Element from "./Element";
 
 
 const OsmScene = (props) => {
@@ -10,20 +10,19 @@ const OsmScene = (props) => {
   let Content;
   if (props.showAll) {
 
-    Content = props.buildings.map(b => <Building
-      position={[b.center.x-props.building.center.x,0,props.building.center.y-b.center.y]}
-      building={b}
-      buildingWireframe={props.buildingWireframe}
-      roofWireframe={props.roofWireframe}
-    />
+    Content = props.elements.map(b => 
+      <Element
+        position={[b.center.x-props.element.center.x,0,props.element.center.y-b.center.y]}
+        element={b}
+        wireframe={props.wireframe}
+      />
     );
   } else {
     Content = (
-      <Building
+      <Element
         position={[0,0,0]}
-        building={props.building}
-        buildingWireframe={props.buildingWireframe}
-        roofWireframe={props.roofWireframe}
+        element={props.element}
+        wireframe={props.wireframe}
       />
     );
   }

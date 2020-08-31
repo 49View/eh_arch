@@ -2,37 +2,34 @@ import React, {useState} from "react";
 import OsmScene from './components/OsmScene'
 // Styles
 import "./styles.css";
-import {buildings} from './buildings.json'
+import {elements} from './elements.json'
 
 
 const App = () => {
 
-  const [bldWireframe, setBldWireframe] = useState(false);
-  const [roofWireframe, setRoofWireframe] = useState(false);
-  const [buildingId, setBuildingId] = useState(buildings[0].id);
+  const [wireframe, setWireframe] = useState(false);
+  const [elementId, setElementId] = useState(elements[0].id);
   const [showAll, setShowAll] = useState(true);
 
   return (
     <div id="mainContainer">
-      BUILDING: <select value={buildingId} onChange={e => setBuildingId(e.target.value)}>
+      BUILDING: <select value={elementId} onChange={e => setElementId(e.target.value)}>
         {
-          buildings.map(b => {
+          elements.map(b => {
             return (
               <option key={b.id} value={b.id}>{b.id}</option>
             )
           })
         }
       </select>
-      <input type="checkbox" checked={bldWireframe} onChange={e => setBldWireframe(e.target.checked)}></input> FACES WIREFRAME
-      <input type="checkbox" checked={roofWireframe} onChange={e => setRoofWireframe(e.target.checked)}></input> ROOF WIREFRAME
+      <input type="checkbox" checked={wireframe} onChange={e => setWireframe(e.target.checked)}></input> WIREFRAME
       <input type="checkbox" checked={showAll} onChange={e => setShowAll(e.target.checked)}></input> SHOW ALL BUILDINGS
        {
-         buildingId &&
+         elementId &&
          <OsmScene
-          buildings={buildings}
-          building={buildings.find(b => b.id.toString()===buildingId.toString())}
-          buildingWireframe={bldWireframe}
-          roofWireframe={roofWireframe}
+          elements={elements}
+          element={elements.find(b => b.id.toString()===elementId.toString())}
+          wireframe={wireframe}
           showAll={showAll}
           />
        }

@@ -6,9 +6,10 @@ const {
     getTrianglesFromComplexPolygon,
     extrudePoly,
     calcPointProjection,
-    getPolygonFromWay,
-    getPolygonsFromMultipolygonRelation,
-    createMesh
+    createMesh,
+    createElementsFromWays,
+    createElementsFromRels
+
 } = require('./osmHelper.js');
 
 const HEIGHT_FOR_LEVEL = 3;
@@ -21,9 +22,13 @@ const createBuildings = (nodes,ways,rels) => {
     console.log("BUILDINGS");
     console.log("----------------------------------------------");
 
-    const simpleBuildings=createSimpleBuildings(ways.filter(w => w.tags && (w.tags["building"] || w.tags["building:part"])));
+    const simpleBuildings=createElementsFromWays(ways
+        , w => w.tags && (w.tags["building"] || w.tags["building:part"])
+        , buildingFromWay);
     // const simpleBuildings=[];
-    const complexBuildings=createComplexBuildings(rels.filter(r => r.tags && r.tags["building"]));
+    const complexBuildings=createElementsFromRels(rels
+        , r => r.tags && r.tags["building"]
+        , buildingFromRel);
 
     console.log(`Found ${simpleBuildings.length} simple buildings`);
     console.log(`Found ${complexBuildings.length} complex buildings`);
@@ -46,7 +51,12 @@ const getBuildingInfo = (tags) => {
     if (tags["height"]) {
         maxHeight=Number(tags["height"].replace("m",""));
     } else if (tags["building:levels"]) {
-        maxHeight=Number(tags["building:levels"].replace("m",""))*HEIGHT_FOR_LEVEL;
+        if (tags["building:levels"].indexOf(",")!==-1) {
+            const levels=tags["building:levels"].split(",");
+            maxHeight=levels.length*HEIGHT_FOR_LEVEL;
+        } else  {
+            maxHeight=Number(tags["building:levels"].replace("m",""))*HEIGHT_FOR_LEVEL;
+        }
     } else {
         maxHeight=HEIGHT_FOR_LEVEL;
     }
@@ -255,37 +265,6 @@ const createGabledRoof = (polygon, roofInfo, ombb) => {
     return faces;
 }
 
-const createSimpleBuildings = (ways) => {
-
-    const buildings=[];
-    ways.filter(w => !w.inRelation).forEach(w => {  // && w.id===364313092
-        //Min 2 points
-        if (w.nodes.length>2) {
-            //Only closed path (first point id must be equal to last point id)
-            if (w.nodes[0].id===w.nodes[w.nodes.length-1].id) {
-
-                try {
-                    const {polygon,localBoundingBox,convexHull,orientedMinBoundingBox} = getPolygonFromWay(w);
-                    const buildingInfo = getBuildingInfo(w.tags);
-
-                    //Compute lateral faces
-                    const lateralFaces = extrudePoly(polygon, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP);
-                    //Compute roof faces
-                    const roofFaces = createRoof(polygon, buildingInfo.roof, convexHull, orientedMinBoundingBox);
-
-                    //Create building mesh
-                    const building = createBuildingMesh("w-"+w.id, w.tags, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
-
-                    buildings.push(building);                    
-                } catch (ex) {
-                    console.log(`Error in ${w.id} way`, ex);
-                }
-            }
-        }
-    });
-
-    return buildings;
-}
 
 const createComplexPolygonRoof = (outerPolygon, innerPolygons, roofInfo) => {
 
@@ -295,34 +274,37 @@ const createComplexPolygonRoof = (outerPolygon, innerPolygons, roofInfo) => {
     return topFace;
 }
 
-const createComplexBuildings = (rels) => {
-    const buildings=[];
+const buildingFromWay = (way, polygon, localBoundingBox, convexHull, orientedMinBoundingBox) => {
 
-    rels.forEach(r => {
-        try {
+    const buildingInfo = getBuildingInfo(way.tags);
 
-            const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(r);
-            const buildingInfo = getBuildingInfo(r.tags);
+    //Compute lateral faces
+    const lateralFaces = extrudePoly(polygon, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP);
+    //Compute roof faces
+    const roofFaces = createRoof(polygon, buildingInfo.roof, convexHull, orientedMinBoundingBox);
 
-            let roofFaces=[];
-            let lateralFaces=[];
-            polygons.filter(p => p.role==="outer").forEach(o => {
-                //Compute lateral faces
-                lateralFaces = lateralFaces.concat(extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP));
-                o.holes.forEach(h => {
-                    lateralFaces = lateralFaces.concat(extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP));
-                })
-                //Compute roof faces
-                roofFaces = roofFaces.concat(createComplexPolygonRoof(o, o.holes, buildingInfo.roof));
-            })
-            const building = createBuildingMesh("r-"+r.id, r.tags, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
-            buildings.push(building);        
+    //Create building mesh
+    const building = createBuildingMesh("w-"+way.id, way.tags, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
+    return building;
+}
 
-        } catch (ex) {
-            console.log(`Error in ${r.id} relation`, ex);
-        }
-    });
-    return buildings;
+const buildingFromRel = (rel,polygons,localBoundingBox) => {
+
+    const buildingInfo = getBuildingInfo(rel.tags);
+
+    let roofFaces=[];
+    let lateralFaces=[];
+    polygons.filter(p => p.role==="outer").forEach(o => {
+        //Compute lateral faces
+        lateralFaces = lateralFaces.concat(extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP));
+        o.holes.forEach(h => {
+            lateralFaces = lateralFaces.concat(extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP));
+        })
+        //Compute roof faces
+        roofFaces = roofFaces.concat(createComplexPolygonRoof(o, o.holes, buildingInfo.roof));
+    })
+    const building = createBuildingMesh("r-"+rel.id, rel.tags, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
+    return building;
 }
 
 module.exports = { createBuildings }
