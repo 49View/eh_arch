@@ -80,6 +80,8 @@ const getBuildingInfo = (tags) => {
         roofShape="pyramidal";
     } else if (tags["roof:shape"]==="gabled" || tags["building:roof:shape"]==="gabled") {
         roofShape="gabled";
+    } else if (tags["roof:shape"]==="dome" || tags["building:roof:shape"]==="dome") {
+        roofShape="dome";
     } else { //FLAT 
         roofShape="flat";
     }
@@ -162,10 +164,33 @@ const createRoof = (polygon, roofInfo, convexHull, ombb) => {
         return createPyramidalRoof(polygon, roofInfo);
     } else if (roofInfo.shape==="gabled") {
         return createGabledRoof(polygon, roofInfo, ombb);
-        //return createFlatRoof(polygon, roofInfo);
+    } else if (roofInfo.shape==="dome") {
+        return createDomeRoof(polygon, roofInfo);
     } else {
         return createFlatRoof(polygon, roofInfo);
     }
+}
+
+const createDomeRoof = (polygon, roofInfo) => {
+    let faces=[];
+
+    for (let i=0;i<polygon.length;i++) {
+        const nextI = (i+1)%polygon.length;
+        const point=polygon[i];
+        const nextPoint=polygon[nextI];
+
+        const dPoint = Math.sqrt(point.x*point.x+point.y*point.y);
+        const dNextPoint = Math.sqrt(nextPoint.x*nextPoint.x+nextPoint.y*nextPoint.y);
+
+        for (let theta=0;theta<=90;theta+=5) {
+            const radTheta=theta/180*Math.PI;
+
+            //const radiusPoint = dPoint*
+        }
+
+    }
+
+    return faces;
 }
 
 const createPyramidalRoof = (polygon, roofInfo) => {
