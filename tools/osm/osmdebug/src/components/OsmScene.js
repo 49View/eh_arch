@@ -38,7 +38,7 @@ const OsmScene = (props) => {
           <pointLight position={[1000, 1000, 1000]} castShadow={true} />
           <pointLight position={[-1000, -100, -1000]} castShadow={true} />
           {Content}
-          <GridHelper />
+          {/* <GridHelper /> */}
           <Controls />
         </Canvas>
     </div>

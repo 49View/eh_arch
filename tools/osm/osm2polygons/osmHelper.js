@@ -477,6 +477,12 @@ const createElementsFromRels = (rels, filter, elementCreator) => {
     return elements;
 }
 
+const setHeight = (faces, height) => {
+    faces.forEach(f => {
+        f.z=height;
+    })
+}
+
 module.exports = {
     getTrianglesFromPolygon,
     getTrianglesFromComplexPolygon,
@@ -494,5 +500,6 @@ module.exports = {
     getPolygonsFromMultipolygonRelation,
     getPolygonFromWay,
     createElementsFromWays,
-    createElementsFromRels
+    createElementsFromRels,
+    setHeight
 }

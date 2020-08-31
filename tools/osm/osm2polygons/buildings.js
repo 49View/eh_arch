@@ -13,6 +13,7 @@ const {
 } = require('./osmHelper.js');
 
 const HEIGHT_FOR_LEVEL = 3;
+const DEFAULT_BUILDING_HEIGHT = 14;
 const DEFAULT_ROOF_COLOUR = "#cccccc";
 const DEFAULT_BUILDING_COLOUR = "#eeeeee";
 const USE_TRIANGLES_STRIP = false;
@@ -43,6 +44,8 @@ const getBuildingInfo = (tags) => {
 
     if (tags["min_height"]) {
         minHeight=Number(tags["min_height"].replace("m",""));
+    } if (tags["building:min_height"]) {
+        minHeight=Number(tags["building:min_height"].replace("m",""));
     } else if (tags["building:min_level"]) {
         minHeight=Number(tags["building:min_level"].replace("m",""))*HEIGHT_FOR_LEVEL;
     } else {
@@ -50,6 +53,8 @@ const getBuildingInfo = (tags) => {
     }
     if (tags["height"]) {
         maxHeight=Number(tags["height"].replace("m",""));
+    } else if (tags["building:height"]) {
+        maxHeight=Number(tags["building:height"].replace("m",""));
     } else if (tags["building:levels"]) {
         if (tags["building:levels"].indexOf(",")!==-1) {
             const levels=tags["building:levels"].split(",");
@@ -58,13 +63,17 @@ const getBuildingInfo = (tags) => {
             maxHeight=Number(tags["building:levels"].replace("m",""))*HEIGHT_FOR_LEVEL;
         }
     } else {
-        maxHeight=HEIGHT_FOR_LEVEL;
+        maxHeight=DEFAULT_BUILDING_HEIGHT;
     }
 
     if (tags["building:colour"]) {
         colour=tags["building:colour"];
     } else {
         colour=DEFAULT_BUILDING_COLOUR;
+    }
+
+    if (!colour.startsWith("#")) {
+        colour="#"+colour;
     }
 
     if (tags["roof:shape"]==="pyramidal" || tags["building:roof:shape"]==="pyramidal") {
@@ -103,6 +112,9 @@ const getBuildingInfo = (tags) => {
         roofColour=tags["building:colour"];
     } else {        
         roofColour=DEFAULT_ROOF_COLOUR;
+    }
+    if (!roofColour.startsWith("#")) {
+        roofColour="#"+roofColour;
     }
 
     if (maxHeight-roofHeight<=minHeight) {
