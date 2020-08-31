@@ -27,6 +27,8 @@ const getData = async (bbox) => {
     out;
     `;
 
+    console.log(query);
+
     const options = {
         method: "POST",
         headers: { 'content-type': 'application/x-www-form-urlencoded' },

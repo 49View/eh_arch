@@ -97,6 +97,9 @@ const getBuildingInfo = (tags) => {
     } else {
         if (roofShape==="flat") {
             roofHeight=0;
+        } else if (roofShape==="dome") {
+            roofHeight=maxHeight-3;
+            if (roofHeight<0) roofHeight=0;
         } else {
             roofHeight=HEIGHT_FOR_LEVEL;
         }
@@ -171,22 +174,73 @@ const createRoof = (polygon, roofInfo, convexHull, ombb) => {
     }
 }
 
+const angleFromSides = (x, y, len) => {
+    let a=Math.acos(x/len);
+    if (y<0) {
+        a=(2*Math.PI)-a;
+    }
+    return a;
+}
+
+const domPointCoordinate = (aAxis, bAxis, minZ, alpha, theta) => {
+    const z = minZ+bAxis*Math.sin(theta);
+    const xy = aAxis*Math.cos(theta);
+    const x = xy*Math.cos(alpha);
+    const y = xy*Math.sin(alpha);
+
+    return [x,y,z];
+}
+
 const createDomeRoof = (polygon, roofInfo) => {
     let faces=[];
 
+    const bAxis = roofInfo.maxHeight-roofInfo.minHeight;
     for (let i=0;i<polygon.length;i++) {
         const nextI = (i+1)%polygon.length;
         const point=polygon[i];
         const nextPoint=polygon[nextI];
 
         const dPoint = Math.sqrt(point.x*point.x+point.y*point.y);
+        const radAlphaPoint = angleFromSides(point.x,point.y,dPoint);
         const dNextPoint = Math.sqrt(nextPoint.x*nextPoint.x+nextPoint.y*nextPoint.y);
+        const radAlphaNextPoint = angleFromSides(nextPoint.x,nextPoint.y,dNextPoint);
 
-        for (let theta=0;theta<=90;theta+=5) {
+        let lastXPoint = point.x;
+        let lastYPoint = point.y;
+        let lastZPoint = roofInfo.minHeight;
+        let lastXNextPoint = nextPoint.x;
+        let lastYNextPoint = nextPoint.y;
+        let lastZNextPoint = roofInfo.minHeight;
+        for (let theta=5;theta<90;theta+=5) {
             const radTheta=theta/180*Math.PI;
 
+            [xPoint,yPoint,zPoint]=domPointCoordinate(dPoint, bAxis, roofInfo.minHeight, radAlphaPoint, radTheta);
+            [xNextPoint,yNextPoint,zNextPoint]=domPointCoordinate(dNextPoint, bAxis, roofInfo.minHeight, radAlphaNextPoint, radTheta);
             //const radiusPoint = dPoint*
+
+            faces.push({x: lastXPoint, y: lastYPoint, z: lastZPoint});
+            faces.push({x: lastXNextPoint, y: lastYNextPoint, z: lastZNextPoint});
+            faces.push({x: xNextPoint, y: yNextPoint, z: zNextPoint});
+
+            faces.push({x: lastXPoint, y: lastYPoint, z: lastZPoint});
+            faces.push({x: xNextPoint, y: yNextPoint, z: zNextPoint});
+            faces.push({x: xPoint, y: yPoint, z: zPoint});
+
+            lastXPoint=xPoint;
+            lastYPoint=yPoint;
+            lastZPoint=zPoint;
+            lastXNextPoint=xNextPoint;
+            lastYNextPoint=yNextPoint;
+            lastZNextPoint=zNextPoint;
         }
+
+        xPoint=0;
+        yPoint=0;
+        zPoint=roofInfo.maxHeight;
+
+        faces.push({x: lastXPoint, y: lastYPoint, z: lastZPoint});
+        faces.push({x: lastXNextPoint, y: lastYNextPoint, z: lastZNextPoint});
+        faces.push({x: xPoint, y: yPoint, z: zPoint});
 
     }
 

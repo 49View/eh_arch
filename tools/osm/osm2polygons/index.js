@@ -11,6 +11,9 @@ const {createWater} = require("./water");
 //const bbox = [51.4696, -0.1777, 51.4878, -0.1375];
 //Royal Albert Hall
 const bbox = [51.50049, -0.17869, 51.50155, -0.17551];
+//Instanbul
+//const bbox = [28.97342,41.00382,28.98050,41.00739];
+
 
 const main = async () => {
   const {nodes, ways, rels} = await getData(bbox);
