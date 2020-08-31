@@ -13,7 +13,7 @@ const {
 } = require('./osmHelper.js');
 
 const HEIGHT_FOR_LEVEL = 3;
-const DEFAULT_BUILDING_HEIGHT = 14;
+const DEFAULT_BUILDING_HEIGHT = 10;
 const DEFAULT_ROOF_COLOUR = "#cccccc";
 const DEFAULT_BUILDING_COLOUR = "#eeeeee";
 const USE_TRIANGLES_STRIP = false;
