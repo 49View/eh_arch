@@ -496,13 +496,13 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
 
 const createElementsFromWays = (ways, filter, elementCreator) => {
     const elements=[];
-    ways.filter(filter)
-        .filter(w => !w.inRelation && w.nodes.length>2 && w.nodes[0].id===w.nodes[w.nodes.length-1].id)
+    ways.filter(w => w.calc!==undefined)
+        .filter(filter)        
         .forEach(w => {  // && w.id===364313092
             try {
-                const {polygon,localBoundingBox,convexHull,orientedMinBoundingBox} = getPolygonFromWay(w);
+                //const {polygon,localBoundingBox,convexHull,orientedMinBoundingBox} = getPolygonFromWay(w);
 
-                const element = elementCreator(w, polygon, localBoundingBox, convexHull, orientedMinBoundingBox);
+                const element = elementCreator(w, w.calc.polygon, w.calc.lbb, w.calc.convexHull, w.calc.ombb);
 
                 elements.push(element);                    
             } catch (ex) {
@@ -517,11 +517,12 @@ const createElementsFromWays = (ways, filter, elementCreator) => {
 const createElementsFromRels = (rels, filter, elementCreator) => {
     const elements=[];
 
-    rels.filter(filter)
+    rels.filter(r => r.calc!==undefined)
+        .filter(filter)
         .forEach(r => {
             try {
-                const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(r);
-                const element = elementCreator(r, polygons, localBoundingBox);
+                //const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(r);
+                const element = elementCreator(r, r.calc.polygons, r.calc.lbb);
                 elements.push(element);       
 
             } catch (ex) {

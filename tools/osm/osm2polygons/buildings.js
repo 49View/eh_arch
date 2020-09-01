@@ -17,7 +17,7 @@ const {
     setHeight
 } = require('./osmHelper.js');
 
-const HEIGHT_FOR_LEVEL = 3;
+const HEIGHT_FOR_LEVEL = 3.5;
 const DEFAULT_BUILDING_HEIGHT = 10;
 const DEFAULT_ROOF_COLOUR = "#cccccc";
 const DEFAULT_BUILDING_COLOUR = "#eeeeee";
@@ -33,7 +33,7 @@ const createBuildings = (nodes,ways,rels) => {
         , buildingFromWay);
     // const simpleBuildings=[];
     const complexBuildings=createElementsFromRels(rels
-        , r => r.tags && r.tags["building"]
+        , r => r.tags && (r.tags["building"] || r.tags["building:part"])
         , buildingFromRel);
 
     console.log(`Found ${simpleBuildings.length} simple buildings`);
@@ -49,7 +49,7 @@ const getBuildingInfo = (tags) => {
 
     if (tags["min_height"]) {
         minHeight=Number(tags["min_height"].replace("m",""));
-    } if (tags["building:min_height"]) {
+    } else if (tags["building:min_height"]) {
         minHeight=Number(tags["building:min_height"].replace("m",""));
     } else if (tags["building:min_level"]) {
         minHeight=Number(tags["building:min_level"].replace("m",""))*HEIGHT_FOR_LEVEL;
@@ -124,7 +124,7 @@ const getBuildingInfo = (tags) => {
         roofColour="#"+roofColour;
     }
 
-    if (maxHeight-roofHeight<=minHeight) {
+    if (maxHeight-roofHeight<minHeight) {
         roofHeight=0;
         roofShape="flat";
     } else {
@@ -423,8 +423,23 @@ const createComplexPolygonRoof = (outerPolygon, innerPolygons, roofInfo) => {
 
 const buildingFromWay = (way, polygon, localBoundingBox, convexHull, orientedMinBoundingBox) => {
 
-    const buildingInfo = getBuildingInfo(way.tags);
+    let isOutline;
 
+    isOutline=false;
+    if (way.tags["building"] && way.tags["building:part"]===undefined && way.children.length>0) {
+
+        way.children.forEach(w => {
+            if (w.tags["building:part"]) {
+                isOutline=true;
+            }
+        })
+    }
+
+    if  (isOutline) {
+        throw new Error(`Way ${way.id} is a building outline`);
+    }
+
+    const buildingInfo = getBuildingInfo(way.tags);
     //Compute lateral faces
     const lateralFaces = extrudePoly(polygon, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP);
     //Compute roof faces
