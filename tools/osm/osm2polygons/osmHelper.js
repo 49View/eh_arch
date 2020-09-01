@@ -1,5 +1,6 @@
 const Decimal = require('decimal.js');
 Decimal.set({ precision: 20, rounding: 1 })
+const { Vector} = require('./vector');
 const poly2tri = require('poly2tri');
 const { calcConvexHull } = require('./convexhull');
 const { calcOmbb } = require('./ombb');
@@ -56,6 +57,27 @@ const getTrianglesFromComplexPolygon = (outerPolyPoints, innerPolys) => {
 
     return points;
 }
+
+const calcPointProjection = (pointLineA, pointLineB, point) => {
+    let prj;
+    if (pointLineA.x===pointLineB.x) {
+        //Horizontal aligned
+        prj = { x: pointLineA.y, y: point.y};
+    } else if (pointLineA.y===pointLineB.y) {
+        //Vertical aligned
+        prj = { x: point.y, y: pointLineA.y};
+    } else {
+        const dx = (pointLineB.x-pointLineA.x);
+        const dy = (pointLineB.y-pointLineA.y);
+        const rxy = dx/dy; 
+
+        const t = (point.y+point.x*rxy-pointLineA.x*rxy-pointLineA.y)/(dy+rxy*dx);
+
+        prj = { x: pointLineA.x+dx*t, y: pointLineA.y+dy*t};
+    }
+    return prj;
+}
+
 
 const extrudePoly = (poly, minHeight, maxHeight, useTrianglesStrip) => {
     
@@ -189,14 +211,16 @@ const removeCollinearPoints = (nodes) => {
         points=[];
         nodes.slice(0,nodes.length-1).forEach(n => {
             const point = { ...n };
-            point.x=n.x.toNumber();
-            point.y=n.y.toNumber();
+            point.x=n.x; //n.x.toNumber();
+            point.y=n.y; //n.y.toNumber();
             points.push(point);
         })
     }
 //console.log(points);
     return points;
 }
+
+
 
 const createBasePolygon = (points) => {
     const polygon = [];
@@ -211,25 +235,57 @@ const createBasePolygon = (points) => {
     return polygon;
 }
 
-const calcPointProjection = (pointLineA, pointLineB, point) => {
-    let prj;
-    if (pointLineA.x===pointLineB.x) {
-        //Horizontal aligned
-        prj = { x: pointLineA.y, y: point.y};
-    } else if (pointLineA.y===pointLineB.y) {
-        //Vertical aligned
-        prj = { x: point.y, y: pointLineA.y};
-    } else {
-        const dx = (pointLineB.x-pointLineA.x);
-        const dy = (pointLineB.y-pointLineA.y);
-        const rxy = dx/dy; 
+const projectionParameterPointToSegment = (point, segmentStart, segmentEnd, clamp) => {
 
-        const t = (point.y+point.x*rxy-pointLineA.x*rxy-pointLineA.y)/(dy+rxy*dx);
+    //Vector from segmentStart to segmentEnd
+    const segmentVector = new Vector(segmentEnd.x-segmentStart.x, segmentEnd.y-segmentStart.y);
+    //Vector from segmentStart to p
+    const pointVector = new Vector(point.x-segmentStart.x, point.y-segmentStart.y);
+    //Projection of pointVector on segmentVector is dot product of vectors
+    //equal to |pointVector|*cos(theta), theta angle between pointVector and segmentVector
+    const projection = pointVector.dot(segmentVector);
+    //parameter is projection divide by length of segment vector
+    //equal to cos(theta)
+    let parameter = projection/segmentVector.length();
 
-        prj = { x: pointLineA.x+dx*t, y: pointLineA.y+dy*t};
+    if (clamp) {
+        parameter=Math.max(0, Math.min(parameter, 1));
     }
-    return prj;
+
+    return parameter;
 }
+
+const pointOnLineFromParameter = (parameter, segmentStart, segmentEnd) => {
+
+    const point={
+        x: segmentStart.x+parameter*(segmentEnd.x-segmentStart.x),
+        y: segmentStart.y+parameter*(segmentEnd.y-segmentStart.y)
+    }
+
+    return point;
+}
+
+const pointOnLine = (point, segmentStart, segmentEnd, clamp) => {
+    const parameter = projectionParameterPointToSegment(point, segmentStart, segmentEnd, clamp);
+    const projectedPoint = pointOnLineFromParameter(parameter, segmentStart, segmentEnd);
+
+    return projectedPoint;
+}
+
+const distanceFromLine = (point, segmentStart, segmentEnd, clamp) => {
+    const projectedPoint = pointOnLine(point, segmentStart, segmentEnd, clamp);
+
+    const projectedVector = new Vector(projectedPoint.x-point.x, projectedPoint.y-point.y);
+
+    return projectedVector.length();
+}
+
+const distanceFromPoint = (pointA, pointB) => {
+    const pointsVector = new Vector(pointB.x-pointA.x, pointB.y-pointA.y);
+
+    return pointsVector.length;
+}
+
 
 const checkPointsOrder = (points,convexHull) => {
 
@@ -491,7 +547,6 @@ module.exports = {
     convertToLocalCoordinate,
     removeCollinearPoints,
     createBasePolygon,
-    calcPointProjection,
     checkPointsOrder,
     checkPathClosed,
     createClosedPath,
@@ -501,5 +556,11 @@ module.exports = {
     getPolygonFromWay,
     createElementsFromWays,
     createElementsFromRels,
-    setHeight
+    setHeight,
+    pointOnLine,
+    distanceFromLine,
+    distanceFromPoint,
+    calcPointProjection,
+    projectionParameterPointToSegment,
+    pointOnLineFromParameter
 }

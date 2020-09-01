@@ -5,11 +5,16 @@ const {
     getTrianglesFromPolygon,
     getTrianglesFromComplexPolygon,
     extrudePoly,
-    calcPointProjection,
     createMesh,
     createElementsFromWays,
-    createElementsFromRels
-
+    createElementsFromRels,
+    pointOnLine,
+    distanceFromLine,
+    distanceFromPoint,
+    calcPointProjection,
+    projectionParameterPointToSegment,
+    pointOnLineFromParameter,
+    setHeight
 } = require('./osmHelper.js');
 
 const HEIGHT_FOR_LEVEL = 3;
@@ -97,9 +102,6 @@ const getBuildingInfo = (tags) => {
     } else {
         if (roofShape==="flat") {
             roofHeight=0;
-        } else if (roofShape==="dome") {
-            roofHeight=maxHeight-3;
-            if (roofHeight<0) roofHeight=0;
         } else {
             roofHeight=HEIGHT_FOR_LEVEL;
         }
@@ -182,41 +184,82 @@ const angleFromSides = (x, y, len) => {
     return a;
 }
 
-const domPointCoordinate = (aAxis, bAxis, minZ, alpha, theta) => {
-    const z = minZ+bAxis*Math.sin(theta);
-    const xy = aAxis*Math.cos(theta);
-    const x = xy*Math.cos(alpha);
-    const y = xy*Math.sin(alpha);
-
-    return [x,y,z];
-}
-
 const createDomeRoof = (polygon, roofInfo) => {
     let faces=[];
 
-    const bAxis = roofInfo.maxHeight-roofInfo.minHeight;
+    //Compute shorter distance from center to polygon segments
+    let inCircleRay = Number.MAX_VALUE;
     for (let i=0;i<polygon.length;i++) {
         const nextI = (i+1)%polygon.length;
         const point=polygon[i];
         const nextPoint=polygon[nextI];
 
-        const dPoint = Math.sqrt(point.x*point.x+point.y*point.y);
-        const radAlphaPoint = angleFromSides(point.x,point.y,dPoint);
-        const dNextPoint = Math.sqrt(nextPoint.x*nextPoint.x+nextPoint.y*nextPoint.y);
-        const radAlphaNextPoint = angleFromSides(nextPoint.x,nextPoint.y,dNextPoint);
+        //Distance from center to polygon segment
+        let distanceFromCenter = distanceFromLine({x: 0, y:0}, point, nextPoint, true);
+        if (distanceFromCenter<inCircleRay) {
+            inCircleRay=distanceFromCenter;
+        }
+    }
 
-        let lastXPoint = point.x;
-        let lastYPoint = point.y;
+    // let errorCounter = 3;
+    // let error=true;
+    // let inCircle=[];
+    let unionSurface;
+
+    // while (error && errorCounter>0) {
+    //     try {
+    //         //Reduce ray for avoid error on union surface computation
+    //         inCircleRay=inCircleRay*0.98;
+    //         inCircle = [];
+    //         //Create incircle surface
+    //         for (let i=0;i<360;i+=5) {
+    //             const a=i*Math.PI/180;
+
+    //             inCircle.push({
+    //                 x: inCircleRay*Math.cos(a),
+    //                 y: inCircleRay*Math.sin(a)
+    //             })
+    //         }
+    //         //Create union surface, from polygon to incircle
+    //         unionSurface=getTrianglesFromComplexPolygon(polygon, [{points: inCircle}]);
+    //         error=false;
+    //     } catch (ex) {
+    //         console.log("Reduce inCircle ray");
+    //         errorCounter--;
+    //     }
+    // }
+
+    // if (error) {
+    //     //Cannot compute base
+    //     unionSurface=getTrianglesFromPolygon(polygon);
+    // }
+
+    unionSurface=getTrianglesFromPolygon(polygon);
+    setHeight(unionSurface, roofInfo.minHeight);
+    faces = faces.concat(unionSurface);
+
+    for (let alpha=0;alpha<360;alpha+=5) {
+        const radAlpha=alpha*Math.PI/180;
+        const radNextAlpha=((alpha+5)%360)*Math.PI/180;
+
+        let lastXPoint = inCircleRay*Math.cos(radAlpha);
+        let lastYPoint = inCircleRay*Math.sin(radAlpha);
         let lastZPoint = roofInfo.minHeight;
-        let lastXNextPoint = nextPoint.x;
-        let lastYNextPoint = nextPoint.y;
+        let lastXNextPoint = inCircleRay*Math.cos(radNextAlpha);
+        let lastYNextPoint = inCircleRay*Math.sin(radNextAlpha);
         let lastZNextPoint = roofInfo.minHeight;
-        for (let theta=5;theta<90;theta+=5) {
-            const radTheta=theta/180*Math.PI;
 
-            [xPoint,yPoint,zPoint]=domPointCoordinate(dPoint, bAxis, roofInfo.minHeight, radAlphaPoint, radTheta);
-            [xNextPoint,yNextPoint,zNextPoint]=domPointCoordinate(dNextPoint, bAxis, roofInfo.minHeight, radAlphaNextPoint, radTheta);
-            //const radiusPoint = dPoint*
+        for (let theta=5;theta<90;theta+=5) {
+            const radTheta=theta*Math.PI/180;
+
+            let xyPoint = inCircleRay*Math.cos(radTheta);
+            let xPoint = xyPoint*Math.cos(radAlpha);
+            let yPoint = xyPoint*Math.sin(radAlpha);
+            let zPoint = roofInfo.minHeight+inCircleRay*Math.sin(radTheta);
+    
+            let xNextPoint = xyPoint*Math.cos(radNextAlpha);
+            let yNextPoint = xyPoint*Math.sin(radNextAlpha);
+            let zNextPoint = zPoint;
 
             faces.push({x: lastXPoint, y: lastYPoint, z: lastZPoint});
             faces.push({x: lastXNextPoint, y: lastYNextPoint, z: lastZNextPoint});
@@ -236,7 +279,7 @@ const createDomeRoof = (polygon, roofInfo) => {
 
         xPoint=0;
         yPoint=0;
-        zPoint=roofInfo.maxHeight;
+        zPoint=roofInfo.minHeight+inCircleRay;
 
         faces.push({x: lastXPoint, y: lastYPoint, z: lastZPoint});
         faces.push({x: lastXNextPoint, y: lastYNextPoint, z: lastZNextPoint});
@@ -308,13 +351,15 @@ const createGabledRoof = (polygon, roofInfo, ombb) => {
     const axis = new Vector(pointB.x-pointA.x,pointB.y-pointA.y);
 
     let faces=[];
+
     for (let i=0;i<polygon.length;i++) {
         const nextI=(i+1)%polygon.length;
         const p = polygon[i];
         const nextP = polygon[nextI];
-        const prj = calcPointProjection(pointA, pointB, p);
-        const nextPrj = calcPointProjection(pointA, pointB, nextP);
-
+         const prj = calcPointProjection(pointA, pointB, p);
+         const nextPrj = calcPointProjection(pointA, pointB, nextP);
+    //    const prj = pointOnLine(p, pointA, pointB, false);
+    //    const nextPrj = pointOnLine(nextP, pointA, pointB, false);
         const dir = new Vector(prj.x-p.x,prj.y-p.y).cross(axis);
         const nextDir = new Vector(prj.x-nextP.x,prj.y-nextP.y).cross(axis);
 
@@ -349,9 +394,8 @@ const createGabledRoof = (polygon, roofInfo, ombb) => {
                 faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});                
             }
         }
-
-        //console.log("PRJ", prj);
     }
+
 
     return faces;
 }
@@ -359,10 +403,22 @@ const createGabledRoof = (polygon, roofInfo, ombb) => {
 
 const createComplexPolygonRoof = (outerPolygon, innerPolygons, roofInfo) => {
 
+    let faces=[];
+    if (roofInfo.minHeight!==roofInfo.maxHeight) {
+        //If required, compute lateral roof face
+        faces=faces.concat(extrudePoly(outerPolygon.points, roofInfo.minHeight, roofInfo.maxHeight, false));
+        innerPolygons.forEach(h => {
+            faces = faces.concat(extrudePoly([...h.points].reverse(), roofInfo.minHeight, roofInfo.maxHeight, false));
+        })
+
+    }
+
     const topFace=getTrianglesFromComplexPolygon(outerPolygon.points, innerPolygons);
     topFace.forEach(t => t.z=roofInfo.maxHeight);
 
-    return topFace;
+    faces=faces.concat(topFace);
+
+    return faces;
 }
 
 const buildingFromWay = (way, polygon, localBoundingBox, convexHull, orientedMinBoundingBox) => {
