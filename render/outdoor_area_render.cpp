@@ -27,12 +27,14 @@ namespace OutdoorAreaRender {
         }
     }
 
-    std::shared_ptr<Profile> makeValanceProfile( const std::string& _name, const V3f& size ) {
-        float bump = size.x() * 0.8f;
-        float w1 = size.x() - bump;
-        float w2 = size.y() - bump * 2.0f;
+    std::shared_ptr<Profile> makeTopBumpProfile( const std::string& _name, const V3f& size ) {
+        return ProfileMaker{ _name }.sd(10).o().ly(size.y()).ax(size.x(), 10).ly(-size.y()).make();
+    }
 
-        return ProfileMaker{ _name }.sd(10).o().lx(w1).ay(bump).ly(w2).ay(bump).lx(-w1).make();
+    std::shared_ptr<Profile> makeBevelTopProfile( const std::string& _name, const V3f& size ) {
+        float bevelRadius = size.x() * 0.4f;
+        float topWidth = size.x() - bevelRadius * 2.0f;
+        return ProfileMaker{ _name }.sd(10).o().ly(size.y()).axHalfLeft(bevelRadius, 4).lx(topWidth).axHalfRight(bevelRadius, 4).ly(-size.y()).make();
     }
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const OutdoorAreaBSData *w ) {
@@ -43,7 +45,7 @@ namespace OutdoorAreaRender {
                 sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(oa.bPoints, oa.elevation), V3f::UP_AXIS, oa.zPull },
                                    w->Position(), oa.outdoorBoundaryMaterial, lRootH);
             } else if ( oa.extrusionType == 1 ) {
-                auto profile = makeValanceProfile("Outdoor1", V3f{oa.followerWidth, oa.zPull, 0.0f});
+                auto profile = makeBevelTopProfile("Outdoor1", V3f{oa.followerWidth, oa.zPull, 0.0f});
                 sg.GB<GT::Follower>( profile,  XZY::C(oa.bPoints, oa.elevation), w->Position(), oa.outdoorBoundaryMaterial, lRootH);
             }
         }

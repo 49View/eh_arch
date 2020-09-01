@@ -20,16 +20,6 @@ void OutdoorAreaBuilder::refresh() {
 
     std::size_t cc = 0;
 
-//    for ( const auto& oa : w->Boundaries() ) {
-//        if ( oa.extrusionType == 0 ) {
-//            auto color = arc.getFillColor(w, Color4f::LIGHT_GREY);
-//            rr.draw<DFlatPoly>(oa.bPoints, color, sm, w->hashFeature("outdoorAreaFlatBseIM", cc++));
-//        } else if ( oa.extrusionType == 1 ) {
-//            auto color = arc.getFillColor(w, Color4f::SKY_BLUE);
-//            rr.draw<DLine>(oa.bPoints, color, sm, w->hashFeature("outdoorAreaFlatBseIM", cc++), oa.followerWidth);
-//        }
-//    }
-
     std::size_t bc = 0;
     for ( const auto& oa : outdoorAreaData()->Boundaries() ) {
         if ( oa.extrusionType == 0 ) {
@@ -123,11 +113,26 @@ void OutdoorAreaBuilder::reset() {
 }
 
 void OutdoorAreaBuilder::makeBalcony() {
-
+    outdoorAreaData()->Boundary(0).outdoorBoundaryMaterial = MaterialAndColorProperty{"rustic"};
+    auto newOutdoor = outdoorAreaData()->Boundary(0);
+    newOutdoor.elevation += newOutdoor.zPull;
+    newOutdoor.zPull = 0.8f;
+    newOutdoor.followerWidth = 0.05f;
+    newOutdoor.outdoorBoundaryMaterial = MaterialAndColorProperty{"plastic"};
+    newOutdoor.extrusionType = 1;
+    outdoorAreaData()->Boundaries().emplace_back(newOutdoor);
+    refresh();
 }
 
 void OutdoorAreaBuilder::makeGarden() {
-
+    auto newOutdoor = outdoorAreaData()->Boundary(0);
+    newOutdoor.elevation += newOutdoor.zPull;
+    newOutdoor.zPull = 2.0f;
+    newOutdoor.followerWidth = 0.02f;
+    newOutdoor.outdoorBoundaryMaterial = MaterialAndColorProperty{"fence"};
+    newOutdoor.extrusionType = 1;
+    outdoorAreaData()->Boundaries().emplace_back(newOutdoor);
+    refresh();
 }
 
 void OutdoorAreaBuilder::makeTerrace() {
