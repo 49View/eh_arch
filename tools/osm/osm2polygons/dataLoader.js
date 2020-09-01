@@ -17,6 +17,8 @@ const getData = async (bbox) => {
         rel["leisure"="garden"](${bbox.join(",")});
         way["leisure"="park"](${bbox.join(",")});
         way["leisure"="garden"](${bbox.join(",")});
+        rel["natural"="water"](${bbox.join(",")});
+        way["natural"="water"](${bbox.join(",")});
     );
     (
         ._;
@@ -24,6 +26,8 @@ const getData = async (bbox) => {
     );
     out;
     `;
+
+    console.log(query);
 
     const options = {
         method: "POST",
@@ -33,7 +37,7 @@ const getData = async (bbox) => {
     //console.log(qs.stringify({data: query}));
     const response=await axios(OVERPASSAPI_URL, options);
     osmData=response.data;
-    //fs.writeFileSync("testData.json", JSON.stringify(osmData), { encoding: "utf8"});
+    fs.writeFileSync("testData.json", JSON.stringify(osmData), { encoding: "utf8"});
     return prepareData(bbox,osmData);
 }
 

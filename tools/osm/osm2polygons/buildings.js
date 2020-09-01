@@ -13,6 +13,7 @@ const {
 } = require('./osmHelper.js');
 
 const HEIGHT_FOR_LEVEL = 3;
+const DEFAULT_BUILDING_HEIGHT = 10;
 const DEFAULT_ROOF_COLOUR = "#cccccc";
 const DEFAULT_BUILDING_COLOUR = "#eeeeee";
 const USE_TRIANGLES_STRIP = false;
@@ -43,6 +44,8 @@ const getBuildingInfo = (tags) => {
 
     if (tags["min_height"]) {
         minHeight=Number(tags["min_height"].replace("m",""));
+    } if (tags["building:min_height"]) {
+        minHeight=Number(tags["building:min_height"].replace("m",""));
     } else if (tags["building:min_level"]) {
         minHeight=Number(tags["building:min_level"].replace("m",""))*HEIGHT_FOR_LEVEL;
     } else {
@@ -50,6 +53,8 @@ const getBuildingInfo = (tags) => {
     }
     if (tags["height"]) {
         maxHeight=Number(tags["height"].replace("m",""));
+    } else if (tags["building:height"]) {
+        maxHeight=Number(tags["building:height"].replace("m",""));
     } else if (tags["building:levels"]) {
         if (tags["building:levels"].indexOf(",")!==-1) {
             const levels=tags["building:levels"].split(",");
@@ -58,7 +63,7 @@ const getBuildingInfo = (tags) => {
             maxHeight=Number(tags["building:levels"].replace("m",""))*HEIGHT_FOR_LEVEL;
         }
     } else {
-        maxHeight=HEIGHT_FOR_LEVEL;
+        maxHeight=DEFAULT_BUILDING_HEIGHT;
     }
 
     if (tags["building:colour"]) {
@@ -67,10 +72,16 @@ const getBuildingInfo = (tags) => {
         colour=DEFAULT_BUILDING_COLOUR;
     }
 
+    if (!colour.startsWith("#")) {
+        colour="#"+colour;
+    }
+
     if (tags["roof:shape"]==="pyramidal" || tags["building:roof:shape"]==="pyramidal") {
         roofShape="pyramidal";
     } else if (tags["roof:shape"]==="gabled" || tags["building:roof:shape"]==="gabled") {
         roofShape="gabled";
+    } else if (tags["roof:shape"]==="dome" || tags["building:roof:shape"]==="dome") {
+        roofShape="dome";
     } else { //FLAT 
         roofShape="flat";
     }
@@ -86,6 +97,9 @@ const getBuildingInfo = (tags) => {
     } else {
         if (roofShape==="flat") {
             roofHeight=0;
+        } else if (roofShape==="dome") {
+            roofHeight=maxHeight-3;
+            if (roofHeight<0) roofHeight=0;
         } else {
             roofHeight=HEIGHT_FOR_LEVEL;
         }
@@ -103,6 +117,9 @@ const getBuildingInfo = (tags) => {
         roofColour=tags["building:colour"];
     } else {        
         roofColour=DEFAULT_ROOF_COLOUR;
+    }
+    if (!roofColour.startsWith("#")) {
+        roofColour="#"+roofColour;
     }
 
     if (maxHeight-roofHeight<=minHeight) {
@@ -150,10 +167,84 @@ const createRoof = (polygon, roofInfo, convexHull, ombb) => {
         return createPyramidalRoof(polygon, roofInfo);
     } else if (roofInfo.shape==="gabled") {
         return createGabledRoof(polygon, roofInfo, ombb);
-        //return createFlatRoof(polygon, roofInfo);
+    } else if (roofInfo.shape==="dome") {
+        return createDomeRoof(polygon, roofInfo);
     } else {
         return createFlatRoof(polygon, roofInfo);
     }
+}
+
+const angleFromSides = (x, y, len) => {
+    let a=Math.acos(x/len);
+    if (y<0) {
+        a=(2*Math.PI)-a;
+    }
+    return a;
+}
+
+const domPointCoordinate = (aAxis, bAxis, minZ, alpha, theta) => {
+    const z = minZ+bAxis*Math.sin(theta);
+    const xy = aAxis*Math.cos(theta);
+    const x = xy*Math.cos(alpha);
+    const y = xy*Math.sin(alpha);
+
+    return [x,y,z];
+}
+
+const createDomeRoof = (polygon, roofInfo) => {
+    let faces=[];
+
+    const bAxis = roofInfo.maxHeight-roofInfo.minHeight;
+    for (let i=0;i<polygon.length;i++) {
+        const nextI = (i+1)%polygon.length;
+        const point=polygon[i];
+        const nextPoint=polygon[nextI];
+
+        const dPoint = Math.sqrt(point.x*point.x+point.y*point.y);
+        const radAlphaPoint = angleFromSides(point.x,point.y,dPoint);
+        const dNextPoint = Math.sqrt(nextPoint.x*nextPoint.x+nextPoint.y*nextPoint.y);
+        const radAlphaNextPoint = angleFromSides(nextPoint.x,nextPoint.y,dNextPoint);
+
+        let lastXPoint = point.x;
+        let lastYPoint = point.y;
+        let lastZPoint = roofInfo.minHeight;
+        let lastXNextPoint = nextPoint.x;
+        let lastYNextPoint = nextPoint.y;
+        let lastZNextPoint = roofInfo.minHeight;
+        for (let theta=5;theta<90;theta+=5) {
+            const radTheta=theta/180*Math.PI;
+
+            [xPoint,yPoint,zPoint]=domPointCoordinate(dPoint, bAxis, roofInfo.minHeight, radAlphaPoint, radTheta);
+            [xNextPoint,yNextPoint,zNextPoint]=domPointCoordinate(dNextPoint, bAxis, roofInfo.minHeight, radAlphaNextPoint, radTheta);
+            //const radiusPoint = dPoint*
+
+            faces.push({x: lastXPoint, y: lastYPoint, z: lastZPoint});
+            faces.push({x: lastXNextPoint, y: lastYNextPoint, z: lastZNextPoint});
+            faces.push({x: xNextPoint, y: yNextPoint, z: zNextPoint});
+
+            faces.push({x: lastXPoint, y: lastYPoint, z: lastZPoint});
+            faces.push({x: xNextPoint, y: yNextPoint, z: zNextPoint});
+            faces.push({x: xPoint, y: yPoint, z: zPoint});
+
+            lastXPoint=xPoint;
+            lastYPoint=yPoint;
+            lastZPoint=zPoint;
+            lastXNextPoint=xNextPoint;
+            lastYNextPoint=yNextPoint;
+            lastZNextPoint=zNextPoint;
+        }
+
+        xPoint=0;
+        yPoint=0;
+        zPoint=roofInfo.maxHeight;
+
+        faces.push({x: lastXPoint, y: lastYPoint, z: lastZPoint});
+        faces.push({x: lastXNextPoint, y: lastYNextPoint, z: lastZNextPoint});
+        faces.push({x: xPoint, y: yPoint, z: zPoint});
+
+    }
+
+    return faces;
 }
 
 const createPyramidalRoof = (polygon, roofInfo) => {

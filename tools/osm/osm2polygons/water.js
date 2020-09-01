@@ -12,61 +12,61 @@ const {
     setHeight
 } = require('./osmHelper.js');
 
-const createParks = (nodes,ways,rels) => {
+const createWater = (nodes,ways,rels) => {
     console.log("----------------------------------------------");
-    console.log("PARKS");
+    console.log("WATER");
     console.log("----------------------------------------------");
 
-    const simpleParks=createElementsFromWays(ways
-        , w => w.tags && w.tags["leisure"] && (w.tags["leisure"]==="park" || w.tags["leisure"]==="garden")
-        , parkFromWay);
+    const simpleWater=createElementsFromWays(ways
+        , w => w.tags && w.tags["natural"] && w.tags["natural"]==="water"
+        , waterFromWay);
     // const simpleBuildings=[];
-    const complexParks=createElementsFromRels(rels
-        , r => r.tags && r.tags["leisure"] && (r.tags["leisure"]==="park" || r.tags["leisure"]==="garden")
-        , parkFromRel);
+    const complexWater=createElementsFromRels(rels
+        , r => r.tags && r.tags["natural"] && r.tags["natural"]==="water"
+        , waterFromRel);
     
-    console.log(`Found ${simpleParks.length} simple parks`);
-    console.log(`Found ${complexParks.length} complex parks`);
+    console.log(`Found ${simpleWater.length} simple water elements`);
+    console.log(`Found ${complexWater.length} complex water elements`);
     console.log("----------------------------------------------");
 
-    return simpleParks.concat(complexParks);
+    return simpleWater.concat(complexWater);
 }
 
-const createParkMesh = (id, tags, boundingBox, faces) => {
+const createWaterMesh = (id, tags, boundingBox, faces) => {
 
     const groups=[];
 
     groups.push({
         faces: faces,
-        colour: "#CDF7C9",
+        colour: "#AAD3DF",
         isTriangleStrip: false
     });
     
-    return createMesh(id, tags, "park", boundingBox, groups);    
+    return createMesh(id, tags, "water", boundingBox, groups);    
 }
 
-const parkFromWay = (way) => {
+const waterFromWay = (way) => {
 
     const {polygon,localBoundingBox,convexHull,orientedMinBoundingBox}=getPolygonFromWay(way);
     const faces = getTrianglesFromPolygon(polygon);
-    setHeight(faces,0);
+    setHeight(faces,0.1);
 
-    const park = createParkMesh("w-"+way.id, way.tags, localBoundingBox, faces);
-    return park;
+    const water = createWaterMesh("w-"+way.id, way.tags, localBoundingBox, faces);
+    return water;
 }
 
-const parkFromRel = (rel) => {
+const waterFromRel = (rel) => {
 
     const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(rel);
     let faces=[];
     polygons.filter(p => p.role==="outer").forEach(o => {
         faces = faces.concat(getTrianglesFromComplexPolygon(o.points, o.holes));
-        setHeight(faces,0);
+        setHeight(faces,0.1);
     });
 
-    const park = createParkMesh("r-"+rel.id, rel.tags, localBoundingBox, faces);
+    const water = createWaterMesh("r-"+rel.id, rel.tags, localBoundingBox, faces);
 
-    return park;
+    return water;
 }
 
-module.exports = { createParks }
+module.exports = { createWater }
