@@ -503,8 +503,12 @@ const buildingFromWay = (way, polygon, localBoundingBox, convexHull, orientedMin
     }
 
     const buildingInfo = getBuildingInfo(way.tags);
-    if  (isOutline) {
-        buildingInfo.height=DEFAULT_BUILDING_HEIGHT;
+    if  (isOutline && way.tags["height"]) {
+        buildingInfo.minHeight=0;
+        buildingInfo.maxHeight=0;
+        buildingInfo.roof.minHeight=0;
+        buildingInfo.roof.maxHeight=0;
+        buildingInfo.roof.shape="flat";
     }
 
     //Compute lateral faces
