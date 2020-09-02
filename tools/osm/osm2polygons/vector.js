@@ -100,6 +100,10 @@ function Vector(x, y)
         return new Vector(this.y, -this.x);
     }
 
+    this.checkParallel = function(vec) {
+        return (this.x*vec.y-this.y*vec.x)===0;
+    }
+
     this.distanceToLine = function(v0, v1)
     {
         var sqrLen = v1.diff(v0).sqrLength();

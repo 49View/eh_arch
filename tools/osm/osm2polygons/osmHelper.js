@@ -246,7 +246,7 @@ const projectionParameterPointToSegment = (point, segmentStart, segmentEnd, clam
     const projection = pointVector.dot(segmentVector);
     //parameter is projection divide by length of segment vector
     //equal to cos(theta)
-    let parameter = projection/segmentVector.length();
+    let parameter = projection/segmentVector.sqrLength();
 
     if (clamp) {
         parameter=Math.max(0, Math.min(parameter, 1));
@@ -286,6 +286,20 @@ const distanceFromPoint = (pointA, pointB) => {
     return pointsVector.length;
 }
 
+const twoLinesintersectParameter = (pointALine1, pointBLine1, pointALine2, pointBLine2) => {
+
+    const line1Vector = new Vector(pointBLine1.x-pointALine1.x, pointBLine1.y-pointALine1.y);
+    const line2Vector = new Vector(pointBLine2.x-pointALine2.x,pointBLine2.y-pointALine2.y);
+
+    if (line1Vector.checkParallel(line2Vector)) {
+        return Infinity;
+    }
+    
+    const parameter = (((pointALine1.y-pointALine2.y)*line1Vector.x)+((pointALine2.x-pointALine1.x)*line1Vector.y))
+            / ((line2Vector.y*line1Vector.x)-(line2Vector.x*line1Vector.y));
+    
+    return parameter;                    
+}
 
 const checkPointsOrder = (points,convexHull) => {
 
@@ -503,8 +517,9 @@ const createElementsFromWays = (ways, filter, elementCreator) => {
                 //const {polygon,localBoundingBox,convexHull,orientedMinBoundingBox} = getPolygonFromWay(w);
 
                 const element = elementCreator(w, w.calc.polygon, w.calc.lbb, w.calc.convexHull, w.calc.ombb);
-
-                elements.push(element);                    
+                if (element!==null) {
+                    elements.push(element);                    
+                }
             } catch (ex) {
                 console.log(`Error in ${w.id} way`, ex);
             }
@@ -523,7 +538,9 @@ const createElementsFromRels = (rels, filter, elementCreator) => {
             try {
                 //const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(r);
                 const element = elementCreator(r, r.calc.polygons, r.calc.lbb);
-                elements.push(element);       
+                if (element!==null) {
+                    elements.push(element);                    
+                }
 
             } catch (ex) {
                 console.log(`Error in ${r.id} relation`, ex);
@@ -563,5 +580,6 @@ module.exports = {
     distanceFromPoint,
     calcPointProjection,
     projectionParameterPointToSegment,
-    pointOnLineFromParameter
+    pointOnLineFromParameter,
+    twoLinesintersectParameter
 }

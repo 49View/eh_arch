@@ -14,7 +14,8 @@ const {
     calcPointProjection,
     projectionParameterPointToSegment,
     pointOnLineFromParameter,
-    setHeight
+    setHeight,
+    twoLinesintersectParameter
 } = require('./osmHelper.js');
 
 const HEIGHT_FOR_LEVEL = 3.5;
@@ -85,6 +86,8 @@ const getBuildingInfo = (tags) => {
         roofShape="pyramidal";
     } else if (tags["roof:shape"]==="gabled" || tags["building:roof:shape"]==="gabled") {
         roofShape="gabled";
+    } else if (tags["roof:shape"]==="hipped" || tags["building:roof:shape"]==="hipped") {
+        roofShape="hipped";
     } else if (tags["roof:shape"]==="dome" || tags["building:roof:shape"]==="dome") {
         roofShape="dome";
     } else { //FLAT 
@@ -110,7 +113,7 @@ const getBuildingInfo = (tags) => {
     if (tags["roof:orientation"]) {
         roofOrientation=tags["roof:orientation"];
     } else {
-        roofOrientation="across";
+        roofOrientation="along";
     }
 
     if (tags["roof:colour"]) {
@@ -168,20 +171,14 @@ const createRoof = (polygon, roofInfo, convexHull, ombb) => {
     if (roofInfo.shape==="pyramidal") {
         return createPyramidalRoof(polygon, roofInfo);
     } else if (roofInfo.shape==="gabled") {
-        return createGabledRoof(polygon, roofInfo, ombb);
+        return createGabledRoof(polygon, roofInfo, ombb, 1);
+    } else if (roofInfo.shape==="hipped") {
+        return createGabledRoof(polygon, roofInfo, ombb, 0.3);
     } else if (roofInfo.shape==="dome") {
         return createDomeRoof(polygon, roofInfo);
     } else {
         return createFlatRoof(polygon, roofInfo);
     }
-}
-
-const angleFromSides = (x, y, len) => {
-    let a=Math.acos(x/len);
-    if (y<0) {
-        a=(2*Math.PI)-a;
-    }
-    return a;
 }
 
 const createDomeRoof = (polygon, roofInfo) => {
@@ -319,7 +316,7 @@ const createFlatRoof = (polygon, roofInfo) => {
     return faces.concat(topFace);
 }
 
-const createGabledRoof = (polygon, roofInfo, ombb) => {
+const createGabledRoof = (polygon, roofInfo, ombb, hippedPerc) => {
 
     const axes=[];
     let pointA, pointB;
@@ -352,18 +349,65 @@ const createGabledRoof = (polygon, roofInfo, ombb) => {
 
     let faces=[];
 
+    let intersection=[];
     for (let i=0;i<polygon.length;i++) {
         const nextI=(i+1)%polygon.length;
         const p = polygon[i];
         const nextP = polygon[nextI];
-         const prj = calcPointProjection(pointA, pointB, p);
-         const nextPrj = calcPointProjection(pointA, pointB, nextP);
-    //    const prj = pointOnLine(p, pointA, pointB, false);
-    //    const nextPrj = pointOnLine(nextP, pointA, pointB, false);
-        const dir = new Vector(prj.x-p.x,prj.y-p.y).cross(axis);
-        const nextDir = new Vector(prj.x-nextP.x,prj.y-nextP.y).cross(axis);
 
-        if (Math.sign(dir)===Math.sign(nextDir)) {
+        //Check sides intersected by axis
+        const u = twoLinesintersectParameter(pointA, pointB, p, nextP);
+        if (u!==Infinity && u>=0 && u<1) {
+
+            intersection.push({
+                i1: i,
+                i2: nextI,
+                p1: p,
+                p2: nextP,
+                point: (new Vector(p.x, p.y).lerp(new Vector(nextP.x, nextP.y), u))
+            })
+        }
+    }
+
+    //More than 2 intersection degenerate in pyramidal roof
+    if (intersection.length!=2) {
+        return createPyramidalRoof(polygon, roofInfo);
+    }
+
+    if (hippedPerc<1) {
+        const newP1 = intersection[0].point.lerp(intersection[1].point, hippedPerc);
+        const newP2 = intersection[0].point.lerp(intersection[1].point, 1-hippedPerc);
+
+        intersection[0].point=newP1;
+        intersection[1].point=newP2;
+    }
+
+    intersection.forEach(i => {
+        faces.push({ x: i.p1.x, y: i.p1.y, z:roofInfo.minHeight});
+        faces.push({ x: i.p2.x, y: i.p2.y, z:roofInfo.minHeight});
+        faces.push({ x: i.point.x, y: i.point.y, z:roofInfo.maxHeight});
+    })
+
+    for (let i=0;i<polygon.length;i++) {
+        const nextI=(i+1)%polygon.length;
+        const p = polygon[i];
+        const nextP = polygon[nextI];
+
+        let intersectionSide=false;
+        for (let j=0;j<intersection.length;j++) {
+            if (intersection[j].i1===i && intersection[j].i2===nextI) {
+                intersectionSide=true;
+                break;
+            }
+        }
+        if (!intersectionSide) {
+            // let prjParamP = projectionParameterPointToSegment(p, intersection[0].point, intersection[1].point, false);
+            // let prjParamNextP = projectionParameterPointToSegment(nextP, intersection[0].point, intersection[1].point, false);
+            // console.log(prjParamP);
+            // console.log(prjParamNextP);
+            prj = pointOnLine(p, intersection[0].point, intersection[1].point, true);
+            nextPrj = pointOnLine(nextP, intersection[0].point, intersection[1].point, true);
+
             faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
             faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
             faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
@@ -371,30 +415,53 @@ const createGabledRoof = (polygon, roofInfo, ombb) => {
             faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
             faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
             faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
-        } else {
-            if (prj.x===nextPrj.x && prj.y===nextPrj.y) {
-                faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
-                faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
-                faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
-            } else {
-                faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
-                faces.push({x: prj.x, y: prj.y, z:roofInfo.minHeight});
-                faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
-
-                faces.push({x: prj.x, y: prj.y, z:roofInfo.minHeight});
-                faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.minHeight});
-                faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
-
-                faces.push({x: prj.x, y: prj.y, z:roofInfo.minHeight});
-                faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
-                faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
-
-                faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.minHeight});
-                faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
-                faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});                
-            }
+    //console.log("Next");
         }
     }
+
+    // for (let i=0;i<polygon.length;i++) {
+    //     const nextI=(i+1)%polygon.length;
+    //     const p = polygon[i];
+    //     const nextP = polygon[nextI];
+    //      const prj = calcPointProjection(pointA, pointB, p);
+    //      const nextPrj = calcPointProjection(pointA, pointB, nextP);
+    // //    const prj = pointOnLine(p, pointA, pointB, false);
+    // //    const nextPrj = pointOnLine(nextP, pointA, pointB, false);
+    //     const dir = new Vector(prj.x-p.x,prj.y-p.y).cross(axis);
+    //     const nextDir = new Vector(prj.x-nextP.x,prj.y-nextP.y).cross(axis);
+
+    //     if (Math.sign(dir)===Math.sign(nextDir)) {
+    //         faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
+    //         faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
+    //         faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
+
+    //         faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
+    //         faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
+    //         faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
+    //     } else {
+    //         if (prj.x===nextPrj.x && prj.y===nextPrj.y) {
+    //             faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
+    //             faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
+    //             faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
+    //         } else {
+    //             faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
+    //             faces.push({x: prj.x, y: prj.y, z:roofInfo.minHeight});
+    //             faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
+
+    //             faces.push({x: prj.x, y: prj.y, z:roofInfo.minHeight});
+    //             faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.minHeight});
+    //             faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
+
+    //             faces.push({x: prj.x, y: prj.y, z:roofInfo.minHeight});
+    //             faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
+    //             faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
+
+    //             faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.minHeight});
+    //             faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
+    //             faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});                
+    //         }
+    //     }
+    // }
 
 
     return faces;
@@ -436,7 +503,8 @@ const buildingFromWay = (way, polygon, localBoundingBox, convexHull, orientedMin
     }
 
     if  (isOutline) {
-        throw new Error(`Way ${way.id} is a building outline`);
+        console.log(`Way ${way.id} is a building outline`);
+        return null;
     }
 
     const buildingInfo = getBuildingInfo(way.tags);
