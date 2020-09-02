@@ -502,12 +502,11 @@ const buildingFromWay = (way, polygon, localBoundingBox, convexHull, orientedMin
         })
     }
 
+    const buildingInfo = getBuildingInfo(way.tags);
     if  (isOutline) {
-        console.log(`Way ${way.id} is a building outline`);
-        return null;
+        buildingInfo.height=DEFAULT_BUILDING_HEIGHT;
     }
 
-    const buildingInfo = getBuildingInfo(way.tags);
     //Compute lateral faces
     const lateralFaces = extrudePoly(polygon, buildingInfo.minHeight, buildingInfo.maxHeight, USE_TRIANGLES_STRIP);
     //Compute roof faces

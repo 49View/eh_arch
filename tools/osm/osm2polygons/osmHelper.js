@@ -175,37 +175,37 @@ const removeCollinearPoints = (nodes) => {
 
     let points = [];
 
-    // nodes.slice(0,nodes.length-1).forEach(n => {
-    //     const point = { ...n };
-    //     point.x=n.x.toNumber();
-    //     point.y=n.y.toNumber();
-    //     points.push(point);
-    // })
+    nodes.slice(0,nodes.length-1).forEach(n => {
+        const point = { ...n };
+        point.x=n.x; //.toNumber();
+        point.y=n.y; //.toNumber();
+        points.push(point);
+    })
 
-    // if (points.length>3) {
+    if (points.length>3) {
 
-    //     let pointToRemove = 0;
-    //     while (pointToRemove>-1 && points.length>=3) {
-    //         pointToRemove = -1;
-    //         for (let ia=0;ia<points.length;ia++) {
-    //             let ib=(ia+1)%points.length;
-    //             let ic=(ia+2)%points.length;
+        let pointToRemove = 0;
+        while (pointToRemove>-1 && points.length>=3) {
+            pointToRemove = -1;
+            for (let ia=0;ia<points.length;ia++) {
+                let ib=(ia+1)%points.length;
+                let ic=(ia+2)%points.length;
 
-    //             let pa=points[ia];
-    //             let pb=points[ib];
-    //             let pc=points[ic];
+                let pa=points[ia];
+                let pb=points[ib];
+                let pc=points[ic];
 
-    //             if (isCollinear(pa,pb,pc)) {
-    //                 pointToRemove=ib;
-    //                 break;
-    //             }
-    //         }
-    //         if (pointToRemove>-1) {
-    //             //console.log("Remove point "+points[pointToRemove].id)
-    //             points.splice(pointToRemove, 1);
-    //         }
-    //     }
-    // }  
+                if (isCollinear(pa,pb,pc)) {
+                    pointToRemove=ib;
+                    break;
+                }
+            }
+            if (pointToRemove>-1) {
+                //console.log("Remove point "+points[pointToRemove].id)
+                points.splice(pointToRemove, 1);
+            }
+        }
+    }  
     
     if (points.length<3) {
         points=[];

@@ -7,7 +7,7 @@ const {createWater} = require("./water");
 const {elaborateData} = require("./dataTransformer");
 
 //WestMinster
-const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
+//const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
 //Battersea Park
 //const bbox = [51.4696, -0.1777, 51.4878, -0.1375];
 //Royal Albert Hall
@@ -15,7 +15,7 @@ const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
 //Instanbul
 //const bbox = [28.97342,41.00382,28.98050,41.00739];
 //San Pietro
-//const bbox = [41.90024, 12.45045, 41.90379, 12.45905];
+const bbox = [41.90024, 12.45045, 41.90379, 12.45905];
 
 
 const main = async () => {
