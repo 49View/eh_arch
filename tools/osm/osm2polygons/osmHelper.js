@@ -136,25 +136,32 @@ const computeBoundingBox = (points) => {
     let maxX=-Number.MAX_VALUE;
     let maxY=-Number.MAX_VALUE;
 
+    const convexHull = calcConvexHull(points);
+    const ombb = calcOmbb(convexHull);
+
     let centerX = 0;
     let centerY = 0;
+    ombb.forEach(p => {
+        centerX = centerX+p.x;
+        centerY = centerY+p.y;
+    });
+    centerX = centerX/4;
+    centerY = centerY/4;
+
     let sizeX = 0;
     let sizeY = 0;
     let centerLat = 0;
     let centerLon = 0;
+
     points.forEach(p => {
         centerLat = centerLat+p.lat;
         centerLon = centerLon+p.lon;
-        centerX = centerX+p.x;
-        centerY = centerY+p.y;
         minX=Math.min(p.x,minX);
         minY=Math.min(p.y,minY);
         maxX=Math.max(p.x,maxX);
         maxY=Math.max(p.y,maxY);
     });
 
-    centerX = centerX/points.length;
-    centerY = centerY/points.length;
     centerLat = centerLat/points.length;
     centerLon = centerLon/points.length;
     sizeX = maxX-minX;

@@ -21,8 +21,8 @@ const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
 
 
 const main = async () => {
-  const {nodes, ways, rels} = await getData(bbox);
-  //const {nodes, ways, rels} = await getDataLocal(bbox);
+  //const {nodes, ways, rels} = await getData(bbox);
+  const {nodes, ways, rels} = await getDataLocal(bbox);
   elaborateData(nodes, ways, rels);
 
   // extendData(nodes,ways,rels);
