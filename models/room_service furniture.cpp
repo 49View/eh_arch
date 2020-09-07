@@ -935,9 +935,9 @@ void RoomServiceFurniture::moveFurniture( FittedFurniture *ff, const V3f& off ) 
 
 void moveFurniture( FittedFurniture *ff, const V3f& off, SceneGraph& sg ) {
     RoomServiceFurniture::moveFurniture(ff, off);
-    auto node = sg.Nodes().find(ff->linkedUUID);
-    if ( node->second ) {
-        node->second->move(off);
+    auto node = sg.getNode(ff->linkedUUID);
+    if ( node) {
+        node->move(off);
     }
 }
 
