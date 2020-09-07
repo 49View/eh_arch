@@ -915,9 +915,9 @@ void RoomServiceFurniture::rotateFurniture( FittedFurniture *ff, const Quaternio
 
 void rotateFurniture( FittedFurniture *ff, const Quaternion& rot, SceneGraph& sg ) {
     RoomServiceFurniture::rotateFurniture(ff, rot);
-    auto node = sg.Nodes().find(ff->linkedUUID);
-    if ( node->second ) {
-        node->second->updateTransform(ff->Rotation());
+    auto node = sg.getNode(ff->linkedUUID);
+    if ( node ) {
+        node->updateTransform(ff->Rotation());
     }
 }
 
