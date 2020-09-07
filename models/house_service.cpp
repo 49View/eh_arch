@@ -11,7 +11,9 @@
 #include <core/util.h>
 #include <core/math/vector_util.hpp>
 #include <core/file_manager.h>
+#include <core/resources/resource_builder.hpp>
 #include <poly/collision_mesh.hpp>
+#include <poly/scene_graph.h>
 
 #include "floor_service.hpp"
 #include "arch_structural_service.hpp"
@@ -56,6 +58,12 @@ std::shared_ptr<CollisionMesh> HouseService::createCollisionMesh( const HouseBSD
         ret->collisionGroups.emplace_back(cg);
     }
     return ret;
+}
+
+void HouseService::loadPanorama( const HouseBSData *house, SceneGraph& sg ) {
+    OSMData map{FM::readLocalFileC("elements.json")};
+    auto cc = sg.GB<GT::OSM>(map, V2f{-0.1216677576303482f, 51.49138259887695f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::Far));
+//    GLTF2Service::save( sg, cc );
 }
 
 template<typename T>
@@ -399,6 +407,7 @@ void HouseService::bestStartingPositionAndAngle( const HouseBSData *house, V3f& 
         pos = house->bestInternalViewingPosition;
         rot = house->bestInternalViewingAngle;
     }
+    pos += house->BBox3d().centreBottom() * V3f::UP_AXIS;
 }
 
 void HouseService::bestDollyPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot ) {

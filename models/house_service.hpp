@@ -23,9 +23,12 @@ struct IsNear {
 struct IsInside {
 };
 
+class SceneGraph;
+
 namespace HouseService {
 
     // Update
+    void loadPanorama( const HouseBSData *house, SceneGraph& sg );
     void pushTourPath( HouseBSData *_house, const CameraSpatialsKeyFrame& csk );
     void pushKeyFrameTourPath( HouseBSData *_house, const CameraSpatialsKeyFrame& csk );
     void popTourPath( HouseBSData *_house, int i );

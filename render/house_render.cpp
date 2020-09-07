@@ -10,6 +10,7 @@
 #include <graphics/render_light_manager.h>
 
 #include <eh_arch/controller/arch_render_controller.hpp>
+#include <eh_arch/models/house_service.hpp>
 #include <core/util.h>
 #include <core/font_utils.hpp>
 #include "wall_render.hpp"
@@ -81,6 +82,7 @@ namespace HouseRender {
     HouseRenderContainer make3dGeometry( Renderer& rr, SceneGraph& sg, const HouseBSData *data ) {
         // Clear the bucket always, because if house it's null it should show a clear/empty screen
         rr.clearBucket(CommandBufferLimits::PBRStart);
+        rr.clearBucket(CommandBufferLimits::PBRStartFar);
         rr.LM()->removeAllPointLights();
 
         // If no data clearly early exit with just clear of buckets performed
@@ -90,17 +92,14 @@ namespace HouseRender {
 
         sg.addSkybox(data->defaultSkybox);
 
-        // Infinite plane
-        sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,
-                         GT::Scale(5000.0f, 0.1f, 5000.0f));
-
         auto houseRootH = EntityFactory::create<Geom>("House");
         houseRootH->updateTransform(data->GeoOffset());
 
         for ( const auto& f : data->mFloors ) {
             FloorRender::make3dGeometry(sg, houseRootH, f.get());
         }
-        sg.addNode( houseRootH );
+        sg.addNode(houseRootH, GTBucket::Near );
+        HouseService::loadPanorama( data, sg );
 
         return ret;
     }

@@ -143,6 +143,7 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
             rsg.changeTime("14:00", H()->sourceData.northCompassAngle);
             V3f probePos = HouseService::centerOfBiggestRoom(H(), 1.25f);
             rsg.setProbePosition(probePos);
+            rsg.setSkyboxCenter(H()->BBox3d().centre());
             loadingMutex = false;
         });
     }
