@@ -52,7 +52,7 @@ namespace KitchenRender {
             float uz = kup.z + ( m == 0 ? 0.0f : unitYSizeAvailable * 0.75f + dp );
             auto linex = FollowerService::createLinePath(kup.p1, kup.p2, kd.drawersThickness, uz);
             drawerOutlines.emplace_back(linex, V3f::UP_AXIS, unitHeight);
-            auto handleWidth = sg.GM(kd.drawersHandleModel)->BBox3d()->calcWidth();
+            auto handleWidth = sg.GM(kd.drawersHandleModel)->BBox3d().calcWidth();
             float drawerWidth = distance(kup.p1, kup.p2);
             if ( drawerWidth > handleWidth * 1.2f ) {
                 auto rotationHandle = rotation;
@@ -101,9 +101,9 @@ namespace KitchenRender {
             } else {
                 // I've decided to split the worktop in 4 pieces (like having a frame around the sink)
                 // instead of clipping an hole through it as I still don't trust booleans they are still too risky
-                auto sinkHalfDepth = sg.GM(kd.sinkModel)->BBox3d()->calcDepth() * 0.5f;
+                auto sinkHalfDepth = sg.GM(kd.sinkModel)->BBox3d().calcDepth() * 0.5f;
                 // Add some filling to make sure the whole sink is cover, ie to cover up round edges
-                auto sinkHalfWidth = ( sg.GM(kd.sinkModel)->BBox3d()->calcWidth() * 0.5f ) - 0.02f;
+                auto sinkHalfWidth = ( sg.GM(kd.sinkModel)->BBox3d().calcWidth() * 0.5f ) - 0.02f;
                 auto kn = normalize(kwp.p2 - kwp.p1);
                 auto sinko1 = kwp.sinkPos + kwp.normal * kd.kitchenWorktopDepth * 0.5f;
                 auto knhw = kn * sinkHalfWidth;
@@ -150,7 +150,7 @@ namespace KitchenRender {
             auto rotation = Quaternion{ RoomService::furnitureAngleFromNormal(kup.normal), V3f::UP_AXIS };
             if ( kup.flags.hasCooker ) {
                 auto mp = kup.cookerPos;
-                auto extractorHeight = sg.GM(kd.extractorHoodModel)->BBox3d()->calcHeight();
+                auto extractorHeight = sg.GM(kd.extractorHoodModel)->BBox3d().calcHeight();
                 sg.GB<GT::Asset>(kd.cooktopModel, lRootH,
                                  XZY::C(mp + kup.normal * kd.kitchenWorktopDepth * 0.5f, topOfWorktop),
                                  GT::Rotate(rotation));
