@@ -464,8 +464,6 @@ V3f ArchSpatial::Center() const { return bbox3d.centre(); }
 const V3f& ArchSpatial::Size() const { return size; }
 const V3f& ArchSpatial::Scale() const { return scaling; }
 const Quaternion& ArchSpatial::Rotation() const { return rotation; }
-const JMATH::Rect2f& ArchSpatial::BBox() const { return bbox; }
-const JMATH::AABB& ArchSpatial::BBox3d() const { return bbox3d; }
 const std::vector<Triangle2d>& ArchSpatial::Triangles2d() const { return mTriangles2d; }
 float& ArchSpatial::w() { return size[0]; }
 float& ArchSpatial::h() { return size[1]; }

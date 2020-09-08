@@ -87,7 +87,7 @@ struct ArchBase {
 
 using SequencePart = int64_t;
 
-struct ArchSpatial : public ArchBase {
+struct ArchSpatial : public ArchBase, Boxable {
 public:
     [[nodiscard]] float Width() const;
     [[nodiscard]] float Height() const;
@@ -108,9 +108,6 @@ public:
     [[nodiscard]] const V3f& Scale() const;
 
     [[nodiscard]] const Quaternion& Rotation() const;
-
-    [[nodiscard]] const JMATH::Rect2f& BBox() const;
-    [[nodiscard]] const JMATH::AABB& BBox3d() const;
 
     [[nodiscard]] const std::vector<Triangle2d>& Triangles2d() const;
 
@@ -139,8 +136,6 @@ private:
     void scaleBBox( const V3f& _scale );
 
 protected:
-    JMATH::Rect2f bbox = JMATH::Rect2f::INVALID;
-    JMATH::AABB bbox3d = JMATH::AABB::INVALID;
     V3f size{ V3f::ZERO };
     V3f pos{ V3f::ZERO };
     V3f centre{ V3f::ZERO };
