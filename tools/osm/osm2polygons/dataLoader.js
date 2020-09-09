@@ -20,6 +20,7 @@ const getData = async (bbox) => {
         way["leisure"="garden"](${bbox.join(",")});
         rel["natural"="water"](${bbox.join(",")});
         way["natural"="water"](${bbox.join(",")});
+        way["highway"](${bbox.join(",")});
     );
     (
         ._;

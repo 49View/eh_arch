@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "decimal.js": "^10.2.0",
+    "js-clipper": "^1.0.1",
     "poly2tri": "^1.5.0",
     "qs": "^6.9.4"
   }

@@ -130,28 +130,30 @@ const isCollinear = (pa,pb,pc) => {
     return cp<1e-20;
 }
 
-const computeBoundingBox = (points) => {
+const computeBoundingBox = (points, isOpen=undefined) => {
     let minX=Number.MAX_VALUE;
     let minY=Number.MAX_VALUE;
     let maxX=-Number.MAX_VALUE;
     let maxY=-Number.MAX_VALUE;
 
-    const convexHull = calcConvexHull(points);
-    const ombb = calcOmbb(convexHull);
-
     let centerX = 0;
     let centerY = 0;
-    ombb.forEach(p => {
-        centerX = centerX+p.x;
-        centerY = centerY+p.y;
-    });
-    centerX = centerX/4;
-    centerY = centerY/4;
-
     let sizeX = 0;
     let sizeY = 0;
     let centerLat = 0;
     let centerLon = 0;
+
+    if (isOpen===undefined) {
+        const convexHull = calcConvexHull(points);
+        const ombb = calcOmbb(convexHull);
+
+        ombb.forEach(p => {
+            centerX = centerX+p.x;
+            centerY = centerY+p.y;
+        });
+        centerX = centerX/4;
+        centerY = centerY/4;
+    }
 
     points.forEach(p => {
         centerLat = centerLat+p.lat;
@@ -160,12 +162,20 @@ const computeBoundingBox = (points) => {
         minY=Math.min(p.y,minY);
         maxX=Math.max(p.x,maxX);
         maxY=Math.max(p.y,maxY);
+        if (isOpen!==undefined) {
+            centerX = centerX+p.x;
+            centerY = centerY+p.y;
+        }
     });
 
     centerLat = centerLat/points.length;
     centerLon = centerLon/points.length;
     sizeX = maxX-minX;
     sizeY = maxY-minY;
+    if (isOpen!==undefined) {
+        centerX = centerX/points.length;
+        centerY = centerY/points.length;
+    }
 
     return {minX,minY,maxX,maxY,centerX,centerY,sizeX,sizeY,centerLat,centerLon}
 }
@@ -182,12 +192,15 @@ const removeCollinearPoints = (nodes) => {
 
     let points = [];
 
-    nodes.slice(0,nodes.length-1).forEach(n => {
-        const point = { ...n };
-        point.x=n.x; //.toNumber();
-        point.y=n.y; //.toNumber();
-        points.push(point);
-    })
+    //If last point is equal to first point then remove last
+    if (nodes[0].id===nodes[nodes.length-1].id) {
+        nodes.slice(0,nodes.length-1).forEach(n => {
+            const point = { ...n };
+            point.x=n.x; //.toNumber();
+            point.y=n.y; //.toNumber();
+            points.push(point);
+        })
+    }
 
     if (points.length>3) {
 
@@ -588,5 +601,6 @@ module.exports = {
     calcPointProjection,
     projectionParameterPointToSegment,
     pointOnLineFromParameter,
-    twoLinesintersectParameter
+    twoLinesintersectParameter,
+    convertToLocalCoordinate
 }
