@@ -56,11 +56,11 @@ namespace HouseRender {
 //        float padding = 0.02f;
 //        auto houseRect = Rect2f{ 0.0f, 0.0f, data->BBox().bottomRight().x() + padding,
 //                                 data->BBox().bottomRight().y() + padding };
-//        rr.draw<DFlatPoly>(CommandBufferLimits::UI2dStart, sm, houseRect.pointscw(), C4f::WHITE, arc.pm(), "floorplanFlatPoly");
+//        rr.draw<DFlatPoly>(CommandBufferLimits::UI2dStart, sm, houseRect.pointscw(), C4fc::WHITE, arc.pm(), "floorplanFlatPoly");
 
         // Render general house information
         auto font = sg.FM().get(S::DEFAULT_FONT).get();
-        auto color = arc.getFillColor(data, C4f::BLACK);
+        auto color = arc.getFillColor(data, C4fc::BLACK);
 
         auto d1 = [&]( const std::string& text, float fontHeight, float yOffset ) {
             auto textPos = FontUtils::fitTextInBox(font, text, data->BBox(), fontHeight);

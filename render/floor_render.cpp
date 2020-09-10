@@ -26,11 +26,11 @@ namespace FloorRender {
         if ( drawDebug ) {
             int oCounter = 0;
             for ( const auto& seg : f->orphanedUShapes ) {
-                rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, sm, 0.075f, arc.pm(),
+                rr.draw<DCircle>(XZY::C(seg.middle), C4fc::WHITE, sm, 0.075f, arc.pm(),
                                  seg.hashFeature("orphanedUShape" + sm.hash(), oCounter++));
             }
             for ( const auto& seg : f->orphanedWallSegments ) {
-                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), Color4f::RED, sm, 0.075f, arc.pm(),
+                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), C4fc::RED, sm, 0.075f, arc.pm(),
                                f->hashFeature("orphanedWallSegments" + sm.hash(), oCounter++));
             }
         }

@@ -146,7 +146,7 @@ protected:
 
 struct ArchStructural : public ArchSpatial {
     std::string linkedUUID{}; // NB This won't get serialized as it's a runtime value only
-    Color4f albedo = Color4f::WHITE;
+    Color4f albedo = C4fc::WHITE;
     HashEH linkedHash = 0;
     SequencePart sequencePart = 0;
 };
@@ -192,7 +192,7 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
 
     Vector2f normal = V2fc::ZERO;
     Vector2f crossNormal = V2fc::ZERO;
-    C4f color = C4f::WHITE;
+    C4f color = C4fc::WHITE;
     uint64_t tag = 0;
     SequencePart sequencePart = 0;
     std::vector<QuadVector3f> quads;
@@ -409,9 +409,9 @@ JSONDATA(KitchenDrawer, p1, p2, z, unitHeight, depth, normal, shape, color)
     float depth = 0.3f;
     V2f normal = V2fc::ZERO;
     KitchenDrawerShape shape{ KitchenDrawerType::FlatBasic };
-    Color4f color = C4f::WHITE;
+    Color4f color = C4fc::WHITE;
     KitchenDrawer( const V2f& p1, const V2f& p2, float z, float unitHeight, float depth, const V2f& normal,
-                   KitchenDrawerShape shape, const Color4f& color = C4f::WHITE ) : p1(p1), p2(p2), z(z),
+                   KitchenDrawerShape shape, const Color4f& color = C4fc::WHITE ) : p1(p1), p2(p2), z(z),
                                                                                    unitHeight(unitHeight),
                                                                                    depth(depth), normal(normal),
                                                                                    shape(std::move(shape)),
@@ -522,8 +522,8 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type,
     MaterialAndColorProperty wallsMaterial{ "plaster_ultra_fine_spray", C4f{ 0.93f, 0.91f, 0.89f, 1.0f } };
     MaterialAndColorProperty floorMaterial{ "european,ash" };
     MaterialAndColorProperty ceilingMaterial{ "plaster_ultra_fine_spray", C4f{ 0.99f, 0.99f, 0.99f, 1.0f } };
-    MaterialAndColorProperty skirtingMaterial{ S::WHITE_PBR, C4f::WHITE };
-    MaterialAndColorProperty covingMaterial{ S::WHITE_PBR, C4f::PASTEL_GRAYLIGHT };
+    MaterialAndColorProperty skirtingMaterial{ S::WHITE_PBR, C4fc::WHITE };
+    MaterialAndColorProperty covingMaterial{ S::WHITE_PBR, C4fc::PASTEL_GRAYLIGHT };
     std::string covingProfile{ "coving,model1" };
     std::string skirtingProfile{ "skirting,kensington" };
     std::string spotlightGeom{ "spotlight_basic" };
@@ -610,7 +610,7 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type,
     float windowFrameThickness = 0.04f;
     float worktopHeight = 0.9f;
     float bathRoomSinkHeight = 0.9f;
-    Color4f defaultWallColor = Color4f::WHITE;
+    Color4f defaultWallColor = C4fc::WHITE;
     subdivisionAccuray accuracy = accuracyNone;
     std::vector<CameraPath> tourPaths;
     std::vector<std::shared_ptr<FloorBSData>> mFloors;

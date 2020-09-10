@@ -18,10 +18,10 @@ namespace OutdoorAreaRender {
         int cc = 0;
         for ( const auto& oa : w->Boundaries() ) {
             if ( oa.extrusionType == 0 ) {
-                auto color = arc.getFillColor(w, Color4f::LIGHT_GREY);
+                auto color = arc.getFillColor(w, C4fc::LIGHT_GREY);
                 rr.draw<DFlatPoly>(oa.bPoints, color, sm, w->hashFeature("outdoorAreaFlatBseIM", cc++));
             } else if ( oa.extrusionType == 1 ) {
-                auto color = arc.getFillColor(w, Color4f::SKY_BLUE);
+                auto color = arc.getFillColor(w, C4fc::SKY_BLUE);
                 rr.draw<DLine>(oa.bPoints, color, sm, w->hashFeature("outdoorAreaFlatBseIM", cc++), oa.followerWidth);
             }
         }

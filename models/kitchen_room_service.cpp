@@ -101,7 +101,7 @@ namespace KitchenRoomService {
 
     void addDrawer( KitchenData& kd, const V2f& p1s, const V2f& p2s, float z, float unitHeight, float depth,
                     const V2f& normal, KitchenDrawerTypeT drawerType,
-                    KitchenDrawerCreateFlagsT hff = KitchenDrawerCreateFlags::None, const C4f& color = C4f::WHITE ) {
+                    KitchenDrawerCreateFlagsT hff = KitchenDrawerCreateFlags::None, const C4f& color = C4fc::WHITE ) {
         float computedDepth = checkBitWiseFlag(hff, KitchenDrawerCreateFlags::NoDepth) ? 0.0f : depth;
         kd.kitchenDrawers.emplace_back(p1s, p2s, z, unitHeight, computedDepth, normal, KitchenDrawerShape{drawerType}, color);
     }
@@ -163,7 +163,7 @@ namespace KitchenRoomService {
         // Filler
         if ( checkBitWiseFlag(hff, KitchenDrawerCreateFlags::HasFakeFiller) ) {
             addDrawer(kd, pd1, pd2, z, unitHeight, kup.depth, kup.normal, KitchenDrawerType::Filler, hff,
-                      C4f::DARK_GRAY);
+                      C4fc::DARK_GRAY);
         }
     }
 

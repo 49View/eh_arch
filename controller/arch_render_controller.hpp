@@ -146,5 +146,5 @@ private:
     RDSPreMult mPm{ Matrix4f::MIDENTITY() };
     FloorPlanRenderMode mRenderMode = FloorPlanRenderMode::Normal2d;
     Matrix4f floorplanNavigationMatrix = Matrix4f::MIDENTITY();
-    C4f selectedColor = C4f::ORANGE_SCHEME1_1;
+    C4f selectedColor = C4fc::ORANGE_SCHEME1_1;
 };

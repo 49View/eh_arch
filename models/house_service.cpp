@@ -14,6 +14,7 @@
 #include <core/resources/resource_builder.hpp>
 #include <poly/collision_mesh.hpp>
 #include <poly/scene_graph.h>
+#include <poly/converters/gltf2/gltf2.h>
 
 #include "floor_service.hpp"
 #include "arch_structural_service.hpp"

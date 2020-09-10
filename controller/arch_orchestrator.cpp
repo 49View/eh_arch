@@ -154,7 +154,7 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
 /// \param ccf
 void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf,
                                   const PostHouseLoadCallback& ccfailure ) {
-    Renderer::clearColor(C4f::XTORGBA("8ae9e9"));
+    Renderer::clearColor(C4fc::XTORGBA("8ae9e9"));
     Http::getNoCache(Url{ "/propertybim/" + _pid }, [&, ccf]( HttpResponeParams params ) {
         if ( !params.BufferString().empty() ) {
             houseJson.reset(std::make_shared<HouseBSData>(params.BufferString()));

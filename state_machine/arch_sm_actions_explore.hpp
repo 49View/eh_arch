@@ -32,8 +32,8 @@ struct [[maybe_unused]] ActivateOrbitMode {
     operator()( SceneGraph& sg, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) noexcept {
         rsg.setRigCameraController(CameraControlType::Orbit);
         rsg.useSkybox(true);
-        rsg.RR().drawGrid(CommandBufferLimits::GridStart, 1.0f, ( Color4f::PASTEL_GRAYLIGHT ),
-                            ( Color4f::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
+        rsg.RR().drawGrid(CommandBufferLimits::GridStart, 1.0f, ( C4fc::PASTEL_GRAYLIGHT ),
+                            ( C4fc::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
     }
 };
 
@@ -118,7 +118,7 @@ static void renderCameraLocator(ArchOrchestrator& asg, RenderOrchestrator& rsg) 
     // Update camera locator on map
     auto camPos = rsg.DC()->getPosition() * V3f::MASK_Y_OUT;
     auto sm = DShaderMatrix{ DShaderMatrixValue2dColor };
-    rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocatorIM, camPos, V4f::DARK_RED, 0.3f,
+    rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocatorIM, camPos, C4fc::DARK_RED, 0.3f,
                                  RDSPreMult(asg.FloorplanNavigationMatrix()),
                                  sm, std::string{ "CameraOminoKey" });
 }

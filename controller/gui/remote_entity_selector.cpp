@@ -325,21 +325,21 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                 }
 
                 std::vector<std::pair<std::string, C4f>> colors;
-                colors.emplace_back("red", C4f::INDIAN_RED);
-                colors.emplace_back("green", C4f::FOREST_GREEN);
-                colors.emplace_back("black", C4f::DARK_GRAY);
+                colors.emplace_back("red", C4fc::INDIAN_RED);
+                colors.emplace_back("green", C4fc::FOREST_GREEN);
+                colors.emplace_back("black", C4fc::DARK_GRAY);
 
-                colors.emplace_back("blue", C4f::SKY_BLUE);
-                colors.emplace_back("cream", C4f::SAND);
-                colors.emplace_back("grey", C4f::PASTEL_GRAY);
+                colors.emplace_back("blue", C4fc::SKY_BLUE);
+                colors.emplace_back("cream", C4fc::SAND);
+                colors.emplace_back("grey", C4fc::PASTEL_GRAY);
 
-                colors.emplace_back("orange", C4f::PASTEL_ORANGE);
-                colors.emplace_back("pink", C4f::HOT_PINK);
-                colors.emplace_back("purple", C4f::DARK_PURPLE);
+                colors.emplace_back("orange", C4fc::PASTEL_ORANGE);
+                colors.emplace_back("pink", C4fc::HOT_PINK);
+                colors.emplace_back("purple", C4fc::DARK_PURPLE);
 
-                colors.emplace_back("teal", C4f::PASTEL_CYAN);
-                colors.emplace_back("white", C4f::LIGHT_GREY);
-                colors.emplace_back("yellow", C4f::PASTEL_YELLOW);
+                colors.emplace_back("teal", C4fc::PASTEL_CYAN);
+                colors.emplace_back("white", C4fc::LIGHT_GREY);
+                colors.emplace_back("yellow", C4fc::PASTEL_YELLOW);
 
                 constexpr int colorFamilyThumbSize = 32;
                 for ( auto& color : colors ) {

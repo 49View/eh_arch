@@ -20,35 +20,35 @@
 namespace WallRender {
 
     void drawWalls2d( Renderer& rr, const WallBSData *wall, DShaderMatrix sm, const ArchRenderController& arc ) {
-        auto color = arc.getFillColor(wall, C4f::BLACK);
+        auto color = arc.getFillColor(wall, C4fc::BLACK);
         rr.draw<DFlatPoly>(sm, wall->Triangles2d(), color, arc.pm(), wall->hashFeature("wallTri"+sm.hash(), 0));
     }
 
 //    void drawIncrementalAlphaWalls2d( Renderer& rr, const WallBSData *wall, float width, DShaderMatrix sm,
 //                                      const RDSPreMult& _pm ) {
-//        auto wc = Color4f::RANDA1();
+//        auto wc = C4fc::RANDA1();
 //        auto wps = wall->epoints.size();
 //        for ( size_t t = 0; t < wps - 1 * !wall->wrapLastPoint; t++ ) {
 //            float incRatio = float(t) / float(wps);
-//            auto wca = Color4f::WHITE * V4f{ V3f::ONE, 0.5f + ( incRatio * 0.5f ) };
+//            auto wca = C4fc::WHITE * V4f{ V3f::ONE, 0.5f + ( incRatio * 0.5f ) };
 //            auto p1 = wall->epoints[t];
 //            auto p2 = wall->epoints[cai(t + 1, wps)];
 //            auto pm = lerp(0.5f, p1, p2);
 //            rr.draw<DLine>(p1, p2, wc * wca, width, sm, _pm);
-//            rr.draw<DLine>(pm, pm + wall->enormals[t] * width * 3.0f, Color4f::PASTEL_CYAN, width * 0.05f,
+//            rr.draw<DLine>(pm, pm + wall->enormals[t] * width * 3.0f, C4fc::PASTEL_CYAN, width * 0.05f,
 //                           true, sm, _pm);
 //        }
 //    }
 
     void drawUShapes2d( Renderer& rr, const WallBSData *wall, [[maybe_unused]] float lineWidth, DShaderMatrix sm,
                         const ArchRenderController& arc ) {
-//        std::array<Color4f, 3> usc = { Color4f::PASTEL_YELLOW, Color4f::PASTEL_CYAN, Color4f::PASTEL_GREEN };
+//        std::array<Color4f, 3> usc = { C4fc::PASTEL_YELLOW, C4fc::PASTEL_CYAN, C4fc::PASTEL_GREEN };
         int uShapeRC = 0;
         for ( const auto& us : wall->mUShapes ) {
 //            for ( int t = 0; t < 3; t++ ) {
 //                rr.draw<DLine>(us.points[t], us.points[t + 1], usc[t], lineWidth, sm, arc.pm());
 //            }
-            rr.draw<DCircleFilled>(us.middle, Color4f::DARK_BLUE, 0.035f, sm, arc.pm(), wall->hashFeature("w2dUShape"+sm.hash(),uShapeRC));
+            rr.draw<DCircleFilled>(us.middle, C4fc::DARK_BLUE, 0.035f, sm, arc.pm(), wall->hashFeature("w2dUShape"+sm.hash(),uShapeRC));
         }
     }
 
@@ -59,7 +59,7 @@ namespace WallRender {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t + 1, wps)];
             auto pm = lerp(0.5f, p1, p2);
-            rr.draw<DLine>(pm, pm + wall->enormals[t] * 0.15f, Color4f::PASTEL_CYAN, width, sm, true, arc.pm(), wall->hashFeature("w2dNormal"+sm.hash(),t));
+            rr.draw<DLine>(pm, pm + wall->enormals[t] * 0.15f, C4fc::PASTEL_CYAN, width, sm, true, arc.pm(), wall->hashFeature("w2dNormal"+sm.hash(),t));
         }
     }
 
@@ -68,7 +68,7 @@ namespace WallRender {
         for ( auto t = 0u; t < wall->epoints.size(); t++ ) {
             auto p1 = wall->epoints[t];
 //            ArchStructuralFeatureDescriptor asf{ ArchStructuralFeature::ASF_Point, t, wall };
-            auto color = arc.getFillColor(ArchStructuralFeature::ASF_Point, t, wall, C4f::RED);
+            auto color = arc.getFillColor(ArchStructuralFeature::ASF_Point, t, wall, C4fc::RED);
             rr.draw<DCircleFilled>(p1, color, width, sm, arc.pm(), wall->hashFeature("w2dPoint"+sm.hash(),t));
         }
     }
@@ -78,7 +78,7 @@ namespace WallRender {
         for ( auto t = 0u; t < wall->epoints.size(); t++ ) {
             auto p1 = wall->epoints[t];
             auto p2 = wall->epoints[cai(t+1, wall->epoints.size())];
-            auto color = arc.getFillColor(ArchStructuralFeature::ASF_Edge, t, wall, Color4f::PASTEL_GREEN);
+            auto color = arc.getFillColor(ArchStructuralFeature::ASF_Edge, t, wall, C4fc::PASTEL_GREEN);
             rr.draw<DLine>(p1, p2, color, width*3.f, sm, arc.pm(), wall->hashFeature("w2dEdge"+sm.hash(),t));
         }
     }

@@ -18,7 +18,7 @@
 #include <eh_arch/models/room_service_furniture.hpp>
 
 inline V4f furnitureMoveDotColor() {
-    return C4f::PASTEL_GREEN;
+    return C4fc::PASTEL_GREEN;
 }
 
 bool ArchExplorer::canBeManipulated() const {

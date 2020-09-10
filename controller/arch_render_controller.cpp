@@ -17,11 +17,11 @@ float ArchRenderController::floorPlanScaler( float value ) const {
 }
 
 Color4f ArchRenderController::floorPlanElemColor( const C4f& nominalColor ) const {
-    return isFloorPlanRenderModeDebug() ? nominalColor : C4f::BLACK;
+    return isFloorPlanRenderModeDebug() ? nominalColor : C4fc::BLACK;
 }
 
 Color4f ArchRenderController::floorPlanElemColor() const {
-    return isFloorPlanRenderModeDebug() ? Color4f::RANDA1() : C4f::BLACK;
+    return isFloorPlanRenderModeDebug() ? C4fc::RANDA1() : C4fc::BLACK;
 }
 
 FloorPlanRenderMode ArchRenderController::renderMode() const {

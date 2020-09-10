@@ -17,7 +17,7 @@ static constexpr float slowingDownTimeOnRotationFactor = 2.0f; // When we travel
 static constexpr float gotoAndFadeTime = 0.5f; // Time it takes to travel to point clicked _and_ to fade in/out from it
 
 inline const V4f& defaultDotColor() {
-    return C4f::SKY_BLUE;
+    return C4fc::SKY_BLUE;
 }
 
 void ArchPositionalDot::updateDot( RenderOrchestrator& rsg ) {

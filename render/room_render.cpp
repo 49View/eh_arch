@@ -40,23 +40,23 @@ namespace RoomRender {
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *room, const ArchRenderController& arc ) {
 
 //        if ( drawDebug) {
-//            rr.draw<DFlatPoly>( room->mPerimeterSegments, 0.025f, C4f::RED, true );
+//            rr.draw<DFlatPoly>( room->mPerimeterSegments, 0.025f, C4fc::RED, true );
 //        }
         auto roomName = RoomService::roomNames(room);
         auto sm = arc.floorPlanShader();
-        auto color = arc.getFillColor(room, C4f::PASTEL_GRAY);
+        auto color = arc.getFillColor(room, C4fc::PASTEL_GRAY);
         auto lineWidth = arc.floorPlanScaler(0.015f);
 
         bool drawDebug = arc.isFloorPlanRenderModeDebug();
         if ( drawDebug && arc.isSelected(room) ) {
             rr.draw<DLine>(room->mPerimeterSegments, lineWidth*2.0f, color, true, room->hashFeature("perimeter"+sm.hash(), 0));
-//            rr.draw<DFlatPoly>(room->mPerimeterSegments, C4f::WHITE*0.9f, arc.pm(),
+//            rr.draw<DFlatPoly>(room->mPerimeterSegments, C4fc::WHITE*0.9f, arc.pm(),
 //                           room->hashFeature("perimeter", 0));
         }
 
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {
-            auto ffColor = arc.getFillColor(ff.get(), C4f::BLACK);
+            auto ffColor = arc.getFillColor(ff.get(), C4fc::BLACK);
             Matrix4f mt{ ff->Position() * V3f::MASK_Y_OUT, ff->Rotation(), ff->Size() * ff->Scale() };
             mt.mult(arc.pm()());
             rr.draw<DLine>(sg.PL(ff->symbolRef), ffColor, RDSPreMult(mt), sm, lineWidth,
@@ -93,7 +93,7 @@ namespace RoomRender {
                        room->hashFeature("T3", 2));
 
 //        for ( auto& cov : room->mvSkirtingSegments ) {
-//            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, arc.pm(), room->hashFeature("skirting", 0));
+//            rr.draw<DLine>(cov, 0.01f, C4fc::BLUE, arc.pm(), room->hashFeature("skirting", 0));
 //        }
     }
 
@@ -170,7 +170,7 @@ namespace RoomRender {
                 auto furn = sg.GB<GT::Asset>(fur->name, lRootH, fur->Position(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
-//                    sg.GB<GT::Shape>(ShapeType::Cube, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale{fur->Size()}, C4f::BLUE_SHADOW );
+                    sg.GB<GT::Shape>(ShapeType::AABB, fur->BBox3d(), C4fc::BLUE_SHADOW );
                 } else {
                     LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
                 }
