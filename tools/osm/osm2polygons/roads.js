@@ -18,7 +18,7 @@ const createRoads = (nodes,ways,rels) => {
 
     const roads = [];
     
-    ways.filter(w => w.tags && w.tags["highway"]).filter(w => w.nodes[0].id!==w.nodes[w.nodes.length-1].id).forEach(w => {
+    ways.filter(w => w.tags && w.tags["highway"]).forEach(w => {
         const road = roadFromWay(w);
         if (road!==null) roads.push(road);
     });
@@ -29,13 +29,13 @@ const createRoads = (nodes,ways,rels) => {
     return roads;
 }
 
-const createRoadMesh = (id, tags, boundingBox, faces) => {
+const createRoadMesh = (id, tags, boundingBox, faces, color) => {
 
     const groups=[];
 
     groups.push({
         faces: faces,
-        colour: "#000000",
+        colour: color,
         isTriangleStrip: false
     });
     
@@ -45,14 +45,85 @@ const createRoadMesh = (id, tags, boundingBox, faces) => {
 const roadFromWay = (way) => {
 
     let road=null;
+    let roadWidth = 2;
+    let roadColor = "#FFFFFF";
+    let roadLane = 1;
     try {
-        points=[];
+        switch (way.tags["highway"]) {
+            case "motorway":
+                roadWidth = 3;
+                roadLane = 3;
+                roadColor = "#DF2E6B";
+                break;
+            case "motorway_link":
+                roadWidth = 2.75;
+                roadLane = 2;
+                roadColor = "#DF2E6B";
+                break;
+            case "thrunk":
+                roadWidth = 3;
+                roadLane = 2;
+                roadColor = "#FBB29A";
+                break;
+            case "thrunk_link":
+                roadWidth = 2.75;
+                roadLane = 2;
+                roadColor = "#FBB29A";
+                break;
+            case "primary":
+                roadWidth = 3;
+                roadLane = 2;
+                roadColor = "#FDD7A1";
+                break;
+            case "primary_link":
+                roadWidth = 2.75;
+                roadLane = 2;
+                roadColor = "#FDD7A1";
+                break;
+            case "secondary":
+                roadWidth = 2.75;
+                roadLane = 2;
+                roadColor = "#F1EEE8";
+                break;
+            case "tertiary":
+                roadWidth = 2.75;
+                roadLane = 2;
+                roadColor = "#FFFFFF";
+                break;
+            case "unclassified":
+            case "residential":
+                roadWidth = 2.75;
+                roadLane = 1;
+                roadColor = "#FFFFFF";
+                break;
+            case "track":
+            case "cycleway":
+            case "bridleway":
+            case "footway":
+            case "path":
+            case "steps":
+                roadWidth = 0.5;
+                roadLane = 1;
+                break;
+            default:
+                roadWidth = 1.5;
+                roadLane = 1;
+                roadColor = "#FFFFFF";
+        }
+        let points=[];
         way.nodes.forEach(n => {
             const point = { ...n };
             point.x=n.x; //n.x.toNumber();
             point.y=n.y; //n.y.toNumber();
             points.push(point);
         }) ;
+
+        let endType = ClipperLib.EndType.etOpenRound;
+        if (points[0].id===points[points.length-1].id) {
+            //endType = ClipperLib.EndType.etClosedLine;
+            points.splice(points.length-1,1);
+        }
+
         const localBoundingBox = computeBoundingBox(points);
         convertToLocalCoordinate(points, localBoundingBox.centerX, localBoundingBox.centerY);
 
@@ -62,15 +133,18 @@ const roadFromWay = (way) => {
         var scale = 100;
         ClipperLib.JS.ScaleUpPaths(subj, scale);
         var co = new ClipperLib.ClipperOffset(2, 0.25);
-        co.AddPaths(subj, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenRound);
-        co.Execute(solution, 300.0);
+        co.AddPaths(subj, ClipperLib.JoinType.jtRound, endType);
+        co.Execute(solution, roadWidth*roadLane*scale);
         ClipperLib.JS.ScaleDownPaths(solution, scale);
 
-        const polygon = solution[0].map(p => { return { x: p.X, y:p.Y}});
-        const faces = getTrianglesFromPolygon(polygon);
+        let faces=[]
+        solution.forEach(s => {
+            const polygon = s.map(p => { return { x: p.X, y:p.Y}});
+            faces = faces.concat(getTrianglesFromPolygon(polygon));
+        });
         setHeight(faces,3);
 
-        road = createRoadMesh("w-"+way.id, way.tags, localBoundingBox, faces);
+        road = createRoadMesh("w-"+way.id, way.tags, localBoundingBox, faces, "#000000");
     } catch (ex) {
         console.log(`Error creating road from way ${way.id}`);
     }

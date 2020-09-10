@@ -8,9 +8,9 @@ const {createRoads} = require("./roads");
 const {elaborateData} = require("./dataTransformer");
 
 //WestMinster
-//const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
+const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
 //Battersea Park
-const bbox = [51.4696, -0.1777, 51.4878, -0.1375];
+//const bbox = [51.4696, -0.1777, 51.4878, -0.1375];
 //Royal Albert Hall
 //const bbox = [51.50049, -0.17869, 51.50155, -0.17551];
 //Instanbul
