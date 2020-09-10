@@ -21,6 +21,8 @@ const getData = async (bbox) => {
         rel["natural"="water"](${bbox.join(",")});
         way["natural"="water"](${bbox.join(",")});
         way["highway"](${bbox.join(",")});
+        way["landuse"="grass"](${bbox.join(",")});
+        rel["landuse"="grass"](${bbox.join(",")});
     );
     (
         ._;
