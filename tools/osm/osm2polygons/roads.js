@@ -171,7 +171,7 @@ const roadFromWay = (way) => {
             });
         });
 
-        setHeight(faces,1.5);
+        setHeight(faces,.5);
 
         road = createRoadMesh("w-"+way.id, way.tags, localBoundingBox, faces, "#000000");
     } catch (ex) {

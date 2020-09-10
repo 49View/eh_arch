@@ -18,11 +18,11 @@ const createParks = (nodes,ways,rels) => {
     console.log("----------------------------------------------");
 
     const simpleParks=createElementsFromWays(ways
-        , w => w.tags && w.tags["leisure"] && (w.tags["leisure"]==="park" || w.tags["leisure"]==="garden")
+        , w => w.tags && ((w.tags["leisure"] && (w.tags["leisure"]==="park" || w.tags["leisure"]==="garden")) || (w.tags["landuse"] && w.tags["landuse"]==="grass"))
         , parkFromWay);
     // const simpleBuildings=[];
     const complexParks=createElementsFromRels(rels
-        , r => r.tags && r.tags["leisure"] && (r.tags["leisure"]==="park" || r.tags["leisure"]==="garden")
+        , r => r.tags && ((r.tags["leisure"] && (r.tags["leisure"]==="park" || r.tags["leisure"]==="garden")) || (r.tags["landuse"] && r.tags["landuse"]==="grass"))
         , parkFromRel);
     
     console.log(`Found ${simpleParks.length} simple parks`);
