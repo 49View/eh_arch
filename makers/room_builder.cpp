@@ -31,7 +31,7 @@ void RoomBuilder::clear( const UICallbackHandle& _ch ) {
     finalised = false;
     currentPointValid = false;
 
-    inputPoint = V3f::ZERO;
+    inputPoint = V3fc::ZERO;
     hasBeenSnapped = false;
     activeSegmentType = ArchType::WallT;
 
@@ -164,7 +164,7 @@ V3f RoomBuilder::snapper( const V3f& _p ) {
 
 V3f RoomBuilder::convert2dPosTo3d( const V2f& _p ) {
     auto pd = rsg.rayViewportPickIntersection(_p);
-    return snapper(Plane3f{ Vector3f::Y_AXIS, 0.0f }.intersectLineGrace(pd.rayNear, pd.rayFar));
+    return snapper(Plane3f{ V3fc::Y_AXIS, 0.0f }.intersectLineGrace(pd.rayNear, pd.rayFar));
 }
 
 void RoomBuilder::setCurrentPointerPos( const V2f& _p ) {
@@ -236,8 +236,8 @@ RoomBuilder::drawSingleDoor2d( int _bucketList, const V3f& _p1, const V3f& _p2, 
 }
 
 struct FloorplanDrawOuterMeasure {
-    V3f p1 = V3f::ZERO;
-    V3f p2 = V3f::ZERO;
+    V3f p1 = V3fc::ZERO;
+    V3f p2 = V3fc::ZERO;
     V2f normal = V2fc::ZERO;
 };
 

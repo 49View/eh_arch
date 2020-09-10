@@ -41,7 +41,7 @@ struct InitializeHouseMaker {
     void operator()( SceneGraph& sg, ArchRenderController& arc, RenderOrchestrator& rsg, ArchOrchestrator& asg,
                      const OnActivateEvent& ev ) noexcept {
         rsg.DC()->setQuat(quatCompose(V3f{ M_PI_2, 0.0f, 0.0f }));
-        rsg.DC()->setPosition(V3f::UP_AXIS * 15.0f);
+        rsg.DC()->setPosition(V3fc::UP_AXIS * 15.0f);
         rsg.RR().setIndoorSceneCoeff(1.0f);
         asg.setFloorPlanView(ev.floorPlanRenderMode);
         if ( ev.ccf ) ev.ccf();
@@ -116,7 +116,7 @@ struct WhichRoomAmI {
 
 static void renderCameraLocator(ArchOrchestrator& asg, RenderOrchestrator& rsg) {
     // Update camera locator on map
-    auto camPos = rsg.DC()->getPosition() * V3f::MASK_Y_OUT;
+    auto camPos = rsg.DC()->getPosition() * V3fc::MASK_Y_OUT;
     auto sm = DShaderMatrix{ DShaderMatrixValue2dColor };
     rsg.RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocatorIM, camPos, C4fc::DARK_RED, 0.3f,
                                  RDSPreMult(asg.FloorplanNavigationMatrix()),

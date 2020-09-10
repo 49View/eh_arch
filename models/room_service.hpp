@@ -385,7 +385,7 @@ public:
     }
 
     [[nodiscard]] const V3f& getSlack( size_t _index = 0 ) const {
-        if ( slack.size() <= _index ) return V3f::ZERO;
+        if ( slack.size() <= _index ) return V3fc::ZERO;
         return slack[_index];
     }
 
@@ -529,7 +529,7 @@ struct FurnitureRuleParams {
     std::shared_ptr<FittedFurniture> ff;
     FittedFurniture* source = nullptr;
     V2f pos = V2fc::ZERO;
-    Quaternion rot{ 0.0f, V3f::UP_AXIS };
+    Quaternion rot{ 0.0f, V3fc::UP_AXIS };
     V2f widthNormal = V2fc::X_AXIS;
     V2f depthNormal = V2fc::Y_AXIS;
     const ArchSegment *ls = nullptr;

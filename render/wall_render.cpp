@@ -30,7 +30,7 @@ namespace WallRender {
 //        auto wps = wall->epoints.size();
 //        for ( size_t t = 0; t < wps - 1 * !wall->wrapLastPoint; t++ ) {
 //            float incRatio = float(t) / float(wps);
-//            auto wca = C4fc::WHITE * V4f{ V3f::ONE, 0.5f + ( incRatio * 0.5f ) };
+//            auto wca = C4fc::WHITE * V4f{ V3fc::ONE, 0.5f + ( incRatio * 0.5f ) };
 //            auto p1 = wall->epoints[t];
 //            auto p2 = wall->epoints[cai(t + 1, wps)];
 //            auto pm = lerp(0.5f, p1, p2);

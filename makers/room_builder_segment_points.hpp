@@ -12,7 +12,7 @@
 #include <eh_arch/makers/bespoke_data/house_maker_bespoke_data.hpp>
 
 struct RoomBuilderSegmentPoint {
-    V3f point = Vector3f::ZERO;
+    V3f point = V3fc::ZERO;
     ArchTypeT type = ArchType::WallT;
 };
 

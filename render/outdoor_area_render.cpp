@@ -42,7 +42,7 @@ namespace OutdoorAreaRender {
 
         for ( const auto& oa : w->Boundaries() ) {
             if ( oa.extrusionType == 0 ) {
-                sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(oa.bPoints, oa.elevation), V3f::UP_AXIS, oa.zPull },
+                sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(oa.bPoints, oa.elevation), V3fc::UP_AXIS, oa.zPull },
                                    w->Position(), oa.outdoorBoundaryMaterial, lRootH);
             } else if ( oa.extrusionType == 1 ) {
                 auto profile = makeBevelTopProfile("Outdoor1", V3f{oa.followerWidth, oa.zPull, 0.0f});

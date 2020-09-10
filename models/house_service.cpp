@@ -401,18 +401,18 @@ HouseService::findRoomArchSegmentWithWallHash( HouseBSData *house, HashEH hashTo
 }
 
 void HouseService::bestStartingPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot ) {
-    if ( house->bestInternalViewingPosition == V3f::ZERO ) {
+    if ( house->bestInternalViewingPosition == V3fc::ZERO ) {
         pos = HouseService::centerOfBiggestRoom(house, 1.48f);
         rot = quatCompose(V3f{ 0.08f, -0.70f, 0.0f });
     } else {
         pos = house->bestInternalViewingPosition;
         rot = house->bestInternalViewingAngle;
     }
-    pos += house->BBox3d().centreBottom() * V3f::UP_AXIS;
+    pos += house->BBox3d().centreBottom() * V3fc::UP_AXIS;
 }
 
 void HouseService::bestDollyPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot ) {
-    if ( house->bestDollyViewingPosition == V3f::ZERO ) {
+    if ( house->bestDollyViewingPosition == V3fc::ZERO ) {
         rot = quatCompose(V3f{ 1.0f, -0.75f, 0.0f });
         pos = V3f{ house->BBox().bottomRight().x(), house->Depth() * 3.0f,
                    house->BBox().bottomRight().y() };

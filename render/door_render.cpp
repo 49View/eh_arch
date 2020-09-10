@@ -161,13 +161,13 @@ namespace DoorRender {
         auto pb = makeEnglishDoorProfile(V2f{ -doorThinkness, doorThinkness * 0.4f });
 
         for ( auto i = 0u; i < numPanels; i++ ) {
-            sg.GB<GT::Follower>(pb, orect[i].points3d(), FollowerFlags::WrapPath, V3f::Z_AXIS * hf + doorPivot, door);
-            sg.GB<GT::Poly>(orectinner[i].points3dcw(), V3f::Z_AXIS * hf1 + doorPivot, door);
+            sg.GB<GT::Follower>(pb, orect[i].points3d(), FollowerFlags::WrapPath, V3fc::Z_AXIS * hf + doorPivot, door);
+            sg.GB<GT::Poly>(orectinner[i].points3dcw(), V3fc::Z_AXIS * hf1 + doorPivot, door);
 
             sg.GB<GT::Follower>(pb, orect[i].points3d(), FollowerFlags::WrapPath,
-                                V3f::Z_AXIS * hf1 + doorPivot + V3f::X_AXIS * _doorSize.x(), door,
-                                GT::Rotate(Quaternion{ M_PI, V3f::UP_AXIS }));
-            sg.GB<GT::Poly>(orectinner[i].points3dcw(), ReverseFlag::True, V3f::Z_AXIS * hf + doorPivot, door);
+                                V3fc::Z_AXIS * hf1 + doorPivot + V3fc::X_AXIS * _doorSize.x(), door,
+                                GT::Rotate(Quaternion{ M_PI, V3fc::UP_AXIS }));
+            sg.GB<GT::Poly>(orectinner[i].points3dcw(), ReverseFlag::True, V3fc::Z_AXIS * hf + doorPivot, door);
         }
     }
 
@@ -211,7 +211,7 @@ namespace DoorRender {
 
         if ( auto architrave_ovolo = sg.PL("architrave,ovolo"); architrave_ovolo ) {
             sg.GB<GT::Follower>(architrave_ovolo, fverts, mRootH,
-                                Vector3f::Z_AXIS_NEG * ( -d->Depth() * direction * .5f ),
+                                V3fc::Z_AXIS_NEG * ( -d->Depth() * direction * .5f ),
                                 GT::Rotate(Quaternion{ M_PI, V3f{ 0.0f, direction < 0.0f ? -1.0f : 0.0f, 0.0f } }));
         }
 
@@ -228,13 +228,13 @@ namespace DoorRender {
                                             WindingOrder::CCW,
                                             PivotPointPosition::BottomCenter);
 
-        sg.GB<GT::Follower>(sg.PL(doorProfile->Name()), fverts2, mRootH, V3f::ZERO);
+        sg.GB<GT::Follower>(sg.PL(doorProfile->Name()), fverts2, mRootH, V3fc::ZERO);
     }
 
     void flatUglyDoor( SceneGraph& sg, GeomSP mRootH, const DoorBSData *d, const V3f& doorPivot,
                        float _doorThinkness = 0.03f ) {
 
-        sg.GB<GT::Extrude>(V2nff{ V2f{ d->Width(), _doorThinkness }, V3f::UP_AXIS, d->Height() }, mRootH,
+        sg.GB<GT::Extrude>(V2nff{ V2f{ d->Width(), _doorThinkness }, V3fc::UP_AXIS, d->Height() }, mRootH,
                            V3f{ 0.0f, doorPivot.yz() });
     }
 
@@ -243,8 +243,8 @@ namespace DoorRender {
 
         V3f v1 = XZY::C(-half(wss.x()), 0.0f, 0.0f);
         V3f v2 = XZY::C(half(wss.x()), 0.0f, 0.0f);
-        V3f v3 = v1 + V3f::UP_AXIS * wss.y();
-        V3f v4 = v2 + V3f::UP_AXIS * wss.y();
+        V3f v3 = v1 + V3fc::UP_AXIS * wss.y();
+        V3f v4 = v2 + V3fc::UP_AXIS * wss.y();
         auto quad = QuadVector3f{ { v1, v2, v4, v3 } };
         wallQuads.emplace_back(QuadVector3fNormal{ quad, XZY::C(V2fc::Y_AXIS, 0.0f) });
         return wallQuads;
@@ -259,16 +259,16 @@ namespace DoorRender {
         sg.GB<GT::Asset>("doorhandle,sx", child, d->doorHandlePivotRight, GT::Rotate(d->doorHandleRot));
 
         float openAngle = d->isMainDoor || d->isDoorTypicallyShut ? 0.0f : d->openingAngleMax;
-        Quaternion rot(openAngle, V3f::UP_AXIS);
-        child->updateTransform(d->doorPivot, rot, V3f::ONE);
+        Quaternion rot(openAngle, V3fc::UP_AXIS);
+        child->updateTransform(d->doorPivot, rot, V3fc::ONE);
 
         return child;
 //    flatUglyDoor( sg, mRootH, d, doorPivot );
     }
 
     void addFloorUnderDoor( SceneGraph& sg, const DoorBSData *d, GeomSP root ) {
-        sg.GB<GT::Extrude>(V2nff{ V2f{ d->Width(), d->Depth() }, V3f::UP_AXIS, 0.001f }, root,
-                           V3f::UP_AXIS * -0.001f);
+        sg.GB<GT::Extrude>(V2nff{ V2f{ d->Width(), d->Depth() }, V3fc::UP_AXIS, 0.001f }, root,
+                           V3fc::UP_AXIS * -0.001f);
     }
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const DoorBSData *data ) {
@@ -290,8 +290,8 @@ namespace DoorRender {
         addFloorUnderDoor(sg, data, lRootH);
 
         float vwangle = -atan2(-data->dirWidth.y(), data->dirWidth.x());
-        Quaternion rot(vwangle + M_PI, V3f::UP_AXIS);
-        lRootH->updateTransform(data->Position(), rot, V3f::ONE);
+        Quaternion rot(vwangle + M_PI, V3fc::UP_AXIS);
+        lRootH->updateTransform(data->Position(), rot, V3fc::ONE);
 
         return lRootH;
     }

@@ -186,8 +186,8 @@ bool checkTraspassingSegments( const std::vector<std::vector<Vector3f>>& cd, con
 //	Vector3f v1 = { w->epoints[t], w->elevation };
 //	Vector3f v2 = { w->epoints[getCircularArrayIndex( t + 1, static_cast<int>( w->epoints.size() ) )], w->elevation };
 //
-//	Vector3f v3 = Vector3f::ZERO;
-//	Vector3f v4 = Vector3f::ZERO;
+//	Vector3f v3 = V3fc::ZERO;
+//	Vector3f v4 = V3fc::ZERO;
 //	auto hitLevel1 = 0;
 //	auto hitLevel2 = 0;
 //	isInsideCeilingContour( cd, v1.xy(), topZ1, hitLevel1 );
@@ -195,8 +195,8 @@ bool checkTraspassingSegments( const std::vector<std::vector<Vector3f>>& cd, con
 //	float topZmin1 = min( topZ1, w->height );
 //	float topZmin2 = min( topZ2, w->height );
 //	float minCommonZ = min( topZmin1, topZmin2 );
-//	v3 = v1 + Vector3f::Z_AXIS * minCommonZ;
-//	v4 = v2 + Vector3f::Z_AXIS * minCommonZ;
+//	v3 = v1 + V3fc::Z_AXIS * minCommonZ;
+//	v4 = v2 + V3fc::Z_AXIS * minCommonZ;
 //	_verts.push_back( v1 );
 //	_verts.push_back( v2 );
 //	_verts.push_back( v4 );
@@ -260,8 +260,8 @@ QuadVector3fList WallService::vertsForWallAt( const WallBSData *w, int t,
     Vector3f v1 = XZY::C(w->epoints[t], w->Elevation());
     Vector3f v2 = XZY::C(w->epoints[getCircularArrayIndex(t + 1, static_cast<int>( w->epoints.size()))], w->Elevation());
 
-    Vector3f v3 = Vector3f::ZERO;
-    Vector3f v4 = Vector3f::ZERO;
+    Vector3f v3 = V3fc::ZERO;
+    Vector3f v4 = V3fc::ZERO;
     auto hitLevel1 = 0;
     auto hitLevel2 = 0;
     isInsideCeilingContour(cd, v1.xz(), topZ1, hitLevel1);
@@ -269,8 +269,8 @@ QuadVector3fList WallService::vertsForWallAt( const WallBSData *w, int t,
     float topZmin1 = min(topZ1, w->Height());
     float topZmin2 = min(topZ2, w->Height());
     float minCommonZ = min(topZmin1, topZmin2);
-    v3 = v1 + Vector3f::UP_AXIS * minCommonZ;
-    v4 = v2 + Vector3f::UP_AXIS * minCommonZ;
+    v3 = v1 + V3fc::UP_AXIS * minCommonZ;
+    v4 = v2 + V3fc::UP_AXIS * minCommonZ;
     ret.push_back({ { v1, v2, v4, v3 } });
 
 

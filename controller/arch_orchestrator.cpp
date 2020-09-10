@@ -256,8 +256,8 @@ void ArchOrchestrator::setTourView() {
         }
         tourPlayback.playBack(rsg.DC());
     } else {
-        V3f pos = V3f::ZERO;
-        Quaternion quat{ M_PI, V3f::UP_AXIS };
+        V3f pos = V3fc::ZERO;
+        Quaternion quat{ M_PI, V3fc::UP_AXIS };
         HouseService::bestStartingPositionAndAngle(H(), pos, quat);
         rsg.DC()->setPosition(pos);
         rsg.DC()->setQuat(quat);
@@ -279,7 +279,7 @@ void ArchOrchestrator::setWalkView( float animationSpeed ) {
     tourPlayback.stopPlayBack(rsg.DC());
     rsg.setRigCameraController(CameraControlType::Walk);
     rsg.useSkybox(true);
-    V3f pos = V3f::ZERO;
+    V3f pos = V3fc::ZERO;
     Quaternion quat;
     HouseService::bestStartingPositionAndAngle(H(), pos, quat);
     if ( animationSpeed > 0.0f ) {
@@ -370,7 +370,7 @@ void ArchOrchestrator::setDollHouseView() {
     rsg.setRigCameraController(CameraControlType::Fly);
     arc.pm(RDSPreMult(Matrix4f::IDENTITY));
     rsg.useSkybox(true);
-    V3f pos = V3f::ZERO;
+    V3f pos = V3fc::ZERO;
     Quaternion quat{};
     HouseService::bestDollyPositionAndAngle(H(), pos, quat);
     Timeline::play(rsg.DC()->PosAnim(), 0, KeyFramePair{ 0.9f, pos });

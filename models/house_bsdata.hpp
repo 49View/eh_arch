@@ -136,11 +136,11 @@ private:
     void scaleBBox( const V3f& _scale );
 
 protected:
-    V3f size{ V3f::ZERO };
-    V3f pos{ V3f::ZERO };
-    V3f centre{ V3f::ZERO };
-    Quaternion rotation{ V3f::ZERO, 1.0f };
-    Vector3f scaling = Vector3f::ONE;
+    V3f size{ V3fc::ZERO };
+    V3f pos{ V3fc::ZERO };
+    V3f centre{ V3fc::ZERO };
+    Quaternion rotation{ V3fc::ZERO, 1.0f };
+    Vector3f scaling = V3fc::ONE;
     std::vector<Triangle2d> mTriangles2d;
 };
 
@@ -247,14 +247,14 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     float doorHandleAngle = 0.0f;
     Quaternion doorHandleRot{};
 
-    Vector3f hingesPivot = Vector3f::ZERO;
-    Vector3f doorHandlePivotLeft = Vector3f::ZERO;
-    Vector3f doorHandlePivotRight = Vector3f::ZERO;
-    Vector3f frameHingesPivot = Vector3f::ZERO;
-    Vector3f doorHandlePlateDoorSidePivot = Vector3f::ZERO;
-    Vector3f doorHandlePlateFrameSidePivot = Vector3f::ZERO;
-    V3f doorPivot = V3f::ZERO;
-    V3f doorGeomPivot = V3f::ZERO;
+    Vector3f hingesPivot = V3fc::ZERO;
+    Vector3f doorHandlePivotLeft = V3fc::ZERO;
+    Vector3f doorHandlePivotRight = V3fc::ZERO;
+    Vector3f frameHingesPivot = V3fc::ZERO;
+    Vector3f doorHandlePlateDoorSidePivot = V3fc::ZERO;
+    Vector3f doorHandlePlateFrameSidePivot = V3fc::ZERO;
+    V3f doorPivot = V3fc::ZERO;
+    V3f doorGeomPivot = V3fc::ZERO;
     V2f doorSize = V2fc::ZERO;
 
     void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
@@ -553,7 +553,7 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type,
     float windowHeight = 1.2f;
     float windowBaseOffset = 0.6f;
     Vector2f offsetFromFloorAnchor = V2fc::ZERO;
-    Vector3f offsetFromFloorAnchor3d = V3f::ZERO;
+    Vector3f offsetFromFloorAnchor3d = V3fc::ZERO;
     V3fVectorOfVector ceilingContours;
     std::vector<Vector2f> mPerimeterSegments;
     std::vector<ArchSegment> perimeterArchSegments;
@@ -596,9 +596,9 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type,
                      0.0f }; // These are extra offsets required to be able to convert from 2d floorplan (with floors that span the whole image) to a real 3d space (floors stacked on top of each other not sideways as in 2d)
     float elevation = 0.0f; // These are extra offsets required to be able to convert from 2d floorplan (with floors that span the whole image) to a real 3d space (floors stacked on top of each other not sideways as in 2d)
     HouseSourceData sourceData;
-    V3f bestInternalViewingPosition = V3f::ZERO;
+    V3f bestInternalViewingPosition = V3fc::ZERO;
     Quaternion bestInternalViewingAngle;
-    V3f bestDollyViewingPosition = V3f::ZERO;
+    V3f bestDollyViewingPosition = V3fc::ZERO;
     Quaternion bestDollyViewingAngle;
     float walkableArea = 0.0f;
     float doorHeight = 1.94f;

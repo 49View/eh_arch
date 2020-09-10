@@ -171,7 +171,7 @@ bool FloorService::checkTwoUShapesDoNotIntersectAnything( FloorBSData *f, UShape
             allLines.emplace_back(w->epoints[cai(i, wepSize)], w->epoints[cai(i + 1, wepSize)]);
         }
     }
-    Vector2f r{ V3f::ZERO };
+    Vector2f r{ V3fc::ZERO };
     Vector2f start = s1->middle + ( normalize(s2->middle - s1->middle) * 0.01f );
     Vector2f end = s2->middle + ( normalize(s1->middle - s2->middle) * 0.01f );
     for ( auto& l : allLines ) {

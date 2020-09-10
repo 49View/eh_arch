@@ -43,7 +43,7 @@ void ArchPositionalDot::singleTap( RenderOrchestrator& rsg ) {
                        } });
         if ( !isNewPositionWalkingOnFloor && antiWallRotation ) {
             auto quat = rsg.DC()->quatAngle();
-            quat = quat * Quaternion{ M_PI, V3f::UP_AXIS };
+            quat = quat * Quaternion{ M_PI, V3fc::UP_AXIS };
             Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ gotoAndFadeTime * speedFactor, quat });
         }
     }
