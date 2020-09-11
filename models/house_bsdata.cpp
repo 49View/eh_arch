@@ -24,7 +24,7 @@ HouseBSData::HouseBSData( const Rect2f& _floorPlanBBox ) {
 
 void HouseBSData::calcBBox( const Matrix4f& _mat ) {
     bbox = Rect2f::INVALID;
-    bbox3d = AABB::INVALID;
+    bbox3d = AABB::MINVALID();;
     for ( auto& floor : mFloors ) {
         floor->calcBBox(Matrix4f{GeoOffset()});
         bbox.merge(floor->BBox());
@@ -104,7 +104,7 @@ FloorBSData::FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _d
 
 void FloorBSData::calcBBox( const Matrix4f& _mat ) {
     bbox = Rect2f::INVALID;
-    bbox3d = AABB::INVALID;
+    bbox3d = AABB::MINVALID();;
     float elevation = number * ( concreteHeight + Height() );
     Matrix4f matCompose = Matrix4f({ 0.0f, 0.0f, elevation }) * _mat;
 
