@@ -99,7 +99,7 @@ HouseBSData *ArchOrchestrator::H() {
 }
 
 Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( float screenRatio, float screenPadding ) {
-    auto m = Matrix4f{ Matrix4f::IDENTITY };
+    auto m = Matrix4f{ Matrix4f::IDENTITY() };
     float vmax = max(houseJson()->BBox().bottomRight().x(), houseJson()->BBox().bottomRight().y());
     float screenFloorplanRatio = ( 1.0f / screenRatio );
     float vmaxScale = vmax / screenFloorplanRatio;
@@ -243,7 +243,7 @@ void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
 void ArchOrchestrator::setTourView() {
     arc.setViewingMode(ArchViewingMode::AVM_Tour);
     rsg.setRigCameraController(CameraControlType::Walk);
-    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY()));
     rsg.useSkybox(true);
 
     if ( !H()->tourPaths.empty() ) {
@@ -314,7 +314,7 @@ void ArchOrchestrator::setFloorPlanView( FloorPlanRenderMode fprm ) {
     tourPlayback.stopPlayBack(rsg.DC());
     rsg.setRigCameraController(CameraControlType::Edit2d);
     rsg.DC()->LockAtWalkingHeight(false);
-    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY()));
     lastKnownGoodFloorPlanRenderMode = fprm;
     arc.renderMode(fprm);
     HouseRender::IMHouseDrawSourceDataFloorPlan(rsg.RR(), sg, H(), arc);
@@ -344,7 +344,7 @@ void ArchOrchestrator::setTopDownView() {
     tourPlayback.stopPlayBack(rsg.DC());
     rsg.setRigCameraController(CameraControlType::Edit2d);
     rsg.DC()->LockAtWalkingHeight(false);
-    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY()));
     arc.renderMode(FloorPlanRenderMode::Normal3d);
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
     rsg.useSkybox(true);
@@ -368,7 +368,7 @@ void ArchOrchestrator::setDollHouseView() {
     tourPlayback.stopPlayBack(rsg.DC());
     arc.setViewingMode(ArchViewingMode::AVM_DollHouse);
     rsg.setRigCameraController(CameraControlType::Fly);
-    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY()));
     rsg.useSkybox(true);
     V3f pos = V3fc::ZERO;
     Quaternion quat{};

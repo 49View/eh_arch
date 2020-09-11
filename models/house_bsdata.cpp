@@ -261,7 +261,7 @@ void RoomBSData::calcBBox( const Matrix4f& _mat ) {
             bbox.expand(ep.p2);
         }
     }
-    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY);
+    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY());
     centre = bbox.calcCentre();
 
     makeTriangles2d();
@@ -309,7 +309,7 @@ void WallBSData::calcBBox( const Matrix4f& _mat ) {
     for ( auto& ep : epoints ) {
         bbox.expand(ep);
     }
-    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY);
+    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY());
     w() = bbox.width();
     makeTriangles2d();
 }
@@ -536,7 +536,7 @@ void DoorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 
 void DoorBSData::calcBBox( const Matrix4f& _mat ) {
     TwoUShapesBased::calcBBox();
-    bbox3d.calc(bbox, 0.0f, Height(), Matrix4f::IDENTITY);
+    bbox3d.calc(bbox, 0.0f, Height(), Matrix4f::IDENTITY());
 }
 
 // *********************************************************************************************************************
@@ -575,7 +575,7 @@ void WindowBSData::calcBBox( const Matrix4f& _mat ) {
     TwoUShapesBased::calcBBox();
     // Recalculate center Y, as usually a window does not start from the floor
     centre.setY(lerp(0.5f, baseOffset, baseOffset + Height()));
-    bbox3d.calc(bbox, baseOffset, baseOffset + Height(), Matrix4f::IDENTITY);
+    bbox3d.calc(bbox, baseOffset, baseOffset + Height(), Matrix4f::IDENTITY());
 }
 
 // *********************************************************************************************************************
