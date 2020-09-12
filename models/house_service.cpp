@@ -62,8 +62,8 @@ std::shared_ptr<CollisionMesh> HouseService::createCollisionMesh( const HouseBSD
 }
 
 void HouseService::loadPanorama( const HouseBSData *house, SceneGraph& sg ) {
-    OSMData map{FM::readLocalFileC("elements.json")};
-    auto cc = sg.GB<GT::OSM>(map, V2f{-0.1216677576303482f, 51.49138259887695f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::Far));
+//    OSMData map{FM::readLocalFileC("elements.json")};
+//    auto cc = sg.GB<GT::OSM>(map, V2f{-0.1216677576303482f, 51.49138259887695f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::Far));
 //    GLTF2Service::save( sg, cc );
 }
 
