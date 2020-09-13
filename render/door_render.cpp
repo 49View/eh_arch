@@ -252,7 +252,8 @@ namespace DoorRender {
 
 
     auto addDoorGeom( SceneGraph& sg, GeomSP mRootH, const DoorBSData *d ) {
-        auto child = mRootH->addChildren("ActualDoor");
+//        auto child = mRootH->addChildren("ActualDoor");
+        auto child = EF::create<Geom>( "ActualDoor" );
         englishDoor(sg, child, d->doorSize, d->doorGeomPivot, d->doorGeomThickness);
 
         sg.GB<GT::Asset>("doorhandle,dx", child, d->doorHandlePivotLeft, GT::Rotate(d->doorHandleRot));
@@ -260,9 +261,9 @@ namespace DoorRender {
 
         float openAngle = d->isMainDoor || d->isDoorTypicallyShut ? 0.0f : d->openingAngleMax;
         Quaternion rot(openAngle, V3fc::UP_AXIS);
-        child->updateTransform(d->doorPivot, rot, V3fc::ONE);
 
-        return child;
+        return mRootH->addChildren(child, d->doorPivot, rot, V3fc::ONE);
+
 //    flatUglyDoor( sg, mRootH, d, doorPivot );
     }
 
@@ -273,7 +274,7 @@ namespace DoorRender {
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const DoorBSData *data ) {
 
-        auto lRootH = eRootH->addChildren("Door"+ std::to_string(data->hash));
+        auto lRootH = EF::create<Geom>("Door"+ std::to_string(data->hash));
 
         addDoorArchitrave(sg, lRootH, data, -1.0f);
         addDoorArchitrave(sg, lRootH, data, 1.0f);
@@ -291,9 +292,8 @@ namespace DoorRender {
 
         float vwangle = -atan2(-data->dirWidth.y(), data->dirWidth.x());
         Quaternion rot(vwangle + M_PI, V3fc::UP_AXIS);
-        lRootH->updateTransform(data->Position(), rot, V3fc::ONE);
 
-        return lRootH;
+        return eRootH->addChildren(lRootH, data->Position(), rot, V3fc::ONE);
     }
 
 }

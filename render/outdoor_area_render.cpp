@@ -38,7 +38,8 @@ namespace OutdoorAreaRender {
     }
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const OutdoorAreaBSData *w ) {
-        auto lRootH = eRootH->addChildren("OutdoorArea"+ std::to_string(w->hash));
+//        auto lRootH = eRootH->addChildren("OutdoorArea"+ std::to_string(w->hash));
+        auto lRootH = EF::create<Geom>("OutdoorArea"+ std::to_string(w->hash));
 
         for ( const auto& oa : w->Boundaries() ) {
             if ( oa.extrusionType == 0 ) {
@@ -50,6 +51,6 @@ namespace OutdoorAreaRender {
             }
         }
 
-        return lRootH;
+        return eRootH->addChildren(lRootH);
     }
 }

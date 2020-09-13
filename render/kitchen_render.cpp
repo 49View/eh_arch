@@ -80,7 +80,8 @@ namespace KitchenRender {
     GeomSP render( SceneGraph& sg, GeomSP eRootH, RoomBSData *w ) {
         KitchenData kd = w->kitchenData;
 
-        auto lRootH = eRootH->addChildren("Kitchen"+ std::to_string(w->hash));
+//        auto lRootH = eRootH->addChildren("Kitchen"+ std::to_string(w->hash));
+        auto lRootH = EF::create<Geom>( "Kitchen"+ std::to_string(w->hash) );
 
         for ( const auto& kwd : kd.kitchenDrawers ) {
             switch ( kwd.shape.type ) {
@@ -169,7 +170,7 @@ namespace KitchenRender {
             }
         }
 
-        return lRootH;
+        return eRootH->addChildren(lRootH);
     }
 
 }

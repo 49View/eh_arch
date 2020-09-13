@@ -139,7 +139,8 @@ namespace RoomRender {
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, RoomBSData *w ) {
 
-        auto lRootH = eRootH->addChildren("Room"+ std::to_string(w->hash));
+//        auto lRootH = eRootH->addChildren("Room"+ std::to_string(w->hash));
+        auto lRootH = EF::create<Geom>("Room"+ std::to_string(w->hash));
 
         RoomRender::createCovingSegments(sg, lRootH, w);
         RoomRender::createSkirtingSegments(sg, lRootH, w);
@@ -170,7 +171,7 @@ namespace RoomRender {
                 auto furn = sg.GB<GT::Asset>(fur->name, lRootH, fur->Position(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
-                    sg.GB<GT::Shape>(ShapeType::AABB, fur->BBox3d(), C4fc::BLUE_SHADOW );
+                    sg.GB<GT::Shape>(ShapeType::AABB, fur->BBox3d(), C4fc::BLUE_SHADOW, lRootH );
                 } else {
                     LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
                 }
@@ -183,6 +184,7 @@ namespace RoomRender {
         sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3fc::UP_AXIS * (w->Height() - zPull) } + w->Position(),
                                          w->ceilingMaterial,
                                          GT::Tag(ArchType::CeilingT));
-        return lRootH;
+
+        return eRootH->addChildren(lRootH);
     }
 }

@@ -322,7 +322,7 @@ namespace WindowRender {
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, WindowBSData *window ) {
 
-        auto lRootH = eRootH->addChildren("Window"+ std::to_string(window->hash));
+        auto lRootH = EF::create<Geom>("Window"+ std::to_string(window->hash));
 
         float windowsSillDepth = 0.04f;
         float currBaseOffset = window->baseOffset < window->ceilingHeight ? window->baseOffset : window->ceilingHeight;
@@ -343,9 +343,8 @@ namespace WindowRender {
 
         float vwangle = -atan2(-window->dirWidth.y(), window->dirWidth.x());
         Quaternion rot(vwangle + window->rotOrientation, V3fc::UP_AXIS);
-        lRootH->updateTransform( window->Position(), rot, V3fc::ONE); //
 
-        return lRootH;
+        return eRootH->addChildren(lRootH, window->Position(), rot, V3fc::ONE);
     }
 
 }

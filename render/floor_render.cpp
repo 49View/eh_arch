@@ -53,7 +53,7 @@ namespace FloorRender {
     }
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const FloorBSData *f ) {
-        auto lRootH = eRootH->addChildren("Floor"+ std::to_string(f->hash));
+        auto lRootH = EF::create<Geom>("Floor"+ std::to_string(f->hash));
 
         // External walls of this floor
         WallRender::make3dGeometry(sg, lRootH, f->perimeterArchSegments, f->externalWallsMaterial);
@@ -71,6 +71,6 @@ namespace FloorRender {
             RoomRender::make3dGeometry(sg, lRootH, w.get());
         }
 
-        return lRootH;
+        return eRootH->addChildren(lRootH);
     }
 }
