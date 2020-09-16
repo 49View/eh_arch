@@ -5,6 +5,27 @@ const Decimal = require('decimal.js');
 Decimal.set({ precision: 20, rounding: 1 })
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
+const LATITUDEKM = 110.574;
+const LONGITUDEKM = 111.320;
+
+const getBoundingBox = (lat, lon, distance) => {
+
+    let result=[];
+
+    result = result.concat(getLatLonFromPointDistance(lat,lon,-distance));
+    result = result.concat(getLatLonFromPointDistance(lat,lon,distance));
+
+    return result;
+} 
+
+const getLatLonFromPointDistance = (lat, lon, distance) => {
+
+    const latResult = lat+(distance/LATITUDEKM);
+    const lonResult = lon+(distance/(LONGITUDEKM*Math.cos(lat/180*Math.PI)));
+
+    return [latResult,lonResult];
+}
+
 const getData = async (bbox) => {
 
     const query=`
@@ -75,5 +96,5 @@ const parseData = (osmData) => {
 }
 
 
-module.exports = {getData,getDataLocal}
+module.exports = {getBoundingBox,getData,getDataLocal}
 

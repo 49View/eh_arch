@@ -1,6 +1,6 @@
 const poly2tri = require('poly2tri');
 const fs = require('fs');
-const {getData,getDataLocal} = require("./dataLoader");
+const {getBoundingBox,getData,getDataLocal} = require("./dataLoader");
 const {createBuildings} = require("./buildings");
 const {createParks} = require("./parks");
 const {createWater} = require("./water");
@@ -8,7 +8,7 @@ const {createRoads} = require("./roads");
 const {elaborateData} = require("./dataTransformer");
 
 //WestMinster
-const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
+// const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
 //Battersea Park
 //const bbox = [51.4696, -0.1777, 51.4878, -0.1375];
 //Royal Albert Hall
@@ -22,6 +22,10 @@ const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
 
 
 const main = async () => {
+
+  const bbox = getBoundingBox(51.4892, -0.1344, 2);
+
+
   const {nodes, ways, rels} = await getData(bbox);
   //const {nodes, ways, rels} = await getDataLocal(bbox);
   elaborateData(nodes, ways, rels);
