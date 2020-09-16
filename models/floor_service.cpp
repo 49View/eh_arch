@@ -34,7 +34,7 @@ void FloorService::addWallsFromData( FloorBSData *f, const V2fVectorOfVector& fl
                                               WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving);
         f->walls.push_back(w);
     }
-    f->calcBBox();
+    f->updateVolume();
 }
 
 void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData *house, const std::vector<RoomPreData>& rds ) {
@@ -48,7 +48,7 @@ void FloorService::addRoomsFromData( FloorBSData *f, const HouseBSData *house, c
 
 void FloorService::addOutdoorAreaFromData( FloorBSData *f, std::shared_ptr<OutdoorAreaBSData> _outdoorArea ) {
     f->outdoorAreas.emplace_back(_outdoorArea);
-    f->calcBBox();
+    f->updateVolume();
 }
 
 void FloorService::updateFromNewDoorOrWindow( FloorBSData *f ) {

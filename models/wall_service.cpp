@@ -33,7 +33,7 @@ void WallService::calculateNormals( WallBSData *w ) {
 
 void WallService::updateFormFactor( WallBSData *w ) {
     calculateNormals(w);
-    w->calcBBox();
+    w->updateVolume();
 }
 
 void WallService::update( WallBSData *w ) {
@@ -50,7 +50,7 @@ void WallService::update( WallBSData *w ) {
         w->slinesGHType[t] = static_cast<uint64_t>( GHType::WallPlaster );
     }
 
-    w->calcBBox();
+    w->updateVolume();
     WallService::updateUShapes(w);
 }
 
@@ -651,7 +651,7 @@ FloorUShapesPair WallService::createTwoShapeAt( HouseBSData *house, const V2f& p
             fus.us1 = WallService::addTwoShapeAt(dynamic_cast<WallBSData *>(wd.arch), wd);
             auto wd2 = arcInters2[0].second;
             fus.us2 = WallService::addTwoShapeAt(dynamic_cast<WallBSData *>(wd2.arch), wd2);
-            house->calcBBox();
+            house->updateVolume();
             fus.f = f.get();
             return fus;
         }

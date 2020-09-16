@@ -348,7 +348,7 @@ namespace RoomService {
                                  const std::vector<std::vector<ArchSegment>>& ws ) {
         WallSegments(r, ws);
         calcLongestWall(r);
-        r->calcBBox();
+        r->updateVolume();
     }
 
     std::vector<std::vector<Vector2f>>

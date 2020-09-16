@@ -15,13 +15,14 @@
 #include <array>
 #include <ostream>
 #include <core/raw_image.h>
+#include <core/names.hpp>
+#include <core/spatial.hpp>
 #include <core/math/vector4f.h>
 #include <core/math/quaternion.h>
 #include <core/hashing/incremental_hash.hpp>
 #include <core/htypes_shared.hpp>
 #include <core/resources/material_and_color_property.hpp>
 #include <core/serialization.hpp>
-#include <core/names.hpp>
 #include <core/math/camera_spatials.hpp>
 
 #include "htypes.hpp"
@@ -87,61 +88,8 @@ struct ArchBase {
 
 using SequencePart = int64_t;
 
-struct ArchSpatial : public ArchBase, Boxable {
-public:
-    [[nodiscard]] float Width() const;
-    [[nodiscard]] float Height() const;
-    [[nodiscard]] float Depth() const;
-
-    [[nodiscard]] float HalfWidth() const;
-    [[nodiscard]] float HalfHeight() const;
-    [[nodiscard]] float HalfDepth() const;
-
-    [[nodiscard]] V3f Position() const;
-    [[maybe_unused]] [[nodiscard]] float PositionX() const;
-    [[maybe_unused]] [[nodiscard]] float PositionY() const;
-    [[maybe_unused]] [[nodiscard]] float PositionZ() const;
-    [[nodiscard]] V2f Position2d() const;
-    [[nodiscard]] V3f Center() const;
-//    [[nodiscard]] V2f Center2d() const { return centre.xz(); }
-    [[nodiscard]] const V3f& Size() const;
-    [[nodiscard]] const V3f& Scale() const;
-
-    [[nodiscard]] const Quaternion& Rotation() const;
-
-    [[nodiscard]] const std::vector<Triangle2d>& Triangles2d() const;
-
-    virtual void move( const V3f& _off );
-    virtual void move( const V2f& _off );
-    virtual void position( const V3f& _pos );
-    virtual void position( const V2f& _pos );
-    virtual void center( const V3f& _pos );
-    virtual void rotate( const Quaternion& _rot );
-    virtual void scale( const V3f& _scale );
+struct ArchSpatial : public ArchBase, Spatial {
     virtual void reRoot( float, ArchRescaleSpaceT );
-
-protected:
-    [[nodiscard]] float& w();
-    [[nodiscard]] float& h();
-    [[nodiscard]] float& d();
-    [[nodiscard]] V3f& position();
-//    [[nodiscard]] V3f& center() { return centre; }
-    [[nodiscard]] Quaternion& rot();
-    [[nodiscard]] V3f& scale();
-    virtual void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY());
-
-private:
-    void posBBox();
-    void rotateBBox( const Quaternion& _rot );
-    void scaleBBox( const V3f& _scale );
-
-protected:
-    V3f size{ V3fc::ZERO };
-    V3f pos{ V3fc::ZERO };
-    V3f centre{ V3fc::ZERO };
-    Quaternion rotation{ V3fc::ZERO, 1.0f };
-    Vector3f scaling = V3fc::ONE;
-    std::vector<Triangle2d> mTriangles2d;
 };
 
 struct ArchStructural : public ArchSpatial {
@@ -175,8 +123,9 @@ struct TwoUShapesBased : public ArchStructural {
     float ceilingHeight = 2.75f;
     uint32_t wallFlags = WallFlags::WF_None;
 
+protected:
+    void calcVolume();
     void reRoot( float, ArchRescaleSpaceT ) override;
-    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
 };
 
 JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, crossNormal, color, tag, sequencePart,
@@ -203,10 +152,14 @@ JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, c
     bool operator!=( const ArchSegment& rhs ) const;
 
     [[nodiscard]] float length() const;
+protected:
     void reRoot( float, ArchRescaleSpaceT );
+
+    friend struct FloorBSData;
+    friend struct RoomBSData;
 };
 
-JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, size, centre, pos, rotation, scaling,
+JSONDATA_H(FittedFurniture, ArchStructural, hash, type, albedo, size, centre, pos, rotation, scaling,
            mTriangles2d, linkedHash, sequencePart, name, keyTag, tags, symbolRef,
            dependantHashList, widthNormal, depthNormal, flags)
     std::string name;
@@ -220,11 +173,15 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, bbox, bbox3d, albedo, si
 
     explicit FittedFurniture( const std::tuple<std::string, AABB>& args, std::string _keyTag, std::string _symbolRef );
     [[nodiscard]] bool checkIf( FittedFurnitureFlagsT _flag ) const;
-    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
+
+protected:
+    void updateVolumeInternal() override;
+
+    friend struct FloorBSData;
 };
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
-           bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
+           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
            sequencePart,
            rooms, subType, isMainDoor, isDoorTypicallyShut, architraveProfile,
            dIndex, doorInnerBumpSize, doorGeomThickness, doorTrim, openingAngleMax, openingAngleMin,
@@ -257,15 +214,18 @@ JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidt
     V3f doorGeomPivot = V3fc::ZERO;
     V2f doorSize = V2fc::ZERO;
 
-    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
     DoorBSData( float _doorHeight, float _ceilingHeight, const UShape& w1, const UShape& w2,
                 ArchSubTypeT st = ArchSubType::NotApplicable );
+protected:
     void reRoot( float, ArchRescaleSpaceT ) override;
+    void updateVolumeInternal() override;
+
+    friend struct FloorBSData;
 };
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
            wallFlags,
-           bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
+           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
            sequencePart,
            mTriangles2d, rooms, numPanels, sillThickness, mainFrameWidth, minPanelWidth, baseOffset,
            rotOrientation, hasBlinds, hasCurtains, curtainGeom, curtainMaterial)
@@ -283,12 +243,16 @@ JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWi
 
     WindowBSData( float _windowHeight, float _ceilingHeight, float _defaultWindowBaseOffset, const UShape& w1,
                   const UShape& w2, ArchSubTypeT = ArchSubType::NotApplicable );
-    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
+
+protected:
+    void updateVolumeInternal() override;
     void reRoot( float, ArchRescaleSpaceT ) override;
+
+    friend struct FloorBSData;
 };
 
 JSONDATA_H(WallBSData, ArchStructural, hash, type,
-           bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
+           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
            epoints, enormals, slinesGHType, mUShapes, elevation, wallFlags, wrapLastPoint)
 
     // epoints are needed when the wall structure has got non-simplifiable shape lie boxing or curved walls, in those cases we just save the contours of the wall shape
@@ -309,18 +273,24 @@ JSONDATA_H(WallBSData, ArchStructural, hash, type,
                 uint32_t wf = WallFlags::WF_HasSkirting | WallFlags::WF_HasCoving,
                 int64_t _linkedHash = 0,
                 SequencePart _sequencePart = 0 );
-    void reRoot( float, ArchRescaleSpaceT ) override;
-    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
+
     [[nodiscard]] float Elevation() const;
+protected:
+    void reRoot( float, ArchRescaleSpaceT ) override;
+    void updateVolumeInternal() override;
 private:
     void makeTriangles2d();
+
+    friend struct FloorBSData;
 };
 
 JSONDATA_H(StairsBSData, ArchStructural, hash, type,
-           bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
+           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
            sequencePart,
            name)
     std::string name;
+
+    friend struct FloorBSData;
 };
 
 JSONDATA(OutdoorBoundary, bPoints, elevation, zPull, followerWidth, extrusionType, outdoorBoundaryMaterial)
@@ -334,7 +304,7 @@ JSONDATA(OutdoorBoundary, bPoints, elevation, zPull, followerWidth, extrusionTyp
 };
 
 JSONDATA_H(OutdoorAreaBSData, ArchStructural, hash, type,
-           bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
+           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
            outdoorBoundaries)
 
     std::vector<OutdoorBoundary> outdoorBoundaries{};
@@ -344,11 +314,15 @@ public:
     [[nodiscard]] const std::vector<OutdoorBoundary>& Boundaries() const;
     std::vector<OutdoorBoundary>& Boundaries();
     OutdoorBoundary& Boundary( std::size_t _index );
-    void reRoot( float, ArchRescaleSpaceT ) override;
-    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
     void addBoundary( const OutdoorBoundary& _ob );
+
+protected:
+    void reRoot( float, ArchRescaleSpaceT ) override;
+    void updateVolumeInternal() override;
 private:
     void makeTriangles2d();
+
+    friend struct FloorBSData;
 };
 
 JSONDATA(KitchenPathFlags, mainSegment, hasCooker, hasSink, hasFridge)
@@ -476,7 +450,7 @@ JSONDATA(LightFittings, key, lightPosition)
 };
 
 JSONDATA_H(RoomBSData, ArchStructural, hash, type,
-           bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
+           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
            roomTypes, windows, doors, mHasCoving, mBBoxCoving, floorType, mFittedFurniture,
            mWallSegments, mWallSegmentsSorted, mPerimeterSegments, mvCovingSegments, mvSkirtingSegments,
            mMaxEnclosingBoundingBox, mLightFittings, mSocketLocators, mSwitchesLocators, maxSizeEnclosedHP1,
@@ -531,21 +505,24 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type,
     KitchenData kitchenData;
 
     RoomBSData( const RoomPreData& _preData, float _floorHeight, float _z );
+protected:
     void reRoot( float, ArchRescaleSpaceT ) override;
-    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
+    void updateVolumeInternal() override;
 private:
     void makeTriangles2d();
+
+    friend struct FloorBSData;
 };
 
 JSONDATA_H(FloorBSData, ArchStructural, hash, type,
-           bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
-           sequencePart,
-           number, area, concreteHeight, hasCoving, doorHeight, windowHeight,
+           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
+           number, elevation, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
            perimeterArchSegments, anchorPoint, walls, windows, doors, stairs, rooms, outdoorAreas, orphanedUShapes)
 
     int32_t number = -1; // As in floor number, ground floor = 1, etc...
-
+    float elevation = 0.0f;
+    
     float area = 0.0f;
     float concreteHeight = 0.0f;
     bool hasCoving = true;
@@ -574,12 +551,15 @@ JSONDATA_H(FloorBSData, ArchStructural, hash, type,
 
     FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _defaultCeilingHeight, float _defaultGroundHeight,
                  float _doorHeight, float _defaultWindowHeight, float _defaultWindowBaseOffset );
+protected:
     void reRoot( float, ArchRescaleSpaceT ) override;
-    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
+    void updateVolumeInternal() override;
+
+    friend struct HouseBSData;
 };
 
 JSONDATA_R_H(HouseBSData, ArchStructural, hash, type,
-             bbox, bbox3d, albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
+             albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
              sequencePart,
              version, propertyId, name, source, declaredSQm, defaultSkybox,
              planeOffset, elevation, sourceData, bestInternalViewingPosition, bestInternalViewingAngle,
@@ -615,18 +595,20 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type,
     std::vector<CameraPath> tourPaths;
     std::vector<std::shared_ptr<FloorBSData>> mFloors;
 
-private:
-    void recalcSkirtingSegments();
-
 public:
     explicit HouseBSData( const JMATH::Rect2f& _floorPlanBBox );
     constexpr static uint64_t Version() { return SHouseJSONVersion; }
-    void calcBBox( const Matrix4f& _mat = Matrix4f::MIDENTITY()) override;
     [[nodiscard]] float Elevation() const;
     [[nodiscard]] V2f PlaneOffset() const;
     [[nodiscard]] V3f GeoOffset() const;
     void reRoot( float, ArchRescaleSpaceT ) override;
     void elevate( float _elevation );
     FloorBSData *addFloorFromData( const JMATH::Rect2f& _rect );
+
+protected:
+    void updateVolumeInternal() override;
+
+private:
+    void recalcSkirtingSegments();
 };
 
