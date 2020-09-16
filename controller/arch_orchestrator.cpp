@@ -158,6 +158,7 @@ void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCa
     Http::getNoCache(Url{ "/propertybim/" + _pid }, [&, ccf]( HttpResponeParams params ) {
         if ( !params.BufferString().empty() ) {
             houseJson.reset(std::make_shared<HouseBSData>(params.BufferString()));
+            houseJson()->updateVolume();
             if ( ccf ) ccf();
         } else {
             if ( ccfailure ) ccfailure();

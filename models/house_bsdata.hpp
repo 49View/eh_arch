@@ -175,7 +175,6 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, albedo, size, centre, po
     [[nodiscard]] bool checkIf( FittedFurnitureFlagsT _flag ) const;
 
 protected:
-    void updateVolumeInternal() override;
 
     friend struct FloorBSData;
 };

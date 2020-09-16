@@ -99,37 +99,21 @@ FloorBSData::FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _d
 }
 
 void FloorBSData::updateVolumeInternal() {
-//    bbox = Rect2f::INVALID;
-//    bbox3d = AABB::MINVALID();;
-//    Matrix4f matCompose = Matrix4f({ 0.0f, 0.0f, elevation });
-//
-//    for ( auto& i : windows ) {
-//        i->calcBBox(matCompose);
-//        bbox.merge(i->BBox());
-//        bbox3d.merge(i->BBox3d());
-//    }
-//    for ( auto& i : doors ) {
-//        i->calcBBox(matCompose);
-//        bbox.merge(i->BBox());
-//        bbox3d.merge(i->BBox3d());
-//    }
-//    for ( auto& i : walls ) {
-//        i->calcBBox(matCompose);
-//        bbox.merge(i->BBox());
-//        bbox3d.merge(i->BBox3d());
-//    }
-//    for ( auto& i : rooms ) {
-//        i->calcBBox(matCompose);
-//        bbox.merge(i->BBox());
-//        bbox3d.merge(i->BBox3d());
-//    }
-//    for ( auto& i : outdoorAreas ) {
-//        i->calcBBox(matCompose);
-//        bbox.merge(i->BBox());
-//        bbox3d.merge(i->BBox3d());
-//    }
-//
-//    bbox3d.calc(BBox(), 0.0f, Height(), matCompose);
+    for ( auto& i : windows ) {
+        mergeVolume(i->updateVolume());
+    }
+    for ( auto& i : doors ) {
+        mergeVolume(i->updateVolume());
+    }
+    for ( auto& i : walls ) {
+        mergeVolume(i->updateVolume());
+    }
+    for ( auto& i : rooms ) {
+        mergeVolume(i->updateVolume());
+    }
+    for ( auto& i : outdoorAreas ) {
+        mergeVolume(i->updateVolume());
+    }
 }
 
 void FloorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
@@ -242,19 +226,21 @@ void RoomBSData::makeTriangles2d() {
 }
 
 void RoomBSData::updateVolumeInternal() {
-//    bbox = Rect2f::INVALID;
-//
-//    for ( auto& ws : mWallSegments ) {
-//        for ( auto& ep : ws ) {
-//            bbox.expand(ep.p1);
-//            bbox.expand(ep.p2);
-//        }
-//    }
-//    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY());
-//    centre = bbox.calcCentre();
-//
-//    makeTriangles2d();
-//    area = RS::area(this);
+
+    for ( auto& ws : mWallSegments ) {
+        for ( auto& ep : ws ) {
+            bbox.expand(ep.p1);
+            bbox.expand(ep.p2);
+        }
+    }
+    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY());
+
+    for ( auto& i : mFittedFurniture ) {
+        mergeVolume(i->updateVolume());
+    }
+
+    makeTriangles2d();
+    area = RS::area(this);
 }
 
 // *********************************************************************************************************************
@@ -290,15 +276,12 @@ void WallBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 }
 
 void WallBSData::updateVolumeInternal() {
-    if ( epoints.empty() ) return;
-
-//    bbox = Rect2f::INVALID;
-//    for ( auto& ep : epoints ) {
-//        bbox.expand(ep);
-//    }
-//    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY());
-//    w() = bbox.width();
-//    makeTriangles2d();
+    for ( auto& ep : epoints ) {
+        bbox.expand(ep);
+    }
+    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY());
+    w() = bbox.width();
+    makeTriangles2d();
 }
 
 void WallBSData::makeTriangles2d() {
@@ -347,10 +330,6 @@ FittedFurniture::FittedFurniture( const std::tuple<std::string, AABB>& args, std
 
     initialiseVolume(std::get<1>(args));
     type = ArchType::FittedFurnitureT;
-}
-
-void FittedFurniture::updateVolumeInternal() {
-    //ArchSpatial::updateVolume();
 }
 
 // *********************************************************************************************************************
@@ -477,7 +456,7 @@ void WindowBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 void WindowBSData::updateVolumeInternal() {
     calcVolume();
     // Recalculate center Y, as usually a window does not start from the floor
-    centre.setY(lerp(0.5f, baseOffset, baseOffset + Height()));
+//    centre.setY(lerp(0.5f, baseOffset, baseOffset + Height()));
     bbox3d.calc(bbox, baseOffset, baseOffset + Height(), Matrix4f::IDENTITY());
 }
 
