@@ -139,6 +139,8 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
             sg.loadCollisionMesh(HouseService::createCollisionMesh(H()));
             hrc = HouseRender::make3dGeometry(rsg.RR(), sg, H());
             if ( ccf ) ccf();
+//            scene_t scene{ 0 };
+//            sg.chartMeshes2(scene);
             rsg.RR().setLoadingFlag(false);
             rsg.changeTime("14:00", H()->sourceData.northCompassAngle);
             V3f probePos = HouseService::centerOfBiggestRoom(H(), 1.25f);

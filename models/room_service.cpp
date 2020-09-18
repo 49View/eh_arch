@@ -754,10 +754,10 @@ namespace RoomService {
     }
 
     std::string roomSizeToString( const RoomBSData *r ) {
-        if ( r->BBox().width() > r->BBox().height() ) {
-            return sizeToStringMeters(r->BBox().width(), r->BBox().height());
+        if ( r->Width() > r->Height() ) {
+            return sizeToStringMeters(r->Width(), r->Height());
         }
-        return sizeToStringMeters(r->BBox().height(), r->BBox().width());
+        return sizeToStringMeters(r->Height(), r->Width());
     }
 
     FittedFurniture *findFurniture( RoomBSData *r, HashEH furnitureHash ) {
