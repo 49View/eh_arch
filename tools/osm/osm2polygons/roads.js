@@ -18,7 +18,7 @@ const createRoads = (nodes,ways,rels) => {
 
     const roads = [];
     
-    ways.filter(w => w.tags && w.tags["highway"]).forEach(w => {
+    ways.filter(w => w.tags && (w.tags["highway"] || (w.tags["railway"] && w.tags["railway"]==="rail"))).forEach(w => {
         const road = roadFromWay(w);
         if (road!==null) roads.push(road);
     });
@@ -109,6 +109,11 @@ const roadFromWay = (way) => {
                 roadWidth = 1.5;
                 roadLane = 1;
                 roadColor = "#FFFFFF";
+        }
+        if (way.tags["railway"] && way.tags["railway"]==="rail") {
+            roadWidth = 1.5;
+            roadLane = 2;
+            roadColor = "#00000";
         }
         let faces=[]
         let points=[];
