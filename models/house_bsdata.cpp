@@ -281,6 +281,7 @@ void WallBSData::updateVolumeInternal() {
     }
     bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY());
     w() = bbox.width();
+    d() = bbox.height();
     makeTriangles2d();
 }
 
@@ -330,6 +331,13 @@ FittedFurniture::FittedFurniture( const std::tuple<std::string, AABB>& args, std
 
     initialiseVolume(std::get<1>(args));
     type = ArchType::FittedFurnitureT;
+}
+
+void FittedFurniture::updateVolumeInternal() {
+    V3f scaledHalf = half(size * scaling);
+    bbox3d = AABB{ ( centre + pos ) - scaledHalf, ( centre + pos ) + scaledHalf };
+    bbox3d = bbox3d.rotate(rotation);
+    bbox = bbox3d.topDown();
 }
 
 // *********************************************************************************************************************
@@ -409,6 +417,7 @@ DoorBSData::DoorBSData( float _doorHeight, float _ceilingHeight, const UShape& w
     h() = _doorHeight;
 
     calcVolume();
+    bbox3d.calc(bbox, 0.0f, Height(), Matrix4f::IDENTITY());
 }
 
 void DoorBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
@@ -438,6 +447,8 @@ WindowBSData::WindowBSData( float _windowHeight, float _ceilingHeight, float _de
     h() = _windowHeight;
 
     calcVolume();
+    centre.setY(lerp(0.5f, baseOffset, baseOffset + Height()));
+    bbox3d.calc(bbox, baseOffset, baseOffset + Height(), Matrix4f::IDENTITY());
 
     numPanels = static_cast<int32_t>( Width() / minPanelWidth );
     if ( numPanels <= 0 ) numPanels = 1;
@@ -456,7 +467,7 @@ void WindowBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
 void WindowBSData::updateVolumeInternal() {
     calcVolume();
     // Recalculate center Y, as usually a window does not start from the floor
-//    centre.setY(lerp(0.5f, baseOffset, baseOffset + Height()));
+    centre.setY(lerp(0.5f, baseOffset, baseOffset + Height()));
     bbox3d.calc(bbox, baseOffset, baseOffset + Height(), Matrix4f::IDENTITY());
 }
 
@@ -577,4 +588,15 @@ void UShape::reRoot( float _scale, [[maybe_unused]] ArchRescaleSpaceT _scaleSpac
     for ( int64_t t = 0; t < 4; t++ ) points[t] *= _scale;
     middle *= _scale;
     width *= _scale;
+}
+
+// *********************************************************************************************************************
+// Stairs
+// *********************************************************************************************************************
+
+void StairsBSData::updateVolumeInternal() {
+    V3f scaledHalf = half(size * scaling);
+    bbox3d = AABB{ ( centre + pos ) - scaledHalf, ( centre + pos ) + scaledHalf };
+    bbox3d = bbox3d.rotate(rotation);
+    bbox = bbox3d.topDown();
 }

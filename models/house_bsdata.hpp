@@ -97,6 +97,10 @@ struct ArchStructural : public ArchSpatial {
     Color4f albedo = C4fc::WHITE;
     HashEH linkedHash = 0;
     SequencePart sequencePart = 0;
+
+protected:
+    void updateVolumeInternal() override {}
+
 };
 
 JSONDATA_H(UShape, ArchBase, hash, type, indices, points, edges, middle, inwardNormals, crossNormals, width,
@@ -126,6 +130,7 @@ struct TwoUShapesBased : public ArchStructural {
 protected:
     void calcVolume();
     void reRoot( float, ArchRescaleSpaceT ) override;
+    void updateVolumeInternal() override {}
 };
 
 JSONDATA(ArchSegment, iFloor, iWall, iIndex, wallHash, p1, p2, middle, normal, crossNormal, color, tag, sequencePart,
@@ -159,7 +164,7 @@ protected:
     friend struct RoomBSData;
 };
 
-JSONDATA_H(FittedFurniture, ArchStructural, hash, type, albedo, size, centre, pos, rotation, scaling,
+JSONDATA_H(FittedFurniture, ArchStructural, hash, type, albedo, bbox, bbox3d, size, centre, pos, rotation, scaling,
            mTriangles2d, linkedHash, sequencePart, name, keyTag, tags, symbolRef,
            dependantHashList, widthNormal, depthNormal, flags)
     std::string name;
@@ -175,12 +180,13 @@ JSONDATA_H(FittedFurniture, ArchStructural, hash, type, albedo, size, centre, po
     [[nodiscard]] bool checkIf( FittedFurnitureFlagsT _flag ) const;
 
 protected:
+    void updateVolumeInternal() override;
 
     friend struct FloorBSData;
 };
 
 JSONDATA_H(DoorBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight, wallFlags,
-           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
+           albedo, bbox, bbox3d, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
            sequencePart,
            rooms, subType, isMainDoor, isDoorTypicallyShut, architraveProfile,
            dIndex, doorInnerBumpSize, doorGeomThickness, doorTrim, openingAngleMax, openingAngleMin,
@@ -224,7 +230,7 @@ protected:
 
 JSONDATA_H(WindowBSData, TwoUShapesBased, hash, type, us1, us2, thickness, dirWidth, dirDepth, ceilingHeight,
            wallFlags,
-           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
+           albedo, bbox, bbox3d, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
            sequencePart,
            mTriangles2d, rooms, numPanels, sillThickness, mainFrameWidth, minPanelWidth, baseOffset,
            rotOrientation, hasBlinds, hasCurtains, curtainGeom, curtainMaterial)
@@ -251,7 +257,7 @@ protected:
 };
 
 JSONDATA_H(WallBSData, ArchStructural, hash, type,
-           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
+           albedo, bbox, bbox3d, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
            epoints, enormals, slinesGHType, mUShapes, elevation, wallFlags, wrapLastPoint)
 
     // epoints are needed when the wall structure has got non-simplifiable shape lie boxing or curved walls, in those cases we just save the contours of the wall shape
@@ -284,10 +290,13 @@ private:
 };
 
 JSONDATA_H(StairsBSData, ArchStructural, hash, type,
-           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
+           albedo, bbox, bbox3d, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
            sequencePart,
            name)
     std::string name;
+
+protected:
+    void updateVolumeInternal() override;
 
     friend struct FloorBSData;
 };
@@ -303,7 +312,7 @@ JSONDATA(OutdoorBoundary, bPoints, elevation, zPull, followerWidth, extrusionTyp
 };
 
 JSONDATA_H(OutdoorAreaBSData, ArchStructural, hash, type,
-           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
+           albedo, bbox, bbox3d, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
            outdoorBoundaries)
 
     std::vector<OutdoorBoundary> outdoorBoundaries{};
@@ -449,7 +458,7 @@ JSONDATA(LightFittings, key, lightPosition)
 };
 
 JSONDATA_H(RoomBSData, ArchStructural, hash, type,
-           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
+           albedo, bbox, bbox3d, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
            roomTypes, windows, doors, mHasCoving, mBBoxCoving, floorType, mFittedFurniture,
            mWallSegments, mWallSegmentsSorted, mPerimeterSegments, mvCovingSegments, mvSkirtingSegments,
            mMaxEnclosingBoundingBox, mLightFittings, mSocketLocators, mSwitchesLocators, maxSizeEnclosedHP1,
@@ -514,7 +523,7 @@ private:
 };
 
 JSONDATA_H(FloorBSData, ArchStructural, hash, type,
-           albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
+           albedo, bbox, bbox3d, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
            number, elevation, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
            perimeterArchSegments, anchorPoint, walls, windows, doors, stairs, rooms, outdoorAreas, orphanedUShapes)
@@ -558,7 +567,7 @@ protected:
 };
 
 JSONDATA_R_H(HouseBSData, ArchStructural, hash, type,
-             albedo, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
+             albedo, bbox, bbox3d, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
              sequencePart,
              version, propertyId, name, source, declaredSQm, defaultSkybox,
              planeOffset, elevation, sourceData, bestInternalViewingPosition, bestInternalViewingAngle,
