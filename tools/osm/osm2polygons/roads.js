@@ -60,12 +60,12 @@ const roadFromWay = (way) => {
                 roadLane = 2;
                 roadColor = "#DF2E6B";
                 break;
-            case "thrunk":
+            case "trunk":
                 roadWidth = 3;
                 roadLane = 2;
                 roadColor = "#FBB29A";
                 break;
-            case "thrunk_link":
+            case "trunk_link":
                 roadWidth = 2.75;
                 roadLane = 2;
                 roadColor = "#FBB29A";
@@ -173,7 +173,8 @@ const roadFromWay = (way) => {
 
         setHeight(faces,.5);
 
-        road = createRoadMesh("w-"+way.id, way.tags, localBoundingBox, faces, "#000000");
+        //road = createRoadMesh("w-"+way.id, way.tags, localBoundingBox, faces, "#000000");
+        road = createRoadMesh("w-"+way.id, way.tags, localBoundingBox, faces, roadColor);
     } catch (ex) {
         console.log(`Error creating road from way ${way.id}`);
     }

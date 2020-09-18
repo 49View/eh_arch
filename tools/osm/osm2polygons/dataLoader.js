@@ -7,22 +7,28 @@ const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
 const getData = async (bbox) => {
 
-    const query=`
+        // way["landuse"="grass"](${bbox.join(",")});
+        // rel["landuse"="grass"](${bbox.join(",")});
+        // rel["leisure"="park"](${bbox.join(",")});
+        // rel["leisure"="garden"](${bbox.join(",")});
+        // way["leisure"="park"](${bbox.join(",")});
+        // way["leisure"="garden"](${bbox.join(",")});
+        const query=`
     [out:json][timeout:25];
     (
         rel["building"](${bbox.join(",")});
         rel["building:part"](${bbox.join(",")});
         way["building"](${bbox.join(",")});
         way["building:part"](${bbox.join(",")});
-        rel["leisure"="park"](${bbox.join(",")});
-        rel["leisure"="garden"](${bbox.join(",")});
-        way["leisure"="park"](${bbox.join(",")});
-        way["leisure"="garden"](${bbox.join(",")});
         rel["natural"="water"](${bbox.join(",")});
         way["natural"="water"](${bbox.join(",")});
         way["highway"](${bbox.join(",")});
-        way["landuse"="grass"](${bbox.join(",")});
-        rel["landuse"="grass"](${bbox.join(",")});
+        way["landuse"](${bbox.join(",")});
+        rel["landuse"](${bbox.join(",")});
+        way["leisure"](${bbox.join(",")});
+        rel["leisure"](${bbox.join(",")});
+        way["area"](${bbox.join(",")});
+        rel["area"](${bbox.join(",")});
     );
     (
         ._;

@@ -374,7 +374,7 @@ const createClosedPath = (member, members) => {
                 closed=true;
             } else {
                 //Search for next node
-                currentId=nextMember.id;
+                currentId=nextMember.ref.id;
                 lastNodeId=nextMember.ref.nodes[nextMember.ref.nodes.length-1].id;
                 connectedMembers.push(nextMember);
             }

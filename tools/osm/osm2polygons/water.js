@@ -61,7 +61,7 @@ const waterFromRel = (rel) => {
     let faces=[];
     polygons.filter(p => p.role==="outer").forEach(o => {
         faces = faces.concat(getTrianglesFromComplexPolygon(o.points, o.holes));
-        setHeight(faces,0.1);
+        setHeight(faces,0);
     });
 
     const water = createWaterMesh("r-"+rel.id, rel.tags, localBoundingBox, faces);

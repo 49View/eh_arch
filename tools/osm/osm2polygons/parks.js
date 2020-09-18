@@ -18,11 +18,13 @@ const createParks = (nodes,ways,rels) => {
     console.log("----------------------------------------------");
 
     const simpleParks=createElementsFromWays(ways
-        , w => w.tags && ((w.tags["leisure"] && (w.tags["leisure"]==="park" || w.tags["leisure"]==="garden")) || (w.tags["landuse"] && w.tags["landuse"]==="grass"))
+        // , w => w.tags && ((w.tags["leisure"] && (w.tags["leisure"]==="park" || w.tags["leisure"]==="garden")) || (w.tags["landuse"] && w.tags["landuse"]==="grass"))
+        , w => w.tags && (w.tags["leisure"] || w.tags["landuse"] || (w.tags["area"] && w.tags["man_made"]))
         , parkFromWay);
     // const simpleBuildings=[];
     const complexParks=createElementsFromRels(rels
-        , r => r.tags && ((r.tags["leisure"] && (r.tags["leisure"]==="park" || r.tags["leisure"]==="garden")) || (r.tags["landuse"] && r.tags["landuse"]==="grass"))
+        //, r => r.tags && ((r.tags["leisure"] && (r.tags["leisure"]==="park" || r.tags["leisure"]==="garden")) || (r.tags["landuse"] && r.tags["landuse"]==="grass"))
+        , r => r.tags && (r.tags["leisure"] || r.tags["landuse"] || (r.tags["area"] && r.tags["man_made"]))
         , parkFromRel);
     
     console.log(`Found ${simpleParks.length} simple parks`);
@@ -32,13 +34,13 @@ const createParks = (nodes,ways,rels) => {
     return simpleParks.concat(complexParks);
 }
 
-const createParkMesh = (id, tags, boundingBox, faces) => {
+const createParkMesh = (id, tags, boundingBox, faces, color) => {
 
     const groups=[];
 
     groups.push({
         faces: faces,
-        colour: "#CDF7C9",
+        colour: color,
         isTriangleStrip: false
     });
     
@@ -51,7 +53,14 @@ const parkFromWay = (way) => {
     const faces = getTrianglesFromPolygon(polygon);
     setHeight(faces,0);
 
-    const park = createParkMesh("w-"+way.id, way.tags, localBoundingBox, faces);
+    let color = "#808080";
+
+    if ((way.tags["landuse"] && way.tags["landuse"]==="grass")
+        || (way.tags["leisure"] && (way.tags["leisure"]==="park" || way.tags["leisure"]==="garden"))) {
+            color="#CDF7C9";
+        }
+
+    const park = createParkMesh("w-"+way.id, way.tags, localBoundingBox, faces, color);
     return park;
 }
 
@@ -64,7 +73,15 @@ const parkFromRel = (rel) => {
         setHeight(faces,0);
     });
 
-    const park = createParkMesh("r-"+rel.id, rel.tags, localBoundingBox, faces);
+
+    let color = "#808080";
+
+    if ((rel.tags["landuse"] && rel.tags["landuse"]==="grass")
+        || (rel.tags["leisure"] && (rel.tags["leisure"]==="park" || rel.tags["leisure"]==="garden"))) {
+            color="#CDF7C9";
+        }
+
+    const park = createParkMesh("r-"+rel.id, rel.tags, localBoundingBox, faces, color);
 
     return park;
 }
