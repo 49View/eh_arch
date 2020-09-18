@@ -18,10 +18,10 @@ namespace OutdoorAreaRender {
         int cc = 0;
         for ( const auto& oa : w->Boundaries() ) {
             if ( oa.extrusionType == 0 ) {
-                auto color = arc.getFillColor(w, Color4f::LIGHT_GREY);
+                auto color = arc.getFillColor(w, C4fc::LIGHT_GREY);
                 rr.draw<DFlatPoly>(oa.bPoints, color, sm, w->hashFeature("outdoorAreaFlatBseIM", cc++));
             } else if ( oa.extrusionType == 1 ) {
-                auto color = arc.getFillColor(w, Color4f::SKY_BLUE);
+                auto color = arc.getFillColor(w, C4fc::SKY_BLUE);
                 rr.draw<DLine>(oa.bPoints, color, sm, w->hashFeature("outdoorAreaFlatBseIM", cc++), oa.followerWidth);
             }
         }
@@ -38,11 +38,12 @@ namespace OutdoorAreaRender {
     }
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const OutdoorAreaBSData *w ) {
-        auto lRootH = eRootH->addChildren("OutdoorArea"+ std::to_string(w->hash));
+//        auto lRootH = eRootH->addChildren("OutdoorArea"+ std::to_string(w->hash));
+        auto lRootH = EF::create<Geom>("OutdoorArea"+ std::to_string(w->hash));
 
         for ( const auto& oa : w->Boundaries() ) {
             if ( oa.extrusionType == 0 ) {
-                sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(oa.bPoints, oa.elevation), V3f::UP_AXIS, oa.zPull },
+                sg.GB<GT::Extrude>(PolyOutLine{ XZY::C(oa.bPoints, oa.elevation), V3fc::UP_AXIS, oa.zPull },
                                    w->Position(), oa.outdoorBoundaryMaterial, lRootH);
             } else if ( oa.extrusionType == 1 ) {
                 auto profile = makeBevelTopProfile("Outdoor1", V3f{oa.followerWidth, oa.zPull, 0.0f});
@@ -50,6 +51,6 @@ namespace OutdoorAreaRender {
             }
         }
 
-        return lRootH;
+        return eRootH->addChildren(lRootH);
     }
 }

@@ -17,7 +17,7 @@ static constexpr float slowingDownTimeOnRotationFactor = 2.0f; // When we travel
 static constexpr float gotoAndFadeTime = 0.5f; // Time it takes to travel to point clicked _and_ to fade in/out from it
 
 inline const V4f& defaultDotColor() {
-    return C4f::SKY_BLUE;
+    return C4fc::SKY_BLUE;
 }
 
 void ArchPositionalDot::updateDot( RenderOrchestrator& rsg ) {
@@ -43,7 +43,7 @@ void ArchPositionalDot::singleTap( RenderOrchestrator& rsg ) {
                        } });
         if ( !isNewPositionWalkingOnFloor && antiWallRotation ) {
             auto quat = rsg.DC()->quatAngle();
-            quat = quat * Quaternion{ M_PI, V3f::UP_AXIS };
+            quat = quat * Quaternion{ M_PI, V3fc::UP_AXIS };
             Timeline::play(rsg.DC()->QAngleAnim(), 0, KeyFramePair{ gotoAndFadeTime * speedFactor, quat });
         }
     }

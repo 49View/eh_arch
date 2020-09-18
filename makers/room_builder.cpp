@@ -31,7 +31,7 @@ void RoomBuilder::clear( const UICallbackHandle& _ch ) {
     finalised = false;
     currentPointValid = false;
 
-    inputPoint = V3f::ZERO;
+    inputPoint = V3fc::ZERO;
     hasBeenSnapped = false;
     activeSegmentType = ArchType::WallT;
 
@@ -164,7 +164,7 @@ V3f RoomBuilder::snapper( const V3f& _p ) {
 
 V3f RoomBuilder::convert2dPosTo3d( const V2f& _p ) {
     auto pd = rsg.rayViewportPickIntersection(_p);
-    return snapper(Plane3f{ Vector3f::Y_AXIS, 0.0f }.intersectLineGrace(pd.rayNear, pd.rayFar));
+    return snapper(Plane3f{ V3fc::Y_AXIS, 0.0f }.intersectLineGrace(pd.rayNear, pd.rayFar));
 }
 
 void RoomBuilder::setCurrentPointerPos( const V2f& _p ) {
@@ -236,8 +236,8 @@ RoomBuilder::drawSingleDoor2d( int _bucketList, const V3f& _p1, const V3f& _p2, 
 }
 
 struct FloorplanDrawOuterMeasure {
-    V3f p1 = V3f::ZERO;
-    V3f p2 = V3f::ZERO;
+    V3f p1 = V3fc::ZERO;
+    V3f p2 = V3fc::ZERO;
     V2f normal = V2fc::ZERO;
 };
 
@@ -291,7 +291,7 @@ auto clampToFloorplanOuterSizes( int i, const V3f& op1, const V3f& op2, const JM
 
 void RoomBuilder::drawFloorplanSegments() {
     Renderer& rr = rsg.RR();
-    auto wallColor = C4f::WHITE;
+    auto wallColor = C4fc::WHITE;
 
     int segC = 0;
     for ( const auto& pwall : segments.pointsOf(ArchType::WallT) ) {
@@ -328,9 +328,9 @@ void RoomBuilder::drawFloorplanSegments() {
             auto afx = clampToFloorplanOuterSizes(i, op1, op2, bb, tierLayers, tierGap);
             auto name = afx.p1.toString() + afx.p2.toString();
             rr.drawMeasurementArrow2(roomEditBucket, afx.p1, afx.p2, afx.normal, op1, op2,
-                                     C4f::WHITE.A(0.65f), wallWidth * 0.1f,
+                                     C4fc::WHITE.A(0.65f), wallWidth * 0.1f,
                                      M_PI_4 * 0.5f, 0.08f, wallWidth * 2.0f, font.get(),
-                                     wallWidth * 1.5f, C4f::WHITE, C4f::BLACK, name);
+                                     wallWidth * 1.5f, C4fc::WHITE, C4fc::BLACK, name);
         }
     }
 
@@ -343,17 +343,17 @@ void RoomBuilder::refresh() {
     if ( segments.empty() ) return;
 
     auto font = sg.FM().get(S::DEFAULT_FONT);
-    auto wallColor = C4f::WHITE;
-    auto textColor = ( C4f::WHITE * 0.95f ).A(1.0f);
+    auto wallColor = C4fc::WHITE;
+    auto textColor = ( C4fc::WHITE * 0.95f ).A(1.0f);
 
     bool intersecting =
             ( ( checkPointIntersect(currentPoint) && segments.back() != currentPoint ) ) && currentPointValid;
-    Color4f currLineColor = intersecting ? Color4f::INDIAN_RED : wallColor.A(1.0f);
+    Color4f currLineColor = intersecting ? C4fc::INDIAN_RED : wallColor.A(1.0f);
     if ( ( hasBeenSnapped || currentPoint == segments.front() ) && !intersecting ) {
-        currLineColor = C4f::DARK_YELLOW;
+        currLineColor = C4fc::DARK_YELLOW;
     }
     if ( ( hasBeenSnapped && currentPoint == segments.front() ) && !intersecting ) {
-        currLineColor = C4f::SPRING_GREEN;
+        currLineColor = C4fc::SPRING_GREEN;
     }
 
     drawFloorplanSegments();
@@ -380,17 +380,17 @@ void RoomBuilder::refresh() {
                 break;
         }
 
-        C4f bgText = V4f{ V4f::WHITE - textColor };
+        C4f bgText = V4f{ C4fc::WHITE - textColor };
         rr.drawMeasurementArrow1(roomEditBucket, currentPoint, segments.back(), textColor, wallWidth * 0.1f,
                                  M_PI_4, 0.1f, wallWidth * 2.0f, font.get(),
-                                 wallWidth * 1.5f, C4f::XTORGBA("#00FEFF"), bgText, "currentMeasurementArrow");
+                                 wallWidth * 1.5f, C4fc::XTORGBA("#00FEFF"), bgText, "currentMeasurementArrow");
     }
 
     if ( hasBeenSnapped ) {
         constexpr float SnapLongLines = 15.0f;
         auto xt = V3f{ currentPoint.x(), 0.0f, SnapLongLines };
         auto xb = V3f{ currentPoint.x(), 0.0f, -SnapLongLines };
-        auto slopeLineColor = Color4f::BLACK;
+        auto slopeLineColor = C4fc::BLACK;
         auto snapLineWidth = wallWidth * 0.066f;
         rr.draw<DLine>(roomEditBucket, xt, xb, slopeLineColor, snapLineWidth, "SnapLongLines1");
         xt = V3f{ SnapLongLines, 0.0f, currentPoint.z() };

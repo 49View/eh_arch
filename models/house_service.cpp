@@ -14,6 +14,7 @@
 #include <core/resources/resource_builder.hpp>
 #include <poly/collision_mesh.hpp>
 #include <poly/scene_graph.h>
+#include <poly/converters/gltf2/gltf2.h>
 
 #include "floor_service.hpp"
 #include "arch_structural_service.hpp"
@@ -61,8 +62,8 @@ std::shared_ptr<CollisionMesh> HouseService::createCollisionMesh( const HouseBSD
 }
 
 void HouseService::loadPanorama( const HouseBSData *house, SceneGraph& sg ) {
-    OSMData map{FM::readLocalFileC("elements.json")};
-    auto cc = sg.GB<GT::OSM>(map, V2f{-0.1216677576303482f, 51.49138259887695f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::Far));
+//    OSMData map{FM::readLocalFileC("elements.json")};
+//    auto cc = sg.GB<GT::OSM>(map, V2f{-0.1216677576303482f, 51.49138259887695f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::Far));
 //    GLTF2Service::save( sg, cc );
 }
 
@@ -400,18 +401,18 @@ HouseService::findRoomArchSegmentWithWallHash( HouseBSData *house, HashEH hashTo
 }
 
 void HouseService::bestStartingPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot ) {
-    if ( house->bestInternalViewingPosition == V3f::ZERO ) {
+    if ( house->bestInternalViewingPosition == V3fc::ZERO ) {
         pos = HouseService::centerOfBiggestRoom(house, 1.48f);
         rot = quatCompose(V3f{ 0.08f, -0.70f, 0.0f });
     } else {
         pos = house->bestInternalViewingPosition;
         rot = house->bestInternalViewingAngle;
     }
-    pos += house->BBox3d().centreBottom() * V3f::UP_AXIS;
+    pos += house->BBox3d().centreBottom() * V3fc::UP_AXIS;
 }
 
 void HouseService::bestDollyPositionAndAngle( const HouseBSData *house, V3f& pos, Quaternion& rot ) {
-    if ( house->bestDollyViewingPosition == V3f::ZERO ) {
+    if ( house->bestDollyViewingPosition == V3fc::ZERO ) {
         rot = quatCompose(V3f{ 1.0f, -0.75f, 0.0f });
         pos = V3f{ house->BBox().bottomRight().x(), house->Depth() * 3.0f,
                    house->BBox().bottomRight().y() };

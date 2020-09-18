@@ -28,10 +28,10 @@ void OutdoorAreaBuilder::refresh() {
             }
         } else if ( oa.extrusionType == 1 ) {
             if ( oa.bPoints.size() > 1 ) {
-                rr.draw<DLine>(rrBucket, oa.bPoints, Color4f::SKY_BLUE, "outdoorAreaBaseL1" + std::to_string(cc++), oa.followerWidth);
+                rr.draw<DLine>(rrBucket, oa.bPoints, C4fc::SKY_BLUE, "outdoorAreaBaseL1" + std::to_string(cc++), oa.followerWidth);
             }
         }
-        auto dotColor = bc == outdoorAreaData()->Boundaries().size() - 1 ? C4f::PASTEL_ORANGE : C4f::STEEL_BLUE;
+        auto dotColor = bc == outdoorAreaData()->Boundaries().size() - 1 ? C4fc::PASTEL_ORANGE : C4fc::STEEL_BLUE;
         for ( const auto& p : oa.bPoints ) {
             rr.draw<DCircleFilled>(rrBucket, p, 0.04f, dotColor, std::to_string(cc++) + "outdoorAreaBase");
         }

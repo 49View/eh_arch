@@ -40,24 +40,24 @@ namespace RoomRender {
     void IMHouseRender( Renderer& rr, SceneGraph& sg, const RoomBSData *room, const ArchRenderController& arc ) {
 
 //        if ( drawDebug) {
-//            rr.draw<DFlatPoly>( room->mPerimeterSegments, 0.025f, C4f::RED, true );
+//            rr.draw<DFlatPoly>( room->mPerimeterSegments, 0.025f, C4fc::RED, true );
 //        }
         auto roomName = RoomService::roomNames(room);
         auto sm = arc.floorPlanShader();
-        auto color = arc.getFillColor(room, C4f::PASTEL_GRAY);
+        auto color = arc.getFillColor(room, C4fc::PASTEL_GRAY);
         auto lineWidth = arc.floorPlanScaler(0.015f);
 
         bool drawDebug = arc.isFloorPlanRenderModeDebug();
         if ( drawDebug && arc.isSelected(room) ) {
             rr.draw<DLine>(room->mPerimeterSegments, lineWidth*2.0f, color, true, room->hashFeature("perimeter"+sm.hash(), 0));
-//            rr.draw<DFlatPoly>(room->mPerimeterSegments, C4f::WHITE*0.9f, arc.pm(),
+//            rr.draw<DFlatPoly>(room->mPerimeterSegments, C4fc::WHITE*0.9f, arc.pm(),
 //                           room->hashFeature("perimeter", 0));
         }
 
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {
-            auto ffColor = arc.getFillColor(ff.get(), C4f::BLACK);
-            Matrix4f mt{ ff->Position() * V3f::MASK_Y_OUT, ff->Rotation(), ff->Size() * ff->Scale() };
+            auto ffColor = arc.getFillColor(ff.get(), C4fc::BLACK);
+            Matrix4f mt{ ff->Position() * V3fc::MASK_Y_OUT, ff->Rotation(), ff->Size() * ff->Scale() };
             mt.mult(arc.pm()());
             rr.draw<DLine>(sg.PL(ff->symbolRef), ffColor, RDSPreMult(mt), sm, lineWidth,
                            room->hashFeature("ff"+sm.hash(), ffc++));
@@ -93,7 +93,7 @@ namespace RoomRender {
                        room->hashFeature("T3", 2));
 
 //        for ( auto& cov : room->mvSkirtingSegments ) {
-//            rr.draw<DLine>(cov, 0.01f, C4f::BLUE, arc.pm(), room->hashFeature("skirting", 0));
+//            rr.draw<DLine>(cov, 0.01f, C4fc::BLUE, arc.pm(), room->hashFeature("skirting", 0));
 //        }
     }
 
@@ -109,7 +109,7 @@ namespace RoomRender {
 
                 if ( auto profile = sg.PL(w->covingProfile); profile ) {
                     sg.GB<GT::Follower>(profile, w->Position(), eRootH, XZY::C(cov, w->Height()), ff, PolyRaise::VerticalNeg,
-                                        GT::ForceNormalAxis(Vector3f::UP_AXIS),
+                                        GT::ForceNormalAxis(V3fc::UP_AXIS),
                                         GT::Flip(V2fc::X_AXIS), w->covingMaterial);
                 }
             }
@@ -130,7 +130,7 @@ namespace RoomRender {
                 FollowerFlags ff = bWrap ? FollowerFlags::WrapPath : FollowerFlags::Defaults;
 
                 if ( auto profile = sg.PL(w->skirtingProfile); profile ) {
-                    sg.GB<GT::Follower>(profile, w->Position(), eRootH, XZY::C(cov, 0.0f), GT::ForceNormalAxis(Vector3f::UP_AXIS),
+                    sg.GB<GT::Follower>(profile, w->Position(), eRootH, XZY::C(cov, 0.0f), GT::ForceNormalAxis(V3fc::UP_AXIS),
                                         ff, GT::Flip(V2fc::X_AXIS), w->skirtingMaterial);
                 }
             }
@@ -139,38 +139,39 @@ namespace RoomRender {
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, RoomBSData *w ) {
 
-        auto lRootH = eRootH->addChildren("Room"+ std::to_string(w->hash));
+//        auto lRootH = eRootH->addChildren("Room"+ std::to_string(w->hash));
+        auto lRootH = EF::create<Geom>("Room"+ std::to_string(w->hash));
 
         RoomRender::createCovingSegments(sg, lRootH, w);
         RoomRender::createSkirtingSegments(sg, lRootH, w);
         WallRender::make3dGeometry(sg, lRootH, w->mWallSegmentsSorted, w->wallsMaterial);
 
         float zPull = 0.001f;
-        auto outline = PolyOutLine{ XZY::C(w->mPerimeterSegments), V3f::UP_AXIS, zPull };
-        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3f::UP_AXIS * -zPull } + w->Position(), w->floorMaterial,
+        auto outline = PolyOutLine{ XZY::C(w->mPerimeterSegments), V3fc::UP_AXIS, zPull };
+        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3fc::UP_AXIS * -zPull } + w->Position(), w->floorMaterial,
                                        GT::Tag(ArchType::FloorT));
 
         for ( const auto& lf : w->mLightFittings ) {
-            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, lRootH, w->Position() + XZY::C(lf.lightPosition) + V3f::UP_AXIS * 0.023f);
+            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, lRootH, w->Position() + XZY::C(lf.lightPosition) + V3fc::UP_AXIS * 0.023f);
             auto lKey = lf.key;
             sg.add<Light>(lKey,
-                          Light{ LightType_Point, lf.key, w->spotlightGeom, XZY::C(lf.lightPosition) + V3f::UP_AXIS_NEG * w->spotLightYOffset*2.0f + w->Position(),
-                                 3.5f, 0.0f, V3f::Y_AXIS * .5f });
+                          Light{ LightType_Point, lf.key, w->spotlightGeom, XZY::C(lf.lightPosition) + V3fc::UP_AXIS_NEG * w->spotLightYOffset*2.0f + w->Position(),
+                                 3.5f, 0.0f, V3fc::Y_AXIS * .5f });
         }
         for ( const auto& lf : w->mSwitchesLocators ) {
             sg.GB<GT::Asset>("lightswitch", lRootH, V3f{ lf.x(), 1.2f, lf.y() } + w->Position(),
-                             GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
+                             GT::Rotate(Quaternion{ lf.z(), V3fc::UP_AXIS }));
         }
         for ( const auto& lf : w->mSocketLocators ) {
             sg.GB<GT::Asset>("powerSocket", lRootH, V3f{ lf.x(), .252f, lf.y() } + w->Position(),
-                             GT::Rotate(Quaternion{ lf.z(), V3f::UP_AXIS }));
+                             GT::Rotate(Quaternion{ lf.z(), V3fc::UP_AXIS }));
         }
         for ( auto& fur : w->mFittedFurniture ) {
             if (!fur->name.empty()) {
                 auto furn = sg.GB<GT::Asset>(fur->name, lRootH, fur->Position(), GT::Rotate(fur->Rotation()), GT::Scale(fur->Scale()));
                 if ( furn ) {
                     fur->linkedUUID = furn->UUiDCopy();
-//                    sg.GB<GT::Shape>(ShapeType::Cube, fur->Center(), GT::Rotate(fur->Rotation()), GT::Scale{fur->Size()}, C4f::BLUE_SHADOW );
+                    sg.GB<GT::Shape>(ShapeType::AABB, furn->volume(), C4fc::BLUE_SHADOW, lRootH );
                 } else {
                     LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
                 }
@@ -180,9 +181,10 @@ namespace RoomRender {
             KitchenRender::render(sg, lRootH, w);
         }
 
-        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3f::UP_AXIS * (w->Height() - zPull) } + w->Position(),
+        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3fc::UP_AXIS * (w->Height() - zPull) } + w->Position(),
                                          w->ceilingMaterial,
                                          GT::Tag(ArchType::CeilingT));
-        return lRootH;
+
+        return eRootH->addChildren(lRootH);
     }
 }

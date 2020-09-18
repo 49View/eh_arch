@@ -101,7 +101,7 @@ namespace KitchenRoomService {
 
     void addDrawer( KitchenData& kd, const V2f& p1s, const V2f& p2s, float z, float unitHeight, float depth,
                     const V2f& normal, KitchenDrawerTypeT drawerType,
-                    KitchenDrawerCreateFlagsT hff = KitchenDrawerCreateFlags::None, const C4f& color = C4f::WHITE ) {
+                    KitchenDrawerCreateFlagsT hff = KitchenDrawerCreateFlags::None, const C4f& color = C4fc::WHITE ) {
         float computedDepth = checkBitWiseFlag(hff, KitchenDrawerCreateFlags::NoDepth) ? 0.0f : depth;
         kd.kitchenDrawers.emplace_back(p1s, p2s, z, unitHeight, computedDepth, normal, KitchenDrawerShape{drawerType}, color);
     }
@@ -163,7 +163,7 @@ namespace KitchenRoomService {
         // Filler
         if ( checkBitWiseFlag(hff, KitchenDrawerCreateFlags::HasFakeFiller) ) {
             addDrawer(kd, pd1, pd2, z, unitHeight, kup.depth, kup.normal, KitchenDrawerType::Filler, hff,
-                      C4f::DARK_GRAY);
+                      C4fc::DARK_GRAY);
         }
     }
 
@@ -172,7 +172,7 @@ namespace KitchenRoomService {
         KitchenData& kd = w->kitchenData;
         auto kwp = kd.kitchenWorktopPath[0];
         auto coffeeMachine = furns.spawn(FTH::FT_CoffeeMachine);
-        auto rot = Quaternion{ RoomService::furnitureAngleFromNormal(kwp.normal), V3f::UP_AXIS };
+        auto rot = Quaternion{ RoomService::furnitureAngleFromNormal(kwp.normal), V3fc::UP_AXIS };
         V2f pos = kwp.p1 + (kwp.crossNormal * coffeeMachine->Width());
         float height = kd.kitchenWorktopHeight + kd.worktopThickness;
         RS::placeManually(FurnitureRuleParams{ f, w, coffeeMachine, pos, rot,
@@ -275,7 +275,7 @@ namespace KitchenRoomService {
             bool hit = RoomService::findOppositeWallFromPoint(w, mp, -normal, targetWall,
                                                               hittingPoint, IncludeWindowsOrDoors::None);
             if ( hit ) {
-                auto rot = Quaternion{ RoomService::furnitureAngleFromNormal(normal), V3f::UP_AXIS };
+                auto rot = Quaternion{ RoomService::furnitureAngleFromNormal(normal), V3fc::UP_AXIS };
                 RS::placeManually(FurnitureRuleParams{ f, w, fridge, hittingPoint + ( normal * fridgeDepth * 0.5f ), rot,
                                     FRPWidthNormal{ crossNormal },
                                     FRPDepthNormal{ normal } });

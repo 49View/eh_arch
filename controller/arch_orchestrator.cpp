@@ -99,7 +99,7 @@ HouseBSData *ArchOrchestrator::H() {
 }
 
 Matrix4f ArchOrchestrator::calcFloorplanNavigationTransform( float screenRatio, float screenPadding ) {
-    auto m = Matrix4f{ Matrix4f::IDENTITY };
+    auto m = Matrix4f{ Matrix4f::IDENTITY() };
     float vmax = max(houseJson()->BBox().bottomRight().x(), houseJson()->BBox().bottomRight().y());
     float screenFloorplanRatio = ( 1.0f / screenRatio );
     float vmaxScale = vmax / screenFloorplanRatio;
@@ -154,10 +154,11 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
 /// \param ccf
 void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCallback& ccf,
                                   const PostHouseLoadCallback& ccfailure ) {
-    Renderer::clearColor(C4f::XTORGBA("8ae9e9"));
+    Renderer::clearColor(C4fc::XTORGBA("8ae9e9"));
     Http::getNoCache(Url{ "/propertybim/" + _pid }, [&, ccf]( HttpResponeParams params ) {
         if ( !params.BufferString().empty() ) {
             houseJson.reset(std::make_shared<HouseBSData>(params.BufferString()));
+            houseJson()->updateVolume();
             if ( ccf ) ccf();
         } else {
             if ( ccfailure ) ccfailure();
@@ -243,7 +244,7 @@ void ArchOrchestrator::setViewingMode( ArchViewingMode _wm ) {
 void ArchOrchestrator::setTourView() {
     arc.setViewingMode(ArchViewingMode::AVM_Tour);
     rsg.setRigCameraController(CameraControlType::Walk);
-    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY()));
     rsg.useSkybox(true);
 
     if ( !H()->tourPaths.empty() ) {
@@ -256,8 +257,8 @@ void ArchOrchestrator::setTourView() {
         }
         tourPlayback.playBack(rsg.DC());
     } else {
-        V3f pos = V3f::ZERO;
-        Quaternion quat{ M_PI, V3f::UP_AXIS };
+        V3f pos = V3fc::ZERO;
+        Quaternion quat{ M_PI, V3fc::UP_AXIS };
         HouseService::bestStartingPositionAndAngle(H(), pos, quat);
         rsg.DC()->setPosition(pos);
         rsg.DC()->setQuat(quat);
@@ -279,7 +280,7 @@ void ArchOrchestrator::setWalkView( float animationSpeed ) {
     tourPlayback.stopPlayBack(rsg.DC());
     rsg.setRigCameraController(CameraControlType::Walk);
     rsg.useSkybox(true);
-    V3f pos = V3f::ZERO;
+    V3f pos = V3fc::ZERO;
     Quaternion quat;
     HouseService::bestStartingPositionAndAngle(H(), pos, quat);
     if ( animationSpeed > 0.0f ) {
@@ -314,7 +315,7 @@ void ArchOrchestrator::setFloorPlanView( FloorPlanRenderMode fprm ) {
     tourPlayback.stopPlayBack(rsg.DC());
     rsg.setRigCameraController(CameraControlType::Edit2d);
     rsg.DC()->LockAtWalkingHeight(false);
-    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY()));
     lastKnownGoodFloorPlanRenderMode = fprm;
     arc.renderMode(fprm);
     HouseRender::IMHouseDrawSourceDataFloorPlan(rsg.RR(), sg, H(), arc);
@@ -344,7 +345,7 @@ void ArchOrchestrator::setTopDownView() {
     tourPlayback.stopPlayBack(rsg.DC());
     rsg.setRigCameraController(CameraControlType::Edit2d);
     rsg.DC()->LockAtWalkingHeight(false);
-    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY()));
     arc.renderMode(FloorPlanRenderMode::Normal3d);
     auto quatAngles = V3f{ M_PI_2, 0.0f, 0.0f };
     rsg.useSkybox(true);
@@ -368,9 +369,9 @@ void ArchOrchestrator::setDollHouseView() {
     tourPlayback.stopPlayBack(rsg.DC());
     arc.setViewingMode(ArchViewingMode::AVM_DollHouse);
     rsg.setRigCameraController(CameraControlType::Fly);
-    arc.pm(RDSPreMult(Matrix4f::IDENTITY));
+    arc.pm(RDSPreMult(Matrix4f::IDENTITY()));
     rsg.useSkybox(true);
-    V3f pos = V3f::ZERO;
+    V3f pos = V3fc::ZERO;
     Quaternion quat{};
     HouseService::bestDollyPositionAndAngle(H(), pos, quat);
     Timeline::play(rsg.DC()->PosAnim(), 0, KeyFramePair{ 0.9f, pos });

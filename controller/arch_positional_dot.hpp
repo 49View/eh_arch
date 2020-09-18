@@ -39,7 +39,7 @@ private:
     FadeInOutSwitch positionalDotAlphaAnim{ fullDotOpacityValue, dotFadeTime };
     bool isFlying = false;
     bool antiWallRotation = false;
-    V3f hitPosition{ V3f::ZERO };
+    V3f hitPosition{ V3fc::ZERO };
     FeatureIntersection fd;
 };
 

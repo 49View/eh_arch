@@ -26,11 +26,11 @@ namespace FloorRender {
         if ( drawDebug ) {
             int oCounter = 0;
             for ( const auto& seg : f->orphanedUShapes ) {
-                rr.draw<DCircle>(XZY::C(seg.middle), Color4f::WHITE, sm, 0.075f, arc.pm(),
+                rr.draw<DCircle>(XZY::C(seg.middle), C4fc::WHITE, sm, 0.075f, arc.pm(),
                                  seg.hashFeature("orphanedUShape" + sm.hash(), oCounter++));
             }
             for ( const auto& seg : f->orphanedWallSegments ) {
-                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), Color4f::RED, sm, 0.075f, arc.pm(),
+                rr.draw<DLine>(XZY::C(seg.p1), XZY::C(seg.p2), C4fc::RED, sm, 0.075f, arc.pm(),
                                f->hashFeature("orphanedWallSegments" + sm.hash(), oCounter++));
             }
         }
@@ -53,7 +53,7 @@ namespace FloorRender {
     }
 
     GeomSP make3dGeometry( SceneGraph& sg, GeomSP eRootH, const FloorBSData *f ) {
-        auto lRootH = eRootH->addChildren("Floor"+ std::to_string(f->hash));
+        auto lRootH = EF::create<Geom>("Floor"+ std::to_string(f->hash));
 
         // External walls of this floor
         WallRender::make3dGeometry(sg, lRootH, f->perimeterArchSegments, f->externalWallsMaterial);
@@ -71,6 +71,6 @@ namespace FloorRender {
             RoomRender::make3dGeometry(sg, lRootH, w.get());
         }
 
-        return lRootH;
+        return eRootH->addChildren(lRootH);
     }
 }

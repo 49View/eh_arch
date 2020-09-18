@@ -64,9 +64,9 @@ private:
 
     RoomBuilderSegmentPoints segments;
     SerializableContainer cachedSegments;
-    V3f currentPoint = V3f::ZERO;
-    V3f inputPoint = V3f::ZERO;
-    V3f mBestStartingPoint = V3f::ZERO;
+    V3f currentPoint = V3fc::ZERO;
+    V3f inputPoint = V3fc::ZERO;
+    V3f mBestStartingPoint = V3fc::ZERO;
     float snapThreshold = 0.10f;
     float wallWidth = 0.15f;
     bool hasBeenSnapped = false;

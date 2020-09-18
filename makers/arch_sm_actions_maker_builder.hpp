@@ -167,7 +167,7 @@ struct KeyToggleFeatureManipulation {
         if ( keyEvent.keyCode == GMK_A ) {
             arc.splitFirstEdgeOnSelectionList([&]( const ArchStructuralFeatureDescriptor& asf, const V2f& offset ) {
                 WallService::splitEdgeAndAddPointInTheMiddle(asf, offset);
-                asg.H()->calcBBox();
+                asg.H()->updateVolume();
             });
             asg.pushHouseChange();
             arc.resetSelection();
@@ -195,7 +195,7 @@ struct TouchMoveFeatureManipulation {
                 asg.pushHouseChange();
             } else {
                 WallService::moveFeature(asf, offset, false);
-                asg.H()->calcBBox();
+                asg.H()->updateVolume();
                 HouseMakerBitmap::makeFromWalls(asg.H());
                 asg.pushHouseChange();
             }

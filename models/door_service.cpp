@@ -60,15 +60,15 @@ void DoorService::calculatePivots( DoorBSData *d ) {
     d->doorHandlePivotRight = Vector3f(-side * realDoorWidth + ( 0.075f * side ), 0.85f, 0.0f);
 
     if ( isOdd(d->dIndex) ) {
-        d->doorHandlePivotLeft += V3f::Z_AXIS * d->doorGeomThickness;
-        d->doorHandlePivotRight += V3f::Z_AXIS * d->doorGeomThickness;
+        d->doorHandlePivotLeft += V3fc::Z_AXIS * d->doorGeomThickness;
+        d->doorHandlePivotRight += V3fc::Z_AXIS * d->doorGeomThickness;
     }
-    d->doorHandleRot = Quaternion(M_PI, V3f::UP_AXIS);
+    d->doorHandleRot = Quaternion(M_PI, V3fc::UP_AXIS);
     if ( isLeft(d->dIndex) ) {
-        d->doorHandlePivotLeft += V3f::Z_AXIS * d->doorGeomThickness;
-        d->doorHandlePivotRight -= V3f::Z_AXIS * d->doorGeomThickness;
+        d->doorHandlePivotLeft += V3fc::Z_AXIS * d->doorGeomThickness;
+        d->doorHandlePivotRight -= V3fc::Z_AXIS * d->doorGeomThickness;
         d->doorHandleRot =
-                Quaternion(M_PI, V3f::Z_AXIS) * Quaternion(M_PI, V3f::UP_AXIS) * Quaternion(M_PI, V3f::X_AXIS);
+                Quaternion(M_PI, V3fc::Z_AXIS) * Quaternion(M_PI, V3fc::UP_AXIS) * Quaternion(M_PI, V3fc::X_AXIS);
     }
 
     d->doorHandlePlateDoorSidePivot = Vector3f(-side * realDoorWidth * 0.5f, 0.0f, d->HalfHeight());

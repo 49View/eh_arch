@@ -348,7 +348,7 @@ namespace RoomService {
                                  const std::vector<std::vector<ArchSegment>>& ws ) {
         WallSegments(r, ws);
         calcLongestWall(r);
-        r->calcBBox();
+        r->updateVolume();
     }
 
     std::vector<std::vector<Vector2f>>
@@ -692,65 +692,65 @@ namespace RoomService {
     Vector4f roomColor( const RoomBSData *r ) {
         switch ( r->roomTypes[0] ) {
             case ASType::GenericRoom:
-                return Color4f::SAND;
+                return C4fc::SAND;
 
             case ASType::LivingRoom:
             case ASType::Studio:
-                return Color4f::ALMOND;
+                return C4fc::ALMOND;
 
             case ASType::Kitchen:
-                return Color4f::PASTEL_GREEN;
+                return C4fc::PASTEL_GREEN;
 
             case ASType::BedroomSingle:
-                return Color4f::PASTEL_BROWN;
+                return C4fc::PASTEL_BROWN;
 
             case ASType::BedroomDouble:
-                return Color4f::PASTEL_BROWN;
+                return C4fc::PASTEL_BROWN;
 
             case ASType::BedroomMaster:
-                return Color4f::PASTEL_BROWN;
+                return C4fc::PASTEL_BROWN;
 
             case ASType::Bathroom:
-                return Color4f::PASTEL_CYAN;
+                return C4fc::PASTEL_CYAN;
 
             case ASType::ShowerRoom:
-                return Color4f::PASTEL_CYAN;
+                return C4fc::PASTEL_CYAN;
 
             case ASType::EnSuite:
-                return Color4f::PASTEL_CYAN;
+                return C4fc::PASTEL_CYAN;
 
             case ASType::ToiletRoom:
-                return Color4f::PASTEL_CYAN;
+                return C4fc::PASTEL_CYAN;
 
             case ASType::Conservatory:
-                return Color4f::PASTEL_GRAYLIGHT;
+                return C4fc::PASTEL_GRAYLIGHT;
 
             case ASType::GamesRoom:
-                return Color4f::PASTEL_RED;
+                return C4fc::PASTEL_RED;
 
             case ASType::Laundry:
-                return Color4f::PASTEL_GRAYLIGHT;
+                return C4fc::PASTEL_GRAYLIGHT;
 
             case ASType::Hallway:
-                return Color4f::PASTEL_GRAYLIGHT;
+                return C4fc::PASTEL_GRAYLIGHT;
 
             case ASType::Garage:
-                return Color4f::PASTEL_GRAY;
+                return C4fc::PASTEL_GRAY;
 
             case ASType::Cupboard:
-                return Color4f::DARK_CYAN;
+                return C4fc::DARK_CYAN;
 
             case ASType::Storage:
-                return Color4f::ORANGE_SCHEME1_1;
+                return C4fc::ORANGE_SCHEME1_1;
 
             case ASType::BoilerRoom:
-                return C4f::DARK_BLUE;
+                return C4fc::DARK_BLUE;
 
             default:
                 break;
         }
 
-        return Color4f::WHITE;
+        return C4fc::WHITE;
     }
 
     std::string roomSizeToString( const RoomBSData *r ) {

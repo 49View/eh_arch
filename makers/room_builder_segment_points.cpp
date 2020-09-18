@@ -202,7 +202,7 @@ void RoomBuilderSegmentPoints::scale( float scaleFactor ) {
 }
 
 V3f RoomBuilderSegmentPoints::lastDirection() const {
-    if ( plist.size() < 2 ) return V3f::ZERO;
+    if ( plist.size() < 2 ) return V3fc::ZERO;
 
     return normalize( plist.back() - plist[plist.size()-2]);
 }

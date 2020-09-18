@@ -18,7 +18,7 @@
 #include <eh_arch/models/room_service_furniture.hpp>
 
 inline V4f furnitureMoveDotColor() {
-    return C4f::PASTEL_GREEN;
+    return C4fc::PASTEL_GREEN;
 }
 
 bool ArchExplorer::canBeManipulated() const {
@@ -87,8 +87,8 @@ void ArchExplorer::firstTimeTouchDownCtrlKey( const V3f& _dir, RenderOrchestrato
             if ( furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ) {
                 furniturePlane = Plane3f{ fd.normal, centerBottomFurnitureSelected };
             } else {
-                furniturePlane = Plane3f{ centerBottomFurnitureSelected, centerBottomFurnitureSelected + V3f::X_AXIS,
-                                          centerBottomFurnitureSelected + V3f::Z_AXIS };
+                furniturePlane = Plane3f{ centerBottomFurnitureSelected, centerBottomFurnitureSelected + V3fc::X_AXIS,
+                                          centerBottomFurnitureSelected + V3fc::Z_AXIS };
             }
             bool inters = false;
             prevFurnitureMovePosition = furniturePlane.intersectRay(rsg.DC()->getPosition(), _dir, inters);
@@ -243,27 +243,27 @@ void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rs
         }
 
         if ( fdFurniture.hasHit() && fdFurniture.nearV < fd.nearV ) {
-            V3f refNormal = V3f::UP_AXIS;
+            V3f refNormal = V3fc::UP_AXIS;
             furnitureSelectionAlphaAnim.fadeIn();
             furnitureSelected = dynamic_cast<FittedFurniture *>(fdFurniture.arch);
 
             if ( furnitureSelected->checkIf(FittedFurnitureFlags::FF_CanBeHanged) ) {
-                float closestDist = dot(fd.normal, V3f::X_AXIS);
+                float closestDist = dot(fd.normal, V3fc::X_AXIS);
                 centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreFront();
-                if ( auto d = dot(fd.normal, V3f::X_AXIS_NEG); d > closestDist ) {
+                if ( auto d = dot(fd.normal, V3fc::X_AXIS_NEG); d > closestDist ) {
                     centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreBack();
                     closestDist = d;
                 }
-                if ( auto d = dot(fd.normal, V3f::Z_AXIS); d > closestDist ) {
+                if ( auto d = dot(fd.normal, V3fc::Z_AXIS); d > closestDist ) {
                     centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreLeft();
                     closestDist = d;
                 }
-                if ( auto d = dot(fd.normal, V3f::Z_AXIS_NEG); d > closestDist ) {
+                if ( auto d = dot(fd.normal, V3fc::Z_AXIS_NEG); d > closestDist ) {
                     centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreRight();
                 }
                 furnitureSelectionOutline = createBBoxOutline(centerBottomFurnitureSelected,
-                                                              V3f::UP_AXIS * furnitureSelected->Height(),
-                                                              V3f::Z_AXIS * furnitureSelected->Width());
+                                                              V3fc::UP_AXIS * furnitureSelected->Height(),
+                                                              V3fc::Z_AXIS * furnitureSelected->Width());
                 refNormal = fd.normal;
             } else {
                 centerBottomFurnitureSelected = furnitureSelected->BBox3d().centreBottom();

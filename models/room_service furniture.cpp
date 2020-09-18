@@ -238,7 +238,7 @@ namespace RoomService {
     void placeAroundInternal( std::shared_ptr<FittedFurniture> dest, FittedFurniture *source, PivotPointPosition where,
                               const V2f& slack, const float _height ) {
 
-        V2f pivotOffset{ V3f::ZERO };
+        V2f pivotOffset{ V3fc::ZERO };
         switch ( where ) {
             case PivotPointPosition::TopLeft:
                 pivotOffset = source->widthNormal * ( source->HalfWidth() + dest->HalfWidth() + slack.x() );
@@ -332,7 +332,7 @@ namespace RoomService {
         V2f offset = params.ls->normal * ( params.ff->HalfDepth() + skirtingDepth(params.r) + params.slack.y() );
         offset += lpn * ( params.ff->HalfWidth() + skirtingDepth(params.r) + params.slack.x() );
         params.ff->position(XZY::C(cornerPoint + offset, params.heightOffset));
-        params.ff->rotate(Quaternion{ RoomService::furnitureAngleFromWall(params.ls), V3f::UP_AXIS });
+        params.ff->rotate(Quaternion{ RoomService::furnitureAngleFromWall(params.ls), V3fc::UP_AXIS });
         params.ff->widthNormal = params.ls->crossNormal;
         params.ff->depthNormal = params.ls->normal;
         return RS::addFurniture(params);
@@ -346,7 +346,7 @@ namespace RoomService {
 
         V2f offset = ls->normal * ( ( params.ff->HalfDepth() ) + skirtingDepth(params.r) + params.slackScalar );
         params.ff->position(XZY::C(ls->middle + offset, params.heightOffset));
-        params.ff->rotate(Quaternion{ RoomService::furnitureAngleFromWall(ls), V3f::UP_AXIS });
+        params.ff->rotate(Quaternion{ RoomService::furnitureAngleFromWall(ls), V3fc::UP_AXIS });
         params.ff->widthNormal = ls->crossNormal;
         params.ff->depthNormal = ls->normal;
         return RS::addFurniture(params);
@@ -641,14 +641,14 @@ namespace RoomService {
         ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner),
                                                    FurnitureRefs{ { FTH::FT_Shelf, FTH::FT_Shelf, FTH::FT_Sofa } },
                                                    WSLOH::Longest(),
-                                                   FurnitureSlacks{ cornerSlack, V3f::ZERO, cornerSlack } });
+                                                   FurnitureSlacks{ cornerSlack, V3fc::ZERO, cornerSlack } });
         ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner),
                                                    FurnitureRefs{ { FTH::FT_Wardrobe, FTH::FT_Wardrobe } },
                                                    WSLOH::LongestOpposite(), WSC_P2 });
         ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner),
                                                    FurnitureRefs{ { FTH::FT_Shelf, FTH::FT_Wardrobe, FTH::FT_Armchair } },
                                                    WallSegmentIdentifier{ WSLOH::ExactIndex(), 3 },
-                                                   FurnitureSlacks{ V3f::ZERO, V3f::ZERO, cornerSlack * 0.5f },
+                                                   FurnitureSlacks{ V3fc::ZERO, V3fc::ZERO, cornerSlack * 0.5f },
                                                    WSC_P2 });
         ruleScript.addRule(FurniturePlacementRule{ FurnitureRuleIndex(RS::SetAlignedAtCorner),
                                                    FurnitureRefs{ { FTH::FT_Armchair } },
