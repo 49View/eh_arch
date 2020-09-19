@@ -119,6 +119,7 @@ struct LoadFloorPlan {
 
 struct ElaborateHouseBitmap {
     void operator()( SceneGraph& sg, ArchOrchestrator& asg, RenderOrchestrator& rsg, ArchRenderController& arc ) {
+        arc.resetSelection();
         auto newHouse = HouseMakerBitmap::make(asg.H(), *sg.get<RawImage>(asg.H()->propertyId), asg.FurnitureMap());
         asg.setHouse(newHouse);
         asg.showIMHouse();
