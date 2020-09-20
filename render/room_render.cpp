@@ -57,7 +57,7 @@ namespace RoomRender {
         int ffc = 0;
         for ( const auto& ff : room->mFittedFurniture ) {
             auto ffColor = arc.getFillColor(ff.get(), C4fc::BLACK);
-            Matrix4f mt{ ff->Position() * V3fc::MASK_Y_OUT, ff->Rotation(), ff->Size() * ff->Scale() };
+            Matrix4f mt{ ff->Position() * V3fc::MASK_Y_OUT, ff->Rotation(), ff->Scale()*ff->Size() };
             mt.mult(arc.pm()());
             rr.draw<DLine>(sg.PL(ff->symbolRef), ffColor, RDSPreMult(mt), sm, lineWidth,
                            room->hashFeature("ff"+sm.hash(), ffc++));

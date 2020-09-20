@@ -167,6 +167,7 @@ protected:
 JSONDATA_H(FittedFurniture, ArchStructural, hash, type, albedo, bbox, bbox3d, size, centre, pos, rotation, scaling,
            mTriangles2d, linkedHash, sequencePart, name, keyTag, tags, symbolRef,
            dependantHashList, widthNormal, depthNormal, flags)
+
     std::string name;
     std::string keyTag;
     std::vector<std::string> tags;
@@ -619,4 +620,5 @@ protected:
 private:
     void recalcSkirtingSegments();
 };
+
 

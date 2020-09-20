@@ -19,7 +19,7 @@
 // *********************************************************************************************************************
 
 HouseBSData::HouseBSData( const Rect2f& _floorPlanBBox ) {
-    initialiseVolume(_floorPlanBBox);
+    initialiseVolume(AABB{ XZY::C(_floorPlanBBox.bottomRight(), 0.0f), XZY::C( _floorPlanBBox.topLeft(), 0.0f) });
 }
 
 void HouseBSData::updateVolumeInternal() {
@@ -84,9 +84,11 @@ FloorBSData::FloorBSData( const JMATH::Rect2f& _rect, int _floorNumber, float _d
                           float _defaultWindowBaseOffset ) {
     type = ArchType::FloorT;
 
+    AABB lBBox3d{};
     auto lSize = V3f{ _rect.width(), _defaultCeilingHeight, _rect.height() };
     auto lCentre = XZY::C(_rect.centre(), number * ( _defaultGroundHeight + _defaultCeilingHeight ));
-    initialiseVolume(lSize, lCentre);
+    lBBox3d.setCenterAndSize(lCentre, lSize);
+    initialiseVolume(lBBox3d);
 
     anchorPoint = JMATH::Rect2fFeature::bottomRight;
     number = _floorNumber;
@@ -329,7 +331,8 @@ FittedFurniture::FittedFurniture( const std::tuple<std::string, AABB>& args, std
                                   std::string _symbolRef ) :
         name(std::get<0>(args)), keyTag(std::move(_keyTag)), symbolRef(std::move(_symbolRef)) {
 
-    initialiseVolume(std::get<1>(args));
+    auto lBBox = std::get<1>(args);
+    initialiseVolume(lBBox);
     type = ArchType::FittedFurnitureT;
 }
 
