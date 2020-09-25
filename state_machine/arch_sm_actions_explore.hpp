@@ -7,6 +7,11 @@
 #include <eh_arch/controller/arch_explorer.hpp>
 #include <graphics/vertex_processing_anim.h>
 
+#ifndef _PRODUCTION_
+#include <graphics/lightmap_manager.hpp>
+#include <poly/converters/gltf2/gltf2.h>
+#endif
+
 struct ExploreEditStateEntry {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
@@ -311,3 +316,13 @@ struct TimeDecrement {
         }
     }
 };
+
+#ifndef _PRODUCTION_
+struct BakeLightmaps {
+    void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
+        if ( asg.H() ) {
+            LightmapManager::bakeLightmaps(rsg.SG(), rsg.RR(), {GLTF2Tag});
+        }
+    }
+};
+#endif

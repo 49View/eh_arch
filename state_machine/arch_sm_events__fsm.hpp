@@ -70,6 +70,9 @@ struct OnFlorPlanViewToggleEvent {
 };
 struct OnDollyHouseToggleEvent {
 };
+struct OnBakeLightmapsEvent {
+};
+
 
 struct OnIncrementalScaleEvent {
     float incrementalScaleFactor = 0.0f;

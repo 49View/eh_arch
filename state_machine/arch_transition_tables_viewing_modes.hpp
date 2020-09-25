@@ -36,7 +36,9 @@ struct ExploreStateMachine {
             ,state<class ExploreState> + event<OnMakeHouse3dEvent> / MakeHouse3d{}
             ,state<class ExploreState> + event<OnAddFurnitureSingleEvent> / AddFurnitureSingle{}
             ,state<class ExploreState> + event<OnTakeScreenShotEvent> / TakeScreenShot{}
-
+#ifndef _PRODUCTION_
+            ,state<class ExploreState> + event<OnBakeLightmapsEvent> / BakeLightmaps{}
+#endif
             // Mouse/Camera events
             ,state<class ExploreState> + event<OnTickEvent> / Tick{}
             ,state<class ExploreState> + event<OnFirstTimeTouchDownEvent> / FirstTimeTouchDown{}
