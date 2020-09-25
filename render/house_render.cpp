@@ -98,7 +98,7 @@ namespace HouseRender {
         for ( const auto& f : data->mFloors ) {
             FloorRender::make3dGeometry(sg, houseRootH, f.get());
         }
-        sg.addNode(houseRootH, GTBucket::Near );
+        sg.traverseNode(houseRootH, GTBucket::Near, NodeTraverseMode::Add );
         HouseService::loadPanorama( data, sg );
 
         return ret;
