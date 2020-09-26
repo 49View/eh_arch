@@ -288,15 +288,16 @@ void RemoteEntitySelector::update( ArchOrchestrator& asg, const std::string& med
                             if ( t > 0 ) ImGui::SameLine();
                             if ( m + t >= metadataMaterialList.size() ) break;
                             const auto& meta = metadataMaterialList[m + t];
-                            auto imr = rsg.SG().get<RawImage>(meta.thumb);
+                            auto thumbName = meta.thumb.empty() ? S::WHITE : meta.thumb;
+                            auto imr = rsg.SG().get<RawImage>(thumbName);
                             if ( !imr ) {
                                 auto fileData = FM::readLocalFileC(
-                                        mediaFolder + "entities/" + meta.group + "/" + meta.thumb);
+                                        mediaFolder + "entities/" + meta.group + "/" + thumbName);
                                 if ( !fileData.empty() ) {
-                                    rsg.SG().addRawImageIM(meta.thumb, RawImage{ fileData });
+                                    rsg.SG().addRawImageIM(thumbName, RawImage{ fileData });
                                 }
                             }
-                            auto im = rsg.TH(meta.thumb);
+                            auto im = rsg.TH(thumbName);
                             if ( im ) {
                                 if ( ImGui::ImageButton(ImGuiRenderTexture(im), ImVec2(matThumbSize, matThumbSize)) ) {
                                     injectMaterial(asg, meta);

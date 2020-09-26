@@ -227,9 +227,9 @@ std::vector<V3f> createBBoxOutline( const V3f& input, const V3f& axis1, const V3
 void ArchExplorer::tickControlKey( ArchOrchestrator& asg, RenderOrchestrator& rsg, const AggregatedInputData& aid,
                                    const std::string& mediaFolder ) {
 
-    auto _dir = aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get());
-
     if ( !bFurnitureTargetLocked ) {
+        auto _dir = aid.mouseViewportDir(TouchIndex::TOUCH_ZERO, rsg.DC().get());
+
         fdFurniture = HouseService::rayFeatureIntersect(asg.H(), RayPair3{ rsg.DC()->getPosition(), _dir },
                                                         FeatureIntersectionFlags::FIF_Furnitures);
         fd = HouseService::rayFeatureIntersect(asg.H(), RayPair3{ rsg.DC()->getPosition(), _dir },
