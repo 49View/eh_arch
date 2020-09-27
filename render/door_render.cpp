@@ -252,7 +252,6 @@ namespace DoorRender {
 
 
     auto addDoorGeom( SceneGraph& sg, GeomSP mRootH, const DoorBSData *d ) {
-//        auto child = mRootH->addChildren("ActualDoor");
         auto child = EF::create<Geom>( "ActualDoor" );
         englishDoor(sg, child, d->doorSize, d->doorGeomPivot, d->doorGeomThickness);
 
