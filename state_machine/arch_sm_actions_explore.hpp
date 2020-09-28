@@ -8,7 +8,7 @@
 #include <graphics/vertex_processing_anim.h>
 
 #ifndef _PRODUCTION_
-#include <graphics/lightmap_manager.hpp>
+#include <render_scene_graph/lightmap_manager.hpp>
 #include <poly/converters/gltf2/gltf2.h>
 #endif
 

@@ -174,7 +174,7 @@ namespace RoomRender {
 //                    LOGRS("Name: " << furn->Name() );
 //                    LOGRS("Arch bbox: " << fur->BBox3d() );
 //                    LOGRS("Geom bbox: " << furn->volume() );
-                    sg.GB<GT::Shape>(ShapeType::AABB, fur->BBox3d(), C4fc::BLUE_SHADOW, lRootH );
+//                    sg.GB<GT::Shape>(ShapeType::AABB, fur->BBox3d(), C4fc::BLUE_SHADOW, lRootH );
                 } else {
                     LOGRS("For some reason I cannot load a fitted furniture, it's empty, on room " << RS::roomName(w))
                 }

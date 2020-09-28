@@ -570,7 +570,7 @@ protected:
 JSONDATA_R_H(HouseBSData, ArchStructural, hash, type,
              albedo, bbox, bbox3d, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash,
              sequencePart,
-             version, propertyId, name, source, declaredSQm, defaultSkybox,
+             version, propertyId, name, source, declaredSQm, defaultSkybox, defaultPanoramaOSMMaterial,
              planeOffset, elevation, sourceData, bestInternalViewingPosition, bestInternalViewingAngle,
              bestDollyViewingPosition, bestDollyViewingAngle, walkableArea, doorHeight, defaultWindowHeight,
              defaultWindowBaseOffset, defaultCeilingHeight, windowsillExpansion, windowFrameThickness,
@@ -581,6 +581,7 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type,
     std::string source;
     std::string declaredSQm;
     std::string defaultSkybox;
+    MaterialAndColorProperty defaultPanoramaOSMMaterial{"city,atlas"};
     V2f planeOffset{ 0.0f,
                      0.0f }; // These are extra offsets required to be able to convert from 2d floorplan (with floors that span the whole image) to a real 3d space (floors stacked on top of each other not sideways as in 2d)
     float elevation = 0.0f; // These are extra offsets required to be able to convert from 2d floorplan (with floors that span the whole image) to a real 3d space (floors stacked on top of each other not sideways as in 2d)

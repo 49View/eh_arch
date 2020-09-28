@@ -13,7 +13,7 @@
 #include <core/math/vector_util.hpp>
 #include <poly/scene_events.h>
 #include <graphics/renderer.h>
-#include <graphics/lightmap_manager.hpp>
+#include <render_scene_graph/lightmap_manager.hpp>
 #include <render_scene_graph/render_orchestrator.h>
 #include <render_scene_graph/ui_view.hpp>
 #include <poly/scene_graph.h>
