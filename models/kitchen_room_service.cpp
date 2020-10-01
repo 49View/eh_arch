@@ -145,8 +145,8 @@ namespace KitchenRoomService {
         for ( int q = 0; q < numDrawers + 1; q++ ) {
             if ( ( q == ( numDrawers ) ) && ( finalPadding < 0.01f ) ) continue;
             float drawerWidth = ( q == numDrawers ) ? finalPadding : drawW;
-            Vector3f a = p1 + ( pDir * drawW * (float) q ) + ( pDir * dp );
-            Vector3f b = a + ( pDir * ( drawerWidth - dp * 2.0f ) );
+            V2f a = p1 + ( pDir * drawW * (float) q ) + ( pDir * dp );
+            V2f b = a + ( pDir * ( drawerWidth - dp * 2.0f ) );
             addDrawer(kd, a, b, z, unitHeight, depth, normal, drawerType, hff);
         }
     }

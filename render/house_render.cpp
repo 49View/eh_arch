@@ -66,7 +66,7 @@ namespace HouseRender {
             auto textPos = FontUtils::fitTextInBox(font, text, data->BBox(), fontHeight);
             textPos.setY(data->BBox().centreTop().y() + yOffset);
 
-            rr.draw<DText>(FDS{ text, font, textPos, fontHeight }, color, arc.pm(),
+            rr.draw<DText>(FDS{ text, font, V3f{textPos}, fontHeight }, color, arc.pm(),
                            data->hashFeature(text + color.toString()+sm.hash(), 0));
         };
 

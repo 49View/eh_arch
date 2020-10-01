@@ -83,13 +83,13 @@ namespace RoomRender {
         auto areaPos = FontUtils::fitTextInBox(font, areaSQm, bestBBox, fontHeight);
         areaPos += V2fc::Y_AXIS * fontHeight;
 
-        rr.draw<DText>(FDS{ roomName, font, textPos, fontHeight }, color, arc.pm(),
+        rr.draw<DText>(FDS{ roomName, font, V3f{textPos}, fontHeight }, color, arc.pm(),
                        room->hashFeature("T1", 0));
 
-        rr.draw<DText>(FDS{ measureText, font, measurePos, fontHeight }, color, arc.pm(),
+        rr.draw<DText>(FDS{ measureText, font, V3f{measurePos}, fontHeight }, color, arc.pm(),
                        room->hashFeature("T2", 1));
 
-        rr.draw<DText>(FDS{ areaSQm, font, areaPos, fontHeight }, color, arc.pm(),
+        rr.draw<DText>(FDS{ areaSQm, font, V3f{areaPos}, fontHeight }, color, arc.pm(),
                        room->hashFeature("T3", 2));
 
 //        for ( auto& cov : room->mvSkirtingSegments ) {

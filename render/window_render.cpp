@@ -67,7 +67,7 @@ namespace WindowRender {
     std::shared_ptr<Profile> makeWindowPanelProfile( const std::string& _name, const V2f& wppSize ) {
 
         Vector2f size = wppSize; // {7.0f, 4.5f}
-        Vector3f sizeh = size * 0.5f;
+        Vector3f sizeh{size * 0.5f};
         float slope = 0.006f; // { 0.4f }
         float glassgap = 0.003f; // { 0.3f }
 
@@ -147,7 +147,7 @@ namespace WindowRender {
 //    auto blindH = eRootH->addChildren<V3f>( V3f{0.0f, _rect.bottom(), -window->HalfDepth() + bd*0.5f });
         auto bp = V3f{ 0.0f, _rect.bottom(), -window->HalfDepth() + bd * 0.5f };
 
-        auto valProfile = makeValanceProfile("valence", valanceSize);
+        auto valProfile = makeValanceProfile("valence", V3f{valanceSize});
         sg.GB<GT::Follower>(valProfile, lineLR(V3fc::X_AXIS, bw), GT::Direction(V3fc::UP_AXIS), eRootH,
                             valancePos + bp);
 //    GeomBuilder{ mPrefs.sg, ProfileBuilder{}.cv2(valanceSize).func(makeValanceProfile),
@@ -273,7 +273,7 @@ namespace WindowRender {
 
             sg.GB<GT::Follower>(centralStemProfile, depthOffset(window, wppSize.x()),
                                 GT::Direction(V3fc::Z_AXIS),
-                                V3fVector{ p1, p2 }, eRootH);
+                                V3fVector{ V3f{p1}, V3f{p2} }, eRootH);
         }
 
         // Window panel profile

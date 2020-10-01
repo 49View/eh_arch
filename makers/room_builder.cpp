@@ -214,8 +214,8 @@ RoomBuilder::drawSingleDoor2d( int _bucketList, const V3f& _p1, const V3f& _p2, 
     float dist = distance(_p1.xz(), _p2.xz()) + windowLineWidth;
     V2f vn = normalize(_p1.xz() - _p2.xz());
     auto slope = XZY::C(rotate90(vn));
-    auto p1 = _p1 + ( slope * windowLineWidthOffset ) + vn * halfWindowLineWidth;
-    auto p2 = _p2 + ( slope * windowLineWidthOffset ) + vn * -halfWindowLineWidth;
+    auto p1 = _p1 + ( slope * windowLineWidthOffset ) + (V3f{vn} * halfWindowLineWidth);
+    auto p2 = _p2 + ( slope * windowLineWidthOffset ) + (V3f{vn} * -halfWindowLineWidth);
     auto p3 = p1 + ( slope * dist );
 
     std::vector<Vector3f> vLists;
@@ -413,7 +413,7 @@ V2fVectorOfVector RoomBuilder::bespokeriseWalls() {
         auto wallSegments = optSegments.wallSegments();
         for ( auto pwall : wallSegments ) {
             removeCollinear(pwall, 0.001f, CollinearWrap::False);
-            auto epts = extrudePointsWithWidth<ExtrudeComtour>(XZY::C(pwall), wallWidth, false);
+            auto epts = extrudePointsWithWidth<ExtrudeContour>(XZY::C(pwall), wallWidth, false);
             pwallLine.emplace_back(XZY::C2(epts));
         }
 

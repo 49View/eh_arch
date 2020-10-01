@@ -91,7 +91,7 @@ rayIntersectInternal( const HouseBSData *_house, const std::vector<std::shared_p
 V3f HouseService::centerOfBiggestRoom( const HouseBSData *house, float _preferredHeight ) {
 
     if ( house->mFloors.empty() ) {
-        return V2fc::ZERO;
+        return V3fc::ZERO;
     }
 
     using floatV3fPair = std::pair<float, V3f>;
@@ -106,7 +106,7 @@ V3f HouseService::centerOfBiggestRoom( const HouseBSData *house, float _preferre
     }
 
     if ( roomSizes.empty() ) {
-        return house->Position2d();
+        return V3f{house->Position2d()};
     }
 
     std::sort(roomSizes.begin(), roomSizes.end(),
