@@ -23,14 +23,13 @@ const {elaborateData} = require("./dataTransformer");
 
 const main = async () => {
 
-  const bbox = getBoundingBox(51.4892, -0.1344, 2);
+  const bbox = getBoundingBox(51.4992784,-0.125376, .3);
 
 
   const {nodes, ways, rels} = await getData(bbox);
   //const {nodes, ways, rels} = await getDataLocal(bbox);
   elaborateData(nodes, ways, rels);
 
-  // extendData(nodes,ways,rels);
   let elements = [];
 
   elements = elements.concat(createBuildings(nodes, ways, rels));

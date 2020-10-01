@@ -19,14 +19,14 @@ const createParks = (nodes,ways,rels) => {
 
     const simpleParks=createElementsFromWays(ways
         // , w => w.tags && ((w.tags["leisure"] && (w.tags["leisure"]==="park" || w.tags["leisure"]==="garden")) || (w.tags["landuse"] && w.tags["landuse"]==="grass"))
-        , w => w.tags && (w.tags["leisure"] || (w.tags["landuse"] && w.tags["landuse"]!=="construction") || (w.tags["area"] && w.tags["man_made"]))
+        , w => w.tags && (w.tags["leisure"] || (w.tags["landuse"] && w.tags["landuse"]!=="construction") || (w.tags["area"] && w.tags["man_made"] && !w.tags["ferry"]))
         , parkFromWay);
     // const simpleBuildings=[];
     const complexParks=createElementsFromRels(rels
         //, r => r.tags && ((r.tags["leisure"] && (r.tags["leisure"]==="park" || r.tags["leisure"]==="garden")) || (r.tags["landuse"] && r.tags["landuse"]==="grass"))
-        , r => r.tags && (r.tags["leisure"] || (r.tags["landuse"] && r.tags["landuse"]!=="construction") || (r.tags["area"] && r.tags["man_made"]))
+        , r => r.tags && (r.tags["leisure"] || (r.tags["landuse"] && r.tags["landuse"]!=="construction") || (r.tags["area"] && r.tags["man_made"] && !r.tags["ferry"]))
         , parkFromRel);
-    
+
     console.log(`Found ${simpleParks.length} simple parks`);
     console.log(`Found ${complexParks.length} complex parks`);
     console.log("----------------------------------------------");
@@ -43,8 +43,8 @@ const createParkMesh = (id, tags, boundingBox, faces, color) => {
         colour: color,
         isTriangleStrip: false
     });
-    
-    return createMesh(id, tags, "park", boundingBox, groups);    
+
+    return createMesh(id, tags, "park", boundingBox, groups);
 }
 
 const parkFromWay = (way) => {

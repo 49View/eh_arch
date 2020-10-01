@@ -69,7 +69,7 @@ const calcPointProjection = (pointLineA, pointLineB, point) => {
     } else {
         const dx = (pointLineB.x-pointLineA.x);
         const dy = (pointLineB.y-pointLineA.y);
-        const rxy = dx/dy; 
+        const rxy = dx/dy;
 
         const t = (point.y+point.x*rxy-pointLineA.x*rxy-pointLineA.y)/(dy+rxy*dx);
 
@@ -80,7 +80,7 @@ const calcPointProjection = (pointLineA, pointLineB, point) => {
 
 
 const extrudePoly = (poly, minHeight, maxHeight, useTrianglesStrip) => {
-    
+
     const result = [];
 
     if (useTrianglesStrip) {
@@ -225,8 +225,8 @@ const removeCollinearPoints = (nodes) => {
                 points.splice(pointToRemove, 1);
             }
         }
-    }  
-    
+    }
+
     if (points.length<3) {
         points=[];
         nodes.slice(0,nodes.length-1).forEach(n => {
@@ -314,11 +314,11 @@ const twoLinesintersectParameter = (pointALine1, pointBLine1, pointALine2, point
     if (line1Vector.checkParallel(line2Vector)) {
         return Infinity;
     }
-    
+
     const parameter = (((pointALine1.y-pointALine2.y)*line1Vector.x)+((pointALine2.x-pointALine1.x)*line1Vector.y))
             / ((line2Vector.y*line1Vector.x)-(line2Vector.x*line1Vector.y));
-    
-    return parameter;                    
+
+    return parameter;
 }
 
 const checkPointsOrder = (points,convexHull) => {
@@ -389,7 +389,7 @@ const createClosedPath = (member, members) => {
     if (!closed) {
         return [];
     }
-    
+
     return connectedMembers;
 }
 
@@ -439,7 +439,7 @@ const createMesh = (id, tags, type, boundingBox, groups) => {
 }
 
 const getPolygonFromWay = (way) => {
-    const points = removeCollinearPoints(way.nodes); 
+    const points = removeCollinearPoints(way.nodes);
     if (points.length<3) {
         throw new Error("Invalid way "+ way.id);
     }
@@ -447,7 +447,7 @@ const getPolygonFromWay = (way) => {
     convertToLocalCoordinate(points, localBoundingBox.centerX, localBoundingBox.centerY);
     //Using: https://github.com/geidav/ombb-rotating-calipers
     //with some modifications
-    
+
     const convexHull = calcConvexHull(points);
     checkPointsOrder(points,convexHull);
     const orientedMinBoundingBox = calcOmbb(convexHull);
@@ -461,9 +461,10 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
 
     //Clone members for elaboration
     const polygons = [];
-    const members = JSON.parse(JSON.stringify(rel.members));
+    const members = rel.members;// JSON.parse(JSON.stringify(rel.members));
     //Cosed polygons not require elaboration
     members.forEach(m => {
+        m.processed = false;
         if (checkPathClosed(m.ref)) {
             m.processed=true;
             const polygon = {
@@ -479,7 +480,7 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
     });
 
     //Search and create closed polygons from segments
-    while (members.filter(m=>m.processed===true).length<members.length) 
+    while (members.filter(m=> m.processed===true).length<members.length)
     {
         for (i=0;i<members.length;i++) {
             if (!members[i].processed) {
@@ -498,14 +499,14 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
                 }
             }
         }
-    } 
+    }
 
     //Create global array points
     let relPoints = [];
     polygons.forEach(p => {
         p.points=[];
         p.nodes.forEach(n => p.points.push({x: Number(n.x), y: Number(n.y), lat: n.lat, lon:n.lon}));
-        relPoints=relPoints.concat(p.points);               
+        relPoints=relPoints.concat(p.points);
     });
     //Compute local bounding box and correct point direction
     const localBoundingBox=computeBoundingBox(relPoints);
@@ -531,14 +532,12 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
 const createElementsFromWays = (ways, filter, elementCreator) => {
     const elements=[];
     ways.filter(w => w.calc!==undefined)
-        .filter(filter)        
+        .filter(filter)
         .forEach(w => {  // && w.id===364313092
             try {
-                //const {polygon,localBoundingBox,convexHull,orientedMinBoundingBox} = getPolygonFromWay(w);
-
                 const element = elementCreator(w, w.calc.polygon, w.calc.lbb, w.calc.convexHull, w.calc.ombb);
                 if (element!==null) {
-                    elements.push(element);                    
+                    elements.push(element);
                 }
             } catch (ex) {
                 console.log(`Error in ${w.id} way`, ex);
@@ -556,10 +555,9 @@ const createElementsFromRels = (rels, filter, elementCreator) => {
         .filter(filter)
         .forEach(r => {
             try {
-                //const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(r);
                 const element = elementCreator(r, r.calc.polygons, r.calc.lbb);
                 if (element!==null) {
-                    elements.push(element);                    
+                    elements.push(element);
                 }
 
             } catch (ex) {

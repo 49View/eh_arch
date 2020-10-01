@@ -7,8 +7,8 @@ const {
 RAD2DEG = 180 / Math.PI;
 PI_4 = Math.PI / 4;
 
-const lat2y = lat => { 
-    return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG; 
+const lat2y = lat => {
+    return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
 }
 // lon2x is basically lon because the mercator is a cilyndrical projection so longitude doesn't change it's ratio
 //const lon2x = lon => { return lon; }
@@ -82,6 +82,9 @@ const extendData = (nodes,ways,relations) => {
     })
     ways.forEach(w => {
         w.inRelation=false;
+        if ( w.id === 166758982 ) {
+            console.log("Extend data for 166758982 ok");
+        }
         const wayNodes=[];
         w.nodes.forEach(n => {
             const node=findElement(nodes,n);
@@ -125,7 +128,7 @@ const elaborateData = (nodes,ways,rels) => {
     //Calculate coordinate as distance from bbox center
     calcCoordinate(nodes);
     //Transform reference in ways and relations to data
-    extendData(nodes,ways,rels);    
+    extendData(nodes,ways,rels);
     //Compute ways and rels
     computePolygons(ways,rels);
 
@@ -135,7 +138,7 @@ const elaborateData = (nodes,ways,rels) => {
 const computePolygons = (ways, rels) => {
 
     ways
-        .filter(w => !w.inRelation && w.nodes.length>2 && w.nodes[0].id===w.nodes[w.nodes.length-1].id)
+        .filter(w => w.nodes.length>2 && w.nodes[0].id===w.nodes[w.nodes.length-1].id)
         .forEach(w => {
             try {
                 const {polygon,localBoundingBox,convexHull,orientedMinBoundingBox} = getPolygonFromWay(w);
@@ -159,6 +162,9 @@ const computePolygons = (ways, rels) => {
     rels
         .forEach(r => {
             try {
+                if ( r.id === 2739442 ) {
+                    console.log("yee")
+                }
                 const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(r);
                 r.calc = {
                     polygons: polygons,
@@ -183,7 +189,7 @@ const createPolygonsHierarchy = (ways, rels) => {
                 .filter(w => w.id !== wo.id)
                 .filter(w => !w.owner || (w.containers && w.containers.findIndex(c => c.id==="w-"+wo.id)))
                 .forEach(wi => {
-                    
+
                     if (checkPolygonInsidePolygon(wo.calc.absolutePolygon, wi.calc.absolutePolygon)) {
                         if (wi.containers===undefined) {
                             wi.containers=[];

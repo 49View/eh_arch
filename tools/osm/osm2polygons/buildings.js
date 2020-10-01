@@ -90,14 +90,14 @@ const getBuildingInfo = (tags) => {
         roofShape="hipped";
     } else if (tags["roof:shape"]==="dome" || tags["building:roof:shape"]==="dome") {
         roofShape="dome";
-    } else { //FLAT 
+    } else { //FLAT
         roofShape="flat";
     }
 
     if (tags["roof:height"]) {
-        roofHeight=Number(tags["roof:height"].replace("m",""));        
+        roofHeight=Number(tags["roof:height"].replace("m",""));
     } else if (tags["building:roof:height"]) {
-        roofHeight=Number(tags["building:roof:height"].replace("m",""));  
+        roofHeight=Number(tags["building:roof:height"].replace("m",""));
     } else if (tags["roof:levels"]) {
         roofHeight=Number(tags["roof:levels"].replace("m",""))*HEIGHT_FOR_LEVEL;
     } else if (tags["building:roof:levels"]) {
@@ -120,7 +120,7 @@ const getBuildingInfo = (tags) => {
         roofColour=tags["roof:colour"];
     } else if (tags["building:colour"]) {
         roofColour=tags["building:colour"];
-    } else {        
+    } else {
         roofColour=DEFAULT_ROOF_COLOUR;
     }
     if (!roofColour.startsWith("#")) {
@@ -156,11 +156,13 @@ const createBuildingMesh = (id, tags, boundingBox, lateralFaces, roofFaces, buil
 
     groups.push({
         faces: lateralFaces,
+        part: "lateral_faces",
         colour: buildingInfo.colour,
         isTriangleStrip: USE_TRIANGLES_STRIP
     });
     groups.push({
         faces: roofFaces,
+        part: "roof_faces",
         colour: buildingInfo.roof.colour,
         isTriangleStrip: false
     });
@@ -253,7 +255,7 @@ const createDomeRoof = (polygon, roofInfo) => {
             let xPoint = xyPoint*Math.cos(radAlpha);
             let yPoint = xyPoint*Math.sin(radAlpha);
             let zPoint = roofInfo.minHeight+inCircleRay*Math.sin(radTheta);
-    
+
             let xNextPoint = xyPoint*Math.cos(radNextAlpha);
             let yNextPoint = xyPoint*Math.sin(radNextAlpha);
             let zNextPoint = zPoint;
@@ -321,7 +323,7 @@ const createGabledRoof = (polygon, roofInfo, ombb, hippedPerc) => {
     const axes=[];
     let pointA, pointB;
     let startIndex;
-        
+
     //OMBB Axis
     axes.push(new Vector(ombb[1].x-ombb[0].x, ombb[1].y-ombb[0].y));
     axes.push(new Vector(ombb[2].x-ombb[1].x, ombb[2].y-ombb[1].y));
@@ -458,7 +460,7 @@ const createGabledRoof = (polygon, roofInfo, ombb, hippedPerc) => {
 
     //             faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.minHeight});
     //             faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
-    //             faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});                
+    //             faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
     //         }
     //     }
     // }
