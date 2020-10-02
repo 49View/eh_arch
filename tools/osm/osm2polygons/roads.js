@@ -1,14 +1,13 @@
-const { Vector} = require('./vector');
 const {
-    createMesh,
-    createElementsFromWays,
     computeBoundingBox,
-    removeCollinearPoints,
     getTrianglesFromPolygon,
     setHeight,
     convertToLocalCoordinate
 } = require('./osmHelper.js');
 const ClipperLib = require('js-clipper');
+const {groupFromRel} = require("./osmHelper");
+const {createElementsFromRels} = require("./osmHelper");
+const {createGroup} = require("./osmHelper");
 
 
 const createRoads = (nodes,ways,rels) => {
@@ -16,33 +15,30 @@ const createRoads = (nodes,ways,rels) => {
     console.log("ROADS");
     console.log("----------------------------------------------");
 
-    const roads = [];
-    
+    let roads = [];
+    const roadTypeName = "road";
+
     ways.filter(w => w.tags && (w.tags["highway"] || (w.tags["railway"] && w.tags["railway"]==="rail"))).forEach(w => {
-        const road = roadFromWay(w);
+        const road = roadFromWay(w, roadTypeName);
         if (road!==null) roads.push(road);
     });
-    
-    console.log(`Found ${roads.length} roads`);
+
+    const relRoads=createElementsFromRels(rels, roadTypeName
+      ,r => r.tags && (r.tags["area"] && (r.tags["highway"] === "pedestrian") )
+      , groupFromRel);
+
+    console.log(`Found way ${roads.length} roads`);
+    console.log(`Found rel ${relRoads.length} roads`);
     console.log("----------------------------------------------");
 
-    return roads;
+    return roads.concat(relRoads);
 }
 
-const createRoadMesh = (id, tags, boundingBox, faces, color) => {
+const roadFromWay = (way, name) => {
 
-    const groups=[];
-
-    groups.push({
-        faces: faces,
-        colour: color,
-        isTriangleStrip: false
-    });
-    
-    return createMesh(id, tags, "road", boundingBox, groups);    
-}
-
-const roadFromWay = (way) => {
+    if ( way.id === 111431570 ) {
+        console.log("aia");
+    }
 
     let road=null;
     let roadWidth = 2;
@@ -150,7 +146,7 @@ const roadFromWay = (way) => {
                     i=j;
                     break;
                 }
-            }            
+            }
         }
 
         if (startIndex===0) {
@@ -169,7 +165,7 @@ const roadFromWay = (way) => {
             co.AddPaths(subj, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenRound);
             co.Execute(solution, roadWidth*roadLane*scale);
             ClipperLib.JS.ScaleDownPaths(solution, scale);
-    
+
             solution.forEach(s => {
                 const polygon = s.map(p => { return { x: p.X, y:p.Y}});
                 faces = faces.concat(getTrianglesFromPolygon(polygon));
@@ -178,8 +174,7 @@ const roadFromWay = (way) => {
 
         setHeight(faces,.5);
 
-        //road = createRoadMesh("w-"+way.id, way.tags, localBoundingBox, faces, "#000000");
-        road = createRoadMesh("w-"+way.id, way.tags, localBoundingBox, faces, roadColor);
+        road = createGroup("w-"+way.id, way.tags, name, localBoundingBox, faces, roadColor);
     } catch (ex) {
         console.log(`Error creating road from way ${way.id}`);
     }

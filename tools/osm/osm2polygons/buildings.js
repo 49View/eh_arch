@@ -29,11 +29,11 @@ const createBuildings = (nodes,ways,rels) => {
     console.log("BUILDINGS");
     console.log("----------------------------------------------");
 
-    const simpleBuildings=createElementsFromWays(ways
+    const simpleBuildings=createElementsFromWays(ways, "building"
         , w => w.tags && (w.tags["building"] || w.tags["building:part"])
         , buildingFromWay);
     // const simpleBuildings=[];
-    const complexBuildings=createElementsFromRels(rels
+    const complexBuildings=createElementsFromRels(rels, "building"
         , r => r.tags && (r.tags["building"] || r.tags["building:part"])
         , buildingFromRel);
 
@@ -150,7 +150,7 @@ const getBuildingInfo = (tags) => {
     }
 }
 
-const createBuildingMesh = (id, tags, boundingBox, lateralFaces, roofFaces, buildingInfo) => {
+const createBuildingMesh = (id, tags, type, boundingBox, lateralFaces, roofFaces, buildingInfo) => {
 
     const groups=[];
 
@@ -166,7 +166,7 @@ const createBuildingMesh = (id, tags, boundingBox, lateralFaces, roofFaces, buil
         colour: buildingInfo.roof.colour,
         isTriangleStrip: false
     });
-    return createMesh(id, tags, "building", boundingBox, groups);
+    return createMesh(id, tags, type, boundingBox, groups);
 }
 
 const createRoof = (polygon, roofInfo, convexHull, ombb) => {
@@ -490,9 +490,14 @@ const createComplexPolygonRoof = (outerPolygon, innerPolygons, roofInfo) => {
     return faces;
 }
 
-const buildingFromWay = (way, polygon, localBoundingBox, convexHull, orientedMinBoundingBox) => {
+const buildingFromWay = (way, name) => {
 
     let isOutline;
+
+    const polygon = way.calc.polygon;
+    const localBoundingBox = way.calc.lbb;
+    const convexHull = way.calc.convexHull;
+    const orientedMinBoundingBox = way.calc.ombb;
 
     isOutline=false;
     if (way.tags["building"] && way.tags["building:part"]===undefined && way.children.length>0) {
@@ -519,13 +524,16 @@ const buildingFromWay = (way, polygon, localBoundingBox, convexHull, orientedMin
     const roofFaces = createRoof(polygon, buildingInfo.roof, convexHull, orientedMinBoundingBox);
 
     //Create building mesh
-    const building = createBuildingMesh("w-"+way.id, way.tags, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
+    const building = createBuildingMesh("w-"+way.id, way.tags, name, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
     return building;
 }
 
-const buildingFromRel = (rel,polygons,localBoundingBox) => {
+const buildingFromRel = (rel, name) => {
 
     const buildingInfo = getBuildingInfo(rel.tags);
+
+    const polygons = rel.calc.polygons;
+    const localBoundingBox = rel.calc.lbb;
 
     let roofFaces=[];
     let lateralFaces=[];
@@ -538,7 +546,7 @@ const buildingFromRel = (rel,polygons,localBoundingBox) => {
         //Compute roof faces
         roofFaces = roofFaces.concat(createComplexPolygonRoof(o, o.holes, buildingInfo.roof));
     })
-    const building = createBuildingMesh("r-"+rel.id, rel.tags, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
+    const building = createBuildingMesh("r-"+rel.id, rel.tags, name, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
     return building;
 }
 

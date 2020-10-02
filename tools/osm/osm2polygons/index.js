@@ -34,7 +34,7 @@ const main = async () => {
 
   elements = elements.concat(createBuildings(nodes, ways, rels));
   elements = elements.concat(createParks(nodes, ways, rels));
-  elements = elements.concat(createWater(nodes, ways, rels));
+  // elements = elements.concat(createWater(nodes, ways, rels));
   elements = elements.concat(createRoads(nodes, ways, rels));
 
   elements.forEach( e => {
@@ -45,10 +45,10 @@ const main = async () => {
   })
 
   //fs.writeFileSync("dataExtend.json", JSON.stringify({nodes,ways,rels},null,4), {options:"utf8"});
-  fs.writeFileSync("../osmdebug/src/elements.json", JSON.stringify({elements},null,4), {options:"utf8"});
-  fs.writeFileSync("elements.json", JSON.stringify({elements},null,4), {options:"utf8"});
-
-
+  const jsonOutput = JSON.stringify({elements},null,4);
+  fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {options:"utf8"});
+  fs.writeFileSync("elements.json", jsonOutput, {options:"utf8"});
+  fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/debug/elements.json", jsonOutput, {options:"utf8"});
 
 }
 

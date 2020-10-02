@@ -27,7 +27,7 @@ const getTrianglesFromPolygon = (polyPoints) => {
 }
 
 const getTrianglesFromComplexPolygon = (outerPolyPoints, innerPolys) => {
-    const intOuterPoints = [];
+    let intOuterPoints = [];
     const intInnersPoints = [];
 
     outerPolyPoints.forEach(p => {
@@ -46,16 +46,24 @@ const getTrianglesFromComplexPolygon = (outerPolyPoints, innerPolys) => {
     intInnersPoints.forEach(i => {
         swctx.addHole(i);
     });
-    swctx.triangulate();
-    const tri= swctx.getTriangles()
-    const points=[];
-    tri.forEach(t => {
-        points.push({x: t.points_[0].x/100000, y: t.points_[0].y/100000});
-        points.push({x: t.points_[1].x/100000, y: t.points_[1].y/100000});
-        points.push({x: t.points_[2].x/100000, y: t.points_[2].y/100000});
-    });
+    // NDDado: we try to triangulate first with the inner holes, if that fails it will roll back (inside the catch)
+    // to a simple polygon with outer points only. This means that the eventual inner points that will be maybe
+    // rendered somewhere will _overlap_ with the outer points. So we still need to get order dependent rendering
+    // on tiles, which is sane anyway.
+    try {
+        swctx.triangulate();
+        const tri= swctx.getTriangles()
+        const points=[];
+        tri.forEach(t => {
+            points.push({x: t.points_[0].x/100000, y: t.points_[0].y/100000});
+            points.push({x: t.points_[1].x/100000, y: t.points_[1].y/100000});
+            points.push({x: t.points_[2].x/100000, y: t.points_[2].y/100000});
+        });
 
-    return points;
+        return points;
+    } catch (e) {
+        return getTrianglesFromPolygon(outerPolyPoints);
+    }
 }
 
 const calcPointProjection = (pointLineA, pointLineB, point) => {
@@ -236,7 +244,7 @@ const removeCollinearPoints = (nodes) => {
             points.push(point);
         })
     }
-//console.log(points);
+
     return points;
 }
 
@@ -423,6 +431,18 @@ const checkPolygonInsidePolygon = (outerPolygon, polygon) => {
     return inside;
 }
 
+const createGroup = (id, tags, name, boundingBox, faces, color) => {
+
+    const groups=[];
+
+    groups.push({
+        faces: faces,
+        colour: color,
+    });
+
+    return createMesh(id, tags, name, boundingBox, groups);
+}
+
 const createMesh = (id, tags, type, boundingBox, groups) => {
     return {
         id: id,
@@ -529,13 +549,13 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
     return {polygons,localBoundingBox};
 }
 
-const createElementsFromWays = (ways, filter, elementCreator) => {
+const createElementsFromWays = (ways, name, filter, elementCreator) => {
     const elements=[];
     ways.filter(w => w.calc!==undefined)
         .filter(filter)
         .forEach(w => {  // && w.id===364313092
             try {
-                const element = elementCreator(w, w.calc.polygon, w.calc.lbb, w.calc.convexHull, w.calc.ombb);
+                const element = elementCreator(w, name);
                 if (element!==null) {
                     elements.push(element);
                 }
@@ -548,14 +568,14 @@ const createElementsFromWays = (ways, filter, elementCreator) => {
     return elements;
 }
 
-const createElementsFromRels = (rels, filter, elementCreator) => {
+const createElementsFromRels = (rels, name, filter, elementCreator) => {
     const elements=[];
 
     rels.filter(r => r.calc!==undefined)
         .filter(filter)
         .forEach(r => {
             try {
-                const element = elementCreator(r, r.calc.polygons, r.calc.lbb);
+                const element = elementCreator(r, name);
                 if (element!==null) {
                     elements.push(element);
                 }
@@ -567,6 +587,41 @@ const createElementsFromRels = (rels, filter, elementCreator) => {
     );
 
     return elements;
+}
+
+const groupFromWay = (way, name) => {
+
+    const {polygon,localBoundingBox}=getPolygonFromWay(way);
+    const faces = getTrianglesFromPolygon(polygon);
+    setHeight(faces,0);
+
+    let color = "#808080";
+
+    if ((way.tags["landuse"] && way.tags["landuse"]==="grass")
+      || (way.tags["leisure"] && (way.tags["leisure"]==="park" || way.tags["leisure"]==="garden"))) {
+        color="#CDF7C9";
+    }
+
+    return createGroup("w-"+way.id, way.tags, name, localBoundingBox, faces, color);
+}
+
+const groupFromRel = (rel, name) => {
+
+    const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(rel);
+    let faces=[];
+    polygons.filter(p => p.role==="outer").forEach(o => {
+        faces = faces.concat(getTrianglesFromComplexPolygon(o.points, o.holes));
+        setHeight(faces,0);
+    });
+
+    let color = "#808080";
+
+    if ((rel.tags["landuse"] && rel.tags["landuse"]==="grass")
+      || (rel.tags["leisure"] && (rel.tags["leisure"]==="park" || rel.tags["leisure"]==="garden"))) {
+        color="#CDF7C9";
+    }
+
+    return createGroup("r-"+rel.id, rel.tags, name, localBoundingBox, faces, color);
 }
 
 const setHeight = (faces, height) => {
@@ -587,6 +642,9 @@ module.exports = {
     checkPathClosed,
     createClosedPath,
     checkPolygonInsidePolygon,
+    groupFromWay,
+    groupFromRel,
+    createGroup,
     createMesh,
     getPolygonsFromMultipolygonRelation,
     getPolygonFromWay,
