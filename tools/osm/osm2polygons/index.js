@@ -1,9 +1,7 @@
-const poly2tri = require('poly2tri');
 const fs = require('fs');
-const {getBoundingBox,getData,getDataLocal} = require("./dataLoader");
+const {createTileAreas} = require("./tileArea");
+const {getBoundingBox,getData} = require("./dataLoader");
 const {createBuildings} = require("./buildings");
-const {createParks} = require("./parks");
-const {createWater} = require("./water");
 const {createRoads} = require("./roads");
 const {elaborateData} = require("./dataTransformer");
 
@@ -20,6 +18,24 @@ const {elaborateData} = require("./dataTransformer");
 // Corniche
 //const bbox = [51.49045, -0.12262, 51.49139, -0.12080];
 
+const parkFilter = w => {
+  return w.tags && (w.tags["leisure"] || (w.tags["landuse"] && (w.tags["landuse"]!=="construction" && w.tags["landuse"]!=="governmental")) || (w.tags["area"] && w.tags["man_made"] && !w.tags["ferry"]));
+}
+
+const parkingFilter = w => {
+  return w.tags && (w.tags["amenity"] === "parking");
+}
+
+const waterFilter = w => {
+  return w.tags && w.tags["natural"] && w.tags["natural"]==="water";
+}
+
+const addTileAreaFilter = (name, areaFilter) => {
+  return {
+    name,
+    areaFilter
+  }
+}
 
 const main = async () => {
 
@@ -33,8 +49,17 @@ const main = async () => {
   let elements = [];
 
   elements = elements.concat(createBuildings(nodes, ways, rels));
-  elements = elements.concat(createParks(nodes, ways, rels));
-  // elements = elements.concat(createWater(nodes, ways, rels));
+
+  const tileAreas = [
+    addTileAreaFilter("park", parkFilter),
+    addTileAreaFilter("parking", parkingFilter),
+    addTileAreaFilter("water", waterFilter),
+  ]
+
+  for ( const tf of tileAreas) {
+    elements = elements.concat(createTileAreas(tf, nodes, ways, rels));
+  }
+
   elements = elements.concat(createRoads(nodes, ways, rels));
 
   elements.forEach( e => {

@@ -5,6 +5,8 @@ const {
     convertToLocalCoordinate
 } = require('./osmHelper.js');
 const ClipperLib = require('js-clipper');
+const {createElementsFromWays} = require("./osmHelper");
+const {groupFromWay} = require("./osmHelper");
 const {groupFromRel} = require("./osmHelper");
 const {createElementsFromRels} = require("./osmHelper");
 const {createGroup} = require("./osmHelper");
@@ -18,10 +20,14 @@ const createRoads = (nodes,ways,rels) => {
     let roads = [];
     const roadTypeName = "road";
 
-    ways.filter(w => w.tags && (w.tags["highway"] || (w.tags["railway"] && w.tags["railway"]==="rail"))).forEach(w => {
+    ways.filter(w => w.tags && (!w.tags["area"] && !w.tags["area"] !== "yes") && (w.tags["highway"] || (w.tags["railway"] && w.tags["railway"]==="rail")) ).forEach(w => {
         const road = roadFromWay(w, roadTypeName);
         if (road!==null) roads.push(road);
     });
+
+    const areaRoads=createElementsFromWays(ways, roadTypeName
+      , w => w.tags && (w.tags["area"] === "yes" && w.tags["highway"])
+      , groupFromWay);
 
     const relRoads=createElementsFromRels(rels, roadTypeName
       ,r => r.tags && (r.tags["area"] && (r.tags["highway"] === "pedestrian") )
@@ -29,15 +35,16 @@ const createRoads = (nodes,ways,rels) => {
 
     console.log(`Found way ${roads.length} roads`);
     console.log(`Found rel ${relRoads.length} roads`);
+    console.log(`Found area ways ${areaRoads.length} roads`);
     console.log("----------------------------------------------");
 
-    return roads.concat(relRoads);
+    return roads.concat(relRoads).concat(areaRoads);
 }
 
 const roadFromWay = (way, name) => {
 
-    if ( way.id === 111431570 ) {
-        console.log("aia");
+    if ( way.tags["area"] === "yes" ) { // way.id === 111431570
+        console.log("Area way: " +  way.id + " of highway type: " + way.tags["highway"] );
     }
 
     let road=null;

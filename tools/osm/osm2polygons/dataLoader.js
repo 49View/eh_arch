@@ -16,7 +16,7 @@ const getBoundingBox = (lat, lon, distance) => {
     result = result.concat(getLatLonFromPointDistance(lat,lon,distance));
 
     return result;
-} 
+}
 
 const getLatLonFromPointDistance = (lat, lon, distance) => {
 
@@ -45,6 +45,7 @@ const getData = async (bbox) => {
         way["natural"="water"](${bbox.join(",")});
         way["highway"](${bbox.join(",")});
         way["railway"="rail"](${bbox.join(",")});
+        way["amenity"="parking"](${bbox.join(",")});
         way["landuse"](${bbox.join(",")});
         rel["landuse"](${bbox.join(",")});
         way["leisure"](${bbox.join(",")});
