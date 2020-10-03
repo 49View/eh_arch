@@ -43,6 +43,7 @@ const getData = async (bbox) => {
         way["building:part"](${bbox.join(",")});
         rel["natural"="water"](${bbox.join(",")});
         way["natural"="water"](${bbox.join(",")});
+        way["barrier"="fence"](${bbox.join(",")});
         way["highway"](${bbox.join(",")});
         way["railway"="rail"](${bbox.join(",")});
         way["amenity"="parking"](${bbox.join(",")});

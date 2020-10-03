@@ -82,9 +82,6 @@ const extendData = (nodes,ways,relations) => {
     })
     ways.forEach(w => {
         w.inRelation=false;
-        if ( w.id === 166758982 ) {
-            console.log("Extend data for 166758982 ok");
-        }
         const wayNodes=[];
         w.nodes.forEach(n => {
             const node=findElement(nodes,n);
@@ -162,9 +159,6 @@ const computePolygons = (ways, rels) => {
     rels
         .forEach(r => {
             try {
-                if ( r.id === 2739442 ) {
-                    console.log("yee")
-                }
                 const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(r);
                 r.calc = {
                     polygons: polygons,

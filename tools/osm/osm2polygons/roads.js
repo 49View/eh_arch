@@ -5,10 +5,6 @@ const {
     convertToLocalCoordinate
 } = require('./osmHelper.js');
 const ClipperLib = require('js-clipper');
-const {createElementsFromWays} = require("./osmHelper");
-const {groupFromWay} = require("./osmHelper");
-const {groupFromRel} = require("./osmHelper");
-const {createElementsFromRels} = require("./osmHelper");
 const {createGroup} = require("./osmHelper");
 
 
@@ -25,27 +21,13 @@ const createRoads = (nodes,ways,rels) => {
         if (road!==null) roads.push(road);
     });
 
-    const areaRoads=createElementsFromWays(ways, roadTypeName
-      , w => w.tags && (w.tags["area"] === "yes" && w.tags["highway"])
-      , groupFromWay);
-
-    const relRoads=createElementsFromRels(rels, roadTypeName
-      ,r => r.tags && (r.tags["area"] && (r.tags["highway"] === "pedestrian") )
-      , groupFromRel);
-
     console.log(`Found way ${roads.length} roads`);
-    console.log(`Found rel ${relRoads.length} roads`);
-    console.log(`Found area ways ${areaRoads.length} roads`);
     console.log("----------------------------------------------");
 
-    return roads.concat(relRoads).concat(areaRoads);
+    return roads;//.concat(relRoads).concat(areaRoads);
 }
 
 const roadFromWay = (way, name) => {
-
-    if ( way.tags["area"] === "yes" ) { // way.id === 111431570
-        console.log("Area way: " +  way.id + " of highway type: " + way.tags["highway"] );
-    }
 
     let road=null;
     let roadWidth = 2;
@@ -91,13 +73,13 @@ const roadFromWay = (way, name) => {
             case "tertiary":
                 roadWidth = 2.75;
                 roadLane = 2;
-                roadColor = "#FFFFFF";
+                roadColor = "#FFDFFF";
                 break;
             case "unclassified":
             case "residential":
                 roadWidth = 2.75;
                 roadLane = 1;
-                roadColor = "#FFFFFF";
+                roadColor = "#FFDFDF";
                 break;
             case "track":
             case "cycleway":
@@ -111,7 +93,7 @@ const roadFromWay = (way, name) => {
             default:
                 roadWidth = 1.5;
                 roadLane = 1;
-                roadColor = "#FFFFFF";
+                roadColor = "#CFCFCF";
         }
         if (way.tags["railway"] && way.tags["railway"]==="rail") {
             roadWidth = 1.5;

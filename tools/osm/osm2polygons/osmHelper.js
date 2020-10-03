@@ -555,6 +555,9 @@ const createElementsFromWays = (ways, name, filter, elementCreator) => {
         .filter(filter)
         .forEach(w => {  // && w.id===364313092
             try {
+                if ( w.id === 672068843 ) {
+                    console.log("aia");
+                }
                 const element = elementCreator(w, name);
                 if (element!==null) {
                     elements.push(element);
@@ -589,20 +592,30 @@ const createElementsFromRels = (rels, name, filter, elementCreator) => {
     return elements;
 }
 
+const getColorFromTags = (tags) => {
+    let color = "#808080";
+
+    if ( tags ) {
+        if ((tags["landuse"] && tags["landuse"]==="grass")
+          || (tags["leisure"] && (tags["leisure"]==="park" || tags["leisure"]==="garden"))) {
+            color="#CDF7C9";
+        } else if ( tags["natural"]==="water" ) {
+            color = "#AAD3DF";
+        }
+    } else {
+        color = "#606060";
+    }
+
+    return color;
+}
+
 const groupFromWay = (way, name) => {
 
     const {polygon,localBoundingBox}=getPolygonFromWay(way);
     const faces = getTrianglesFromPolygon(polygon);
     setHeight(faces,0);
 
-    let color = "#808080";
-
-    if ((way.tags["landuse"] && way.tags["landuse"]==="grass")
-      || (way.tags["leisure"] && (way.tags["leisure"]==="park" || way.tags["leisure"]==="garden"))) {
-        color="#CDF7C9";
-    }
-
-    return createGroup("w-"+way.id, way.tags, name, localBoundingBox, faces, color);
+    return createGroup("w-"+way.id, way.tags, name, localBoundingBox, faces, getColorFromTags(way.tags));
 }
 
 const groupFromRel = (rel, name) => {
@@ -614,14 +627,7 @@ const groupFromRel = (rel, name) => {
         setHeight(faces,0);
     });
 
-    let color = "#808080";
-
-    if ((rel.tags["landuse"] && rel.tags["landuse"]==="grass")
-      || (rel.tags["leisure"] && (rel.tags["leisure"]==="park" || rel.tags["leisure"]==="garden"))) {
-        color="#CDF7C9";
-    }
-
-    return createGroup("r-"+rel.id, rel.tags, name, localBoundingBox, faces, color);
+    return createGroup("r-"+rel.id, rel.tags, name, localBoundingBox, faces, getColorFromTags(rel.tags));
 }
 
 const setHeight = (faces, height) => {

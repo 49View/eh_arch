@@ -1,6 +1,7 @@
 const fs = require('fs');
+const {getDataLocal} = require("./dataLoader");
 const {createTileAreas} = require("./tileArea");
-const {getBoundingBox,getData} = require("./dataLoader");
+const {getBoundingBox, getData} = require("./dataLoader");
 const {createBuildings} = require("./buildings");
 const {createRoads} = require("./roads");
 const {elaborateData} = require("./dataTransformer");
@@ -19,7 +20,7 @@ const {elaborateData} = require("./dataTransformer");
 //const bbox = [51.49045, -0.12262, 51.49139, -0.12080];
 
 const parkFilter = w => {
-  return w.tags && (w.tags["leisure"] || (w.tags["landuse"] && (w.tags["landuse"]!=="construction" && w.tags["landuse"]!=="governmental")) || (w.tags["area"] && w.tags["man_made"] && !w.tags["ferry"]));
+  return w.tags && (w.tags["leisure"] || (w.tags["landuse"] && (w.tags["landuse"] !== "construction" && w.tags["landuse"] !== "governmental")) || (w.tags["area"] && w.tags["man_made"] && !w.tags["ferry"]));
 }
 
 const parkingFilter = w => {
@@ -27,7 +28,19 @@ const parkingFilter = w => {
 }
 
 const waterFilter = w => {
-  return w.tags && w.tags["natural"] && w.tags["natural"]==="water";
+  return w.tags && w.tags["natural"] === "water";
+}
+
+const fenceFilter = w => {
+  return w.tags && w.tags["barrier"] === "fence";
+}
+
+const roadFilter = w => {
+  return w.tags && (w.tags["area"] === "yes" && w.tags["highway"]);
+}
+
+const unclassifiedFilter = w => {
+  return w.tags === undefined && w.nodes && w.nodes.length > 0;
 }
 
 const addTileAreaFilter = (name, areaFilter) => {
@@ -39,11 +52,10 @@ const addTileAreaFilter = (name, areaFilter) => {
 
 const main = async () => {
 
-  const bbox = getBoundingBox(51.4992784,-0.125376, .3);
+  const bbox = getBoundingBox(51.4992784, -0.125376, .3);
 
-
-  const {nodes, ways, rels} = await getData(bbox);
-  //const {nodes, ways, rels} = await getDataLocal(bbox);
+  // const {nodes, ways, rels} = await getData(bbox);
+  const {nodes, ways, rels} = await getDataLocal(bbox);
   elaborateData(nodes, ways, rels);
 
   let elements = [];
@@ -51,29 +63,32 @@ const main = async () => {
   elements = elements.concat(createBuildings(nodes, ways, rels));
 
   const tileAreas = [
+    addTileAreaFilter("unclassified", unclassifiedFilter),
     addTileAreaFilter("park", parkFilter),
     addTileAreaFilter("parking", parkingFilter),
     addTileAreaFilter("water", waterFilter),
+    addTileAreaFilter("fence", fenceFilter),
+    addTileAreaFilter("road", roadFilter),
   ]
 
-  for ( const tf of tileAreas) {
+  for (const tf of tileAreas) {
     elements = elements.concat(createTileAreas(tf, nodes, ways, rels));
   }
 
   elements = elements.concat(createRoads(nodes, ways, rels));
 
-  elements.forEach( e => {
-    e.groups.forEach( g=> {
-      g.triangles = g.faces.map( f => [ f.x, f.y, f.z] );
+  elements.forEach(e => {
+    e.groups.forEach(g => {
+      g.triangles = g.faces.map(f => [f.x, f.y, f.z]);
       delete g.faces;
     })
   })
 
   //fs.writeFileSync("dataExtend.json", JSON.stringify({nodes,ways,rels},null,4), {options:"utf8"});
-  const jsonOutput = JSON.stringify({elements},null,4);
-  fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {options:"utf8"});
-  fs.writeFileSync("elements.json", jsonOutput, {options:"utf8"});
-  fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/debug/elements.json", jsonOutput, {options:"utf8"});
+  const jsonOutput = JSON.stringify({elements}, null, 4);
+  fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {options: "utf8"});
+  fs.writeFileSync("elements.json", jsonOutput, {options: "utf8"});
+  fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/debug/elements.json", jsonOutput, {options: "utf8"});
 
 }
 
