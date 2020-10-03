@@ -26,7 +26,7 @@ const createRoads = (nodes,ways) => {
     console.log(`Found way ${roads.length} roads`);
     console.log("----------------------------------------------");
 
-    return roads;//.concat(relRoads).concat(areaRoads);
+    return roads;
 }
 
 const roadFromWay = (way, name) => {

@@ -10,7 +10,7 @@ PI_4 = Math.PI / 4;
 const lat2y = lat => {
     return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
 }
-// lon2x is basically lon because the mercator is a cilyndrical projection so longitude doesn't change it's ratio
+// lon2x is basically lon because the mercator is a cylindrical projection so longitude doesn't change it's ratio
 //const lon2x = lon => { return lon; }
 const calcCoordinate = (nodes) => {
     // const latCenter = bbox[0]+(bbox[2]-bbox[0])/2;
@@ -64,10 +64,8 @@ const calcDistance = (latitude1,longitude1,latitude2,longitude2) => {
               Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-    const d = (R * c); // in metres
-
-
-    return d;
+     // in metres
+    return (R * c);
 }
 
 const findElement = (list,id) => {
@@ -129,7 +127,7 @@ const elaborateData = (nodes,ways,rels) => {
     //Compute ways and rels
     computePolygons(ways,rels);
 
-    createPolygonsHierarchy(ways, rels);
+    createPolygonsHierarchy(ways);
 }
 
 const computePolygons = (ways, rels) => {
@@ -172,7 +170,7 @@ const computePolygons = (ways, rels) => {
 
 }
 
-const createPolygonsHierarchy = (ways, rels) => {
+const createPolygonsHierarchy = (ways) => {
 
     ways
         .filter(w => w.calc!==undefined)
@@ -187,7 +185,7 @@ const createPolygonsHierarchy = (ways, rels) => {
                     if (checkPolygonInsidePolygon(wo.calc.absolutePolygon, wi.calc.absolutePolygon)) {
                         if (wi.containers===undefined) {
                             wi.containers=[];
-                        };
+                        }
                         wi.containers.push(wo);
                         wo.children.push(wi);
                     }
