@@ -195,12 +195,12 @@ const createPolygonsHierarchy = (ways, rels) => {
         }
     );
 
-    ways
-        .filter(w => w.calc!==undefined)
-        .forEach(w => {
-            console.log(`Way ${w.id} has ${w.children.length} children`);
-        }
-    );
+    // ways
+    //     .filter(w => w.calc!==undefined)
+    //     .forEach(w => {
+    //         console.log(`Way ${w.id} has ${w.children.length} children`);
+    //     }
+    // );
 
 }
 

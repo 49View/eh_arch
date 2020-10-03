@@ -15,7 +15,7 @@ const {
     projectionParameterPointToSegment,
     pointOnLineFromParameter,
     setHeight,
-    twoLinesintersectParameter
+    twoLinesIntersectParameter: twoLinesIntersectParameter
 } = require('./osmHelper.js');
 
 const HEIGHT_FOR_LEVEL = 3.5;
@@ -358,7 +358,7 @@ const createGabledRoof = (polygon, roofInfo, ombb, hippedPerc) => {
         const nextP = polygon[nextI];
 
         //Check sides intersected by axis
-        const u = twoLinesintersectParameter(pointA, pointB, p, nextP);
+        const u = twoLinesIntersectParameter(pointA, pointB, p, nextP);
         if (u!==Infinity && u>=0 && u<1) {
 
             intersection.push({

@@ -5,17 +5,9 @@ const poly2tri = require('poly2tri');
 const { calcConvexHull } = require('./convexhull');
 const { calcOmbb } = require('./ombb');
 
-
-const getTrianglesFromPolygon = (polyPoints) => {
-    const intPoints = [];
-
-    polyPoints.forEach(p => {
-        intPoints.push({x: p.x*100000, y: p.y*100000})
-    });
-
-    const swctx = new poly2tri.SweepContext(intPoints);
-    swctx.triangulate();
-    const tri= swctx.getTriangles()
+const triangulate = (swCtx) => {
+    swCtx.triangulate();
+    const tri= swCtx.getTriangles()
     const points=[];
     tri.forEach(t => {
         points.push({x: t.points_[0].x/100000, y: t.points_[0].y/100000});
@@ -24,6 +16,18 @@ const getTrianglesFromPolygon = (polyPoints) => {
     });
 
     return points;
+
+}
+
+const getTrianglesFromPolygon = (polyPoints) => {
+    const intPoints = [];
+
+    polyPoints.forEach(p => {
+        intPoints.push({x: p.x*100000, y: p.y*100000})
+    });
+
+    const swCtx = new poly2tri.SweepContext(intPoints);
+    return triangulate(swCtx);
 }
 
 const getTrianglesFromComplexPolygon = (outerPolyPoints, innerPolys) => {
@@ -42,25 +46,16 @@ const getTrianglesFromComplexPolygon = (outerPolyPoints, innerPolys) => {
         intInnersPoints.push(intInnerPoint);
     });
 
-    const swctx = new poly2tri.SweepContext(intOuterPoints);
+    const swCtx = new poly2tri.SweepContext(intOuterPoints);
     intInnersPoints.forEach(i => {
-        swctx.addHole(i);
+        swCtx.addHole(i);
     });
     // NDDado: we try to triangulate first with the inner holes, if that fails it will roll back (inside the catch)
     // to a simple polygon with outer points only. This means that the eventual inner points that will be maybe
     // rendered somewhere will _overlap_ with the outer points. So we still need to get order dependent rendering
     // on tiles, which is sane anyway.
     try {
-        swctx.triangulate();
-        const tri= swctx.getTriangles()
-        const points=[];
-        tri.forEach(t => {
-            points.push({x: t.points_[0].x/100000, y: t.points_[0].y/100000});
-            points.push({x: t.points_[1].x/100000, y: t.points_[1].y/100000});
-            points.push({x: t.points_[2].x/100000, y: t.points_[2].y/100000});
-        });
-
-        return points;
+        return triangulate(swCtx);
     } catch (e) {
         return getTrianglesFromPolygon(outerPolyPoints);
     }
@@ -284,13 +279,10 @@ const projectionParameterPointToSegment = (point, segmentStart, segmentEnd, clam
 }
 
 const pointOnLineFromParameter = (parameter, segmentStart, segmentEnd) => {
-
-    const point={
-        x: segmentStart.x+parameter*(segmentEnd.x-segmentStart.x),
-        y: segmentStart.y+parameter*(segmentEnd.y-segmentStart.y)
-    }
-
-    return point;
+    return {
+        x: segmentStart.x + parameter * (segmentEnd.x - segmentStart.x),
+        y: segmentStart.y + parameter * (segmentEnd.y - segmentStart.y)
+    };
 }
 
 const pointOnLine = (point, segmentStart, segmentEnd, clamp) => {
@@ -314,7 +306,7 @@ const distanceFromPoint = (pointA, pointB) => {
     return pointsVector.length;
 }
 
-const twoLinesintersectParameter = (pointALine1, pointBLine1, pointALine2, pointBLine2) => {
+const twoLinesIntersectParameter = (pointALine1, pointBLine1, pointALine2, pointBLine2) => {
 
     const line1Vector = new Vector(pointBLine1.x-pointALine1.x, pointBLine1.y-pointALine1.y);
     const line2Vector = new Vector(pointBLine2.x-pointALine2.x,pointBLine2.y-pointALine2.y);
@@ -601,12 +593,118 @@ const getColorFromTags = (tags) => {
             color="#CDF7C9";
         } else if ( tags["natural"]==="water" ) {
             color = "#AAD3DF";
+        } else if ( tags["highway"] ) {
+            switch (tags["highway"]) {
+                case "motorway":
+                    color = "#DF2E6B";
+                    break;
+                case "motorway_link":
+                    color = "#DF2E6B";
+                    break;
+                case "trunk":
+                    color = "#FBB29A";
+                    break;
+                case "trunk_link":
+                    color = "#FBB29A";
+                    break;
+                case "primary":
+                    color = "#FDD7A1";
+                    break;
+                case "primary_link":
+                    color = "#FDD7A1";
+                    break;
+                case "secondary":
+                    color = "#F1EEE8";
+                    break;
+                case "tertiary":
+                    color = "#FFDFFF";
+                    break;
+                case "unclassified":
+                case "residential":
+                    color = "#FFDFDF";
+                    break;
+                case "track":
+                case "cycleway":
+                case "bridleway":
+                case "footway":
+                case "path":
+                case "steps":
+                    color = "#8F8F8F";
+                    break;
+                default:
+                    color = "#CFCFCF";
+            }
+        } else if (tags["railway"] && tags["railway"]==="rail") {
+            color = "#303030";
         }
     } else {
         color = "#606060";
     }
 
     return color;
+}
+
+const getWidthFromWay = (way) => {
+    let roadLane = 1;
+    let roadWidth = 2;
+
+    switch (way.tags["highway"]) {
+        case "motorway":
+            roadWidth = 3;
+            roadLane = 3;
+            break;
+        case "motorway_link":
+            roadWidth = 2.75;
+            roadLane = 2;
+            break;
+        case "trunk":
+            roadWidth = 3;
+            roadLane = 2;
+            break;
+        case "trunk_link":
+            roadWidth = 2.75;
+            roadLane = 2;
+            break;
+        case "primary":
+            roadWidth = 3;
+            roadLane = 2;
+            break;
+        case "primary_link":
+            roadWidth = 2.75;
+            roadLane = 2;
+            break;
+        case "secondary":
+            roadWidth = 2.75;
+            roadLane = 2;
+            break;
+        case "tertiary":
+            roadWidth = 2.75;
+            roadLane = 2;
+            break;
+        case "unclassified":
+        case "residential":
+            roadWidth = 2.75;
+            roadLane = 1;
+            break;
+        case "track":
+        case "cycleway":
+        case "bridleway":
+        case "footway":
+        case "path":
+        case "steps":
+            roadWidth = 0.5;
+            roadLane = 1;
+            break;
+        default:
+            roadWidth = 1.5;
+            roadLane = 1;
+    }
+    if (way.tags["railway"] && way.tags["railway"]==="rail") {
+        roadWidth = 1.5;
+        roadLane = 2;
+    }
+
+    return { roadWidth, roadLane };
 }
 
 const groupFromWay = (way, name) => {
@@ -652,6 +750,8 @@ module.exports = {
     groupFromRel,
     createGroup,
     createMesh,
+    getColorFromTags,
+    getWidthFromWay,
     getPolygonsFromMultipolygonRelation,
     getPolygonFromWay,
     createElementsFromWays,
@@ -663,6 +763,5 @@ module.exports = {
     calcPointProjection,
     projectionParameterPointToSegment,
     pointOnLineFromParameter,
-    twoLinesintersectParameter,
-    convertToLocalCoordinate
+    twoLinesIntersectParameter: twoLinesIntersectParameter
 }
