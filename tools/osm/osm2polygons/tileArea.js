@@ -1,3 +1,5 @@
+const {groupFromNode} = require("./osmHelper");
+const {createElementsFromNodes} = require("./osmHelper");
 const {groupFromRel, groupFromWay} = require("./osmHelper");
 const {
     createElementsFromWays,
@@ -9,19 +11,25 @@ const createTileAreas = (tileFilter,nodes,ways,rels) => {
     console.log(tileFilter.name);
     console.log("----------------------------------------------");
 
-    const simpleParks=createElementsFromWays(ways, tileFilter.name
+    const wayBasedElements=createElementsFromWays(ways, tileFilter.name
         , w => tileFilter.areaFilter(w)
         , groupFromWay);
 
-    const complexParks=createElementsFromRels(rels, tileFilter.name
+    const relBasedElements=createElementsFromRels(rels, tileFilter.name
         , r => tileFilter.areaFilter(r)
         , groupFromRel);
 
-    console.log(`Found ${simpleParks.length} way ${tileFilter.name}`);
-    console.log(`Found ${complexParks.length} rels ${tileFilter.name}`);
+    // const nodeBasedElements=createElementsFromNodes(nodes, tileFilter.name
+    //   , r => tileFilter.areaFilter(r)
+    //   , groupFromNode);
+
+    console.log(`Found ${wayBasedElements.length} way ${tileFilter.name}`);
+    console.log(`Found ${relBasedElements.length} rels ${tileFilter.name}`);
+    // console.log(`Found ${nodeBasedElements.length} nodes ${tileFilter.name}`);
     console.log("----------------------------------------------");
 
-    return simpleParks.concat(complexParks);
+    // return wayBasedElements.concat(relBasedElements).concat(nodeBasedElements);
+    return wayBasedElements.concat(relBasedElements);
 }
 
 module.exports = { createTileAreas }

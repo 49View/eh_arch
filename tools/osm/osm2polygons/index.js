@@ -3,7 +3,6 @@ const {getDataLocal} = require("./dataLoader");
 const {createTileAreas} = require("./tileArea");
 const {getBoundingBox, getData} = require("./dataLoader");
 const {createBuildings} = require("./buildings");
-const {createRoads} = require("./roads");
 const {elaborateData} = require("./dataTransformer");
 
 //WestMinster
@@ -32,11 +31,15 @@ const waterFilter = w => {
 }
 
 const fenceFilter = w => {
-  return w.tags && w.tags["barrier"] === "fence";
+  return w.tags && w.tags["barrier"];
 }
 
 const roadFilter = w => {
-  return w.tags && (w.tags["area"] === "yes" && w.tags["highway"]);
+  return w.tags && (w.tags["highway"]);
+}
+
+const treeFilter = w => {
+  return w.tags && (w.tags["natural"] === "tree");
 }
 
 const unclassifiedFilter = w => {
@@ -67,33 +70,34 @@ const main = async () => {
     addTileAreaFilter("park", parkFilter),
     addTileAreaFilter("parking", parkingFilter),
     addTileAreaFilter("water", waterFilter),
-    addTileAreaFilter("fence", fenceFilter),
+    addTileAreaFilter("barrier", fenceFilter),
     addTileAreaFilter("road", roadFilter),
+    // addTileAreaFilter("tree", treeFilter),
   ]
 
   for (const tf of tileAreas) {
     elements = elements.concat(createTileAreas(tf, nodes, ways, rels));
   }
 
-  elements = elements.concat(createRoads(nodes, ways, rels));
-
   elements.forEach(e => {
-    e.groups.forEach(g => {
-      g.triangles = g.faces.map(f => [f.x, f.y, f.z]);
-      delete g.faces;
-    })
+    if ( e.groups ) {
+      e.groups.forEach(g => {
+        if (g.faces) {
+          g.triangles = g.faces.map(f => [f.x, f.y, f.z]);
+          delete g.faces;
+        }
+      })
+    }
   })
 
-  //fs.writeFileSync("dataExtend.json", JSON.stringify({nodes,ways,rels},null,4), {options:"utf8"});
   const jsonOutput = JSON.stringify({elements}, null, 4);
   fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {options: "utf8"});
   fs.writeFileSync("elements.json", jsonOutput, {options: "utf8"});
   fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/debug/elements.json", jsonOutput, {options: "utf8"});
-
 }
 
 
-main().then(r => {
+main().then(() => {
   console.log("----------------------------------------------");
   console.log("Successfully executed")
 }).catch(ex => {

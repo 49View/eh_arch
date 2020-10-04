@@ -24,7 +24,7 @@ const DEFAULT_ROOF_COLOUR = "#cccccc";
 const DEFAULT_BUILDING_COLOUR = "#eeeeee";
 const USE_TRIANGLES_STRIP = false;
 
-const createBuildings = (nodes,ways,rels) => {
+const exportBuildings = (nodes, ways, rels) => {
     console.log("----------------------------------------------");
     console.log("BUILDINGS");
     console.log("----------------------------------------------");
@@ -550,4 +550,4 @@ const buildingFromRel = (rel, name) => {
     return building;
 }
 
-module.exports = { createBuildings }
+module.exports = { createBuildings: exportBuildings }

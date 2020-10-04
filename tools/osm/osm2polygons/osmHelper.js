@@ -435,6 +435,18 @@ const createGroup = (id, tags, name, boundingBox, faces, color) => {
     return createMesh(id, tags, name, boundingBox, groups);
 }
 
+const exportNode = (node, type) => {
+    return {
+        id: node.id,
+        type: type,
+        point: {
+            x: node.lon,
+            y: node.lat
+        },
+        tags: node.tags
+    }
+}
+
 const createMesh = (id, tags, type, boundingBox, groups) => {
     return {
         id: id,
@@ -547,9 +559,6 @@ const createElementsFromWays = (ways, name, filter, elementCreator) => {
         .filter(filter)
         .forEach(w => {  // && w.id===364313092
             try {
-                if ( w.id === 672068843 ) {
-                    console.log("aia");
-                }
                 const element = elementCreator(w, name);
                 if (element!==null) {
                     elements.push(element);
@@ -580,6 +589,26 @@ const createElementsFromRels = (rels, name, filter, elementCreator) => {
             }
         }
     );
+
+    return elements;
+}
+
+const createElementsFromNodes = (nodes, name, filter, elementCreator) => {
+    const elements=[];
+
+    nodes.filter(filter)
+      .forEach(r => {
+            try {
+                const element = elementCreator(r, name);
+                if (element!==null) {
+                    elements.push(element);
+                }
+
+            } catch (ex) {
+                console.log(`Error in ${r.id} relation`, ex);
+            }
+        }
+      );
 
     return elements;
 }
@@ -636,6 +665,8 @@ const getColorFromTags = (tags) => {
             }
         } else if (tags["railway"] && tags["railway"]==="rail") {
             color = "#303030";
+        } else if ( tags["barrier"] ) {
+            color = "#709090";
         }
     } else {
         color = "#606060";
@@ -648,60 +679,62 @@ const getWidthFromWay = (way) => {
     let roadLane = 1;
     let roadWidth = 2;
 
-    switch (way.tags["highway"]) {
-        case "motorway":
-            roadWidth = 3;
-            roadLane = 3;
-            break;
-        case "motorway_link":
-            roadWidth = 2.75;
-            roadLane = 2;
-            break;
-        case "trunk":
-            roadWidth = 3;
-            roadLane = 2;
-            break;
-        case "trunk_link":
-            roadWidth = 2.75;
-            roadLane = 2;
-            break;
-        case "primary":
-            roadWidth = 3;
-            roadLane = 2;
-            break;
-        case "primary_link":
-            roadWidth = 2.75;
-            roadLane = 2;
-            break;
-        case "secondary":
-            roadWidth = 2.75;
-            roadLane = 2;
-            break;
-        case "tertiary":
-            roadWidth = 2.75;
-            roadLane = 2;
-            break;
-        case "unclassified":
-        case "residential":
-            roadWidth = 2.75;
-            roadLane = 1;
-            break;
-        case "track":
-        case "cycleway":
-        case "bridleway":
-        case "footway":
-        case "path":
-        case "steps":
-            roadWidth = 0.5;
-            roadLane = 1;
-            break;
-        default:
+    if ( way.tags ) {
+        switch (way.tags["highway"]) {
+            case "motorway":
+                roadWidth = 3;
+                roadLane = 3;
+                break;
+            case "motorway_link":
+                roadWidth = 2.75;
+                roadLane = 2;
+                break;
+            case "trunk":
+                roadWidth = 3;
+                roadLane = 2;
+                break;
+            case "trunk_link":
+                roadWidth = 2.75;
+                roadLane = 2;
+                break;
+            case "primary":
+                roadWidth = 3;
+                roadLane = 2;
+                break;
+            case "primary_link":
+                roadWidth = 2.75;
+                roadLane = 2;
+                break;
+            case "secondary":
+                roadWidth = 2.75;
+                roadLane = 2;
+                break;
+            case "tertiary":
+                roadWidth = 2.75;
+                roadLane = 2;
+                break;
+            case "unclassified":
+            case "residential":
+                roadWidth = 2.75;
+                roadLane = 1;
+                break;
+            case "track":
+            case "cycleway":
+            case "bridleway":
+            case "footway":
+            case "path":
+            case "steps":
+                roadWidth = 0.5;
+                roadLane = 1;
+                break;
+            default:
+                roadWidth = 1.5;
+                roadLane = 1;
+        }
+        if (way.tags["railway"] && way.tags["railway"]==="rail") {
             roadWidth = 1.5;
-            roadLane = 1;
-    }
-    if (way.tags["railway"] && way.tags["railway"]==="rail") {
-        roadWidth = 1.5;
-        roadLane = 2;
+            roadLane = 2;
+        }
     }
 
     return { roadWidth, roadLane };
@@ -709,23 +742,27 @@ const getWidthFromWay = (way) => {
 
 const groupFromWay = (way, name) => {
 
-    const {polygon,localBoundingBox}=getPolygonFromWay(way);
-    const faces = getTrianglesFromPolygon(polygon);
+    // const {polygon,localBoundingBox}=getPolygonFromWay(way);
+    const faces = getTrianglesFromPolygon(way.calc.polygon);
     setHeight(faces,0);
 
-    return createGroup("w-"+way.id, way.tags, name, localBoundingBox, faces, getColorFromTags(way.tags));
+    return createGroup("w-"+way.id, way.tags, name, way.calc.lbb, faces, getColorFromTags(way.tags));
 }
 
 const groupFromRel = (rel, name) => {
 
-    const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(rel);
+    // const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(rel);
     let faces=[];
-    polygons.filter(p => p.role==="outer").forEach(o => {
+    rel.calc.polygons.filter(p => p.role==="outer").forEach(o => {
         faces = faces.concat(getTrianglesFromComplexPolygon(o.points, o.holes));
         setHeight(faces,0);
     });
 
-    return createGroup("r-"+rel.id, rel.tags, name, localBoundingBox, faces, getColorFromTags(rel.tags));
+    return createGroup("r-"+rel.id, rel.tags, name, rel.calc.lbb, faces, getColorFromTags(rel.tags));
+}
+
+const groupFromNode = (node, name) => {
+    return exportNode(node, name);
 }
 
 const setHeight = (faces, height) => {
@@ -748,12 +785,14 @@ module.exports = {
     checkPolygonInsidePolygon,
     groupFromWay,
     groupFromRel,
+    groupFromNode,
     createGroup,
     createMesh,
     getColorFromTags,
     getWidthFromWay,
     getPolygonsFromMultipolygonRelation,
     getPolygonFromWay,
+    createElementsFromNodes,
     createElementsFromWays,
     createElementsFromRels,
     setHeight,

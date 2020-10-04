@@ -1,8 +1,13 @@
+const {getTrianglesFromPolygon} = require("./osmHelper");
+const {convertToLocalCoordinate} = require("./osmHelper");
+const {computeBoundingBox} = require("./osmHelper");
+const {getWidthFromWay} = require("./osmHelper");
 const {
     getPolygonsFromMultipolygonRelation,
     getPolygonFromWay,
     checkPolygonInsidePolygon
 } = require("./osmHelper.js");
+const ClipperLib = require('js-clipper');
 
 RAD2DEG = 180 / Math.PI;
 PI_4 = Math.PI / 4;
@@ -132,8 +137,7 @@ const elaborateData = (nodes,ways,rels) => {
 
 const computePolygons = (ways, rels) => {
 
-    ways
-        .filter(w => w.nodes.length>2 && w.nodes[0].id===w.nodes[w.nodes.length-1].id)
+    ways.filter(w => w.nodes.length>2 && w.nodes[0].id===w.nodes[w.nodes.length-1].id)
         .forEach(w => {
             try {
                 const {polygon,localBoundingBox,convexHull,orientedMinBoundingBox} = getPolygonFromWay(w);
@@ -154,8 +158,79 @@ const computePolygons = (ways, rels) => {
         }
     );
 
-    rels
-        .forEach(r => {
+    // ways.filter(w => w.tags && (w.tags["barrier"]) && w.nodes.length>1 && w.nodes[0].id!==w.nodes[w.nodes.length-1].id)
+    ways.filter(w => w.tags && (w.tags["highway"] || w.tags["barrier"]) && w.nodes.length>1 && w.nodes[0].id!==w.nodes[w.nodes.length-1].id)
+    // ways.filter(w => w.nodes.length>1 && w.nodes[0].id!==w.nodes[w.nodes.length-1].id)
+      .forEach(way => {
+            try {
+                const {roadWidth, roadLane} = getWidthFromWay(way);
+                let faces=[];
+                let points=[];
+                way.nodes.forEach(n => {
+                    const point = { ...n };
+                    point.x=n.x; //n.x.toNumber();
+                    point.y=n.y; //n.y.toNumber();
+                    points.push(point);
+                }) ;
+
+                const localBoundingBox = computeBoundingBox(points);
+                convertToLocalCoordinate(points, localBoundingBox.centerX, localBoundingBox.centerY);
+
+                let pointsPartial = [];
+                let startIndex = 0;
+                for (let i=startIndex;i<points.length;i++) {
+                    for (let j=i+1;j<points.length;j++) {
+                        if (points[i].id===points[j].id) {
+                            if (startIndex<j) {
+                                pointsPartial.push(points.slice(startIndex, j));
+                            }
+                            startIndex=j;
+                            i=j;
+                            break;
+                        }
+                    }
+                }
+
+                if (startIndex===0) {
+                    pointsPartial.push(points);
+                } else {
+                    pointsPartial.push(points.slice(startIndex-1, points.length));
+                }
+
+                pointsPartial.forEach(points => {
+                    let subj = new ClipperLib.Paths();
+                    let solution = new ClipperLib.Paths();
+                    subj[0] = points.map(p => { return {X: p.x, Y: p.y}});
+                    const scale = 100;
+                    ClipperLib.JS.ScaleUpPaths(subj, scale);
+                    let co = new ClipperLib.ClipperOffset(2, 0.25);
+                    co.AddPaths(subj, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenRound);
+                    co.Execute(solution, roadWidth*roadLane*scale);
+                    ClipperLib.JS.ScaleDownPaths(solution, scale);
+
+                    solution.forEach(s => {
+                        const polygon = s.map(p => { return { x: p.X, y:p.Y}});
+                        faces = faces.concat(polygon);
+                    });
+                });
+                const absolutePolygon=[];
+                faces.forEach(p => {
+                    absolutePolygon.push({x: p.x+localBoundingBox.centerX, y:p.y+localBoundingBox.centerY});
+                })
+
+                way.calc = {
+                    polygon: faces,
+                    absolutePolygon: absolutePolygon,
+                    lbb: localBoundingBox,
+                };
+
+            } catch (ex) {
+                console.log(`Error in ${way.id} way`, ex);
+            }
+        }
+      );
+
+    rels.forEach(r => {
             try {
                 const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(r);
                 r.calc = {
