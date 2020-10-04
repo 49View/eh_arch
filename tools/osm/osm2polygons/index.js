@@ -55,10 +55,10 @@ const addTileAreaFilter = (name, areaFilter) => {
 
 const main = async () => {
 
-  const bbox = getBoundingBox(51.4992784, -0.125376, .3);
+  const tileBoundary = getBoundingBox(51.4992784, -0.125376, .3, 15);
 
-  // const {nodes, ways, rels} = await getData(bbox);
-  const {nodes, ways, rels} = await getDataLocal(bbox);
+  const {nodes, ways, rels} = await getData(tileBoundary.bbox);
+  // const {nodes, ways, rels} = await getDataLocal();
   elaborateData(nodes, ways, rels);
 
   let elements = [];
@@ -91,9 +91,9 @@ const main = async () => {
   })
 
   const jsonOutput = JSON.stringify({elements}, null, 4);
-  fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {options: "utf8"});
-  fs.writeFileSync("elements.json", jsonOutput, {options: "utf8"});
-  fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/debug/elements.json", jsonOutput, {options: "utf8"});
+  fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {encoding: "utf8"});
+  fs.writeFileSync("elements.json", jsonOutput, {encoding: "utf8"});
+  fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/debug/elements.json", jsonOutput, {encoding: "utf8"});
 }
 
 

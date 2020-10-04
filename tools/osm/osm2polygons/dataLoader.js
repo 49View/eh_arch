@@ -5,37 +5,59 @@ const Decimal = require('decimal.js');
 Decimal.set({ precision: 20, rounding: 1 })
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
-const LATITUDEKM = 110.574;
-const LONGITUDEKM = 111.320;
+function lon2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
+function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
 
-const getBoundingBox = (lat, lon, distance) => {
-
-    let result=[];
-
-    result = result.concat(getLatLonFromPointDistance(lat,lon,-distance));
-    result = result.concat(getLatLonFromPointDistance(lat,lon,distance));
-
-    return result;
+function tile2long(x,z) {
+    return (x/Math.pow(2,z)*360-180);
+}
+function tile2lat(y,z) {
+    const n = Math.PI - 2 * Math.PI * y / Math.pow(2, z);
+    return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
 }
 
-const getLatLonFromPointDistance = (lat, lon, distance) => {
+const getBoundingBox = (lat, lon, distance, zoom) => {
 
-    const latResult = lat+(distance/LATITUDEKM);
-    const lonResult = lon+(distance/(LONGITUDEKM*Math.cos(lat/180*Math.PI)));
+    const tileX = lon2tile(lon, zoom);
+    const tileY = lat2tile(lat, zoom);
 
-    return [latResult,lonResult];
+    console.log(`${lat} ${lon}`);
+    console.log(`${tileX} ${tileY}`);
+
+    console.log(`TopLeft     ${tile2long(tileX, zoom)} ${tile2lat(tileY, zoom)}`)
+    console.log(`TopRight    ${tile2long(tileX+1, zoom)} ${tile2lat(tileY, zoom)}`)
+    console.log(`BottomLeft  ${tile2long(tileX, zoom)} ${tile2lat(tileY+1, zoom)}`)
+    console.log(`BottomRight ${tile2long(tileX+1, zoom)} ${tile2lat(tileY+1, zoom)}`)
+    console.log(`Center      ${tile2long(tileX+0.5, zoom)} ${tile2lat(tileY+0.5, zoom)}`)
+
+    return {
+        bbox: [
+            tile2lat(tileY+1, zoom),
+            tile2long(tileX, zoom),
+            tile2lat(tileY, zoom),
+            tile2long(tileX+1, zoom)
+        ],
+        center: {
+            x: tile2long(tileX+0.5, zoom),
+            y: tile2lat(tileY+0.5, zoom)
+        }
+    };
 }
+
+// const getLatLonFromPointDistance = (lat, lon, distance) => {
+//
+//     const LATITUDEKM = 110.574;
+//     const LONGITUDEKM = 111.320;
+//
+//     const latResult = lat+(distance/LATITUDEKM);
+//     const lonResult = lon+(distance/(LONGITUDEKM*Math.cos(lat/180*Math.PI)));
+//
+//     return [latResult,lonResult];
+// }
 
 const getData = async (bbox) => {
 
-        // way["landuse"="grass"](${bbox.join(",")});
-        // rel["landuse"="grass"](${bbox.join(",")});
-        // rel["leisure"="park"](${bbox.join(",")});
-        // rel["leisure"="garden"](${bbox.join(",")});
-        // way["leisure"="park"](${bbox.join(",")});
-        // way["leisure"="garden"](${bbox.join(",")});
-        const query=`
-    [out:json][timeout:25];
+    const query=`[out:json][timeout:25];
     (
         rel["building"](${bbox.join(",")});
         rel["building:part"](${bbox.join(",")});
@@ -71,13 +93,14 @@ const getData = async (bbox) => {
     };
     //console.log(qs.stringify({data: query}));
     const response=await axios(OVERPASSAPI_URL, options);
-    osmData=response.data;
+    const osmData=response.data;
     fs.writeFileSync("testData.json", JSON.stringify(osmData), { encoding: "utf8"});
     return prepareData(osmData);
 }
 
-const getDataLocal = (bbox) => {
-    const osmData = JSON.parse(fs.readFileSync("testData.json", { encoding: "utf8"}));
+const getDataLocal = () => {
+    const buffer = fs.readFileSync("testData.json");
+    const osmData = JSON.parse(buffer.toString());
     return prepareData(osmData);
 }
 

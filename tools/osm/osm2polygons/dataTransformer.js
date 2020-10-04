@@ -11,10 +11,27 @@ const ClipperLib = require('js-clipper');
 
 RAD2DEG = 180 / Math.PI;
 PI_4 = Math.PI / 4;
+const TILE_SIZE = 256;
 
 const lat2y = lat => {
     return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
 }
+
+// The mapping between latitude, longitude and pixels is defined by the web
+// mercator projection.
+function project(lat, lon) {
+    let siny = Math.sin((lat * Math.PI) / 180);
+
+    // Truncating to 0.9999 effectively limits latitude to 89.189. This is
+    // about a third of a tile past the edge of the world tile.
+    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+
+    return {
+        x: TILE_SIZE * (0.5 + lon / 360),
+        y: TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI))
+    }
+}
+
 // lon2x is basically lon because the mercator is a cylindrical projection so longitude doesn't change it's ratio
 //const lon2x = lon => { return lon; }
 const calcCoordinate = (nodes) => {
@@ -30,29 +47,13 @@ const calcCoordinate = (nodes) => {
         // n.y=new Decimal(Math.sign(n.lat)).mul(calcDistance(0,0,lat2y(n.lat),0));
         n.x=Math.sign(n.lon)*calcDistance(0,0,0,n.lon);
         n.y=Math.sign(n.lat)*calcDistance(0,0,lat2y(n.lat),0);
+        // const p = project( n.lat, n.lon );
+        // n.x = p.x;
+        // n.y = p.y;
     })
 }
 
 const calcDistance = (latitude1,longitude1,latitude2,longitude2) => {
-
-    // const toRadians = new Decimal(Math.PI).div(new Decimal(180));
-    // const lat1 = new Decimal(latitude1);
-    // const lon1 = new Decimal(longitude1);
-    // const lat2 = new Decimal(latitude2);
-    // const lon2 = new Decimal(longitude2);
-    // const R = new Decimal(6372.797e3); // metres
-
-    // const phi1 = lat1.mul(toRadians); // φ, λ in radians
-    // const phi2 = lat2.mul(toRadians);
-    // const deltaPhi = (lat2.sub(lat1)).mul(toRadians);
-    // const deltaLambda = (lon2.sub(lon1)).mul(toRadians);
-
-    // let a = Decimal.sin(deltaPhi.div(2)).mul(Decimal.sin(deltaPhi.div(2)))
-    //     .add(Decimal.cos(phi1).mul(Decimal.cos(phi2)).mul(Decimal.sin(deltaLambda.div(2))).mul(Decimal.sin(deltaLambda.div(2))))
-
-    // const c = Decimal.atan2(Decimal.sqrt(a),Decimal.sqrt(new Decimal(1).sub(a))).mul(2);
-
-    // const d = R.mul(c); // in metres
 
     const lat1 = latitude1;
     const lon1 = longitude1;
