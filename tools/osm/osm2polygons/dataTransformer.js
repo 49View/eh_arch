@@ -9,47 +9,19 @@ const {
 } = require("./osmHelper.js");
 const ClipperLib = require('js-clipper');
 
-RAD2DEG = 180 / Math.PI;
-PI_4 = Math.PI / 4;
-const TILE_SIZE = 256;
+// RAD2DEG = 180 / Math.PI;
+// PI_4 = Math.PI / 4;
+//
+// const lat2y = lat => {
+//     return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
+// }
 
-const lat2y = lat => {
-    return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
-}
-
-// The mapping between latitude, longitude and pixels is defined by the web
-// mercator projection.
-function project(lat, lon) {
-    let siny = Math.sin((lat * Math.PI) / 180);
-
-    // Truncating to 0.9999 effectively limits latitude to 89.189. This is
-    // about a third of a tile past the edge of the world tile.
-    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
-
-    return {
-        x: TILE_SIZE * (0.5 + lon / 360),
-        y: TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI))
-    }
-}
-
-// lon2x is basically lon because the mercator is a cylindrical projection so longitude doesn't change it's ratio
-//const lon2x = lon => { return lon; }
-const calcCoordinate = (nodes) => {
-    // const latCenter = bbox[0]+(bbox[2]-bbox[0])/2;
-    // const lonCenter = bbox[1]+(bbox[3]-bbox[1])/2;
-
+const calcCoordinate = (tileBoundary, nodes) => {
     nodes.forEach(n => {
-        // n.x = calcDistance(bbox[0],bbox[1],bbox[0],n.lon);
-        // n.y = calcDistance(bbox[0],bbox[1],n.lat,bbox[1]);
-        // n.x = new Decimal(calcDistance(0,0,0,n.lon)*Math.sign(n.lon));
-        // n.y = new Decimal(calcDistance(0,0,n.lat,0)*Math.sign(n.lat));
-        // n.x=new Decimal(Math.sign(n.lon)).mul(calcDistance(0,0,0,n.lon));
-        // n.y=new Decimal(Math.sign(n.lat)).mul(calcDistance(0,0,lat2y(n.lat),0));
-        n.x=Math.sign(n.lon)*calcDistance(0,0,0,n.lon);
-        n.y=Math.sign(n.lat)*calcDistance(0,0,lat2y(n.lat),0);
-        // const p = project( n.lat, n.lon );
-        // n.x = p.x;
-        // n.y = p.y;
+        const ly = n.lat;
+        const lx = n.lon;
+        n.x=Math.sign(n.lon)*calcDistance(ly,0,ly,lx);
+        n.y=Math.sign(n.lat)*calcDistance(0,lx,ly,lx);
     })
 }
 
@@ -125,9 +97,9 @@ const extendData = (nodes,ways,relations) => {
     })
 }
 
-const elaborateData = (nodes,ways,rels) => {
+const elaborateData = (tileBoundary, nodes,ways,rels) => {
     //Calculate coordinate as distance from bbox center
-    calcCoordinate(nodes);
+    calcCoordinate(tileBoundary, nodes);
     //Transform reference in ways and relations to data
     extendData(nodes,ways,rels);
     //Compute ways and rels
@@ -159,9 +131,7 @@ const computePolygons = (ways, rels) => {
         }
     );
 
-    // ways.filter(w => w.tags && (w.tags["barrier"]) && w.nodes.length>1 && w.nodes[0].id!==w.nodes[w.nodes.length-1].id)
     ways.filter(w => w.tags && (w.tags["highway"] || w.tags["barrier"]) && w.nodes.length>1 && w.nodes[0].id!==w.nodes[w.nodes.length-1].id)
-    // ways.filter(w => w.nodes.length>1 && w.nodes[0].id!==w.nodes[w.nodes.length-1].id)
       .forEach(way => {
             try {
                 const {roadWidth, roadLane} = getWidthFromWay(way);

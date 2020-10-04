@@ -16,6 +16,29 @@ function tile2lat(y,z) {
     return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
 }
 
+RAD2DEG = 180 / Math.PI;
+PI_4 = Math.PI / 4;
+const TILE_SIZE = 256;
+
+const lat2y = lat => {
+    return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
+}
+
+// The mapping between latitude, longitude and pixels is defined by the web
+// mercator projection.
+function project(lat, lon) {
+    let siny = Math.sin((lat * Math.PI) / 180);
+
+    // Truncating to 0.9999 effectively limits latitude to 89.189. This is
+    // about a third of a tile past the edge of the world tile.
+    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+
+    return {
+        x: TILE_SIZE * (0.5 + lon / 360),
+        y: TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI))
+    }
+}
+
 const getBoundingBox = (lat, lon, distance, zoom) => {
 
     const tileX = lon2tile(lon, zoom);
@@ -30,16 +53,31 @@ const getBoundingBox = (lat, lon, distance, zoom) => {
     console.log(`BottomRight ${tile2long(tileX+1, zoom)} ${tile2lat(tileY+1, zoom)}`)
     console.log(`Center      ${tile2long(tileX+0.5, zoom)} ${tile2lat(tileY+0.5, zoom)}`)
 
+    console.log(`Zero        ${tile2long(0,0)} ${tile2lat(0,0)}`)
+
+    const topLat    = tile2lat(tileY+1, zoom);
+    const topLon    = tile2long(tileX, zoom);
+    const bottomLat = tile2lat(tileY, zoom);
+    const bottomLon = tile2long(tileX+1, zoom);
+
+    const centerLat = tile2lat(tileY+0.5, zoom);
+    const centerLon = tile2long(tileX+0.5, zoom);
+
     return {
         bbox: [
-            tile2lat(tileY+1, zoom),
-            tile2long(tileX, zoom),
-            tile2lat(tileY, zoom),
-            tile2long(tileX+1, zoom)
+            topLat   ,
+            topLon   ,
+            bottomLat,
+            bottomLon
         ],
         center: {
-            x: tile2long(tileX+0.5, zoom),
-            y: tile2lat(tileY+0.5, zoom)
+            ...project(centerLat, centerLon),
+            lat: centerLat,
+            lon: centerLon
+        },
+        zero: {
+            lat: tile2lat(0,0),
+            lon: tile2long(0,0)
         }
     };
 }

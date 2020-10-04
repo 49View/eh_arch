@@ -57,9 +57,9 @@ const main = async () => {
 
   const tileBoundary = getBoundingBox(51.4992784, -0.125376, .3, 15);
 
-  const {nodes, ways, rels} = await getData(tileBoundary.bbox);
-  // const {nodes, ways, rels} = await getDataLocal();
-  elaborateData(nodes, ways, rels);
+  // const {nodes, ways, rels} = await getData(tileBoundary.bbox);
+  const {nodes, ways, rels} = await getDataLocal();
+  elaborateData(tileBoundary, nodes, ways, rels);
 
   let elements = [];
 
