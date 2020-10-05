@@ -11,7 +11,7 @@ const {
 //     return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
 // }
 
-const calcCoordinate = (tileBoundary, nodes) => {
+const calcCoordinate = (nodes) => {
   nodes.forEach(n => {
     const ly = n.lat;
     const lx = n.lon;
@@ -94,7 +94,7 @@ const extendData = (nodes, ways, relations) => {
 
 const elaborateData = (tileBoundary, nodes, ways, rels) => {
   //Calculate coordinate as distance from bbox center
-  calcCoordinate(tileBoundary, nodes);
+  calcCoordinate(nodes);
   //Transform reference in ways and relations to data
   extendData(nodes, ways, rels);
   //Compute ways and rels

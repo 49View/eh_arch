@@ -1,4 +1,4 @@
-const { Vector} = require('./vector');
+const { Vector} = require('../geometry/vector');
 const Decimal = require('decimal.js');
 Decimal.set({ precision: 20, rounding: 1 });
 const {

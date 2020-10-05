@@ -1,7 +1,7 @@
-const { Vector} = require('./vector');
+const { Vector} = require('../geometry/vector');
 const poly2tri = require('poly2tri');
-const { calcConvexHull } = require('./convexhull');
-const { calcOmbb } = require('./ombb');
+const { calcConvexHull } = require('../geometry/convexhull');
+const { calcOmbb } = require('../geometry/ombb');
 const ClipperLib = require('js-clipper');
 
 const triangulate = (swCtx) => {
@@ -624,7 +624,6 @@ const createElementsFromRels = (rels, name, filter, elementCreator) => {
                 if (element!==null) {
                     elements.push(element);
                 }
-
             } catch (ex) {
                 console.log(`Error in ${r.id} relation`, ex);
             }
@@ -644,7 +643,6 @@ const createElementsFromNodes = (nodes, name, filter, elementCreator) => {
                 if (element!==null) {
                     elements.push(element);
                 }
-
             } catch (ex) {
                 console.log(`Error in ${r.id} relation`, ex);
             }
@@ -803,7 +801,7 @@ const groupFromRel = (rel, name) => {
 }
 
 const groupFromNode = (node, name) => {
-    return exportNode(node, name);
+    return createGroup("n-"+node.id, node.tags, name, [], [], getColorFromTags(node.tags));
 }
 
 const setHeight = (faces, height) => {

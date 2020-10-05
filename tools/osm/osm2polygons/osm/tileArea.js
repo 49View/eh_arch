@@ -19,17 +19,17 @@ const createTileAreas = (tileFilter,nodes,ways,rels) => {
         , r => tileFilter.areaFilter(r)
         , groupFromRel);
 
-    // const nodeBasedElements=createElementsFromNodes(nodes, tileFilter.name
-    //   , r => tileFilter.areaFilter(r)
-    //   , groupFromNode);
+    const nodeBasedElements=createElementsFromNodes(nodes, tileFilter.name
+      , r => tileFilter.areaFilter(r)
+      , groupFromNode);
 
     console.log(`Found ${wayBasedElements.length} way ${tileFilter.name}`);
     console.log(`Found ${relBasedElements.length} rels ${tileFilter.name}`);
-    // console.log(`Found ${nodeBasedElements.length} nodes ${tileFilter.name}`);
+    console.log(`Found ${nodeBasedElements.length} nodes ${tileFilter.name}`);
     console.log("----------------------------------------------");
 
-    // return wayBasedElements.concat(relBasedElements).concat(nodeBasedElements);
-    return wayBasedElements.concat(relBasedElements);
+    return wayBasedElements.concat(relBasedElements).concat(nodeBasedElements);
+    // return wayBasedElements.concat(relBasedElements);
 }
 
 module.exports = { createTileAreas }

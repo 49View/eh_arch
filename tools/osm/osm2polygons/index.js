@@ -1,9 +1,9 @@
 const fs = require('fs');
-const {getDataLocal} = require("./dataLoader");
-const {createTileAreas} = require("./tileArea");
-const {getBoundingBox, getData} = require("./dataLoader");
-const {createBuildings} = require("./buildings");
-const {elaborateData} = require("./dataTransformer");
+const {getDataLocal} = require("./osm/dataLoader");
+const {createTileAreas} = require("./osm/tileArea");
+const {getBoundingBox, getData} = require("./osm/dataLoader");
+const {createBuildings} = require("./osm/buildings");
+const {elaborateData} = require("./osm/dataTransformer");
 
 //WestMinster
 // const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
@@ -72,7 +72,7 @@ const main = async () => {
     addTileAreaFilter("water", waterFilter),
     addTileAreaFilter("barrier", fenceFilter),
     addTileAreaFilter("road", roadFilter),
-    // addTileAreaFilter("tree", treeFilter),
+    addTileAreaFilter("tree", treeFilter),
   ]
 
   for (const tf of tileAreas) {
