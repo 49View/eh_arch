@@ -8,7 +8,7 @@ const {calcNodeCoordinates} = require("./dataTransformer");
 
 const triangulate = (swCtx) => {
     swCtx.triangulate();
-    const tri= swCtx.getTriangles()
+    const tri= swCtx.getTriangles();
     const points=[];
     tri.forEach(t => {
         points.push({x: t.points_[0].x/100000, y: t.points_[0].y/100000});
@@ -17,12 +17,41 @@ const triangulate = (swCtx) => {
     });
 
     return points;
+}
+
+const clipPolyPoints = (tileBoundary, polyPoints) => {
+
+    let subj = [];
+    let clip = [];
+    let solution = [];
+    subj.push(polyPoints.map(p => {
+        return {X: p.x, Y: p.y}
+    }));
+    clip.push(tileBoundary.tileClip.map( tc => {return {...tc}}));
+
+    let co = new ClipperLib.Clipper();
+    const scale = 100000;
+    ClipperLib.JS.ScaleUpPaths(subj, scale);
+    ClipperLib.JS.ScaleUpPaths(clip, scale);
+    co.AddPaths(subj, ClipperLib.PolyType.ptSubject, true);
+    co.AddPaths(clip, ClipperLib.PolyType.ptClip, true);
+    co.Execute(ClipperLib.ClipType.ctIntersection, solution, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
+    ClipperLib.JS.ScaleDownPaths(solution, scale);
+
+    let polyPointsClipped = [];
+    solution.forEach(s => {
+        polyPointsClipped = s.map(p => {
+            return {x: p.X, y: p.Y}
+        });
+    });
+
+    return polyPointsClipped;
 
 }
 
 const getTrianglesFromPolygon = (polyPoints) => {
-    const intPoints = [];
 
+    const intPoints = [];
     polyPoints.forEach(p => {
         intPoints.push({x: p.x*100000, y: p.y*100000})
     });
@@ -586,13 +615,13 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
     return {polygons,localBoundingBox};
 }
 
-const createElementsFromWays = (ways, name, filter, elementCreator) => {
+const createElementsFromWays = (ways, tileBoundary, name, filter, elementCreator) => {
     const elements=[];
     ways.filter(w => w.calc!==undefined)
         .filter(filter)
         .forEach(w => {  // && w.id===364313092
             try {
-                const element = elementCreator(w, name);
+                const element = elementCreator(w, tileBoundary, name);
                 if (element!==null) {
                     elements.push(element);
                 }
@@ -605,14 +634,14 @@ const createElementsFromWays = (ways, name, filter, elementCreator) => {
     return elements;
 }
 
-const createElementsFromRels = (rels, name, filter, elementCreator) => {
+const createElementsFromRels = (rels, tileBoundary, name, filter, elementCreator) => {
     const elements=[];
 
     rels.filter(r => r.calc!==undefined)
         .filter(filter)
         .forEach(r => {
             try {
-                const element = elementCreator(r, name);
+                const element = elementCreator(r, tileBoundary, name);
                 if (element!==null) {
                     elements.push(element);
                 }
@@ -625,13 +654,13 @@ const createElementsFromRels = (rels, name, filter, elementCreator) => {
     return elements;
 }
 
-const createElementsFromNodes = (nodes, name, filter, elementCreator) => {
+const createElementsFromNodes = (nodes, tileBoundary, name, filter, elementCreator) => {
     const elements=[];
 
     nodes.filter(filter)
       .forEach(r => {
             try {
-                const element = elementCreator(r, name);
+                const element = elementCreator(r, tileBoundary, name);
                 if (element!==null) {
                     elements.push(element);
                 }
@@ -771,7 +800,9 @@ const getWidthFromWay = (way) => {
     return { roadWidth, roadLane };
 }
 
-const groupFromWay = (way, name) => {
+const groupFromWay = (way, tileBoundary, name) => {
+
+    // const polyPointsClipped = clipPolyPoints(tileBoundary, way.calc.polygon);
 
     const faces = getTrianglesFromPolygon(way.calc.polygon);
     setHeight(faces,0);
@@ -779,7 +810,7 @@ const groupFromWay = (way, name) => {
     return createGroup("w-"+way.id, way.tags, name, way.calc.localBoundingBox, faces, getColorFromTags(way.tags));
 }
 
-const groupFromRel = (rel, name) => {
+const groupFromRel = (rel, tileBoundary, name) => {
 
     let faces=[];
     rel.calc.polygons.filter(p => p.role==="outer").forEach(o => {
@@ -790,7 +821,7 @@ const groupFromRel = (rel, name) => {
     return createGroup("r-"+rel.id, rel.tags, name, rel.calc.localBoundingBox, faces, getColorFromTags(rel.tags));
 }
 
-const groupFromNode = (node, name) => {
+const groupFromNode = (node, tileBoundary, name) => {
     const nodeCenter = calcNodeCoordinates(node);
     const nodeBBox = {
         centerX: nodeCenter.x,

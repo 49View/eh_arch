@@ -1,5 +1,5 @@
+const {exportBuildings} = require("./buildings");
 const {groupFromNode} = require("./osmHelper");
-const {createBuildings} = require("./buildings");
 const {createElementsFromNodes} = require("./osmHelper");
 const {groupFromRel, groupFromWay} = require("./osmHelper");
 const {
@@ -42,20 +42,20 @@ const addTileAreaFilter = (name, areaFilter) => {
     }
 }
 
-const createTileAreas = (tileFilter,nodes,ways,rels) => {
+const createTileAreas = (tileFilter, tileBoundary, nodes,ways,rels) => {
     console.log("----------------------------------------------");
     console.log(tileFilter.name);
     console.log("----------------------------------------------");
 
-    const wayBasedElements=createElementsFromWays(ways, tileFilter.name
+    const wayBasedElements=createElementsFromWays(ways, tileBoundary, tileFilter.name
         , w => tileFilter.areaFilter(w)
         , groupFromWay);
 
-    const relBasedElements=createElementsFromRels(rels, tileFilter.name
+    const relBasedElements=createElementsFromRels(rels, tileBoundary, tileFilter.name
         , r => tileFilter.areaFilter(r)
         , groupFromRel);
 
-    const nodeBasedElements=createElementsFromNodes(nodes, tileFilter.name
+    const nodeBasedElements=createElementsFromNodes(nodes, tileBoundary, tileFilter.name
       , r => tileFilter.areaFilter(r)
       , groupFromNode);
 
@@ -67,10 +67,10 @@ const createTileAreas = (tileFilter,nodes,ways,rels) => {
     return wayBasedElements.concat(relBasedElements).concat(nodeBasedElements);
 }
 
-const createTile = (nodes, ways, rels) => {
+const createTile = (tileBoundary, nodes, ways, rels) => {
     let elements = [];
 
-    // elements = elements.concat(createBuildings(nodes, ways, rels));
+    elements = elements.concat(exportBuildings(tileBoundary, nodes, ways, rels));
 
     const tileAreas = [
         addTileAreaFilter("unclassified", unclassifiedFilter),
@@ -83,7 +83,7 @@ const createTile = (nodes, ways, rels) => {
     ]
 
     tileAreas.forEach( tf => {
-        elements = elements.concat(createTileAreas(tf, nodes, ways, rels));
+        elements = elements.concat(createTileAreas(tf, tileBoundary, nodes, ways, rels));
     });
 
     return elements;

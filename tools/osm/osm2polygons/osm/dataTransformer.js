@@ -43,8 +43,8 @@ const calcNodeCoordinates = n => {
   const ly = n.lat;
   const lx = n.lon;
   return {
-    x: Math.sign(n.lon) * calcDistance(ly, 0, ly, lx),
-    y: Math.sign(n.lat) * calcDistance(0, lx, ly, lx)
+    x: calcDistance(ly, 0, ly, lx),
+    y: calcDistance(0, lx, ly, lx)
   }
 }
 
@@ -76,6 +76,7 @@ const calcDistance = (latitude1, longitude1, latitude2, longitude2) => {
   // in metres
   return (R * c);
 }
+
 const getBoundingBox = (coords) => {
 
   const {lat, lon, zoom} = {...coords};
@@ -101,6 +102,10 @@ const getBoundingBox = (coords) => {
   const centerLat = tile2lat(tileY+0.5, zoom);
   const centerLon = tile2long(tileX+0.5, zoom);
 
+  const sizeX = calcDistance(centerLat, topLon, centerLat, bottomLon);
+  const sizeY = calcDistance(topLat, centerLon, bottomLat, centerLon);
+
+  const halfW = 0.5;
   return {
     bbox: [
       topLat   ,
@@ -113,6 +118,28 @@ const getBoundingBox = (coords) => {
       lat: centerLat,
       lon: centerLon
     },
+    size: {
+      x: sizeX,
+      y: sizeY,
+    },
+    tileClip: [
+      {
+        X: -sizeX*halfW,
+        Y: sizeY*halfW
+      },
+      {
+        X: sizeX*halfW,
+        Y: sizeY*halfW
+      },
+      {
+        X: sizeX*halfW,
+        Y: -sizeY*halfW
+      },
+      {
+        X: -sizeX*halfW,
+        Y: -sizeY*halfW
+      },
+    ],
     zero: {
       lat: tile2lat(0,0),
       lon: tile2long(0,0)

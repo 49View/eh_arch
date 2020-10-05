@@ -1,6 +1,4 @@
 const { Vector} = require('../geometry/vector');
-const Decimal = require('decimal.js');
-Decimal.set({ precision: 20, rounding: 1 });
 const {
     getTrianglesFromPolygon,
     getTrianglesFromComplexPolygon,
@@ -10,10 +8,6 @@ const {
     createElementsFromRels,
     pointOnLine,
     distanceFromLine,
-    distanceFromPoint,
-    calcPointProjection,
-    projectionParameterPointToSegment,
-    pointOnLineFromParameter,
     setHeight,
     twoLinesIntersectParameter: twoLinesIntersectParameter
 } = require('./osmHelper.js');
@@ -24,16 +18,16 @@ const DEFAULT_ROOF_COLOUR = "#cccccc";
 const DEFAULT_BUILDING_COLOUR = "#eeeeee";
 const USE_TRIANGLES_STRIP = false;
 
-const exportBuildings = (nodes, ways, rels) => {
+const exportBuildings = (tileBoundary, nodes, ways, rels) => {
     console.log("----------------------------------------------");
     console.log("BUILDINGS");
     console.log("----------------------------------------------");
 
-    const simpleBuildings=createElementsFromWays(ways, "building"
+    const simpleBuildings=createElementsFromWays(ways, tileBoundary, "building"
         , w => w.tags && (w.tags["building"] || w.tags["building:part"])
         , buildingFromWay);
     // const simpleBuildings=[];
-    const complexBuildings=createElementsFromRels(rels, "building"
+    const complexBuildings=createElementsFromRels(rels, tileBoundary, "building"
         , r => r.tags && (r.tags["building"] || r.tags["building:part"])
         , buildingFromRel);
 
@@ -133,8 +127,8 @@ const getBuildingInfo = (tags) => {
     } else {
         maxHeight=maxHeight-roofHeight;
     }
-    roofMinHeight=maxHeight;
-    roofMaxHeight=maxHeight+roofHeight;
+    const roofMinHeight=maxHeight;
+    const roofMaxHeight=maxHeight+roofHeight;
 
     return {
         minHeight: minHeight,
@@ -210,7 +204,7 @@ const createDomeRoof = (polygon, roofInfo) => {
     //         //Reduce ray for avoid error on union surface computation
     //         inCircleRay=inCircleRay*0.98;
     //         inCircle = [];
-    //         //Create incircle surface
+    //         //Create in circle surface
     //         for (let i=0;i<360;i+=5) {
     //             const a=i*Math.PI/180;
 
@@ -219,7 +213,7 @@ const createDomeRoof = (polygon, roofInfo) => {
     //                 y: inCircleRay*Math.sin(a)
     //             })
     //         }
-    //         //Create union surface, from polygon to incircle
+    //         //Create union surface, from polygon to in circle
     //         unionSurface=getTrianglesFromComplexPolygon(polygon, [{points: inCircle}]);
     //         error=false;
     //     } catch (ex) {
@@ -276,9 +270,9 @@ const createDomeRoof = (polygon, roofInfo) => {
             lastZNextPoint=zNextPoint;
         }
 
-        xPoint=0;
-        yPoint=0;
-        zPoint=roofInfo.minHeight+inCircleRay;
+        let xPoint=0;
+        let yPoint=0;
+        let zPoint=roofInfo.minHeight+inCircleRay;
 
         faces.push({x: lastXPoint, y: lastYPoint, z: lastZPoint});
         faces.push({x: lastXNextPoint, y: lastYNextPoint, z: lastZNextPoint});
@@ -347,7 +341,7 @@ const createGabledRoof = (polygon, roofInfo, ombb, hippedPerc) => {
     pointA=ombb[startIndex].lerp(ombb[startIndex+1], 0.5);
     pointB=ombb[startIndex+2].lerp(ombb[(startIndex+3)%4], 0.5);
 
-    const axis = new Vector(pointB.x-pointA.x,pointB.y-pointA.y);
+    // const axis = new Vector(pointB.x-pointA.x,pointB.y-pointA.y);
 
     let faces=[];
 
@@ -372,7 +366,7 @@ const createGabledRoof = (polygon, roofInfo, ombb, hippedPerc) => {
     }
 
     //More than 2 intersection degenerate in pyramidal roof
-    if (intersection.length!=2) {
+    if (intersection.length!==2) {
         return createPyramidalRoof(polygon, roofInfo);
     }
 
@@ -407,8 +401,8 @@ const createGabledRoof = (polygon, roofInfo, ombb, hippedPerc) => {
             // let prjParamNextP = projectionParameterPointToSegment(nextP, intersection[0].point, intersection[1].point, false);
             // console.log(prjParamP);
             // console.log(prjParamNextP);
-            prj = pointOnLine(p, intersection[0].point, intersection[1].point, true);
-            nextPrj = pointOnLine(nextP, intersection[0].point, intersection[1].point, true);
+            const prj = pointOnLine(p, intersection[0].point, intersection[1].point, true);
+            const nextPrj = pointOnLine(nextP, intersection[0].point, intersection[1].point, true);
 
             faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
             faces.push({x: nextP.x, y: nextP.y, z:roofInfo.minHeight});
@@ -524,8 +518,7 @@ const buildingFromWay = (way, name) => {
     const roofFaces = createRoof(polygon, buildingInfo.roof, convexHull, orientedMinBoundingBox);
 
     //Create building mesh
-    const building = createBuildingMesh("w-"+way.id, way.tags, name, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
-    return building;
+    return createBuildingMesh("w-" + way.id, way.tags, name, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
 }
 
 const buildingFromRel = (rel, name) => {
@@ -546,8 +539,7 @@ const buildingFromRel = (rel, name) => {
         //Compute roof faces
         roofFaces = roofFaces.concat(createComplexPolygonRoof(o, o.holes, buildingInfo.roof));
     })
-    const building = createBuildingMesh("r-"+rel.id, rel.tags, name, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
-    return building;
+    return createBuildingMesh("r-" + rel.id, rel.tags, name, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
 }
 
-module.exports = { createBuildings: exportBuildings }
+module.exports = { exportBuildings }

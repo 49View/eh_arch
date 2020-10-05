@@ -1,6 +1,5 @@
 import React from "react";
 import { Canvas } from "react-three-fiber";
-import GridHelper from "./GridHelper";
 import Controls from "./Controls";
 import Element from "./Element";
 
@@ -10,9 +9,9 @@ const OsmScene = (props) => {
   let Content;
   if (props.showAll) {
 
-    Content = props.elements.map(b => 
+    Content = props.elements.map(b =>
       <Element
-        position={[b.center.x-props.element.center.x,0,props.element.center.y-b.center.y]}
+        position={[b.center.x-props.element.center.x,0,b.center.y-props.element.center.y]}
         element={b}
         wireframe={props.wireframe}
       />

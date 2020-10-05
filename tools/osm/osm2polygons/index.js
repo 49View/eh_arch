@@ -26,7 +26,7 @@ const main = async (args) => {
   const tileBoundary = getBoundingBox({...coords});
   const {nodes, ways, rels} = useCache ? await getDataLocal() : await getData(tileBoundary.bbox);
   elaborateData(tileBoundary, nodes, ways, rels);
-  const elements = createTile(nodes, ways, rels);
+  const elements = createTile(tileBoundary, nodes, ways, rels);
 
   exportTile(elements);
 }
