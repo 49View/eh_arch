@@ -272,6 +272,8 @@ const removeCollinearPoints = (nodes) => {
 }
 
 const offsetPolyline = (way, points) => {
+
+    // let pointsPartial = points;
     let pointsPartial = [];
     let startIndex = 0;
     for (let i = startIndex; i < points.length; i++) {
@@ -290,15 +292,15 @@ const offsetPolyline = (way, points) => {
     if (startIndex === 0) {
         pointsPartial.push(points);
     } else {
-        pointsPartial.push(points.slice(startIndex - 1, points.length));
+        // pointsPartial.push(points.slice(startIndex - 1, points.length));
     }
 
     const {roadWidth, roadLane} = getWidthFromWay(way);
     let polygon = [];
-    pointsPartial.forEach(points => {
+    pointsPartial.forEach(pts => {
         let subj = new ClipperLib.Paths();
         let solution = new ClipperLib.Paths();
-        subj[0] = points.map(p => {
+        subj[0] = pts.map(p => {
             return {X: p.x, Y: p.y}
         });
         const scale = 100;
@@ -573,7 +575,7 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
     //Search and create closed polygons from segments
     while (members.filter(m=> m.processed===true).length<members.length)
     {
-        for (i=0;i<members.length;i++) {
+        for (let i=0;i<members.length;i++) {
             if (!members[i].processed) {
                 const connectedMembers = createClosedPath(members[i], members);
                 if (connectedMembers.length>0) {
