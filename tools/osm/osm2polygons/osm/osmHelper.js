@@ -4,6 +4,44 @@ const { calcConvexHull } = require('../geometry/convexhull');
 const { calcOmbb } = require('../geometry/ombb');
 const ClipperLib = require('js-clipper');
 
+const calcNodeCoordinates = n => {
+    const ly = n.lat;
+    const lx = n.lon;
+    return {
+        x: Math.sign(n.lon) * calcDistance(ly, 0, ly, lx),
+        y: Math.sign(n.lat) * calcDistance(0, lx, ly, lx)
+    }
+}
+
+const calcCoordinate = (nodes) => {
+    nodes.forEach(n => {
+        const nc = calcNodeCoordinates(n);
+        n.x = nc.x;
+        n.y = nc.y;
+    })
+}
+
+const calcDistance = (latitude1, longitude1, latitude2, longitude2) => {
+
+    const lat1 = latitude1;
+    const lon1 = longitude1;
+    const lat2 = latitude2;
+    const lon2 = longitude2;
+    const R = 6371e3; // metres
+    const phi1 = lat1 * Math.PI / 180; // φ, λ in radians
+    const phi2 = lat2 * Math.PI / 180;
+    const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+    const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+      Math.cos(phi1) * Math.cos(phi2) *
+      Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    // in metres
+    return (R * c);
+}
+
 const triangulate = (swCtx) => {
     swCtx.triangulate();
     const tri= swCtx.getTriangles()
@@ -469,18 +507,6 @@ const createGroup = (id, tags, name, boundingBox, faces, color) => {
     return createMesh(id, tags, name, boundingBox, groups);
 }
 
-const exportNode = (node, type) => {
-    return {
-        id: node.id,
-        type: type,
-        point: {
-            x: node.lon,
-            y: node.lat
-        },
-        tags: node.tags
-    }
-}
-
 const createMesh = (id, tags, type, boundingBox, groups) => {
     return {
         id: id,
@@ -745,16 +771,16 @@ const getWidthFromWay = (way) => {
                 roadLane = 2;
                 break;
             case "secondary":
-                roadWidth = 2.75;
+                roadWidth = 2.5;
                 roadLane = 2;
                 break;
             case "tertiary":
-                roadWidth = 2.75;
+                roadWidth = 2.25;
                 roadLane = 2;
                 break;
             case "unclassified":
             case "residential":
-                roadWidth = 2.75;
+                roadWidth = 2.5;
                 roadLane = 1;
                 break;
             case "track":
@@ -781,7 +807,6 @@ const getWidthFromWay = (way) => {
 
 const groupFromWay = (way, name) => {
 
-    // const {polygon,localBoundingBox}=getPolygonFromWay(way);
     const faces = getTrianglesFromPolygon(way.calc.polygon);
     setHeight(faces,0);
 
@@ -790,7 +815,6 @@ const groupFromWay = (way, name) => {
 
 const groupFromRel = (rel, name) => {
 
-    // const {polygons,localBoundingBox} = getPolygonsFromMultipolygonRelation(rel);
     let faces=[];
     rel.calc.polygons.filter(p => p.role==="outer").forEach(o => {
         faces = faces.concat(getTrianglesFromComplexPolygon(o.points, o.holes));
@@ -801,7 +825,14 @@ const groupFromRel = (rel, name) => {
 }
 
 const groupFromNode = (node, name) => {
-    return createGroup("n-"+node.id, node.tags, name, [], [], getColorFromTags(node.tags));
+    const nodeCenter = calcNodeCoordinates(node);
+    const nodeBBox = {
+        centerX: nodeCenter.x,
+        centerY: nodeCenter.y,
+        centerLat: node.lat,
+        centerLon: node.lon
+    }
+    return createGroup("n-"+node.id, node.tags, name, nodeBBox, [], getColorFromTags(node.tags));
 }
 
 const setHeight = (faces, height) => {
@@ -811,6 +842,7 @@ const setHeight = (faces, height) => {
 }
 
 module.exports = {
+    calcCoordinate,
     getTrianglesFromPolygon,
     getTrianglesFromComplexPolygon,
     extrudePoly,

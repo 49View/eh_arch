@@ -1,3 +1,4 @@
+const {calcCoordinate} = require("./osmHelper");
 const {
   getPolygonsFromMultipolygonRelation,
   getPolygonFromWay,
@@ -11,35 +12,6 @@ const {
 //     return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
 // }
 
-const calcCoordinate = (nodes) => {
-  nodes.forEach(n => {
-    const ly = n.lat;
-    const lx = n.lon;
-    n.x = Math.sign(n.lon) * calcDistance(ly, 0, ly, lx);
-    n.y = Math.sign(n.lat) * calcDistance(0, lx, ly, lx);
-  })
-}
-
-const calcDistance = (latitude1, longitude1, latitude2, longitude2) => {
-
-  const lat1 = latitude1;
-  const lon1 = longitude1;
-  const lat2 = latitude2;
-  const lon2 = longitude2;
-  const R = 6371e3; // metres
-  const phi1 = lat1 * Math.PI / 180; // φ, λ in radians
-  const phi2 = lat2 * Math.PI / 180;
-  const deltaPhi = (lat2 - lat1) * Math.PI / 180;
-  const deltaLambda = (lon2 - lon1) * Math.PI / 180;
-
-  const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
-    Math.cos(phi1) * Math.cos(phi2) *
-    Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  // in metres
-  return (R * c);
-}
 
 const findElement = (list, id) => {
   return list.find(e => e.id === id);
