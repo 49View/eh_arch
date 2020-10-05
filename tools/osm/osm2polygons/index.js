@@ -1,8 +1,9 @@
+const {elaborateData} = require("./osm/osmHelper");
+const {getBoundingBox} = require("./osm/dataTransformer");
 const {exportTile} = require("./osm/dataLoader");
 const {createTile} = require("./osm/tileArea");
 const {getDataLocal} = require("./osm/dataLoader");
-const {getBoundingBox, getData} = require("./osm/dataLoader");
-const {elaborateData} = require("./osm/dataTransformer");
+const {getData} = require("./osm/dataLoader");
 
 //WestMinster
 // const bbox = [51.4992784, -0.125376, 15];

@@ -70,7 +70,7 @@ const createTileAreas = (tileFilter,nodes,ways,rels) => {
 const createTile = (nodes, ways, rels) => {
     let elements = [];
 
-    elements = elements.concat(createBuildings(nodes, ways, rels));
+    // elements = elements.concat(createBuildings(nodes, ways, rels));
 
     const tileAreas = [
         addTileAreaFilter("unclassified", unclassifiedFilter),

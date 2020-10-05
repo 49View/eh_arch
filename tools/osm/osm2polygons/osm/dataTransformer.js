@@ -1,10 +1,3 @@
-const {calcCoordinate} = require("./osmHelper");
-const {
-  getPolygonsFromMultipolygonRelation,
-  getPolygonFromWay,
-  checkPolygonInsidePolygon
-} = require("./osmHelper.js");
-
 // RAD2DEG = 180 / Math.PI;
 // PI_4 = Math.PI / 4;
 //
@@ -12,112 +5,119 @@ const {
 //     return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
 // }
 
+function lon2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
+function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
 
-const findElement = (list, id) => {
-  return list.find(e => e.id === id);
+function tile2long(x,z) {
+  return (x/Math.pow(2,z)*360-180);
+}
+function tile2lat(y,z) {
+  const n = Math.PI - 2 * Math.PI * y / Math.pow(2, z);
+  return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
 }
 
-const extendData = (nodes, ways, relations) => {
+RAD2DEG = 180 / Math.PI;
+PI_4 = Math.PI / 4;
+const TILE_SIZE = 256;
 
+// const lat2y = lat => {
+//     return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
+// }
+
+// The mapping between latitude, longitude and pixels is defined by the web
+// mercator projection.
+function project(lat, lon) {
+  let sinY = Math.sin((lat * Math.PI) / 180);
+
+  // Truncating to 0.9999 effectively limits latitude to 89.189. This is
+  // about a third of a tile past the edge of the world tile.
+  sinY = Math.min(Math.max(sinY, -0.9999), 0.9999);
+
+  return {
+    x: TILE_SIZE * (0.5 + lon / 360),
+    y: TILE_SIZE * (0.5 - Math.log((1 + sinY) / (1 - sinY)) / (4 * Math.PI))
+  }
+}
+
+const calcNodeCoordinates = n => {
+  const ly = n.lat;
+  const lx = n.lon;
+  return {
+    x: Math.sign(n.lon) * calcDistance(ly, 0, ly, lx),
+    y: Math.sign(n.lat) * calcDistance(0, lx, ly, lx)
+  }
+}
+
+const calcCoordinate = (nodes) => {
   nodes.forEach(n => {
-    n.inWay = false;
-    n.inRelation = false;
-  })
-  ways.forEach(w => {
-    w.inRelation = false;
-    const wayNodes = [];
-    w.nodes.forEach(n => {
-      const node = findElement(nodes, n);
-      if (node) {
-        node.inWay = true;
-        wayNodes.push(node);
-      }
-    })
-    w.nodes = wayNodes;
-  });
-
-  relations.forEach(r => {
-    const relationMembers = [];
-    r.members.forEach(m => {
-      const member = {
-        type: m.type,
-        role: m.role
-      }
-      if (m.type === "way") {
-        const way = findElement(ways, m.ref);
-        if (way) {
-          way.inRelation = true;
-          member.ref = way;
-        }
-      } else if (m.type === "node") {
-        const node = findElement(nodes, m.ref);
-        if (node) {
-          node.inRelation = true;
-          member.ref = node;
-        }
-      }
-      if (member.ref) {
-        relationMembers.push(member);
-      }
-    });
-    r.members = relationMembers;
+    const nc = calcNodeCoordinates(n);
+    n.x = nc.x;
+    n.y = nc.y;
   })
 }
 
-const elaborateData = (tileBoundary, nodes, ways, rels) => {
-  //Calculate coordinate as distance from bbox center
-  calcCoordinate(nodes);
-  //Transform reference in ways and relations to data
-  extendData(nodes, ways, rels);
-  //Compute ways and rels
-  computePolygons(ways, rels);
+const calcDistance = (latitude1, longitude1, latitude2, longitude2) => {
 
-  createPolygonsHierarchy(ways);
+  const lat1 = latitude1;
+  const lon1 = longitude1;
+  const lat2 = latitude2;
+  const lon2 = longitude2;
+  const R = 6371e3; // metres
+  const phi1 = lat1 * Math.PI / 180; // φ, λ in radians
+  const phi2 = lat2 * Math.PI / 180;
+  const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+  const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+  const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+    Math.cos(phi1) * Math.cos(phi2) *
+    Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  // in metres
+  return (R * c);
 }
+const getBoundingBox = (coords) => {
 
-const computePolygons = (ways, rels) => {
+  const {lat, lon, zoom} = {...coords};
+  const tileX = lon2tile(lon, zoom);
+  const tileY = lat2tile(lat, zoom);
 
-  ways.forEach(w => {
-        try {
-          w.calc = {...getPolygonFromWay(w)};
-        } catch (ex) {
-          console.log(`Error in ${w.id} way`, ex);
-        }
-      }
-    );
+  console.log(`${lat} ${lon}`);
+  console.log(`${tileX} ${tileY}`);
 
-  rels.forEach(r => {
-      try {
-        r.calc = {...getPolygonsFromMultipolygonRelation(r)};
-      } catch (ex) {
-        console.log(`Error in ${r.id} relation`, ex);
-      }
+  console.log(`TopLeft     ${tile2long(tileX, zoom)} ${tile2lat(tileY, zoom)}`)
+  console.log(`TopRight    ${tile2long(tileX+1, zoom)} ${tile2lat(tileY, zoom)}`)
+  console.log(`BottomLeft  ${tile2long(tileX, zoom)} ${tile2lat(tileY+1, zoom)}`)
+  console.log(`BottomRight ${tile2long(tileX+1, zoom)} ${tile2lat(tileY+1, zoom)}`)
+  console.log(`Center      ${tile2long(tileX+0.5, zoom)} ${tile2lat(tileY+0.5, zoom)}`)
+
+  console.log(`Zero        ${tile2long(0,0)} ${tile2lat(0,0)}`)
+
+  const topLat    = tile2lat(tileY+1, zoom);
+  const topLon    = tile2long(tileX, zoom);
+  const bottomLat = tile2lat(tileY, zoom);
+  const bottomLon = tile2long(tileX+1, zoom);
+
+  const centerLat = tile2lat(tileY+0.5, zoom);
+  const centerLon = tile2long(tileX+0.5, zoom);
+
+  return {
+    bbox: [
+      topLat   ,
+      topLon   ,
+      bottomLat,
+      bottomLon
+    ],
+    center: {
+      ...project(centerLat, centerLon),
+      lat: centerLat,
+      lon: centerLon
+    },
+    zero: {
+      lat: tile2lat(0,0),
+      lon: tile2long(0,0)
     }
-  );
-
-}
-
-const createPolygonsHierarchy = (ways) => {
-
-  ways.filter(w => w.calc !== undefined)
-    .forEach(wo => {
-        wo.children = [];
-        ways
-          .filter(w => w.calc !== undefined)
-          .filter(w => w.id !== wo.id)
-          .filter(w => (w.containers && w.containers.findIndex(c => c.id === "w-" + wo.id)))
-          .forEach(wi => {
-
-            if (checkPolygonInsidePolygon(wo.calc.absolutePolygon, wi.calc.absolutePolygon)) {
-              if (wi.containers === undefined) {
-                wi.containers = [];
-              }
-              wi.containers.push(wo);
-              wo.children.push(wi);
-            }
-          })
-      }
-    );
+  };
 }
 
 const convertElementFacesToTriangles = (elements) => {
@@ -132,6 +132,9 @@ const convertElementFacesToTriangles = (elements) => {
 }
 
 module.exports = {
-  elaborateData,
+  calcDistance,
+  calcCoordinate,
+  calcNodeCoordinates,
+  getBoundingBox,
   convertElementFacesToTriangles
 }
