@@ -1,8 +1,7 @@
-const fs = require('fs');
+const {exportTile} = require("./osm/dataLoader");
+const {createTile} = require("./osm/tileArea");
 const {getDataLocal} = require("./osm/dataLoader");
-const {createTileAreas} = require("./osm/tileArea");
 const {getBoundingBox, getData} = require("./osm/dataLoader");
-const {createBuildings} = require("./osm/buildings");
 const {elaborateData} = require("./osm/dataTransformer");
 
 //WestMinster
@@ -18,41 +17,6 @@ const {elaborateData} = require("./osm/dataTransformer");
 // Corniche
 //const bbox = [51.49045, -0.12262, 51.49139, -0.12080];
 
-const parkFilter = w => {
-  return w.tags && (w.tags["leisure"] || (w.tags["landuse"] && (w.tags["landuse"] !== "construction" && w.tags["landuse"] !== "governmental")) || (w.tags["area"] && w.tags["man_made"] && !w.tags["ferry"]));
-}
-
-const parkingFilter = w => {
-  return w.tags && (w.tags["amenity"] === "parking");
-}
-
-const waterFilter = w => {
-  return w.tags && w.tags["natural"] === "water";
-}
-
-const fenceFilter = w => {
-  return w.tags && w.tags["barrier"];
-}
-
-const roadFilter = w => {
-  return w.tags && (w.tags["highway"]);
-}
-
-const treeFilter = w => {
-  return w.tags && (w.tags["natural"] === "tree");
-}
-
-const unclassifiedFilter = w => {
-  return w.tags === undefined && w.nodes && w.nodes.length > 0;
-}
-
-const addTileAreaFilter = (name, areaFilter) => {
-  return {
-    name,
-    areaFilter
-  }
-}
-
 const main = async () => {
 
   const tileBoundary = getBoundingBox(51.4992784, -0.125376, .3, 15);
@@ -61,39 +25,9 @@ const main = async () => {
   const {nodes, ways, rels} = await getDataLocal();
   elaborateData(tileBoundary, nodes, ways, rels);
 
-  let elements = [];
+  const elements = createTile(nodes, ways, rels);
 
-  elements = elements.concat(createBuildings(nodes, ways, rels));
-
-  const tileAreas = [
-    addTileAreaFilter("unclassified", unclassifiedFilter),
-    addTileAreaFilter("park", parkFilter),
-    addTileAreaFilter("parking", parkingFilter),
-    addTileAreaFilter("water", waterFilter),
-    addTileAreaFilter("barrier", fenceFilter),
-    addTileAreaFilter("road", roadFilter),
-    addTileAreaFilter("tree", treeFilter),
-  ]
-
-  for (const tf of tileAreas) {
-    elements = elements.concat(createTileAreas(tf, nodes, ways, rels));
-  }
-
-  elements.forEach(e => {
-    if ( e.groups ) {
-      e.groups.forEach(g => {
-        if (g.faces) {
-          g.triangles = g.faces.map(f => [f.x, f.y, f.z]);
-          delete g.faces;
-        }
-      })
-    }
-  })
-
-  const jsonOutput = JSON.stringify({elements}, null, 4);
-  fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {encoding: "utf8"});
-  fs.writeFileSync("elements.json", jsonOutput, {encoding: "utf8"});
-  fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/debug/elements.json", jsonOutput, {encoding: "utf8"});
+  exportTile(elements);
 }
 
 

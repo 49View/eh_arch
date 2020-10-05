@@ -2,6 +2,7 @@ const axios = require('axios')
 const qs = require('qs');
 const fs = require('fs');
 const Decimal = require('decimal.js');
+const {convertElementFacesToTriangles} = require("./dataTransformer");
 Decimal.set({ precision: 20, rounding: 1 })
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
@@ -166,6 +167,15 @@ const parseData = (osmData) => {
     return {nodes,ways,rels}
 }
 
+const exportTile = elements => {
 
-module.exports = {getBoundingBox,getData,getDataLocal}
+    convertElementFacesToTriangles(elements);
+
+    const jsonOutput = JSON.stringify({elements}, null, 4);
+    fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {encoding: "utf8"});
+    fs.writeFileSync("elements.json", jsonOutput, {encoding: "utf8"});
+    fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/debug/elements.json", jsonOutput, {encoding: "utf8"});
+}
+
+module.exports = {getBoundingBox,getData,getDataLocal,exportTile}
 
