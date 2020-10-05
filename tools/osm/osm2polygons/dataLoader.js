@@ -20,22 +20,22 @@ RAD2DEG = 180 / Math.PI;
 PI_4 = Math.PI / 4;
 const TILE_SIZE = 256;
 
-const lat2y = lat => {
-    return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
-}
+// const lat2y = lat => {
+//     return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
+// }
 
 // The mapping between latitude, longitude and pixels is defined by the web
 // mercator projection.
 function project(lat, lon) {
-    let siny = Math.sin((lat * Math.PI) / 180);
+    let sinY = Math.sin((lat * Math.PI) / 180);
 
     // Truncating to 0.9999 effectively limits latitude to 89.189. This is
     // about a third of a tile past the edge of the world tile.
-    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+    sinY = Math.min(Math.max(sinY, -0.9999), 0.9999);
 
     return {
         x: TILE_SIZE * (0.5 + lon / 360),
-        y: TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI))
+        y: TILE_SIZE * (0.5 - Math.log((1 + sinY) / (1 - sinY)) / (4 * Math.PI))
     }
 }
 

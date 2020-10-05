@@ -1,9 +1,8 @@
-const Decimal = require('decimal.js');
-Decimal.set({ precision: 20, rounding: 1 })
 const { Vector} = require('./vector');
 const poly2tri = require('poly2tri');
 const { calcConvexHull } = require('./convexhull');
 const { calcOmbb } = require('./ombb');
+const ClipperLib = require('js-clipper');
 
 const triangulate = (swCtx) => {
     swCtx.triangulate();
@@ -141,8 +140,8 @@ const computeBoundingBox = (points, isOpen=undefined) => {
 
     let centerX = 0;
     let centerY = 0;
-    let sizeX = 0;
-    let sizeY = 0;
+    let sizeX;
+    let sizeY;
     let centerLat = 0;
     let centerLon = 0;
 
@@ -198,10 +197,7 @@ const removeCollinearPoints = (nodes) => {
     //If last point is equal to first point then remove last
     if (nodes[0].id===nodes[nodes.length-1].id) {
         nodes.slice(0,nodes.length-1).forEach(n => {
-            const point = { ...n };
-            point.x=n.x; //.toNumber();
-            point.y=n.y; //.toNumber();
-            points.push(point);
+            points.push({ ...n });
         })
     }
 
@@ -231,19 +227,59 @@ const removeCollinearPoints = (nodes) => {
     }
 
     if (points.length<3) {
-        points=[];
-        nodes.slice(0,nodes.length-1).forEach(n => {
-            const point = { ...n };
-            point.x=n.x; //n.x.toNumber();
-            point.y=n.y; //n.y.toNumber();
-            points.push(point);
-        })
+        points = nodes.map(n => {return {...n}});
     }
 
     return points;
 }
 
+const offsetPolyline = (way, points) => {
+    let pointsPartial = [];
+    let startIndex = 0;
+    for (let i = startIndex; i < points.length; i++) {
+        for (let j = i + 1; j < points.length; j++) {
+            if (points[i].id === points[j].id) {
+                if (startIndex < j) {
+                    pointsPartial.push(points.slice(startIndex, j));
+                }
+                startIndex = j;
+                i = j;
+                break;
+            }
+        }
+    }
 
+    if (startIndex === 0) {
+        pointsPartial.push(points);
+    } else {
+        pointsPartial.push(points.slice(startIndex - 1, points.length));
+    }
+
+    const {roadWidth, roadLane} = getWidthFromWay(way);
+    let polygon = [];
+    pointsPartial.forEach(points => {
+        let subj = new ClipperLib.Paths();
+        let solution = new ClipperLib.Paths();
+        subj[0] = points.map(p => {
+            return {X: p.x, Y: p.y}
+        });
+        const scale = 100;
+        ClipperLib.JS.ScaleUpPaths(subj, scale);
+        let co = new ClipperLib.ClipperOffset(2, 0.25);
+        co.AddPaths(subj, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenRound);
+        co.Execute(solution, roadWidth * roadLane * scale);
+        ClipperLib.JS.ScaleDownPaths(solution, scale);
+
+        solution.forEach(s => {
+            const polys = s.map(p => {
+                return {x: p.X, y: p.Y}
+            });
+            polygon = polygon.concat(polys);
+        });
+    });
+
+    return polygon;
+}
 
 const createBasePolygon = (points) => {
     const polygon = [];
@@ -287,9 +323,7 @@ const pointOnLineFromParameter = (parameter, segmentStart, segmentEnd) => {
 
 const pointOnLine = (point, segmentStart, segmentEnd, clamp) => {
     const parameter = projectionParameterPointToSegment(point, segmentStart, segmentEnd, clamp);
-    const projectedPoint = pointOnLineFromParameter(parameter, segmentStart, segmentEnd);
-
-    return projectedPoint;
+    return pointOnLineFromParameter(parameter, segmentStart, segmentEnd);
 }
 
 const distanceFromLine = (point, segmentStart, segmentEnd, clamp) => {
@@ -315,21 +349,21 @@ const twoLinesIntersectParameter = (pointALine1, pointBLine1, pointALine2, point
         return Infinity;
     }
 
-    const parameter = (((pointALine1.y-pointALine2.y)*line1Vector.x)+((pointALine2.x-pointALine1.x)*line1Vector.y))
-            / ((line2Vector.y*line1Vector.x)-(line2Vector.x*line1Vector.y));
-
-    return parameter;
+    return (((pointALine1.y - pointALine2.y) * line1Vector.x) + ((pointALine2.x - pointALine1.x) * line1Vector.y))
+      / ((line2Vector.y * line1Vector.x) - (line2Vector.x * line1Vector.y));
 }
 
 const checkPointsOrder = (points,convexHull) => {
+
+    if ( points.length < 3 ) return points;
 
     let i1,i2,i3;
 
     //console.log(convexHull.length);
 
-    i1 = points.findIndex(p => p.id==convexHull[0].id);
-    i2 = points.findIndex(p => p.id==convexHull[1].id);
-    i3 = points.findIndex(p => p.id==convexHull[2].id);
+    i1 = points.findIndex(p => p.id===convexHull[0].id);
+    i2 = points.findIndex(p => p.id===convexHull[1].id);
+    i3 = points.findIndex(p => p.id===convexHull[2].id);
 
     if (i2<i1) i2=i2+points.length;
     if (i3<i1) i3=i3+points.length;
@@ -463,8 +497,10 @@ const createMesh = (id, tags, type, boundingBox, groups) => {
 }
 
 const getPolygonFromWay = (way) => {
+    const isClosed = way.nodes[0].id === way.nodes[way.nodes.length - 1].id;
+
     const points = removeCollinearPoints(way.nodes);
-    if (points.length<3) {
+    if (points.length<3 && isClosed) {
         throw new Error("Invalid way "+ way.id);
     }
     let localBoundingBox = computeBoundingBox(points);
@@ -474,11 +510,16 @@ const getPolygonFromWay = (way) => {
 
     const convexHull = calcConvexHull(points);
     checkPointsOrder(points,convexHull);
-    const orientedMinBoundingBox = calcOmbb(convexHull);
+    const ombb = calcOmbb(convexHull);
 
-    const polygon = createBasePolygon(points);
+    const polygon = isClosed ? createBasePolygon(points) : offsetPolyline(way, points);
 
-    return {polygon,localBoundingBox,convexHull,orientedMinBoundingBox}
+    const absolutePolygon = [];
+    polygon.forEach(p => {
+        absolutePolygon.push({x: p.x + localBoundingBox.centerX, y: p.y + localBoundingBox.centerY});
+    })
+
+    return {polygon,absolutePolygon,localBoundingBox,convexHull,ombb}
 }
 
 const getPolygonsFromMultipolygonRelation = (rel) => {
@@ -746,7 +787,7 @@ const groupFromWay = (way, name) => {
     const faces = getTrianglesFromPolygon(way.calc.polygon);
     setHeight(faces,0);
 
-    return createGroup("w-"+way.id, way.tags, name, way.calc.lbb, faces, getColorFromTags(way.tags));
+    return createGroup("w-"+way.id, way.tags, name, way.calc.localBoundingBox, faces, getColorFromTags(way.tags));
 }
 
 const groupFromRel = (rel, name) => {
@@ -758,7 +799,7 @@ const groupFromRel = (rel, name) => {
         setHeight(faces,0);
     });
 
-    return createGroup("r-"+rel.id, rel.tags, name, rel.calc.lbb, faces, getColorFromTags(rel.tags));
+    return createGroup("r-"+rel.id, rel.tags, name, rel.calc.localBoundingBox, faces, getColorFromTags(rel.tags));
 }
 
 const groupFromNode = (node, name) => {
@@ -775,6 +816,7 @@ module.exports = {
     getTrianglesFromPolygon,
     getTrianglesFromComplexPolygon,
     extrudePoly,
+    offsetPolyline,
     computeBoundingBox,
     convertToLocalCoordinate,
     removeCollinearPoints,

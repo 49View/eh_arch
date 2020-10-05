@@ -495,7 +495,7 @@ const buildingFromWay = (way, name) => {
     let isOutline;
 
     const polygon = way.calc.polygon;
-    const localBoundingBox = way.calc.lbb;
+    const localBoundingBox = way.calc.localBoundingBox;
     const convexHull = way.calc.convexHull;
     const orientedMinBoundingBox = way.calc.ombb;
 
@@ -533,7 +533,7 @@ const buildingFromRel = (rel, name) => {
     const buildingInfo = getBuildingInfo(rel.tags);
 
     const polygons = rel.calc.polygons;
-    const localBoundingBox = rel.calc.lbb;
+    const localBoundingBox = rel.calc.localBoundingBox;
 
     let roofFaces=[];
     let lateralFaces=[];
