@@ -122,14 +122,12 @@ const createPolygonsHierarchy = (ways) => {
 
 const convertElementFacesToTriangles = (elements) => {
   elements.forEach(e => {
-    if ( e.groups ) {
       e.groups.forEach(g => {
         if (g.faces) {
           g.triangles = g.faces.map(f => [f.x, f.y, f.z]);
           delete g.faces;
         }
       })
-    }
   });
 }
 

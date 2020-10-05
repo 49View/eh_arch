@@ -5,7 +5,7 @@ const {getBoundingBox, getData} = require("./osm/dataLoader");
 const {elaborateData} = require("./osm/dataTransformer");
 
 //WestMinster
-// const bbox = [51.4892, -0.1344, 51.5016, -0.1034];
+// const bbox = [51.4992784, -0.125376, 15];
 //Battersea Park
 //const bbox = [51.4696, -0.1777, 51.4878, -0.1375];
 //Royal Albert Hall
@@ -17,21 +17,20 @@ const {elaborateData} = require("./osm/dataTransformer");
 // Corniche
 //const bbox = [51.49045, -0.12262, 51.49139, -0.12080];
 
-const main = async () => {
+const main = async (args) => {
 
-  const tileBoundary = getBoundingBox(51.4992784, -0.125376, .3, 15);
+  const useCache = (args.length === 4 && args[3] === "useCache");
+  const coords = {lat: args.length===0 ? 51.4992784 : Number(args[0]), lon:  args.length===0 ? -0.125376 : Number(args[1]), zoom: args.length===0 ? 15 : Number(args[2])};
 
-  // const {nodes, ways, rels} = await getData(tileBoundary.bbox);
-  const {nodes, ways, rels} = await getDataLocal();
+  const tileBoundary = getBoundingBox({...coords});
+  const {nodes, ways, rels} = useCache ? await getDataLocal() : await getData(tileBoundary.bbox);
   elaborateData(tileBoundary, nodes, ways, rels);
-
   const elements = createTile(nodes, ways, rels);
 
   exportTile(elements);
 }
 
-
-main().then(() => {
+main(process.argv.slice(2)).then(() => {
   console.log("----------------------------------------------");
   console.log("Successfully executed")
 }).catch(ex => {

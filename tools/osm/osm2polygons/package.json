@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js 51.4992784 -0.125376 15 useCache"
   },
-  "author": "",
+  "author": "Shinobi and Dado",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",

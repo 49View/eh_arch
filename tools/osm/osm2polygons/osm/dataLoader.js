@@ -40,8 +40,9 @@ function project(lat, lon) {
     }
 }
 
-const getBoundingBox = (lat, lon, distance, zoom) => {
+const getBoundingBox = (coords) => {
 
+    const {lat, lon, zoom} = {...coords};
     const tileX = lon2tile(lon, zoom);
     const tileY = lat2tile(lat, zoom);
 
@@ -82,17 +83,6 @@ const getBoundingBox = (lat, lon, distance, zoom) => {
         }
     };
 }
-
-// const getLatLonFromPointDistance = (lat, lon, distance) => {
-//
-//     const LATITUDEKM = 110.574;
-//     const LONGITUDEKM = 111.320;
-//
-//     const latResult = lat+(distance/LATITUDEKM);
-//     const lonResult = lon+(distance/(LONGITUDEKM*Math.cos(lat/180*Math.PI)));
-//
-//     return [latResult,lonResult];
-// }
 
 const getData = async (bbox) => {
 
