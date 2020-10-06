@@ -40,8 +40,8 @@ function project(lat, lon) {
 }
 
 const calcNodeCoordinates = n => {
-  const ly = n.lat;
   const lx = n.lon;
+  const ly = n.lat;
   return {
     x: calcDistance(ly, 0, ly, lx),
     y: calcDistance(0, lx, ly, lx)
@@ -140,6 +140,10 @@ const getBoundingBox = (coords) => {
         Y: -sizeY*halfW
       },
     ],
+    tilePos: {
+      x: calcDistance(topLat, topLon, topLat, 0),
+      y: calcDistance(topLat, topLon, 0, topLon),
+    },
     zero: {
       lat: tile2lat(0,0),
       lon: tile2long(0,0)

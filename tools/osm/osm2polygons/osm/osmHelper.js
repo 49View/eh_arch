@@ -163,7 +163,7 @@ const isCollinear = (pa,pb,pc) => {
     return cp<1e-20;
 }
 
-const computeBoundingBox = (points, isOpen=undefined) => {
+const computeBoundingBox = (tileBoundary, points) => {
     let minX=Number.MAX_VALUE;
     let minY=Number.MAX_VALUE;
     let maxX=-Number.MAX_VALUE;
@@ -176,17 +176,15 @@ const computeBoundingBox = (points, isOpen=undefined) => {
     let centerLat = 0;
     let centerLon = 0;
 
-    if (isOpen===undefined) {
-        const convexHull = calcConvexHull(points);
-        const ombb = calcOmbb(convexHull);
+    const convexHull = calcConvexHull(points);
+    const ombb = calcOmbb(convexHull);
 
-        ombb.forEach(p => {
-            centerX = centerX+p.x;
-            centerY = centerY+p.y;
-        });
-        centerX = centerX/4;
-        centerY = centerY/4;
-    }
+    ombb.forEach(p => {
+        centerX = centerX+p.x;
+        centerY = centerY+p.y;
+    });
+    centerX = centerX/4;
+    centerY = centerY/4;
 
     points.forEach(p => {
         centerLat = centerLat+p.lat;
@@ -195,22 +193,16 @@ const computeBoundingBox = (points, isOpen=undefined) => {
         minY=Math.min(p.y,minY);
         maxX=Math.max(p.x,maxX);
         maxY=Math.max(p.y,maxY);
-        if (isOpen!==undefined) {
-            centerX = centerX+p.x;
-            centerY = centerY+p.y;
-        }
     });
 
     centerLat = centerLat/points.length;
     centerLon = centerLon/points.length;
     sizeX = maxX-minX;
     sizeY = maxY-minY;
-    if (isOpen!==undefined) {
-        centerX = centerX/points.length;
-        centerY = centerY/points.length;
-    }
+    const deltaX = centerX - tileBoundary.tilePos.x;
+    const deltaY = centerY - tileBoundary.tilePos.y;
 
-    return {minX,minY,maxX,maxY,centerX,centerY,sizeX,sizeY,centerLat,centerLon}
+    return {minX,minY,maxX,maxY,centerX,centerY,sizeX,sizeY,centerLat,centerLon,deltaX,deltaY}
 }
 
 const convertToLocalCoordinate = (points, originX, originY) => {
@@ -507,6 +499,8 @@ const createMesh = (id, tags, type, boundingBox, groups) => {
         id: id,
         type: type,
         center: {
+            deltaX: boundingBox.deltaX,
+            deltaY: boundingBox.deltaY,
             x: boundingBox.centerX,
             y: boundingBox.centerY,
             lat: boundingBox.centerLat,
@@ -517,14 +511,14 @@ const createMesh = (id, tags, type, boundingBox, groups) => {
     }
 }
 
-const getPolygonFromWay = (way) => {
+const getPolygonFromWay = (tileBoundary, way) => {
     const isClosed = way.nodes[0].id === way.nodes[way.nodes.length - 1].id;
 
     const points = removeCollinearPoints(way.nodes);
     if (points.length<3 && isClosed) {
         throw new Error("Invalid way "+ way.id);
     }
-    let localBoundingBox = computeBoundingBox(points);
+    let localBoundingBox = computeBoundingBox(tileBoundary, points);
     convertToLocalCoordinate(points, localBoundingBox.centerX, localBoundingBox.centerY);
     //Using: https://github.com/geidav/ombb-rotating-calipers
     //with some modifications
@@ -543,7 +537,7 @@ const getPolygonFromWay = (way) => {
     return {polygon,absolutePolygon,localBoundingBox,convexHull,ombb}
 }
 
-const getPolygonsFromMultipolygonRelation = (rel) => {
+const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
 
     //Clone members for elaboration
     const polygons = [];
@@ -595,7 +589,7 @@ const getPolygonsFromMultipolygonRelation = (rel) => {
         relPoints=relPoints.concat(p.points);
     });
     //Compute local bounding box and correct point direction
-    const localBoundingBox=computeBoundingBox(relPoints);
+    const localBoundingBox=computeBoundingBox(tileBoundary, relPoints);
     polygons.forEach(p => {
         convertToLocalCoordinate(p.points, localBoundingBox.centerX, localBoundingBox.centerY);
         const convexHull = calcConvexHull(p.points);
@@ -895,16 +889,16 @@ const elaborateData = (tileBoundary, nodes, ways, rels) => {
     //Transform reference in ways and relations to data
     extendData(nodes, ways, rels);
     //Compute ways and rels
-    computePolygons(ways, rels);
+    computePolygons(tileBoundary, ways, rels);
 
     createPolygonsHierarchy(ways);
 }
 
-const computePolygons = (ways, rels) => {
+const computePolygons = (tileBoundary, ways, rels) => {
 
     ways.forEach(w => {
           try {
-              w.calc = {...getPolygonFromWay(w)};
+              w.calc = {...getPolygonFromWay(tileBoundary, w)};
           } catch (ex) {
               console.log(`Error in ${w.id} way`, ex);
           }
@@ -913,7 +907,7 @@ const computePolygons = (ways, rels) => {
 
     rels.forEach(r => {
           try {
-              r.calc = {...getPolygonsFromMultipolygonRelation(r)};
+              r.calc = {...getPolygonsFromMultipolygonRelation(tileBoundary, r)};
           } catch (ex) {
               console.log(`Error in ${r.id} relation`, ex);
           }

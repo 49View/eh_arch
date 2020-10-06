@@ -484,7 +484,7 @@ const createComplexPolygonRoof = (outerPolygon, innerPolygons, roofInfo) => {
     return faces;
 }
 
-const buildingFromWay = (way, name) => {
+const buildingFromWay = (way, tileBoundary, name) => {
 
     let isOutline;
 
