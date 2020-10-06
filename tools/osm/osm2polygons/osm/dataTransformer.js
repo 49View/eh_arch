@@ -40,11 +40,9 @@ function project(lat, lon) {
 }
 
 const calcNodeCoordinates = n => {
-  const lx = n.lon;
-  const ly = n.lat;
   return {
-    x: calcDistance(ly, 0, ly, lx),
-    y: calcDistance(0, lx, ly, lx)
+    x: calcDistance(n.lat, 0, n.lat, n.lon),
+    y: calcDistance(0, n.lon, n.lat, n.lon)
   }
 }
 
@@ -54,6 +52,15 @@ const calcCoordinate = (nodes) => {
     n.x = nc.x;
     n.y = nc.y;
   })
+}
+
+const calcTileDelta = ( center, tilePos ) => {
+  return {
+    deltaPosInTile : [
+      center.x - tilePos.x,
+      center.y - tilePos.y
+    ]
+  };
 }
 
 const calcDistance = (latitude1, longitude1, latitude2, longitude2) => {
@@ -173,6 +180,7 @@ module.exports = {
   calcDistance,
   calcCoordinate,
   calcNodeCoordinates,
+  calcTileDelta,
   getBoundingBox,
   convertElementFacesToTriangles
 }

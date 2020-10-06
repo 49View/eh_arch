@@ -489,7 +489,6 @@ const buildingFromWay = (way, tileBoundary, name) => {
     let isOutline;
 
     const polygon = way.calc.polygon;
-    const localBoundingBox = way.calc.localBoundingBox;
     const convexHull = way.calc.convexHull;
     const orientedMinBoundingBox = way.calc.ombb;
 
@@ -518,7 +517,7 @@ const buildingFromWay = (way, tileBoundary, name) => {
     const roofFaces = createRoof(polygon, buildingInfo.roof, convexHull, orientedMinBoundingBox);
 
     //Create building mesh
-    return createBuildingMesh("w-" + way.id, way.tags, name, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
+    return createBuildingMesh("w-" + way.id, way.tags, name, way.spatial, lateralFaces, roofFaces, buildingInfo);
 }
 
 const buildingFromRel = (rel, name) => {
@@ -526,7 +525,6 @@ const buildingFromRel = (rel, name) => {
     const buildingInfo = getBuildingInfo(rel.tags);
 
     const polygons = rel.calc.polygons;
-    const localBoundingBox = rel.calc.localBoundingBox;
 
     let roofFaces=[];
     let lateralFaces=[];
@@ -539,7 +537,7 @@ const buildingFromRel = (rel, name) => {
         //Compute roof faces
         roofFaces = roofFaces.concat(createComplexPolygonRoof(o, o.holes, buildingInfo.roof));
     })
-    return createBuildingMesh("r-" + rel.id, rel.tags, name, localBoundingBox, lateralFaces, roofFaces, buildingInfo);
+    return createBuildingMesh("r-" + rel.id, rel.tags, name, rel.spatial, lateralFaces, roofFaces, buildingInfo);
 }
 
 module.exports = { exportBuildings }
