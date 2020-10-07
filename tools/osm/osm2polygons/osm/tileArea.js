@@ -1,4 +1,4 @@
-const {exportBuildings} = require("./buildings");
+const {exportBuildings} = require("./buildings/building");
 const {groupFromNode} = require("./osmHelper");
 const {createElementsFromNodes} = require("./osmHelper");
 const {groupFromRel, groupFromWay} = require("./osmHelper");
