@@ -5,7 +5,6 @@ const {calcOmbb} = require('../geometry/ombb');
 const ClipperLib = require('js-clipper');
 const {calcTileDelta} = require("./dataTransformer");
 const {calcCoordinate} = require("./dataTransformer");
-const {calcNodeCoordinates} = require("./dataTransformer");
 
 const triangulate = (swCtx) => {
   swCtx.triangulate();
@@ -20,37 +19,37 @@ const triangulate = (swCtx) => {
   return points;
 }
 
-const clipPolyPoints = (tileBoundary, polyPoints) => {
-
-  let subj = [];
-  let clip = [];
-  let solution = [];
-  subj.push(polyPoints.map(p => {
-    return {X: p.x, Y: p.y}
-  }));
-  clip.push(tileBoundary.tileClip.map(tc => {
-    return {...tc}
-  }));
-
-  let co = new ClipperLib.Clipper();
-  const scale = 100000;
-  ClipperLib.JS.ScaleUpPaths(subj, scale);
-  ClipperLib.JS.ScaleUpPaths(clip, scale);
-  co.AddPaths(subj, ClipperLib.PolyType.ptSubject, true);
-  co.AddPaths(clip, ClipperLib.PolyType.ptClip, true);
-  co.Execute(ClipperLib.ClipType.ctIntersection, solution, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
-  ClipperLib.JS.ScaleDownPaths(solution, scale);
-
-  let polyPointsClipped = [];
-  solution.forEach(s => {
-    polyPointsClipped = s.map(p => {
-      return {x: p.X, y: p.Y}
-    });
-  });
-
-  return polyPointsClipped;
-
-}
+// const clipPolyPoints = (tileBoundary, polyPoints) => {
+//
+//   let subj = [];
+//   let clip = [];
+//   let solution = [];
+//   subj.push(polyPoints.map(p => {
+//     return {X: p.x, Y: p.y}
+//   }));
+//   clip.push(tileBoundary.tileClip.map(tc => {
+//     return {...tc}
+//   }));
+//
+//   let co = new ClipperLib.Clipper();
+//   const scale = 100000;
+//   ClipperLib.JS.ScaleUpPaths(subj, scale);
+//   ClipperLib.JS.ScaleUpPaths(clip, scale);
+//   co.AddPaths(subj, ClipperLib.PolyType.ptSubject, true);
+//   co.AddPaths(clip, ClipperLib.PolyType.ptClip, true);
+//   co.Execute(ClipperLib.ClipType.ctIntersection, solution, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
+//   ClipperLib.JS.ScaleDownPaths(solution, scale);
+//
+//   let polyPointsClipped = [];
+//   solution.forEach(s => {
+//     polyPointsClipped = s.map(p => {
+//       return {x: p.X, y: p.Y}
+//     });
+//   });
+//
+//   return polyPointsClipped;
+//
+// }
 
 const getTrianglesFromPolygon = (polyPoints) => {
 
@@ -115,30 +114,23 @@ const calcPointProjection = (pointLineA, pointLineB, point) => {
 }
 
 
-const extrudePoly = (poly, minHeight, maxHeight, useTrianglesStrip) => {
+const extrudePoly = (poly, minHeight, maxHeight) => {
 
   const result = [];
 
-  if (useTrianglesStrip) {
-    poly.forEach(p => {
-      result.push({x: p.x, y: p.y, z: minHeight});
-      result.push({x: p.x, y: p.y, z: maxHeight});
-    });
-  } else {
-    for (let i = 0; i < poly.length; i++) {
-      const nextI = (i + 1) % poly.length;
+  for (let i = 0; i < poly.length; i++) {
+    const nextI = (i + 1) % poly.length;
 
-      const point = poly[i];
-      const nextPoint = poly[nextI];
-      //First triangle for lateral face
-      result.push({x: point.x, y: point.y, z: minHeight});
-      result.push({x: nextPoint.x, y: nextPoint.y, z: minHeight});
-      result.push({x: nextPoint.x, y: nextPoint.y, z: maxHeight});
-      //Second triangle for lateral face
-      result.push({x: point.x, y: point.y, z: minHeight});
-      result.push({x: nextPoint.x, y: nextPoint.y, z: maxHeight});
-      result.push({x: point.x, y: point.y, z: maxHeight});
-    }
+    const point = poly[i];
+    const nextPoint = poly[nextI];
+    //First triangle for lateral face
+    result.push({x: point.x, y: point.y, z: minHeight});
+    result.push({x: nextPoint.x, y: nextPoint.y, z: minHeight});
+    result.push({x: nextPoint.x, y: nextPoint.y, z: maxHeight});
+    //Second triangle for lateral face
+    result.push({x: point.x, y: point.y, z: minHeight});
+    result.push({x: nextPoint.x, y: nextPoint.y, z: maxHeight});
+    result.push({x: point.x, y: point.y, z: maxHeight});
   }
 
   return result;
@@ -205,7 +197,7 @@ const computeBoundingBox = (tileBoundary, points) => {
   sizeX = maxX - minX;
   sizeY = maxY - minY;
 
-  return {minX, minY, maxX, maxY, center, sizeX, sizeY, lat, lon, ...calcTileDelta( center, tileBoundary.tilePos )}
+  return {minX, minY, maxX, maxY, center, sizeX, sizeY, lat, lon, ...calcTileDelta(center, tileBoundary.tilePos)}
 }
 
 const convertToLocalCoordinate = (points, originX, originY) => {
@@ -886,9 +878,9 @@ const elaborateData = (tileBoundary, nodes, ways, rels) => {
 
 const computePolygons = (tileBoundary, nodes, ways, rels) => {
 
-  nodes.forEach( node => {
+  nodes.forEach(node => {
     node.spatial = {
-      ...calcTileDelta( node, tileBoundary.tilePos ),
+      ...calcTileDelta(node, tileBoundary.tilePos),
       lat: node.lat,
       lon: node.lon
     };
