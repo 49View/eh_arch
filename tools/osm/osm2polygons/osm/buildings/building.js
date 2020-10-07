@@ -191,7 +191,7 @@ const buildingFromWay = (way, tileBoundary, name) => {
   return createBuildingMesh("w-" + way.id, way.tags, name, way.spatial, lateralFaces, roofFaces, buildingInfo);
 }
 
-const buildingFromRel = (rel, name) => {
+const buildingFromRel = (rel, tileBoundary, name) => {
 
   const buildingInfo = getBuildingInfo(rel.tags);
 
