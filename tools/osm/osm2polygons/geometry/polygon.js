@@ -92,6 +92,8 @@ const getTrianglesFromPolygon = (outerPolyPoints, innerPolys, height) => {
   // to a simple polygon with outer points only. This means that the eventual inner points that will be maybe
   // rendered somewhere will _overlap_ with the outer points. So we still need to get order dependent rendering
   // on tiles, which is sane anyway.
+  // PS: I would have preferred a normal if/then in here, by using the clipper library that's not possible :/ So we
+  // had to settle for the try/catch
   try {
     return triangulate3d(swCtx, height);
   } catch (e) {
@@ -100,6 +102,5 @@ const getTrianglesFromPolygon = (outerPolyPoints, innerPolys, height) => {
 }
 
 module.exports = {
-  getTrianglesFromPolygon,
-  setHeight,
+  getTrianglesFromPolygon
 }
