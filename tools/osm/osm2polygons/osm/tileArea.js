@@ -42,35 +42,34 @@ const addTileAreaFilter = (name, areaFilter) => {
     }
 }
 
-const createTileAreas = (tileFilter, tileBoundary, nodes,ways,rels) => {
+const createTileAreas = (elements, tileFilter, tileBoundary, nodes,ways,rels) => {
     console.log("----------------------------------------------");
     console.log(tileFilter.name);
     console.log("----------------------------------------------");
 
-    const wayBasedElements=createElementsFromWays(ways, tileBoundary, tileFilter.name
+    createElementsFromWays(elements, ways, tileBoundary, tileFilter.name
         , w => tileFilter.areaFilter(w)
         , groupFromWay);
 
-    const relBasedElements=createElementsFromRels(rels, tileBoundary, tileFilter.name
+    createElementsFromRels(elements,rels, tileBoundary, tileFilter.name
         , r => tileFilter.areaFilter(r)
         , groupFromRel);
 
-    const nodeBasedElements=createElementsFromNodes(nodes, tileBoundary, tileFilter.name
+    createElementsFromNodes(elements,nodes, tileBoundary, tileFilter.name
       , r => tileFilter.areaFilter(r)
       , groupFromNode);
 
-    console.log(`Found ${wayBasedElements.length} way ${tileFilter.name}`);
-    console.log(`Found ${relBasedElements.length} rels ${tileFilter.name}`);
-    console.log(`Found ${nodeBasedElements.length} nodes ${tileFilter.name}`);
+    console.log(`Found ${elements.length} ${tileFilter.name}`);
+    // console.log(`Found ${wayBasedElements.length} way ${tileFilter.name}`);
+    // console.log(`Found ${relBasedElements.length} rels ${tileFilter.name}`);
+    // console.log(`Found ${nodeBasedElements.length} nodes ${tileFilter.name}`);
     console.log("----------------------------------------------");
-
-    return wayBasedElements.concat(relBasedElements).concat(nodeBasedElements);
 }
 
 const createTile = (tileBoundary, nodes, ways, rels) => {
-    let elements = [];
 
-    elements = elements.concat(exportBuildings(tileBoundary, nodes, ways, rels));
+    const elements = [];
+    exportBuildings(elements, tileBoundary, nodes, ways, rels);
 
     const tileAreas = [
         addTileAreaFilter("unclassified", unclassifiedFilter),
@@ -83,7 +82,7 @@ const createTile = (tileBoundary, nodes, ways, rels) => {
     ]
 
     tileAreas.forEach( tf => {
-        elements = elements.concat(createTileAreas(tf, tileBoundary, nodes, ways, rels));
+        createTileAreas(elements, tf, tileBoundary, nodes, ways, rels);
     });
 
     return elements;

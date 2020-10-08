@@ -12,24 +12,21 @@ const DEFAULT_BUILDING_HEIGHT = HEIGHT_FOR_LEVEL * 3;
 const DEFAULT_ROOF_COLOUR = "#ee2222";
 const DEFAULT_BUILDING_COLOUR = "#eeeeee";
 
-const exportBuildings = (tileBoundary, nodes, ways, rels) => {
+const exportBuildings = (elements, tileBoundary, nodes, ways, rels) => {
   console.log("----------------------------------------------");
   console.log("BUILDINGS");
   console.log("----------------------------------------------");
 
-  const simpleBuildings = createElementsFromWays(ways, tileBoundary, "building"
+  createElementsFromWays(elements, ways, tileBoundary, "building"
     , w => w.tags && (w.tags["building"] || w.tags["building:part"])
     , buildingFromWay);
-  // const simpleBuildings=[];
-  const complexBuildings = createElementsFromRels(rels, tileBoundary, "building"
+
+  createElementsFromRels(elements, rels, tileBoundary, "building"
     , r => r.tags && (r.tags["building"] || r.tags["building:part"])
     , buildingFromRel);
 
-  console.log(`Found ${simpleBuildings.length} simple buildings`);
-  console.log(`Found ${complexBuildings.length} complex buildings`);
+  console.log(`Found ${elements.length} buildings`);
   console.log("----------------------------------------------");
-
-  return simpleBuildings.concat(complexBuildings);
 }
 
 const getBuildingInfo = (tags) => {
@@ -155,7 +152,7 @@ const createBuildingMesh = (id, tags, type, boundingBox, lateralFaces, roofFaces
   return createMesh(id, tags, type, boundingBox, groups);
 }
 
-const buildingFromWay = (way, tileBoundary, name) => {
+const buildingFromWay = (elements, way, tileBoundary, name) => {
 
   let isOutline;
 
@@ -188,10 +185,10 @@ const buildingFromWay = (way, tileBoundary, name) => {
   const roofFaces = createRoof(polygon, buildingInfo.roof, convexHull, orientedMinBoundingBox);
 
   //Create building mesh
-  return createBuildingMesh("w-" + way.id, way.tags, name, way.spatial, lateralFaces, roofFaces, buildingInfo);
+  elements.push(createBuildingMesh("w-" + way.id, way.tags, name, way.spatial, lateralFaces, roofFaces, buildingInfo));
 }
 
-const buildingFromRel = (rel, tileBoundary, name) => {
+const buildingFromRel = (elements, rel, tileBoundary, name) => {
 
   const buildingInfo = getBuildingInfo(rel.tags);
 
@@ -208,7 +205,7 @@ const buildingFromRel = (rel, tileBoundary, name) => {
     //Compute roof faces
     roofFaces = roofFaces.concat(createComplexPolygonRoof(o, o.holes, buildingInfo.roof));
   })
-  return createBuildingMesh("r-" + rel.id, rel.tags, name, rel.spatial, lateralFaces, roofFaces, buildingInfo);
+  elements.push(createBuildingMesh("r-" + rel.id, rel.tags, name, rel.spatial, lateralFaces, roofFaces, buildingInfo));
 }
 
 module.exports = {exportBuildings}

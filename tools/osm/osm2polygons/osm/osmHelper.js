@@ -415,8 +415,22 @@ const createMesh = (id, tags, type, center, groups) => {
   }
 }
 
-const getPolygonFromWay = (tileBoundary, way) => {
+const isClosedWay = way => {
   const isClosed = way.nodes[0].id === way.nodes[way.nodes.length - 1].id;
+
+  if ( way.tags ) {
+    const highway = way.tags['highway'];
+    if ( highway && (highway !== "pedestrian" && highway !== "footway") ) {
+      return false;
+    }
+  }
+
+  return isClosed;
+}
+
+const getPolygonFromWay = (tileBoundary, way) => {
+
+  const isClosed = isClosedWay(way);
 
   const points = removeCollinearPoints(way.nodes);
   if (points.length < 3 && isClosed) {
@@ -453,6 +467,7 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
       m.processed = true;
       const polygon = {
         role: m.role,
+        tags: m.ref.tags,
         nodes: []
       }
       //Copy point but not last (same than first)
@@ -471,6 +486,7 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
         if (connectedMembers.length > 0) {
           const polygon = {
             role: connectedMembers[0].role,
+            tags: members[i].ref.tags,
             nodes: []
           }
           connectedMembers.forEach(m => {
@@ -512,62 +528,42 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
   return {polygons};
 }
 
-const createElementsFromWays = (ways, tileBoundary, name, filter, elementCreator) => {
-  const elements = [];
+const createElementsFromWays = (elements, ways, tileBoundary, name, filter, elementCreator) => {
   ways.filter(w => w.calc !== undefined)
     .filter(filter)
     .forEach(w => {  // && w.id===364313092
         try {
-          const element = elementCreator(w, tileBoundary, name);
-          if (element !== null) {
-            elements.push(element);
-          }
+          elementCreator(elements, w, tileBoundary, name);
         } catch (ex) {
           console.log(`Error in ${w.id} way`, ex);
         }
       }
     );
-
-  return elements;
 }
 
-const createElementsFromRels = (rels, tileBoundary, name, filter, elementCreator) => {
-  const elements = [];
-
+const createElementsFromRels = (elements, rels, tileBoundary, name, filter, elementCreator) => {
   rels.filter(r => r.calc !== undefined)
     .filter(filter)
     .forEach(r => {
         try {
-          const element = elementCreator(r, tileBoundary, name);
-          if (element !== null) {
-            elements.push(element);
-          }
+          elementCreator(elements, r, tileBoundary, name);
         } catch (ex) {
           console.log(`Error in ${r.id} relation`, ex);
         }
       }
     );
-
-  return elements;
 }
 
-const createElementsFromNodes = (nodes, tileBoundary, name, filter, elementCreator) => {
-  const elements = [];
-
+const createElementsFromNodes = (elements, nodes, tileBoundary, name, filter, elementCreator) => {
   nodes.filter(filter)
     .forEach(r => {
         try {
-          const element = elementCreator(r, tileBoundary, name);
-          if (element !== null) {
-            elements.push(element);
-          }
+          elementCreator(elements, r, tileBoundary, name);
         } catch (ex) {
           console.log(`Error in ${r.id} relation`, ex);
         }
       }
     );
-
-  return elements;
 }
 
 const getColorFromTags = (tags) => {
@@ -697,28 +693,36 @@ const getWidthFromWay = (way) => {
   return {roadWidth, roadLane};
 }
 
-const groupFromWay = (way, tileBoundary, name) => {
+const groupFromWay = (elements, way, tileBoundary, name) => {
 
   // const polyPointsClipped = clipPolyPoints(tileBoundary, way.calc.polygon);
   //, way.tags && way.tags[name]
 
   const faces = getTrianglesFromPolygon(way.calc.polygon, null,0);
 
-  return exportGroup("w-" + way.id, way.tags, name, way.spatial, faces, getColorFromTags(way.tags));
+  elements.push(exportGroup("w-" + way.id, way.tags, name, way.spatial, faces, getColorFromTags(way.tags)));
 }
 
-const groupFromRel = (rel, tileBoundary, name) => {
+const groupFromRel = (elements, rel, tileBoundary, name) => {
 
-  let faces = [];
+  if ( rel.id === 8244923 ) {
+    console.log("a")
+  }
+
   rel.calc.polygons && rel.calc.polygons.forEach(o => {
-    faces = faces.concat(getTrianglesFromPolygon(o.points, o.holes, 0));
+    let faces = getTrianglesFromPolygon(o.points, o.holes, 0);
+    const tags = o.tags ? o.tags : rel.tags;
+    elements.push(exportGroup("r-" + rel.id, tags, name, rel.spatial, faces, getColorFromTags(tags)));
   });
-
-  return exportGroup("r-" + rel.id, rel.tags, name, rel.spatial, faces, getColorFromTags(rel.tags));
+  // if ( rel.calc.polygons && rel.calc.polygons.length > 1 ) {
+  //   const o = rel.calc.polygons[1];
+  //   faces = faces.concat(getTrianglesFromPolygon(o.points, o.holes, 0));
+  // }
+  // return exportGroup("r-" + rel.id, rel.tags, name, rel.spatial, faces, getColorFromTags(rel.tags));
 }
 
-const groupFromNode = (node, tileBoundary, name) => {
-  return exportGroup("n-" + node.id, node.tags, name, node.spatial, [], getColorFromTags(node.tags));
+const groupFromNode = (elements, node, tileBoundary, name) => {
+  elements.push(exportGroup("n-" + node.id, node.tags, name, node.spatial, [], getColorFromTags(node.tags)));
 }
 
 const findElement = (list, id) => {
@@ -793,7 +797,7 @@ const computePolygons = (tileBoundary, nodes, ways, rels) => {
     };
   });
 
-  ways.forEach(w => {
+  ways.filter( w => w.inRelation === false ).forEach(w => {
       try {
         w.calc = {...getPolygonFromWay(tileBoundary, w)};
       } catch (ex) {
@@ -866,5 +870,5 @@ module.exports = {
   calcPointProjection,
   projectionParameterPointToSegment,
   pointOnLineFromParameter,
-  twoLinesIntersectParameter: twoLinesIntersectParameter
+  twoLinesIntersectParameter
 }
