@@ -1,11 +1,9 @@
-const {pointOnLine} = require("../osmHelper");
-const {twoLinesIntersectParameter} = require("../osmHelper");
-const {setHeight} = require("../osmHelper");
-const {distanceFromLine} = require("../osmHelper");
-const {getTrianglesFromComplexPolygon} = require("../osmHelper");
+const {getTrianglesFromPolygon} = require("../../geometry/polygon");
+const {pointOnLine, distanceFromLine, twoLinesIntersectParameter} = require("../osmHelper");
+
 const {Vector} = require("../../geometry/vector");
-const {getTrianglesFromPolygon} = require("../osmHelper");
 const {extrudePoly} = require("../osmHelper");
+
 const createRoof = (polygon, roofInfo, convexHull, ombb) => {
   if (roofInfo.shape==="pyramidal") {
     return createPyramidalRoof(polygon, roofInfo);
@@ -42,36 +40,7 @@ const createDomeRoof = (polygon, roofInfo) => {
   // let inCircle=[];
   let unionSurface;
 
-  // while (error && errorCounter>0) {
-  //     try {
-  //         //Reduce ray for avoid error on union surface computation
-  //         inCircleRay=inCircleRay*0.98;
-  //         inCircle = [];
-  //         //Create in circle surface
-  //         for (let i=0;i<360;i+=5) {
-  //             const a=i*Math.PI/180;
-
-  //             inCircle.push({
-  //                 x: inCircleRay*Math.cos(a),
-  //                 y: inCircleRay*Math.sin(a)
-  //             })
-  //         }
-  //         //Create union surface, from polygon to in circle
-  //         unionSurface=getTrianglesFromComplexPolygon(polygon, [{points: inCircle}]);
-  //         error=false;
-  //     } catch (ex) {
-  //         console.log("Reduce inCircle ray");
-  //         errorCounter--;
-  //     }
-  // }
-
-  // if (error) {
-  //     //Cannot compute base
-  //     unionSurface=getTrianglesFromPolygon(polygon);
-  // }
-
-  unionSurface=getTrianglesFromPolygon(polygon);
-  setHeight(unionSurface, roofInfo.minHeight);
+  unionSurface=getTrianglesFromPolygon(polygon, null, roofInfo.minHeight);
   faces = faces.concat(unionSurface);
 
   for (let alpha=0;alpha<360;alpha+=5) {
@@ -120,7 +89,6 @@ const createDomeRoof = (polygon, roofInfo) => {
     faces.push({x: lastXPoint, y: lastYPoint, z: lastZPoint});
     faces.push({x: lastXNextPoint, y: lastYNextPoint, z: lastZNextPoint});
     faces.push({x: xPoint, y: yPoint, z: zPoint});
-
   }
 
   return faces;
@@ -149,8 +117,7 @@ const createFlatRoof = (polygon, roofInfo) => {
     faces=faces.concat(extrudePoly(polygon, roofInfo.minHeight, roofInfo.maxHeight, false));
   }
   //
-  const topFace = getTrianglesFromPolygon(polygon);
-  topFace.forEach(t => t.z=roofInfo.maxHeight);
+  const topFace = getTrianglesFromPolygon(polygon, null, roofInfo.maxHeight);
 
   return faces.concat(topFace);
 }
@@ -319,8 +286,7 @@ const createComplexPolygonRoof = (outerPolygon, innerPolygons, roofInfo) => {
 
   }
 
-  const topFace=getTrianglesFromComplexPolygon(outerPolygon.points, innerPolygons);
-  topFace.forEach(t => t.z=roofInfo.maxHeight);
+  const topFace=getTrianglesFromPolygon(outerPolygon.points, innerPolygons, roofInfo.maxHeight);
 
   faces=faces.concat(topFace);
 
