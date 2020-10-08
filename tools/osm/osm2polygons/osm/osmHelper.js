@@ -1,97 +1,11 @@
 const {Vector} = require('../geometry/vector');
-const poly2tri = require('poly2tri');
 const {calcConvexHull} = require('../geometry/convexhull');
 const {calcOmbb} = require('../geometry/ombb');
 const ClipperLib = require('js-clipper');
+const {getTrianglesFromPolygon} = require("../geometry/polygon");
 const {calcTileDelta} = require("./dataTransformer");
 const {calcCoordinate} = require("./dataTransformer");
 
-const triangulate = (swCtx) => {
-  swCtx.triangulate();
-  const tri = swCtx.getTriangles();
-  const points = [];
-  tri.forEach(t => {
-    points.push({x: t.points_[0].x / 100000, y: t.points_[0].y / 100000});
-    points.push({x: t.points_[1].x / 100000, y: t.points_[1].y / 100000});
-    points.push({x: t.points_[2].x / 100000, y: t.points_[2].y / 100000});
-  });
-
-  return points;
-}
-
-// const clipPolyPoints = (tileBoundary, polyPoints) => {
-//
-//   let subj = [];
-//   let clip = [];
-//   let solution = [];
-//   subj.push(polyPoints.map(p => {
-//     return {X: p.x, Y: p.y}
-//   }));
-//   clip.push(tileBoundary.tileClip.map(tc => {
-//     return {...tc}
-//   }));
-//
-//   let co = new ClipperLib.Clipper();
-//   const scale = 100000;
-//   ClipperLib.JS.ScaleUpPaths(subj, scale);
-//   ClipperLib.JS.ScaleUpPaths(clip, scale);
-//   co.AddPaths(subj, ClipperLib.PolyType.ptSubject, true);
-//   co.AddPaths(clip, ClipperLib.PolyType.ptClip, true);
-//   co.Execute(ClipperLib.ClipType.ctIntersection, solution, ClipperLib.PolyFillType.pftNonZero, ClipperLib.PolyFillType.pftNonZero);
-//   ClipperLib.JS.ScaleDownPaths(solution, scale);
-//
-//   let polyPointsClipped = [];
-//   solution.forEach(s => {
-//     polyPointsClipped = s.map(p => {
-//       return {x: p.X, y: p.Y}
-//     });
-//   });
-//
-//   return polyPointsClipped;
-//
-// }
-
-const getTrianglesFromPolygon = (polyPoints) => {
-
-  const intPoints = [];
-  polyPoints.forEach(p => {
-    intPoints.push({x: p.x * 100000, y: p.y * 100000})
-  });
-
-  const swCtx = new poly2tri.SweepContext(intPoints);
-  return triangulate(swCtx);
-}
-
-const getTrianglesFromComplexPolygon = (outerPolyPoints, innerPolys) => {
-  let intOuterPoints = [];
-  const intInnersPoints = [];
-
-  outerPolyPoints.forEach(p => {
-    intOuterPoints.push({x: p.x * 100000, y: p.y * 100000})
-  });
-
-  innerPolys.forEach(i => {
-    const intInnerPoint = [];
-    i.points.forEach(p => {
-      intInnerPoint.push({x: p.x * 100000, y: p.y * 100000})
-    });
-    intInnersPoints.push(intInnerPoint);
-  });
-
-  const swCtx = new poly2tri.SweepContext(intOuterPoints);
-  intInnersPoints.forEach(i => {
-    swCtx.addHole(i);
-  });
-  // NDDado: we try to triangulate first with the inner holes, if that fails it will roll back (inside the catch)
-  // to a simple polygon with outer points only. This means that the eventual inner points that will be maybe
-  // rendered somewhere will _overlap_ with the outer points. So we still need to get order dependent rendering
-  // on tiles, which is sane anyway.
-  try {
-    return triangulate(swCtx);
-  } catch (e) {
-    return getTrianglesFromPolygon(outerPolyPoints);
-  }
-}
 
 const calcPointProjection = (pointLineA, pointLineB, point) => {
   let prj;
@@ -786,9 +700,9 @@ const getWidthFromWay = (way) => {
 const groupFromWay = (way, tileBoundary, name) => {
 
   // const polyPointsClipped = clipPolyPoints(tileBoundary, way.calc.polygon);
+  //, way.tags && way.tags[name]
 
-  const faces = getTrianglesFromPolygon(way.calc.polygon);
-  setHeight(faces, 0);
+  const faces = getTrianglesFromPolygon(way.calc.polygon, null,0);
 
   return exportGroup("w-" + way.id, way.tags, name, way.spatial, faces, getColorFromTags(way.tags));
 }
@@ -796,9 +710,8 @@ const groupFromWay = (way, tileBoundary, name) => {
 const groupFromRel = (rel, tileBoundary, name) => {
 
   let faces = [];
-  rel.calc.polygons.filter(p => p.role === "outer").forEach(o => {
-    faces = faces.concat(getTrianglesFromComplexPolygon(o.points, o.holes));
-    setHeight(faces, 0);
+  rel.calc.polygons && rel.calc.polygons.forEach(o => {
+    faces = faces.concat(getTrianglesFromPolygon(o.points, o.holes, 0));
   });
 
   return exportGroup("r-" + rel.id, rel.tags, name, rel.spatial, faces, getColorFromTags(rel.tags));
@@ -806,12 +719,6 @@ const groupFromRel = (rel, tileBoundary, name) => {
 
 const groupFromNode = (node, tileBoundary, name) => {
   return exportGroup("n-" + node.id, node.tags, name, node.spatial, [], getColorFromTags(node.tags));
-}
-
-const setHeight = (faces, height) => {
-  faces.forEach(f => {
-    f.z = height;
-  })
 }
 
 const findElement = (list, id) => {
@@ -931,8 +838,6 @@ const createPolygonsHierarchy = (ways) => {
 
 module.exports = {
   elaborateData,
-  getTrianglesFromPolygon,
-  getTrianglesFromComplexPolygon,
   extrudePoly,
   offsetPolyline,
   computeBoundingBox,
@@ -955,7 +860,6 @@ module.exports = {
   createElementsFromNodes,
   createElementsFromWays,
   createElementsFromRels,
-  setHeight,
   pointOnLine,
   distanceFromLine,
   distanceFromPoint,
