@@ -1,10 +1,6 @@
+const {extrudePoly} = require("../../geometry/polygon");
 const {exportGroup} = require("../osmHelper");
-const {createComplexPolygonRoof} = require("./roof");
-const {createRoof} = require("./roof");
-const {
-  extrudePoly,
-  createElements,
-} = require('../osmHelper.js');
+const {createRoof, createComplexPolygonRoof} = require("./roof");
 
 const HEIGHT_FOR_LEVEL = 2.97;
 const DEFAULT_BUILDING_HEIGHT = HEIGHT_FOR_LEVEL * 3;

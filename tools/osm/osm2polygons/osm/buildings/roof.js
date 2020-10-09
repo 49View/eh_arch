@@ -1,8 +1,6 @@
-const {getTrianglesFromPolygon} = require("../../geometry/polygon");
+const {getTrianglesFromPolygon, extrudePoly} = require("../../geometry/polygon");
 const {pointOnLine, distanceFromLine, twoLinesIntersectParameter} = require("../osmHelper");
-
 const {Vector} = require("../../geometry/vector");
-const {extrudePoly} = require("../osmHelper");
 
 const createRoof = (polygon, roofInfo, convexHull, ombb) => {
   if (roofInfo.shape==="pyramidal") {

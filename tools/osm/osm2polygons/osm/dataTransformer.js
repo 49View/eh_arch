@@ -54,15 +54,6 @@ const calcCoordinate = (nodes) => {
   })
 }
 
-const calcTileDelta = ( center, tilePos ) => {
-  return {
-    deltaPosInTile : [
-      center.x - tilePos.x,
-      center.y - tilePos.y
-    ]
-  };
-}
-
 const calcDistance = (latitude1, longitude1, latitude2, longitude2) => {
 
   const lat1 = latitude1;
@@ -180,7 +171,6 @@ module.exports = {
   calcDistance,
   calcCoordinate,
   calcNodeCoordinates,
-  calcTileDelta,
   getBoundingBox,
   convertElementFacesToTriangles
 }
