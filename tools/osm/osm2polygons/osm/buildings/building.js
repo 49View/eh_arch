@@ -3,8 +3,7 @@ const {createComplexPolygonRoof} = require("./roof");
 const {createRoof} = require("./roof");
 const {
   extrudePoly,
-  createMesh,
-  createElementsFromWays,
+  createElements,
   createElementsFromRels,
 } = require('../osmHelper.js');
 
@@ -18,11 +17,11 @@ const exportBuildings = (elements, nodes, ways, rels) => {
   console.log("BUILDINGS");
   console.log("----------------------------------------------");
 
-  createElementsFromWays(elements, ways, "building"
+  createElements(elements, ways, "building"
     , w => w.tags && (w.tags["building"] || w.tags["building:part"])
     , buildingFromWay);
 
-  createElementsFromRels(elements, rels, "building"
+  createElements(elements, rels, "building"
     , r => r.tags && (r.tags["building"] || r.tags["building:part"])
     , buildingFromRel);
 

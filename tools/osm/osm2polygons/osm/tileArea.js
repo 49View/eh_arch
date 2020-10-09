@@ -3,7 +3,7 @@ const {groupFromNode} = require("./osmHelper");
 const {createElementsFromNodes} = require("./osmHelper");
 const {groupFromRel, groupFromWay} = require("./osmHelper");
 const {
-    createElementsFromWays,
+    createElements,
     createElementsFromRels,
 } = require('./osmHelper.js');
 
@@ -46,20 +46,20 @@ const addTileAreaFilter = (name, areaFilter) => {
     }
 }
 
-const createTileAreas = (elements, tileFilter, nodes,ways,rels) => {
+const createTileAreas = (elements, tileFilter, nodes, ways, rels) => {
     console.log("----------------------------------------------");
     console.log(tileFilter.name);
     console.log("----------------------------------------------");
 
-    createElementsFromWays(elements, ways, tileFilter.name
+    createElements(elements, ways, tileFilter.name
         , w => tileFilter.areaFilter(w)
         , groupFromWay);
 
-    createElementsFromRels(elements,rels, tileFilter.name
+    createElements(elements,rels, tileFilter.name
         , r => tileFilter.areaFilter(r)
         , groupFromRel);
 
-    createElementsFromNodes(elements,nodes, tileFilter.name
+    createElements(elements,nodes, tileFilter.name
       , r => tileFilter.areaFilter(r)
       , groupFromNode);
 
