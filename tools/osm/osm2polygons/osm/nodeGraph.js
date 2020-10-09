@@ -223,11 +223,10 @@ const getColorFromTags = (tags) => {
   let color = "#808080";
 
   if (tags) {
-    if ((tags["landuse"] && tags["landuse"] === "grass")
-      || (tags["leisure"] && (tags["leisure"] === "park" || tags["leisure"] === "garden"))) {
-      color = "#CDF7C9";
-    } else if (tags["natural"] === "water") {
+    if (tags["natural"] === "water") {
       color = "#AAD3DF";
+    } else if ((tags["landuse"] && tags["landuse"] === "grass") || (tags["leisure"] && (tags["leisure"] === "park" || tags["leisure"] === "garden"))) {
+      color = "#CDF7C9";
     } else if (tags["highway"]) {
       switch (tags["highway"]) {
         case "motorway":
@@ -350,7 +349,7 @@ const groupFromGraphNode = (elements, graphNode, name) => {
   if ( graphNode.type === "way" || graphNode.type === "relation" ) {
     graphNode.calc && graphNode.calc.polygons && graphNode.calc.polygons.forEach(o => {
       const faces = getTrianglesFromPolygon(o.points, o.holes,0);
-      const tags = o.tags ? o.tags : graphNode.tags;
+      const tags = {...graphNode.tags, ...o.tags};
       elements.push(exportGroup(graphNode, name, faces, getColorFromTags(tags)));
     });
   } else if ( graphNode.type === "node" ) {
