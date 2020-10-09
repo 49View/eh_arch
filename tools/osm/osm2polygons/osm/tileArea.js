@@ -46,20 +46,20 @@ const addTileAreaFilter = (name, areaFilter) => {
     }
 }
 
-const createTileAreas = (elements, tileFilter, tileBoundary, nodes,ways,rels) => {
+const createTileAreas = (elements, tileFilter, nodes,ways,rels) => {
     console.log("----------------------------------------------");
     console.log(tileFilter.name);
     console.log("----------------------------------------------");
 
-    createElementsFromWays(elements, ways, tileBoundary, tileFilter.name
+    createElementsFromWays(elements, ways, tileFilter.name
         , w => tileFilter.areaFilter(w)
         , groupFromWay);
 
-    createElementsFromRels(elements,rels, tileBoundary, tileFilter.name
+    createElementsFromRels(elements,rels, tileFilter.name
         , r => tileFilter.areaFilter(r)
         , groupFromRel);
 
-    createElementsFromNodes(elements,nodes, tileBoundary, tileFilter.name
+    createElementsFromNodes(elements,nodes, tileFilter.name
       , r => tileFilter.areaFilter(r)
       , groupFromNode);
 
@@ -73,7 +73,7 @@ const createTileAreas = (elements, tileFilter, tileBoundary, nodes,ways,rels) =>
 const createTile = (tileBoundary, nodes, ways, rels) => {
 
     const elements = [];
-    exportBuildings(elements, tileBoundary, nodes, ways, rels);
+    exportBuildings(elements, nodes, ways, rels);
 
     const tileAreas = [
         // addTileAreaFilter("building", buildingFilter),
@@ -87,7 +87,7 @@ const createTile = (tileBoundary, nodes, ways, rels) => {
     ]
 
     tileAreas.forEach( tf => {
-        createTileAreas(elements, tf, tileBoundary, nodes, ways, rels);
+        createTileAreas(elements, tf, nodes, ways, rels);
     });
 
     return elements;

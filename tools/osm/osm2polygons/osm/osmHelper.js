@@ -528,12 +528,12 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
   return {polygons};
 }
 
-const createElementsFromWays = (elements, ways, tileBoundary, name, filter, elementCreator) => {
+const createElementsFromWays = (elements, ways,  name, filter, elementCreator) => {
   ways.filter(w => w.calc !== undefined)
     .filter(filter)
     .forEach(w => {  // && w.id===364313092
         try {
-          elementCreator(elements, w, tileBoundary, name);
+          elementCreator(elements, w, name);
         } catch (ex) {
           console.log(`Error in ${w.id} way`, ex);
         }
@@ -541,12 +541,12 @@ const createElementsFromWays = (elements, ways, tileBoundary, name, filter, elem
     );
 }
 
-const createElementsFromRels = (elements, rels, tileBoundary, name, filter, elementCreator) => {
+const createElementsFromRels = (elements, rels, name, filter, elementCreator) => {
   rels.filter(r => r.calc !== undefined)
     .filter(filter)
     .forEach(r => {
         try {
-          elementCreator(elements, r, tileBoundary, name);
+          elementCreator(elements, r, name);
         } catch (ex) {
           console.log(`Error in ${r.id} relation`, ex);
         }
@@ -554,11 +554,11 @@ const createElementsFromRels = (elements, rels, tileBoundary, name, filter, elem
     );
 }
 
-const createElementsFromNodes = (elements, nodes, tileBoundary, name, filter, elementCreator) => {
+const createElementsFromNodes = (elements, nodes, name, filter, elementCreator) => {
   nodes.filter(filter)
     .forEach(r => {
         try {
-          elementCreator(elements, r, tileBoundary, name);
+          elementCreator(elements, r, name);
         } catch (ex) {
           console.log(`Error in ${r.id} relation`, ex);
         }
@@ -693,13 +693,13 @@ const getWidthFromWay = (way) => {
   return {roadWidth, roadLane};
 }
 
-const groupFromWay = (elements, way, tileBoundary, name) => {
+const groupFromWay = (elements, way, name) => {
 
   const faces = getTrianglesFromPolygon(way.calc.polygon, null,0);
   elements.push(exportGroup(way, "w-", name, faces, getColorFromTags(way.tags)));
 }
 
-const groupFromRel = (elements, rel, tileBoundary, name) => {
+const groupFromRel = (elements, rel, name) => {
 
   rel.calc.polygons && rel.calc.polygons.forEach(o => {
     let faces = getTrianglesFromPolygon(o.points, o.holes, 0);
@@ -708,7 +708,7 @@ const groupFromRel = (elements, rel, tileBoundary, name) => {
   });
 }
 
-const groupFromNode = (elements, node, tileBoundary, name) => {
+const groupFromNode = (elements, node, name) => {
   elements.push(exportGroup(node, "n-", name, [], getColorFromTags(node.tags)));
 }
 

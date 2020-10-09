@@ -13,16 +13,16 @@ const DEFAULT_BUILDING_HEIGHT = HEIGHT_FOR_LEVEL * 3;
 const DEFAULT_ROOF_COLOUR = "#ee2222";
 const DEFAULT_BUILDING_COLOUR = "#eeeeee";
 
-const exportBuildings = (elements, tileBoundary, nodes, ways, rels) => {
+const exportBuildings = (elements, nodes, ways, rels) => {
   console.log("----------------------------------------------");
   console.log("BUILDINGS");
   console.log("----------------------------------------------");
 
-  createElementsFromWays(elements, ways, tileBoundary, "building"
+  createElementsFromWays(elements, ways, "building"
     , w => w.tags && (w.tags["building"] || w.tags["building:part"])
     , buildingFromWay);
 
-  createElementsFromRels(elements, rels, tileBoundary, "building"
+  createElementsFromRels(elements, rels, "building"
     , r => r.tags && (r.tags["building"] || r.tags["building:part"])
     , buildingFromRel);
 
@@ -136,7 +136,7 @@ const getBuildingInfo = (tags) => {
   }
 }
 
-const buildingFromWay = (elements, way, tileBoundary, name) => {
+const buildingFromWay = (elements, way, name) => {
 
   const polygon = way.calc.polygon;
   const convexHull = way.calc.convexHull;
@@ -153,7 +153,7 @@ const buildingFromWay = (elements, way, tileBoundary, name) => {
   elements.push(exportGroup(way,"wbr-", name, roofFaces, buildingInfo.roof.colour));
 }
 
-const buildingFromRel = (elements, rel, tileBoundary, name) => {
+const buildingFromRel = (elements, rel, name) => {
 
   const buildingInfo = getBuildingInfo(rel.tags);
 
