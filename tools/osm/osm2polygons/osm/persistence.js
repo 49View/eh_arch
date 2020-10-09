@@ -1,6 +1,7 @@
 const axios = require('axios')
 const qs = require('qs');
 const fs = require('fs');
+const {graphRel, graphWay, graphNode} = require("./names");
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
 const getData = async (bbox) => {
@@ -68,9 +69,9 @@ const parseData = (osmData) => {
     const rels = [];
 
     elements.forEach((e,i) => {
-        if (e.type==="node") nodes.push(e)
-        else if (e.type==="way") ways.push(e)
-        else if (e.type==="relation") rels.push(e)
+        if (e.type===graphNode) nodes.push(e)
+        else if (e.type===graphWay) ways.push(e)
+        else if (e.type===graphRel) rels.push(e)
         else console.log(`Element ${i} unknown`);
     });
 

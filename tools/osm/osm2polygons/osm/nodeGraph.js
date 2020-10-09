@@ -1,3 +1,6 @@
+const {roleInner} = require("./names");
+const {roleOuter} = require("./names");
+const {graphRel, graphWay, graphNode} = require("./names");
 const {calcConvexHull} = require('../geometry/convexhull');
 const {calcOmbb} = require('../geometry/ombb');
 const {checkPointsOrder, offsetPolyline, computeBoundingBox, removeCollinearPoints, calcTileDelta, checkPolygonInsidePolygon, getTrianglesFromPolygon} = require("../geometry/polygon");
@@ -195,9 +198,9 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
     checkPointsOrder(p.points, convexHull);
   });
   //Create reference between inner and outer
-  polygons.filter(p => p.role === "outer").forEach(o => {
+  polygons.filter(p => p.role === roleOuter).forEach(o => {
     o.holes = [];
-    polygons.filter(p => p.role === "inner" && p.container === undefined).forEach(i => {
+    polygons.filter(p => p.role === roleInner && p.container === undefined).forEach(i => {
       if (checkPolygonInsidePolygon(o.points, i.points)) {
         i.container = o;
         o.holes.push(i);
@@ -340,13 +343,13 @@ const getWidthFromWay = (way) => {
 }
 
 const groupFromGraphNode = (elements, graphNode, name) => {
-  if ( graphNode.type === "way" || graphNode.type === "relation" ) {
+  if ( graphNode.type === graphWay || graphNode.type === graphRel ) {
     graphNode.calc && graphNode.calc.polygons && graphNode.calc.polygons.forEach(o => {
       const faces = getTrianglesFromPolygon(o.points, o.holes,0);
       const tags = {...graphNode.tags, ...o.tags};
       elements.push(exportGroup(graphNode, name, faces, getColorFromTags(tags)));
     });
-  } else if ( graphNode.type === "node" ) {
+  } else if ( graphNode.type === graphNode ) {
     elements.push(exportGroup(graphNode, name, [], getColorFromTags(graphNode.tags)));
   }
 }
@@ -381,13 +384,13 @@ const extendData = (nodes, ways, relations) => {
         type: m.type,
         role: m.role
       }
-      if (m.type === "way") {
+      if (m.type === graphWay) {
         const way = findElement(ways, m.ref);
         if (way) {
           way.inRelation = true;
           member.ref = way;
         }
-      } else if (m.type === "node") {
+      } else if (m.type === graphNode) {
         const node = findElement(nodes, m.ref);
         if (node) {
           node.inRelation = true;

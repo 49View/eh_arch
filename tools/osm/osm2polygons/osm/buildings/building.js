@@ -1,3 +1,5 @@
+const {roleOuter} = require("../names");
+const {graphRel, graphWay} = require("../names");
 const {extrudePoly} = require("../../geometry/polygon");
 const {exportGroup} = require("../nodeGraph");
 const {createRoof, createComplexPolygonRoof} = require("./roof");
@@ -138,7 +140,7 @@ const buildingFromRel = (elements, rel, name) => {
 
   let roofFaces = [];
   let lateralFaces = [];
-  polygons.filter(p => p.role === "outer").forEach(o => {
+  polygons.filter(p => p.role === roleOuter).forEach(o => {
     //Compute lateral faces
     lateralFaces = lateralFaces.concat(extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight));
     o.holes && o.holes.forEach(h => {
@@ -152,9 +154,9 @@ const buildingFromRel = (elements, rel, name) => {
 }
 
 const groupFromBuilding = (elements, graphNode, name) => {
-  if ( graphNode.type === "way" ) {
+  if ( graphNode.type === graphWay ) {
     buildingFromWay( elements, graphNode, name );
-  } else if ( graphNode.type === "relation" ) {
+  } else if ( graphNode.type === graphRel ) {
     buildingFromRel( elements, graphNode, name );
   }
 }

@@ -1,14 +1,15 @@
+const {valuePyramidal, valueDone, valueGabled, valueHipped} = require("../names");
 const {getTrianglesFromPolygon, extrudePoly,pointOnLine, distanceFromLine, twoLinesIntersectParameter} = require("../../geometry/polygon");
 const {Vector} = require("../../geometry/vector");
 
 const createRoof = (polygon, roofInfo, convexHull, ombb) => {
-  if (roofInfo.shape==="pyramidal") {
+  if (roofInfo.shape===valuePyramidal) {
     return createPyramidalRoof(polygon.points, roofInfo);
-  } else if (roofInfo.shape==="gabled") {
+  } else if (roofInfo.shape===valueGabled) {
     return createGabledRoof(polygon.points, roofInfo, ombb, 1);
-  } else if (roofInfo.shape==="hipped") {
+  } else if (roofInfo.shape===valueHipped) {
     return createGabledRoof(polygon.points, roofInfo, ombb, 0.3);
-  } else if (roofInfo.shape==="dome") {
+  } else if (roofInfo.shape===valueDone) {
     return createDomeRoof(polygon, roofInfo);
   } else {
     return createFlatRoof(polygon, roofInfo);
