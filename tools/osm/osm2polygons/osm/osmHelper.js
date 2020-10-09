@@ -393,7 +393,7 @@ const checkPolygonInsidePolygon = (outerPolygon, polygon) => {
   return inside;
 }
 
-const exportGroup = (elem, idPrefix, name, faces, color) => {
+const exportGroup = (elem, name, faces, color) => {
 
   const groups = [];
 
@@ -402,7 +402,7 @@ const exportGroup = (elem, idPrefix, name, faces, color) => {
     colour: color,
   });
 
-  return createMesh(idPrefix+elem.id, elem.tags, name, elem.spatial, groups);
+  return createMesh(elem.type+"-"+elem.id, elem.tags, name, elem.spatial, groups);
 }
 
 const createMesh = (id, tags, type, center, groups) => {
@@ -452,7 +452,13 @@ const getPolygonFromWay = (tileBoundary, way) => {
     absolutePolygon.push({x: p.x + way.spatial.center.x, y: p.y + way.spatial.center.y});
   })
 
-  return {polygon, absolutePolygon, convexHull, ombb}
+  const polygons = [];
+  polygons.push({
+    points: polygon,
+    holes: null,
+    tags: way.tags
+  });
+  return {polygons, absolutePolygon, convexHull, ombb}
 }
 
 const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
@@ -666,23 +672,16 @@ const getWidthFromWay = (way) => {
   return {roadWidth, roadLane};
 }
 
-const groupFromWay = (elements, way, name) => {
-  if ( way.calc ) {
-    const faces = getTrianglesFromPolygon(way.calc.polygon, null,0);
-    elements.push(exportGroup(way, "w-", name, faces, getColorFromTags(way.tags)));
+const groupFromGraphNode = (elements, graphNode, name) => {
+  if ( graphNode.type === "way" || graphNode.type === "relation" ) {
+    graphNode.calc && graphNode.calc.polygons && graphNode.calc.polygons.forEach(o => {
+      const faces = getTrianglesFromPolygon(o.points, o.holes,0);
+      const tags = o.tags ? o.tags : graphNode.tags;
+      elements.push(exportGroup(graphNode, name, faces, getColorFromTags(tags)));
+    });
+  } else if ( graphNode.type === "node" ) {
+    elements.push(exportGroup(graphNode, name, [], getColorFromTags(graphNode.tags)));
   }
-}
-
-const groupFromRel = (elements, rel, name) => {
-  rel.calc.polygons && rel.calc.polygons.forEach(o => {
-    let faces = getTrianglesFromPolygon(o.points, o.holes, 0);
-    const tags = o.tags ? o.tags : rel.tags;
-    elements.push(exportGroup(rel, "r-", name, faces, getColorFromTags(tags)));
-  });
-}
-
-const groupFromNode = (elements, node, name) => {
-  elements.push(exportGroup(node, "n-", name, [], getColorFromTags(node.tags)));
 }
 
 const findElement = (list, id) => {
@@ -811,9 +810,7 @@ module.exports = {
   checkPathClosed,
   createClosedPath,
   checkPolygonInsidePolygon,
-  groupFromWay,
-  groupFromRel,
-  groupFromNode,
+  groupFromGraphNode,
   exportGroup,
   createMesh,
   getColorFromTags,

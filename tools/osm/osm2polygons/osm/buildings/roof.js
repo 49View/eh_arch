@@ -6,11 +6,11 @@ const {extrudePoly} = require("../osmHelper");
 
 const createRoof = (polygon, roofInfo, convexHull, ombb) => {
   if (roofInfo.shape==="pyramidal") {
-    return createPyramidalRoof(polygon, roofInfo);
+    return createPyramidalRoof(polygon.points, roofInfo);
   } else if (roofInfo.shape==="gabled") {
-    return createGabledRoof(polygon, roofInfo, ombb, 1);
+    return createGabledRoof(polygon.points, roofInfo, ombb, 1);
   } else if (roofInfo.shape==="hipped") {
-    return createGabledRoof(polygon, roofInfo, ombb, 0.3);
+    return createGabledRoof(polygon.points, roofInfo, ombb, 0.3);
   } else if (roofInfo.shape==="dome") {
     return createDomeRoof(polygon, roofInfo);
   } else {
@@ -40,7 +40,7 @@ const createDomeRoof = (polygon, roofInfo) => {
   // let inCircle=[];
   let unionSurface;
 
-  unionSurface=getTrianglesFromPolygon(polygon, null, roofInfo.minHeight);
+  unionSurface=getTrianglesFromPolygon(polygon.points, polygon.holes, roofInfo.minHeight);
   faces = faces.concat(unionSurface);
 
   for (let alpha=0;alpha<360;alpha+=5) {
@@ -114,10 +114,10 @@ const createFlatRoof = (polygon, roofInfo) => {
   let faces=[];
   if (roofInfo.minHeight!==roofInfo.maxHeight) {
     //If required, compute lateral roof face
-    faces=faces.concat(extrudePoly(polygon, roofInfo.minHeight, roofInfo.maxHeight, false));
+    faces=faces.concat(extrudePoly(polygon.points, roofInfo.minHeight, roofInfo.maxHeight, false));
   }
   //
-  const topFace = getTrianglesFromPolygon(polygon, null, roofInfo.maxHeight);
+  const topFace = getTrianglesFromPolygon(polygon.points, polygon.holes, roofInfo.maxHeight);
 
   return faces.concat(topFace);
 }

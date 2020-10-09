@@ -1,14 +1,9 @@
-const {exportBuildings} = require("./buildings/building");
-const {groupFromNode} = require("./osmHelper");
-const {createElementsFromNodes} = require("./osmHelper");
-const {groupFromRel, groupFromWay} = require("./osmHelper");
-const {
-    createElements,
-    createElementsFromRels,
-} = require('./osmHelper.js');
+const {groupFromBuilding} = require("./buildings/building");
+const {groupFromGraphNode} = require("./osmHelper");
+const {createElements} = require('./osmHelper.js');
 
 const buildingFilter = w => {
-    return w => w.tags && (w.tags["building"] || w.tags["building:part"]);
+    return w.tags && (w.tags["building"] || w.tags["building:part"]);
 }
 
 const parkFilter = w => {
@@ -39,10 +34,11 @@ const unclassifiedFilter = w => {
     return w.tags === undefined && w.nodes && w.nodes.length > 0;
 }
 
-const addTileAreaFilter = (name, areaFilter) => {
+const addTileAreaFilter = (name, areaFilter, elaborateCallback = groupFromGraphNode ) => {
     return {
         name,
         areaFilter,
+        elaborateCallback
     }
 }
 
@@ -53,15 +49,15 @@ const createTileAreas = (elements, tileFilter, nodes, ways, rels) => {
 
     createElements(elements, ways, tileFilter.name
         , w => tileFilter.areaFilter(w)
-        , groupFromWay);
+        , tileFilter.elaborateCallback);
 
-    createElements(elements,rels, tileFilter.name
+    createElements(elements, rels, tileFilter.name
         , r => tileFilter.areaFilter(r)
-        , groupFromRel);
+      , tileFilter.elaborateCallback);
 
-    createElements(elements,nodes, tileFilter.name
+    createElements(elements, nodes, tileFilter.name
       , r => tileFilter.areaFilter(r)
-      , groupFromNode);
+      , tileFilter.elaborateCallback);
 
     console.log(`Found ${elements.length} ${tileFilter.name}`);
     // console.log(`Found ${wayBasedElements.length} way ${tileFilter.name}`);
@@ -73,10 +69,10 @@ const createTileAreas = (elements, tileFilter, nodes, ways, rels) => {
 const createTile = (tileBoundary, nodes, ways, rels) => {
 
     const elements = [];
-    exportBuildings(elements, nodes, ways, rels);
+    // exportBuildings(elements, nodes, ways, rels);
 
     const tileAreas = [
-        // addTileAreaFilter("building", buildingFilter),
+        addTileAreaFilter("building", buildingFilter, groupFromBuilding),
         addTileAreaFilter("unclassified", unclassifiedFilter),
         addTileAreaFilter("park", parkFilter),
         addTileAreaFilter("parking", parkingFilter),
