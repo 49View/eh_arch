@@ -7,6 +7,10 @@ const {
     createElementsFromRels,
 } = require('./osmHelper.js');
 
+const buildingFilter = w => {
+    return w => w.tags && (w.tags["building"] || w.tags["building:part"]);
+}
+
 const parkFilter = w => {
     return w.tags && (w.tags["leisure"] || (w.tags["landuse"] && (w.tags["landuse"] !== "construction" && w.tags["landuse"] !== "governmental")) || (w.tags["area"] && w.tags["man_made"] && !w.tags["ferry"]));
 }
@@ -38,7 +42,7 @@ const unclassifiedFilter = w => {
 const addTileAreaFilter = (name, areaFilter) => {
     return {
         name,
-        areaFilter
+        areaFilter,
     }
 }
 
@@ -72,6 +76,7 @@ const createTile = (tileBoundary, nodes, ways, rels) => {
     exportBuildings(elements, tileBoundary, nodes, ways, rels);
 
     const tileAreas = [
+        // addTileAreaFilter("building", buildingFilter),
         addTileAreaFilter("unclassified", unclassifiedFilter),
         addTileAreaFilter("park", parkFilter),
         addTileAreaFilter("parking", parkingFilter),

@@ -393,7 +393,7 @@ const checkPolygonInsidePolygon = (outerPolygon, polygon) => {
   return inside;
 }
 
-const exportGroup = (id, tags, name, boundingBox, faces, color) => {
+const exportGroup = (elem, idPrefix, name, faces, color) => {
 
   const groups = [];
 
@@ -402,7 +402,7 @@ const exportGroup = (id, tags, name, boundingBox, faces, color) => {
     colour: color,
   });
 
-  return createMesh(id, tags, name, boundingBox, groups);
+  return createMesh(idPrefix+elem.id, elem.tags, name, elem.spatial, groups);
 }
 
 const createMesh = (id, tags, type, center, groups) => {
@@ -695,34 +695,21 @@ const getWidthFromWay = (way) => {
 
 const groupFromWay = (elements, way, tileBoundary, name) => {
 
-  // const polyPointsClipped = clipPolyPoints(tileBoundary, way.calc.polygon);
-  //, way.tags && way.tags[name]
-
   const faces = getTrianglesFromPolygon(way.calc.polygon, null,0);
-
-  elements.push(exportGroup("w-" + way.id, way.tags, name, way.spatial, faces, getColorFromTags(way.tags)));
+  elements.push(exportGroup(way, "w-", name, faces, getColorFromTags(way.tags)));
 }
 
 const groupFromRel = (elements, rel, tileBoundary, name) => {
 
-  if ( rel.id === 8244923 ) {
-    console.log("a")
-  }
-
   rel.calc.polygons && rel.calc.polygons.forEach(o => {
     let faces = getTrianglesFromPolygon(o.points, o.holes, 0);
     const tags = o.tags ? o.tags : rel.tags;
-    elements.push(exportGroup("r-" + rel.id, tags, name, rel.spatial, faces, getColorFromTags(tags)));
+    elements.push(exportGroup(rel, "r-", name, faces, getColorFromTags(tags)));
   });
-  // if ( rel.calc.polygons && rel.calc.polygons.length > 1 ) {
-  //   const o = rel.calc.polygons[1];
-  //   faces = faces.concat(getTrianglesFromPolygon(o.points, o.holes, 0));
-  // }
-  // return exportGroup("r-" + rel.id, rel.tags, name, rel.spatial, faces, getColorFromTags(rel.tags));
 }
 
 const groupFromNode = (elements, node, tileBoundary, name) => {
-  elements.push(exportGroup("n-" + node.id, node.tags, name, node.spatial, [], getColorFromTags(node.tags)));
+  elements.push(exportGroup(node, "n-", name, [], getColorFromTags(node.tags)));
 }
 
 const findElement = (list, id) => {
@@ -827,7 +814,6 @@ const createPolygonsHierarchy = (ways) => {
           .filter(w => w.id !== wo.id)
           .filter(w => (w.containers && w.containers.findIndex(c => c.id === "w-" + wo.id)))
           .forEach(wi => {
-
             if (checkPolygonInsidePolygon(wo.calc.absolutePolygon, wi.calc.absolutePolygon)) {
               if (wi.containers === undefined) {
                 wi.containers = [];
