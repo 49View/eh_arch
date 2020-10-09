@@ -1,9 +1,7 @@
 const axios = require('axios')
 const qs = require('qs');
 const fs = require('fs');
-const {convertElementFacesToTriangles} = require("./dataTransformer");
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
-
 
 const getData = async (bbox) => {
 
@@ -77,6 +75,24 @@ const parseData = (osmData) => {
     });
 
     return {nodes,ways,rels}
+}
+
+const convertElementFacesToTriangles = (elements) => {
+    elements.forEach(e => {
+        e.groups.forEach(g => {
+            g.triangles = [];
+            let f = [];
+            for ( let i = 0; i < g.faces.length; i+= 3) {
+                f = g.faces[i];
+                g.triangles.push([f.x, f.y, f.z]);
+                f = g.faces[i+2];
+                g.triangles.push([f.x, f.y, f.z]);
+                f = g.faces[i+1];
+                g.triangles.push([f.x, f.y, f.z]);
+            }
+            delete g.faces;
+        })
+    });
 }
 
 const exportTile = elements => {

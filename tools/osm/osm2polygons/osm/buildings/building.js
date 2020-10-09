@@ -1,5 +1,5 @@
 const {extrudePoly} = require("../../geometry/polygon");
-const {exportGroup} = require("../osmHelper");
+const {exportGroup} = require("../nodeGraph");
 const {createRoof, createComplexPolygonRoof} = require("./roof");
 
 const HEIGHT_FOR_LEVEL = 2.97;

@@ -1,18 +1,7 @@
 const {calcConvexHull} = require('../geometry/convexhull');
 const {calcOmbb} = require('../geometry/ombb');
-const {checkPointsOrder, offsetPolyline} = require("../geometry/polygon");
-const {computeBoundingBox} = require("../geometry/polygon");
-const {removeCollinearPoints, calcTileDelta} = require("../geometry/polygon");
-const {checkPolygonInsidePolygon} = require("../geometry/polygon");
-const {getTrianglesFromPolygon} = require("../geometry/polygon");
-const {calcCoordinate} = require("./dataTransformer");
-
-const convertToLocalCoordinate = (points, originX, originY) => {
-  points.forEach(p => {
-    p.x = p.x - originX;
-    p.y = p.y - originY;
-  });
-}
+const {checkPointsOrder, offsetPolyline, computeBoundingBox, removeCollinearPoints, calcTileDelta, checkPolygonInsidePolygon, getTrianglesFromPolygon} = require("../geometry/polygon");
+const {calcCoordinate, convertToLocalCoordinate} = require("./coordinates");
 
 const createBasePolygon = (points) => {
   const polygon = [];

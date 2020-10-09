@@ -149,28 +149,17 @@ const getBoundingBox = (coords) => {
   };
 }
 
-const convertElementFacesToTriangles = (elements) => {
-  elements.forEach(e => {
-      e.groups.forEach(g => {
-        g.triangles = [];
-        let f = [];
-        for ( let i = 0; i < g.faces.length; i+= 3) {
-          f = g.faces[i];
-          g.triangles.push([f.x, f.y, f.z]);
-          f = g.faces[i+2];
-          g.triangles.push([f.x, f.y, f.z]);
-          f = g.faces[i+1];
-          g.triangles.push([f.x, f.y, f.z]);
-        }
-        delete g.faces;
-      })
+const convertToLocalCoordinate = (points, originX, originY) => {
+  points.forEach(p => {
+    p.x = p.x - originX;
+    p.y = p.y - originY;
   });
 }
 
 module.exports = {
   calcDistance,
   calcCoordinate,
+  convertToLocalCoordinate,
   calcNodeCoordinates,
   getBoundingBox,
-  convertElementFacesToTriangles
 }

@@ -1,9 +1,9 @@
-const {elaborateData} = require("./osm/osmHelper");
-const {getBoundingBox} = require("./osm/dataTransformer");
-const {exportTile} = require("./osm/dataLoader");
-const {createTile} = require("./osm/tileArea");
-const {getDataLocal} = require("./osm/dataLoader");
-const {getData} = require("./osm/dataLoader");
+const {elaborateData} = require("./osm/nodeGraph");
+const {getBoundingBox} = require("./osm/coordinates");
+const {exportTile} = require("./osm/persistence");
+const {createTile} = require("./osm/tile");
+const {getDataLocal} = require("./osm/persistence");
+const {getData} = require("./osm/persistence");
 
 //WestMinster
 // const bbox = [51.4992784, -0.125376, 15];

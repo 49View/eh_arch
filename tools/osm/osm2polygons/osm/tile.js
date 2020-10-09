@@ -1,6 +1,6 @@
 const {groupFromBuilding} = require("./buildings/building");
-const {groupFromGraphNode} = require("./osmHelper");
-const {createElements} = require('./osmHelper.js');
+const {groupFromGraphNode} = require("./nodeGraph");
+const {createElements} = require('./nodeGraph.js');
 
 const buildingFilter = w => {
     return w.tags && (w.tags["building"] || w.tags["building:part"]);
