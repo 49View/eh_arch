@@ -287,40 +287,34 @@ const getWidthFromWay = (way) => {
   if (way.tags) {
     switch (way.tags["highway"]) {
       case "motorway":
-        roadWidth = 3;
+        roadWidth = 2;
         roadLane = 3;
         break;
       case "motorway_link":
-        roadWidth = 2.75;
+        roadWidth = 2;
         roadLane = 2;
         break;
       case "trunk":
-        roadWidth = 3;
-        roadLane = 2;
-        break;
       case "trunk_link":
-        roadWidth = 2.75;
+        roadWidth = 1.8;
         roadLane = 2;
         break;
       case "primary":
-        roadWidth = 3;
-        roadLane = 2;
-        break;
       case "primary_link":
-        roadWidth = 2.75;
+        roadWidth = 1.5;
         roadLane = 2;
         break;
       case "secondary":
-        roadWidth = 2.5;
+        roadWidth = 0.8;
         roadLane = 2;
         break;
       case "tertiary":
-        roadWidth = 2.25;
+        roadWidth = 1;
         roadLane = 2;
         break;
       case "unclassified":
       case "residential":
-        roadWidth = 2.5;
+        roadWidth = 0.8;
         roadLane = 1;
         break;
       case "track":
@@ -333,11 +327,11 @@ const getWidthFromWay = (way) => {
         roadLane = 1;
         break;
       default:
-        roadWidth = 1.5;
+        roadWidth = 0.8;
         roadLane = 1;
     }
     if (way.tags["railway"] && way.tags["railway"] === "rail") {
-      roadWidth = 1.5;
+      roadWidth = 0.5;
       roadLane = 2;
     }
   }
