@@ -1,7 +1,6 @@
 const {calcConvexHull} = require('../geometry/convexhull');
 const {calcOmbb} = require('../geometry/ombb');
-const ClipperLib = require('js-clipper');
-const {checkPointsOrder} = require("../geometry/polygon");
+const {checkPointsOrder, offsetPolyline} = require("../geometry/polygon");
 const {computeBoundingBox} = require("../geometry/polygon");
 const {removeCollinearPoints, calcTileDelta} = require("../geometry/polygon");
 const {checkPolygonInsidePolygon} = require("../geometry/polygon");
@@ -13,56 +12,6 @@ const convertToLocalCoordinate = (points, originX, originY) => {
     p.x = p.x - originX;
     p.y = p.y - originY;
   });
-}
-
-const offsetPolyline = (way, points) => {
-
-  // let pointsPartial = points;
-  let pointsPartial = [];
-  let startIndex = 0;
-  for (let i = startIndex; i < points.length; i++) {
-    for (let j = i + 1; j < points.length; j++) {
-      if (points[i].id === points[j].id) {
-        if (startIndex < j) {
-          pointsPartial.push(points.slice(startIndex, j));
-        }
-        startIndex = j;
-        i = j;
-        break;
-      }
-    }
-  }
-
-  if (startIndex === 0) {
-    pointsPartial.push(points);
-  } else {
-    // pointsPartial.push(points.slice(startIndex - 1, points.length));
-  }
-
-  const {roadWidth, roadLane} = getWidthFromWay(way);
-  let polygon = [];
-  pointsPartial.forEach(pts => {
-    let subj = new ClipperLib.Paths();
-    let solution = new ClipperLib.Paths();
-    subj[0] = pts.map(p => {
-      return {X: p.x, Y: p.y}
-    });
-    const scale = 100;
-    ClipperLib.JS.ScaleUpPaths(subj, scale);
-    let co = new ClipperLib.ClipperOffset(2, 0.25);
-    co.AddPaths(subj, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenRound);
-    co.Execute(solution, roadWidth * roadLane * scale);
-    ClipperLib.JS.ScaleDownPaths(solution, scale);
-
-    solution.forEach(s => {
-      const polys = s.map(p => {
-        return {x: p.X, y: p.Y}
-      });
-      polygon = polygon.concat(polys);
-    });
-  });
-
-  return polygon;
 }
 
 const createBasePolygon = (points) => {
@@ -180,7 +129,8 @@ const getPolygonFromWay = (tileBoundary, way) => {
   checkPointsOrder(points, convexHull);
   const ombb = calcOmbb(convexHull);
 
-  const polygon = isClosed ? createBasePolygon(points) : offsetPolyline(way, points);
+  const {roadWidth, roadLane} = getWidthFromWay(way);
+  const polygon = isClosed ? createBasePolygon(points) : offsetPolyline(roadWidth * roadLane, points);
 
   const absolutePolygon = [];
   polygon.forEach(p => {
@@ -535,17 +485,7 @@ const createPolygonsHierarchy = (ways) => {
 
 module.exports = {
   elaborateData,
-  offsetPolyline,
-  convertToLocalCoordinate,
-  createBasePolygon,
-  checkPathClosed,
-  createClosedPath,
   groupFromGraphNode,
   exportGroup,
-  createMesh,
-  getColorFromTags,
-  getWidthFromWay,
-  getPolygonsFromMultipolygonRelation,
-  getPolygonFromWay,
   createElements,
 }

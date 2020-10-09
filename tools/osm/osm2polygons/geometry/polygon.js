@@ -1,4 +1,5 @@
 const poly2tri = require('poly2tri');
+const ClipperLib = require('js-clipper');
 const {Vector} = require('../geometry/vector');
 const {calcOmbb} = require("./ombb");
 const {calcConvexHull} = require("./convexhull");
@@ -14,6 +15,55 @@ const triangulate = (swCtx) => {
   });
 
   return points;
+}
+
+const offsetPolyline = (offset, points) => {
+
+  // let pointsPartial = points;
+  let pointsPartial = [];
+  let startIndex = 0;
+  for (let i = startIndex; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      if (points[i].id === points[j].id) {
+        if (startIndex < j) {
+          pointsPartial.push(points.slice(startIndex, j));
+        }
+        startIndex = j;
+        i = j;
+        break;
+      }
+    }
+  }
+
+  if (startIndex === 0) {
+    pointsPartial.push(points);
+  } else {
+    // pointsPartial.push(points.slice(startIndex - 1, points.length));
+  }
+
+  let polygon = [];
+  pointsPartial.forEach(pts => {
+    let subj = new ClipperLib.Paths();
+    let solution = new ClipperLib.Paths();
+    subj[0] = pts.map(p => {
+      return {X: p.x, Y: p.y}
+    });
+    const scale = 100;
+    ClipperLib.JS.ScaleUpPaths(subj, scale);
+    let co = new ClipperLib.ClipperOffset(2, 0.25);
+    co.AddPaths(subj, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenRound);
+    co.Execute(solution, offset * scale);
+    ClipperLib.JS.ScaleDownPaths(solution, scale);
+
+    solution.forEach(s => {
+      const polys = s.map(p => {
+        return {x: p.X, y: p.Y}
+      });
+      polygon = polygon.concat(polys);
+    });
+  });
+
+  return polygon;
 }
 
 const clipPolyPoints = (tileBoundary, polyPoints) => {
@@ -380,6 +430,7 @@ const checkPointsOrder = (points, convexHull) => {
 module.exports = {
   getTrianglesFromPolygon,
   extrudePoly,
+  offsetPolyline,
   removeCollinearPoints,
   computeBoundingBox,
   checkPolygonInsidePolygon,
