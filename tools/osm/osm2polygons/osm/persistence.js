@@ -1,7 +1,8 @@
 const axios = require('axios')
 const qs = require('qs');
 const fs = require('fs');
-const {graphRel, graphWay, graphNode} = require("./names");
+const {tagBarrier} = require("./nameValues");
+const {graphRel, graphWay, graphNode} = require("./nameValues");
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
 const getData = async (bbox) => {
@@ -14,7 +15,7 @@ const getData = async (bbox) => {
         way["building:part"](${bbox.join(",")});
         rel["natural"="water"](${bbox.join(",")});
         way["natural"="water"](${bbox.join(",")});
-        way["barrier"](${bbox.join(",")});
+        way[${tagBarrier}](${bbox.join(",")});
         way["highway"](${bbox.join(",")});
         rel["highway"](${bbox.join(",")});
         way["railway"="rail"](${bbox.join(",")});

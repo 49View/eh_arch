@@ -1,3 +1,5 @@
+const {groupFromBarrier} = require("./buildings/barrier");
+const {tagBarrier} = require("./nameValues");
 const {groupFromBuilding} = require("./buildings/building");
 const {groupFromGraphNode} = require("./nodeGraph");
 const {createElements} = require('./nodeGraph.js');
@@ -18,8 +20,8 @@ const waterFilter = w => {
     return w.tags && w.tags["natural"] === "water";
 }
 
-const fenceFilter = w => {
-    return w.tags && w.tags["barrier"];
+const barrierFilter = w => {
+    return w.tags && w.tags[tagBarrier];
 }
 
 const roadFilter = w => {
@@ -77,7 +79,7 @@ const createTile = (tileBoundary, nodes, ways, rels) => {
         addTileAreaFilter("park", parkFilter),
         addTileAreaFilter("parking", parkingFilter),
         addTileAreaFilter("water", waterFilter),
-        addTileAreaFilter("barrier", fenceFilter),
+        addTileAreaFilter(tagBarrier, barrierFilter, groupFromBarrier),
         addTileAreaFilter("road", roadFilter),
         addTileAreaFilter("tree", treeFilter),
     ]

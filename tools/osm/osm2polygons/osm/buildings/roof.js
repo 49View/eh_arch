@@ -1,4 +1,4 @@
-const {valuePyramidal, valueDone, valueGabled, valueHipped, valueAlong} = require("../names");
+const {valuePyramidal, valueDone, valueGabled, valueHipped, valueAlong} = require("../nameValues");
 const {getTrianglesFromPolygon, extrudePoly,pointOnLine, distanceFromLine, twoLinesIntersectParameter} = require("../../geometry/polygon");
 const {Vector} = require("../../geometry/vector");
 
@@ -21,10 +21,10 @@ const createDomeRoof = (polygon, roofInfo) => {
 
   //Compute shorter distance from center to polygon segments
   let inCircleRay = Number.MAX_VALUE;
-  for (let i=0;i<polygon.length;i++) {
-    const nextI = (i+1)%polygon.length;
-    const point=polygon[i];
-    const nextPoint=polygon[nextI];
+  for (let i=0;i<polygon.points.length;i++) {
+    const nextI = (i+1)%polygon.points.length;
+    const point=polygon.points[i];
+    const nextPoint=polygon.points[nextI];
 
     //Distance from center to polygon segment
     let distanceFromCenter = distanceFromLine({x: 0, y:0}, point, nextPoint, true);

@@ -1,4 +1,4 @@
-const {roleOuter, graphRel, graphWay, valueAlong, valueFlat} = require("../names");
+const {roleOuter, graphRel, graphWay, valueAlong, valueFlat} = require("../nameValues");
 const {extrudePoly} = require("../../geometry/polygon");
 const {exportGroup} = require("../nodeGraph");
 const {createRoof, createComplexPolygonRoof} = require("./roof");
