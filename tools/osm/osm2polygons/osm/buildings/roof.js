@@ -1,4 +1,4 @@
-const {valuePyramidal, valueDone, valueGabled, valueHipped} = require("../names");
+const {valuePyramidal, valueDone, valueGabled, valueHipped, valueAlong} = require("../names");
 const {getTrianglesFromPolygon, extrudePoly,pointOnLine, distanceFromLine, twoLinesIntersectParameter} = require("../../geometry/polygon");
 const {Vector} = require("../../geometry/vector");
 
@@ -132,7 +132,7 @@ const createGabledRoof = (polygon, roofInfo, ombb, hippedPerc) => {
   axes.push(new Vector(ombb[3].x-ombb[2].x, ombb[3].y-ombb[2].y));
   axes.push(new Vector(ombb[0].x-ombb[3].x, ombb[0].y-ombb[3].y));
 
-  if (roofInfo.orientation==="along") {
+  if (roofInfo.orientation===valueAlong) {
     if (axes[0].length()>axes[1].length()) {
       startIndex=1;
     } else {
@@ -219,7 +219,6 @@ const createGabledRoof = (polygon, roofInfo, ombb, hippedPerc) => {
       faces.push({x: p.x, y: p.y, z:roofInfo.minHeight});
       faces.push({x: nextPrj.x, y: nextPrj.y, z:roofInfo.maxHeight});
       faces.push({x: prj.x, y: prj.y, z:roofInfo.maxHeight});
-      //console.log("Next");
     }
   }
 

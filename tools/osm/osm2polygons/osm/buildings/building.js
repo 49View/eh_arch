@@ -1,5 +1,4 @@
-const {roleOuter} = require("../names");
-const {graphRel, graphWay} = require("../names");
+const {roleOuter, graphRel, graphWay, valueAlong, valueFlat} = require("../names");
 const {extrudePoly} = require("../../geometry/polygon");
 const {exportGroup} = require("../nodeGraph");
 const {createRoof, createComplexPolygonRoof} = require("./roof");
@@ -68,7 +67,7 @@ const getBuildingInfo = (tags) => {
   } else if (tags["building:roof:levels"]) {
     roofHeight = Number(tags["building:roof:levels"].replace("m", "")) * HEIGHT_FOR_LEVEL;
   } else {
-    if (roofShape === "flat") {
+    if (roofShape === valueFlat) {
       roofHeight = 0;
     } else {
       roofHeight = HEIGHT_FOR_LEVEL;
@@ -78,7 +77,7 @@ const getBuildingInfo = (tags) => {
   if (tags["roof:orientation"]) {
     roofOrientation = tags["roof:orientation"];
   } else {
-    roofOrientation = "along";
+    roofOrientation = valueAlong;
   }
 
   if (tags["roof:colour"]) {
@@ -94,7 +93,7 @@ const getBuildingInfo = (tags) => {
 
   if (maxHeight - roofHeight < minHeight) {
     roofHeight = 0;
-    roofShape = "flat";
+    roofShape = valueFlat;
   } else {
     maxHeight = maxHeight - roofHeight;
   }

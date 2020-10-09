@@ -10,9 +10,12 @@ const valuePyramidal = "pyramidal";
 const valueGabled = "gabled";
 const valueHipped = "hipped";
 const valueDone = "dome";
+const valueFlat = "flat";
+
+const valueAlong = "along";
 
 module.exports = {
   graphWay, graphRel, graphNode,
   roleInner, roleOuter,
-  valueDone, valueGabled, valueHipped, valuePyramidal
+  valueAlong, valueDone, valueGabled, valueHipped, valuePyramidal, valueFlat
 }
