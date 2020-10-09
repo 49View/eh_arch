@@ -1,5 +1,4 @@
-const {getTrianglesFromPolygon, extrudePoly} = require("../../geometry/polygon");
-const {pointOnLine, distanceFromLine, twoLinesIntersectParameter} = require("../osmHelper");
+const {getTrianglesFromPolygon, extrudePoly,pointOnLine, distanceFromLine, twoLinesIntersectParameter} = require("../../geometry/polygon");
 const {Vector} = require("../../geometry/vector");
 
 const createRoof = (polygon, roofInfo, convexHull, ombb) => {

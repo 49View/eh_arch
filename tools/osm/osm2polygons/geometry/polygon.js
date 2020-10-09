@@ -1,4 +1,5 @@
 const poly2tri = require('poly2tri');
+const {Vector} = require('../geometry/vector');
 const {calcOmbb} = require("./ombb");
 const {calcConvexHull} = require("./convexhull");
 
@@ -293,6 +294,89 @@ const checkPolygonInsidePolygon = (outerPolygon, polygon) => {
   return inside;
 }
 
+const projectionParameterPointToSegment = (point, segmentStart, segmentEnd, clamp) => {
+
+  //Vector from segmentStart to segmentEnd
+  const segmentVector = new Vector(segmentEnd.x - segmentStart.x, segmentEnd.y - segmentStart.y);
+  //Vector from segmentStart to p
+  const pointVector = new Vector(point.x - segmentStart.x, point.y - segmentStart.y);
+  //Projection of pointVector on segmentVector is dot product of vectors
+  //equal to |pointVector|*cos(theta), theta angle between pointVector and segmentVector
+  const projection = pointVector.dot(segmentVector);
+  //parameter is projection divide by length of segment vector
+  //equal to cos(theta)
+  let parameter = projection / segmentVector.sqrLength();
+
+  if (clamp) {
+    parameter = Math.max(0, Math.min(parameter, 1));
+  }
+
+  return parameter;
+}
+
+const pointOnLineFromParameter = (parameter, segmentStart, segmentEnd) => {
+  return {
+    x: segmentStart.x + parameter * (segmentEnd.x - segmentStart.x),
+    y: segmentStart.y + parameter * (segmentEnd.y - segmentStart.y)
+  };
+}
+
+const pointOnLine = (point, segmentStart, segmentEnd, clamp) => {
+  const parameter = projectionParameterPointToSegment(point, segmentStart, segmentEnd, clamp);
+  return pointOnLineFromParameter(parameter, segmentStart, segmentEnd);
+}
+
+const distanceFromLine = (point, segmentStart, segmentEnd, clamp) => {
+  const projectedPoint = pointOnLine(point, segmentStart, segmentEnd, clamp);
+
+  const projectedVector = new Vector(projectedPoint.x - point.x, projectedPoint.y - point.y);
+
+  return projectedVector.length();
+}
+
+const distanceFromPoint = (pointA, pointB) => {
+  const pointsVector = new Vector(pointB.x - pointA.x, pointB.y - pointA.y);
+
+  return pointsVector.length;
+}
+
+const twoLinesIntersectParameter = (pointALine1, pointBLine1, pointALine2, pointBLine2) => {
+
+  const line1Vector = new Vector(pointBLine1.x - pointALine1.x, pointBLine1.y - pointALine1.y);
+  const line2Vector = new Vector(pointBLine2.x - pointALine2.x, pointBLine2.y - pointALine2.y);
+
+  if (line1Vector.checkParallel(line2Vector)) {
+    return Infinity;
+  }
+
+  return (((pointALine1.y - pointALine2.y) * line1Vector.x) + ((pointALine2.x - pointALine1.x) * line1Vector.y))
+    / ((line2Vector.y * line1Vector.x) - (line2Vector.x * line1Vector.y));
+}
+
+const checkPointsOrder = (points, convexHull) => {
+
+  if (points.length < 3) return points;
+
+  let i1, i2, i3;
+
+  //console.log(convexHull.length);
+
+  i1 = points.findIndex(p => p.id === convexHull[0].id);
+  i2 = points.findIndex(p => p.id === convexHull[1].id);
+  i3 = points.findIndex(p => p.id === convexHull[2].id);
+
+  if (i2 < i1) i2 = i2 + points.length;
+  if (i3 < i1) i3 = i3 + points.length;
+
+  if (i1 < i2 && i2 < i3) {
+    //console.log("Point order correct");
+    return points;
+  } else {
+    //console.log("Reverse point list order");
+    return points.reverse();
+  }
+}
+
 module.exports = {
   getTrianglesFromPolygon,
   extrudePoly,
@@ -300,5 +384,12 @@ module.exports = {
   computeBoundingBox,
   checkPolygonInsidePolygon,
   clipPolyPoints,
-  calcTileDelta
+  calcTileDelta,
+  checkPointsOrder,
+  pointOnLine,
+  distanceFromLine,
+  distanceFromPoint,
+  projectionParameterPointToSegment,
+  pointOnLineFromParameter,
+  twoLinesIntersectParameter
 }
