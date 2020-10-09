@@ -14,7 +14,7 @@ function Vector(x, y)
         x = Math.max(x, vec.x);
         y = Math.max(y, vec.y);
     }
-    
+
     this.midpoint = function(vec)
     {
         return new Vector((x+vec.x)*0.5, (y+vec.y)*0.5);
@@ -27,14 +27,14 @@ function Vector(x, y)
 
     this.normalize = function()
     {
-        var len = this.length();
+        const len = this.length();
         this.x /= len;
         this.y /= len;
     }
 
     this.normalized = function()
     {
-        var vec = new Vector(this.x, this.y);
+        let vec = new Vector(this.x, this.y);
         vec.normalize();
         return vec;
     }
@@ -80,8 +80,8 @@ function Vector(x, y)
 
     this.distance = function(vec)
     {
-        var x = this.x-vec.x;
-        var y = this.y-vec.y;
+        const x = this.x - vec.x;
+        const y = this.y - vec.y;
         return Math.sqrt(x*x+y*y);
     }
 
@@ -92,7 +92,7 @@ function Vector(x, y)
 
     this.equals = function(vec)
     {
-        return this.x == vec.x && this.y == vec.y;
+        return this.x === vec.x && this.y === vec.y;
     }
 
     this.orthogonal = function()
@@ -106,11 +106,11 @@ function Vector(x, y)
 
     this.distanceToLine = function(v0, v1)
     {
-        var sqrLen = v1.diff(v0).sqrLength();
-        var u = ((this.x-v0.x)*(v1.x-v0.x)+(this.y-v0.y)*(v1.y-v0.y))/sqrLen;
-        var v1c = v1.diff(v0);
+        const sqrLen = v1.diff(v0).sqrLength();
+        const u = ((this.x - v0.x) * (v1.x - v0.x) + (this.y - v0.y) * (v1.y - v0.y)) / sqrLen;
+        let v1c = v1.diff(v0);
         v1c.scale(u);
-        var pl = v0.clone();
+        let pl = v0.clone();
         pl.add(v1c);
         return this.distance(pl);
     }
@@ -120,10 +120,10 @@ function Vector(x, y)
         return (new Vector(this.x+t*(vec.x-this.x),this.y+t*(vec.y-this.y)));
     }
 
-    this.cross = function(vec) 
+    this.cross = function(vec)
     {
         return (this.x*vec.y-this.y*vec.x);
     }
-};
+}
 
 module.exports = {Vector}
