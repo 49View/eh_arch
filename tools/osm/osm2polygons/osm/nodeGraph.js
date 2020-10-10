@@ -1,4 +1,4 @@
-const {graphRel, graphWay, graphNode, roleInner, roleOuter, getWidthFromWay, getColorFromTags} = require("./nameValues");
+const {graphTypeRel, graphTypeWay, graphTypeNode, roleInner, roleOuter, getWidthFromWay, getColorFromTags} = require("./nameValues");
 const {calcConvexHull} = require('../geometry/convexhull');
 const {calcOmbb} = require('../geometry/ombb');
 const {checkPointsOrder, offsetPolyline, computeBoundingBox, removeCollinearPoints, calcTileDelta, checkPolygonInsidePolygon, getTrianglesFromPolygon} = require("../geometry/polygon");
@@ -221,13 +221,13 @@ const createElements = (elements, ways, name, filter, elementCreator) => {
 }
 
 const groupFromGraphNode = (elements, graphNode, name) => {
-  if ( graphNode.type === graphWay || graphNode.type === graphRel ) {
+  if ( graphNode.type === graphTypeWay || graphNode.type === graphTypeRel ) {
     graphNode.calc && graphNode.calc.polygons && graphNode.calc.polygons.forEach(o => {
       const faces = getTrianglesFromPolygon(o.points, o.holes,0);
       const tags = {...graphNode.tags, ...o.tags};
       elements.push(exportGroup(graphNode, name, faces, getColorFromTags(tags)));
     });
-  } else if ( graphNode.type === graphNode ) {
+  } else if ( graphNode.type === graphTypeNode ) {
     elements.push(exportGroup(graphNode, name, [], getColorFromTags(graphNode.tags)));
   }
 }
@@ -262,13 +262,13 @@ const extendData = (nodes, ways, relations) => {
         type: m.type,
         role: m.role
       }
-      if (m.type === graphWay) {
+      if (m.type === graphTypeWay) {
         const way = findElement(ways, m.ref);
         if (way) {
           way.inRelation = true;
           member.ref = way;
         }
-      } else if (m.type === graphNode) {
+      } else if (m.type === graphTypeNode) {
         const node = findElement(nodes, m.ref);
         if (node) {
           node.inRelation = true;

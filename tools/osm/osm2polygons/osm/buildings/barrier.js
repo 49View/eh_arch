@@ -1,7 +1,7 @@
 const {getColorFromTags} = require("../nameValues");
 const {exportGroup} = require("../nodeGraph");
 const {extrudePoly, getTrianglesFromPolygon} = require("../../geometry/polygon");
-const {graphWay, graphRel} = require("../nameValues");
+const {graphTypeWay} = require("../nameValues");
 
 const barrierFromWay = (elements, way, name) => {
 
@@ -17,10 +17,10 @@ const barrierFromWay = (elements, way, name) => {
 }
 
 const groupFromBarrier = (elements, graphNode, name) => {
-  if ( graphNode.type === graphWay ) {
+  if ( graphNode.type === graphTypeWay ) {
     barrierFromWay( elements, graphNode, name );
   }
-  // else if ( graphNode.type === graphRel ) {
+  // else if ( graphNode.type === graphTypeRel ) {
   //   buildingFromRel( elements, graphNode, name );
   // }
 }

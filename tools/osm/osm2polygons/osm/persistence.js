@@ -1,8 +1,7 @@
 const axios = require('axios')
 const qs = require('qs');
 const fs = require('fs');
-const {tagBarrier} = require("./nameValues");
-const {graphRel, graphWay, graphNode} = require("./nameValues");
+const {graphTypeRel, graphTypeWay, graphTypeNode, tagBarrier} = require("./nameValues");
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
 const getData = async (bbox) => {
@@ -70,9 +69,9 @@ const parseData = (osmData) => {
     const rels = [];
 
     elements.forEach((e,i) => {
-        if (e.type===graphNode) nodes.push(e)
-        else if (e.type===graphWay) ways.push(e)
-        else if (e.type===graphRel) rels.push(e)
+        if (e.type===graphTypeNode) nodes.push(e)
+        else if (e.type===graphTypeWay) ways.push(e)
+        else if (e.type===graphTypeRel) rels.push(e)
         else console.log(`Element ${i} unknown`);
     });
 

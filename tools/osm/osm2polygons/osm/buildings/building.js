@@ -1,4 +1,4 @@
-const {roleInner, valueAlong, valueFlat} = require("../nameValues");
+const {graphTypeNode, roleInner, valueAlong, valueFlat} = require("../nameValues");
 const {extrudePoly} = require("../../geometry/polygon");
 const {exportGroup} = require("../nodeGraph");
 const {createRoof} = require("./roof");
@@ -116,24 +116,26 @@ const getBuildingInfo = (tags) => {
 
 const groupFromBuilding = (elements, graphNode, name) => {
 
-  const buildingInfo = getBuildingInfo(graphNode.tags);
-  const convexHull = graphNode.calc.convexHull;
-  const orientedMinBoundingBox = graphNode.calc.ombb;
-  const polygons = graphNode.calc.polygons;
+  if ( graphNode.type !== graphTypeNode ) {
+    const buildingInfo = getBuildingInfo(graphNode.tags);
+    const convexHull = graphNode.calc.convexHull;
+    const orientedMinBoundingBox = graphNode.calc.ombb;
+    const polygons = graphNode.calc.polygons;
 
-  polygons.filter(p => !p.role || p.role !== roleInner).forEach(o => {
-    //Compute lateral faces
-    let lateralFaces = [];
-    lateralFaces = lateralFaces.concat(extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight));
-    o.holes && o.holes.forEach(h => {
-      lateralFaces = lateralFaces.concat(extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight));
-    })
-    elements.push(exportGroup(graphNode, name, lateralFaces, buildingInfo.colour));
-    //Compute roof faces
-    const roofFaces = createRoof(o, buildingInfo.roof, convexHull, orientedMinBoundingBox);
-    // console.log("graphNode tags of complex roof " + JSON.stringify(graphNode.tags));
-    elements.push(exportGroup(graphNode, name, roofFaces, buildingInfo.roof.colour));
-  })
+    polygons.filter(p => !p.role || p.role !== roleInner).forEach(o => {
+      //Compute lateral faces
+      let lateralFaces = [];
+      lateralFaces = lateralFaces.concat(extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight));
+      o.holes && o.holes.forEach(h => {
+        lateralFaces = lateralFaces.concat(extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight));
+      })
+      elements.push(exportGroup(graphNode, name, lateralFaces, buildingInfo.colour));
+      //Compute roof faces
+      const roofFaces = createRoof(o, buildingInfo.roof, convexHull, orientedMinBoundingBox);
+      // console.log("graphNode tags of complex roof " + JSON.stringify(graphNode.tags));
+      elements.push(exportGroup(graphNode, name, roofFaces, buildingInfo.roof.colour));
+    });
+  }
 }
 
 module.exports = {groupFromBuilding}

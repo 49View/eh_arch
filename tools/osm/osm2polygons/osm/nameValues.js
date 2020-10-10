@@ -1,7 +1,7 @@
 
-const graphWay  = "way";
-const graphRel  = "relation";
-const graphNode = "node";
+const graphTypeWay  = "way";
+const graphTypeRel  = "relation";
+const graphTypeNode = "node";
 
 const roleOuter = "outer";
 const roleInner = "inner";
@@ -151,7 +151,7 @@ const getWidthFromWay = (way) => {
 }
 
 module.exports = {
-  graphWay, graphRel, graphNode,
+  graphTypeWay, graphTypeRel, graphTypeNode,
   roleInner, roleOuter,
   getColorFromTags, getWidthFromWay,
   tagBarrier,
