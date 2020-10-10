@@ -1,4 +1,4 @@
-const {graphTypeNode, roleInner, valueAlong, valueFlat} = require("../nameValues");
+const {graphTypeNode, roleInner, valueAlong, valueFlat, valueAirShaft} = require("../nameValues");
 const {extrudePoly} = require("../../geometry/polygon");
 const {exportGroup} = require("../nodeGraph");
 const {createRoof} = require("./roof");
@@ -7,6 +7,17 @@ const HEIGHT_FOR_LEVEL = 2.97;
 const DEFAULT_BUILDING_HEIGHT = HEIGHT_FOR_LEVEL * 3;
 const DEFAULT_ROOF_COLOUR = "#ee2222";
 const DEFAULT_BUILDING_COLOUR = "#eeeeee";
+
+const getDefaultBuildingHeight = (buildingType) => {
+
+  if ( buildingType ) {
+    if ( buildingType === valueAirShaft ) {
+      return 0.1;
+    }
+  }
+  return DEFAULT_BUILDING_HEIGHT;
+}
+
 
 const getBuildingInfo = (tags) => {
   let minHeight, maxHeight, colour;
@@ -33,7 +44,7 @@ const getBuildingInfo = (tags) => {
       maxHeight = Number(tags["building:levels"].replace("m", "")) * HEIGHT_FOR_LEVEL;
     }
   } else {
-    maxHeight = DEFAULT_BUILDING_HEIGHT;
+    maxHeight = getDefaultBuildingHeight(tags["building"]);
   }
 
   if (tags["building:colour"]) {
@@ -117,6 +128,9 @@ const getBuildingInfo = (tags) => {
 const groupFromBuilding = (elements, graphNode, name) => {
 
   if ( graphNode.type !== graphTypeNode ) {
+    if ( graphNode.id === 162513945 ) {
+      console.log("a");
+    }
     const buildingInfo = getBuildingInfo(graphNode.tags);
     const convexHull = graphNode.calc.convexHull;
     const orientedMinBoundingBox = graphNode.calc.ombb;

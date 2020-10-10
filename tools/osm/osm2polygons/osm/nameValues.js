@@ -6,16 +6,22 @@ const graphTypeNode = "node";
 const roleOuter = "outer";
 const roleInner = "inner";
 
+// Node typology
 const tagBarrier = "barrier";
 
+const valueFence = "fence";
+
+// Roof
 const valuePyramidal = "pyramidal";
 const valueGabled = "gabled";
 const valueHipped = "hipped";
 const valueDone = "dome";
 const valueFlat = "flat";
-
 const valueAlong = "along";
-const valueFence = "fence";
+
+// Buildings
+const valueAirShaft = "air_shaft";
+
 
 const getColorFromTags = (tags) => {
   let color = "#808080";
@@ -154,6 +160,7 @@ module.exports = {
   graphTypeWay, graphTypeRel, graphTypeNode,
   roleInner, roleOuter,
   getColorFromTags, getWidthFromWay,
+  valueAirShaft,
   tagBarrier,
   valueAlong, valueDone, valueGabled, valueHipped, valuePyramidal, valueFlat, valueFence
 }
