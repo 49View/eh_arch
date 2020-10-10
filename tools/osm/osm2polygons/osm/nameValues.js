@@ -15,6 +15,7 @@ const valueDone = "dome";
 const valueFlat = "flat";
 
 const valueAlong = "along";
+const valueFence = "fence";
 
 const getColorFromTags = (tags) => {
   let color = "#808080";
@@ -68,7 +69,13 @@ const getColorFromTags = (tags) => {
     } else if (tags["railway"] && tags["railway"] === "rail") {
       color = "#303030";
     } else if (tags[tagBarrier]) {
-      color = "#709090";
+      switch (tags[tagBarrier]) {
+        case valueFence:
+          color = "#22222280"
+          break;
+        default:
+          color = "#DBB29A";
+      }
     }
   } else {
     color = "#606060";
@@ -148,5 +155,5 @@ module.exports = {
   roleInner, roleOuter,
   getColorFromTags, getWidthFromWay,
   tagBarrier,
-  valueAlong, valueDone, valueGabled, valueHipped, valuePyramidal, valueFlat
+  valueAlong, valueDone, valueGabled, valueHipped, valuePyramidal, valueFlat, valueFence
 }

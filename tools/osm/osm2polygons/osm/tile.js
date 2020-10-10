@@ -49,22 +49,28 @@ const createTileAreas = (elements, tileFilter, nodes, ways, rels) => {
     console.log(tileFilter.name);
     console.log("----------------------------------------------");
 
+    let countStart = elements.length;
+
     createElements(elements, ways, tileFilter.name
         , w => tileFilter.areaFilter(w)
         , tileFilter.elaborateCallback);
+
+    console.log(`Found ${elements.length-countStart} way ${tileFilter.name}`);
+    countStart = elements.length;
 
     createElements(elements, rels, tileFilter.name
         , r => tileFilter.areaFilter(r)
       , tileFilter.elaborateCallback);
 
+    console.log(`Found ${elements.length-countStart} rel ${tileFilter.name}`);
+    countStart = elements.length;
+
     createElements(elements, nodes, tileFilter.name
       , r => tileFilter.areaFilter(r)
       , tileFilter.elaborateCallback);
 
-    console.log(`Found ${elements.length} ${tileFilter.name}`);
-    // console.log(`Found ${wayBasedElements.length} way ${tileFilter.name}`);
-    // console.log(`Found ${relBasedElements.length} rels ${tileFilter.name}`);
-    // console.log(`Found ${nodeBasedElements.length} nodes ${tileFilter.name}`);
+    console.log(`Found ${elements.length-countStart} node ${tileFilter.name}`);
+
     console.log("----------------------------------------------");
 }
 
@@ -75,13 +81,13 @@ const createTile = (tileBoundary, nodes, ways, rels) => {
 
     const tileAreas = [
         addTileAreaFilter("building", buildingFilter, groupFromBuilding),
+        addTileAreaFilter("tree", treeFilter),
         addTileAreaFilter("unclassified", unclassifiedFilter),
         addTileAreaFilter("park", parkFilter),
         addTileAreaFilter("parking", parkingFilter),
         addTileAreaFilter("water", waterFilter),
-        addTileAreaFilter(tagBarrier, barrierFilter, groupFromBarrier),
         addTileAreaFilter("road", roadFilter),
-        addTileAreaFilter("tree", treeFilter),
+        addTileAreaFilter(tagBarrier, barrierFilter, groupFromBarrier),
     ]
 
     tileAreas.forEach( tf => {

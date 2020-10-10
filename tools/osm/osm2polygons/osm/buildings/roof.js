@@ -114,7 +114,11 @@ const createFlatRoof = (polygon, roofInfo) => {
     //If required, compute lateral roof face
     faces=faces.concat(extrudePoly(polygon.points, roofInfo.minHeight, roofInfo.maxHeight, false));
   }
-  //
+
+  polygon.holes && polygon.holes.forEach(h => {
+    faces = faces.concat(extrudePoly([...h.points].reverse(), roofInfo.minHeight, roofInfo.maxHeight, false));
+  })
+
   const topFace = getTrianglesFromPolygon(polygon.points, polygon.holes, roofInfo.maxHeight);
 
   return faces.concat(topFace);
@@ -270,24 +274,4 @@ const createGabledRoof = (polygon, roofInfo, ombb, hippedPerc) => {
   return faces;
 }
 
-
-const createComplexPolygonRoof = (outerPolygon, innerPolygons, roofInfo) => {
-
-  let faces=[];
-  if (roofInfo.minHeight!==roofInfo.maxHeight) {
-    //If required, compute lateral roof face
-    faces=faces.concat(extrudePoly(outerPolygon.points, roofInfo.minHeight, roofInfo.maxHeight, false));
-    innerPolygons.forEach(h => {
-      faces = faces.concat(extrudePoly([...h.points].reverse(), roofInfo.minHeight, roofInfo.maxHeight, false));
-    })
-
-  }
-
-  const topFace=getTrianglesFromPolygon(outerPolygon.points, innerPolygons, roofInfo.maxHeight);
-
-  faces=faces.concat(topFace);
-
-  return faces;
-}
-
-module.exports = { createRoof, createComplexPolygonRoof }
+module.exports = { createRoof }
