@@ -25,7 +25,9 @@ const barrierFilter = w => {
 }
 
 const roadFilter = w => {
-    return w.tags && (w.tags["highway"]);
+    const subwayPathFilter = w=> ( !w.tags["layer"] || w.tags["layer"] >= 0);
+
+    return w.tags && w.tags["highway"] && subwayPathFilter(w);
 }
 
 const treeFilter = w => {
