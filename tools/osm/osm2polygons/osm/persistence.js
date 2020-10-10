@@ -4,7 +4,11 @@ const fs = require('fs');
 const {graphTypeRel, graphTypeWay, graphTypeNode, tagBarrier} = require("./nameValues");
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
-const getData = async (bbox) => {
+const getData = async (bbox, useCache) => {
+
+    if (useCache) {
+        return getDataLocal();
+    }
 
     const query=`[out:json][timeout:25];
     (
@@ -80,19 +84,22 @@ const parseData = (osmData) => {
 
 const convertElementFacesToTriangles = (elements) => {
     elements.forEach(e => {
-        e.groups.forEach(g => {
-            g.triangles = [];
-            let f = [];
-            for ( let i = 0; i < g.faces.length; i+= 3) {
-                f = g.faces[i];
-                g.triangles.push([f.x, f.y, f.z]);
-                f = g.faces[i+2];
-                g.triangles.push([f.x, f.y, f.z]);
-                f = g.faces[i+1];
-                g.triangles.push([f.x, f.y, f.z]);
-            }
-            delete g.faces;
-        })
+        const groupings = e.groups || [];
+        if ( groupings.length > 0 ) {
+            groupings.forEach(g => {
+                g.triangles = [];
+                let f = [];
+                for ( let i = 0; i < g.faces.length; i+= 3) {
+                    f = g.faces[i];
+                    g.triangles.push([f.x, f.y, f.z]);
+                    f = g.faces[i+2];
+                    g.triangles.push([f.x, f.y, f.z]);
+                    f = g.faces[i+1];
+                    g.triangles.push([f.x, f.y, f.z]);
+                }
+                delete g.faces;
+            })
+        }
     });
 }
 
@@ -106,5 +113,5 @@ const exportTile = elements => {
     fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/debug/elements.json", jsonOutput, {encoding: "utf8"});
 }
 
-module.exports = {getData,getDataLocal,exportTile}
+module.exports = {getData,exportTile}
 

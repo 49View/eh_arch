@@ -1,9 +1,7 @@
 const {elaborateData} = require("./osm/nodeGraph");
 const {getBoundingBox} = require("./osm/coordinates");
-const {exportTile} = require("./osm/persistence");
+const {getData, exportTile} = require("./osm/persistence");
 const {createTile} = require("./osm/tile");
-const {getDataLocal} = require("./osm/persistence");
-const {getData} = require("./osm/persistence");
 
 //WestMinster
 // const bbox = [51.4992784, -0.125376, 15];
@@ -24,7 +22,7 @@ const main = async (args) => {
   const coords = {lat: args.length===0 ? 51.4992784 : Number(args[0]), lon:  args.length===0 ? -0.125376 : Number(args[1]), zoom: args.length===0 ? 15 : Number(args[2])};
 
   const tileBoundary = getBoundingBox({...coords});
-  const {nodes, ways, rels} = useCache ? await getDataLocal() : await getData(tileBoundary.bbox);
+  const {nodes, ways, rels} = await getData(tileBoundary.bbox, useCache);
   elaborateData(tileBoundary, nodes, ways, rels);
   const elements = createTile(tileBoundary, nodes, ways, rels);
 
