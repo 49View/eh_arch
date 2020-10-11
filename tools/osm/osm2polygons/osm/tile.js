@@ -1,7 +1,7 @@
-const {groupFromBarrier} = require("./buildings/barrier");
+const {groupFromGraphNode} = require("./elements/road");
+const {groupFromBarrier} = require("./elements/barrier");
 const {tagBarrier} = require("./nameValues");
-const {groupFromBuilding} = require("./buildings/building");
-const {groupFromGraphNode} = require("./nodeGraph");
+const {groupFromBuilding} = require("./elements/building");
 const {createElements} = require('./nodeGraph.js');
 
 const buildingFilter = w => {

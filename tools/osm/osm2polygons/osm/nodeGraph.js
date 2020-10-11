@@ -225,19 +225,6 @@ const createElements = (elements, ways, name, filter, elementCreator) => {
     );
 }
 
-const groupFromGraphNode = (elements, graphNode, name) => {
-
-  if ( graphNode.type === graphTypeWay || graphNode.type === graphTypeRel ) {
-    graphNode.calc && graphNode.calc.polygons && graphNode.calc.polygons.forEach(o => {
-      const faces = getTrianglesFromPolygon(o.points, o.holes,0);
-      const tags = {...graphNode.tags, ...o.tags};
-      elements.push(exportGroup(graphNode, name, faces, getColorFromTags(tags)));
-    });
-  } else if ( graphNode.type === graphTypeNode ) {
-    elements.push(exportGroup(graphNode, name, [], getColorFromTags(graphNode.tags)));
-  }
-}
-
 const findElement = (list, id) => {
   return list.find(e => e.id === id);
 }
@@ -363,7 +350,6 @@ const createPolygonsHierarchy = (ways) => {
 
 module.exports = {
   elaborateData,
-  groupFromGraphNode,
   exportGroup,
   createElements,
 }
