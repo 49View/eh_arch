@@ -10,8 +10,8 @@ const DEFAULT_BUILDING_COLOUR = "#eeeeee";
 
 const getDefaultBuildingHeight = (buildingType) => {
 
-  if ( buildingType ) {
-    if ( buildingType === valueAirShaft ) {
+  if (buildingType) {
+    if (buildingType === valueAirShaft) {
       return 0.1;
     }
   }
@@ -127,10 +127,7 @@ const getBuildingInfo = (tags) => {
 
 const groupFromBuilding = (elements, graphNode, name) => {
 
-  if ( graphNode.type !== graphTypeNode ) {
-    if ( graphNode.id === 162513945 ) {
-      console.log("a");
-    }
+  if (graphNode.type !== graphTypeNode) {
     const buildingInfo = getBuildingInfo(graphNode.tags);
     const convexHull = graphNode.calc.convexHull;
     const orientedMinBoundingBox = graphNode.calc.ombb;
@@ -138,11 +135,10 @@ const groupFromBuilding = (elements, graphNode, name) => {
 
     polygons.filter(p => !p.role || p.role !== roleInner).forEach(o => {
       //Compute lateral faces
-      let lateralFaces = [];
-      lateralFaces = lateralFaces.concat(extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight));
+      let lateralFaces = extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight);
       o.holes && o.holes.forEach(h => {
         lateralFaces = lateralFaces.concat(extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight));
-      })
+      });
       elements.push(exportGroup(graphNode, name, lateralFaces, buildingInfo.colour));
       //Compute roof faces
       const roofFaces = createRoof(o, buildingInfo.roof, convexHull, orientedMinBoundingBox);

@@ -93,6 +93,9 @@ const isClosedWay = way => {
   const isClosed = way.nodes[0].id === way.nodes[way.nodes.length - 1].id;
 
   if ( way.tags ) {
+    if ( way.tags["area"] === "yes" ) {
+      return true;
+    }
     const highway = way.tags['highway'];
     if ( highway && (highway !== "pedestrian" && highway !== "footway") ) {
       return false;
@@ -148,6 +151,7 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
       m.processed = true;
       const polygon = {
         role: m.role,
+        id: m.ref.id,
         tags: m.ref.tags,
         nodes: []
       }
@@ -168,6 +172,7 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
           const polygon = {
             role: connectedMembers[0].role,
             tags: members[i].ref.tags,
+            id: members[i].ref.id,
             nodes: []
           }
           connectedMembers.forEach(m => {
@@ -221,6 +226,7 @@ const createElements = (elements, ways, name, filter, elementCreator) => {
 }
 
 const groupFromGraphNode = (elements, graphNode, name) => {
+
   if ( graphNode.type === graphTypeWay || graphNode.type === graphTypeRel ) {
     graphNode.calc && graphNode.calc.polygons && graphNode.calc.polygons.forEach(o => {
       const faces = getTrianglesFromPolygon(o.points, o.holes,0);
@@ -267,6 +273,7 @@ const extendData = (nodes, ways, relations) => {
         if (way) {
           way.inRelation = true;
           member.ref = way;
+          way.role = m.role;
         }
       } else if (m.type === graphTypeNode) {
         const node = findElement(nodes, m.ref);
@@ -304,7 +311,15 @@ const computePolygons = (tileBoundary, nodes, ways, rels) => {
     };
   });
 
-  ways.filter( w => w.inRelation === false ).forEach(w => {
+  // We filter the ways to be added following these rules:
+  // If not in any relationship => add to list
+  // If in a relationship then add to the list all the inner ways, as the outer way of a relationship it's rendered either as a clipped polygon or a closed area.
+  const notInRelationshipFilter = w => w.inRelation === false;
+  const innerWayInRelationshipFilter = w => (w.inRelation === true && w.role && w.role === roleInner);
+
+  const wayFilter = w => notInRelationshipFilter(w) || innerWayInRelationshipFilter(w);
+
+  ways.filter( wayFilter ).forEach(w => {
       try {
         w.calc = {...getPolygonFromWay(tileBoundary, w)};
       } catch (ex) {

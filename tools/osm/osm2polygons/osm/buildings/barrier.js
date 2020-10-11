@@ -20,9 +20,6 @@ const groupFromBarrier = (elements, graphNode, name) => {
   if ( graphNode.type === graphTypeWay ) {
     barrierFromWay( elements, graphNode, name );
   }
-  // else if ( graphNode.type === graphTypeRel ) {
-  //   buildingFromRel( elements, graphNode, name );
-  // }
 }
 
 module.exports = {
