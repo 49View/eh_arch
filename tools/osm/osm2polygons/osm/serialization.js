@@ -14,22 +14,22 @@ const facesToTriangles = faces => {
 }
 
 const serializeMesh = (faces, color, name) => {
-  const meshes = [{
+  return {
     triangles: facesToTriangles(faces),
     colour: color,
     name: name
-  }];
-
-  return meshes;
+  };
 }
 
 const serializeElement = (elem, type, meshes) => {
+
+  const meshArray = Array.isArray(meshes) ? meshes : [meshes];
 
   return {
     id: elem.type+"-"+elem.id,
     type: type,
     center: elem.spatial,
-    meshes: meshes,
+    meshes: meshArray,
     tags: elem.tags
   }
 }

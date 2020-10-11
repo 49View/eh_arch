@@ -12,7 +12,7 @@ const barrierFromWay = (elements, way, name) => {
     let lateralFaces = extrudePoly(polygon.points, 0, barrierHeight);
     const topFace = getTrianglesFromPolygon(polygon.points, polygon.holes, barrierHeight);
     lateralFaces = lateralFaces.concat(topFace);
-    elements.push(serializeElement(way, name,  serializeMesh(lateralFaces, getColorFromTags(way.tags))));
+    elements.push(serializeElement(way, name, serializeMesh(lateralFaces, getColorFromTags(way.tags))));
   });
 }
 

@@ -146,10 +146,9 @@ const groupFromBuilding = (elements, graphNode, name) => {
       //Compute roof faces
       const roofFaces = createRoof(o, buildingInfo.roof, convexHull, orientedMinBoundingBox);
 
-      // let buildingFaces = serializeMesh(lateralFaces, buildingInfo.colour, "lateral");
-      // let buildingFaces = serializeMesh(lateralFaces, buildingInfo.colour, "lateral");
-      elements.push(serializeElement(graphNode, name, serializeMesh(lateralFaces, buildingInfo.colour, "lateral")));
-      elements.push(serializeElement(graphNode, name, serializeMesh(roofFaces, buildingInfo.roof.colour, "roof")));
+      let lateralMesh = serializeMesh(lateralFaces, buildingInfo.colour, "lateral");
+      let roofMesh    = serializeMesh(roofFaces, buildingInfo.roof.colour, "roof");
+      elements.push(serializeElement(graphNode, name, [lateralMesh, roofMesh]));
     });
   }
 }
