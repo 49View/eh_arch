@@ -1,7 +1,7 @@
 const {getColorFromTags} = require("../nameValues");
 const {serializeElement, serializeMesh} = require("../serialization");
 const {extrudePoly, getTrianglesFromPolygon} = require("../../geometry/polygon");
-const {graphTypeWay} = require("../nameValues");
+const {graphTypeWay, tagBarrier} = require("../nameValues");
 
 const barrierFromWay = (elements, way, name) => {
 
@@ -12,7 +12,7 @@ const barrierFromWay = (elements, way, name) => {
     let lateralFaces = extrudePoly(polygon.points, 0, barrierHeight);
     const topFace = getTrianglesFromPolygon(polygon.points, polygon.holes, barrierHeight);
     lateralFaces = lateralFaces.concat(topFace);
-    elements.push(serializeElement(way, name, serializeMesh(lateralFaces, getColorFromTags(way.tags))));
+    elements.push(serializeElement(way, name, serializeMesh(lateralFaces, getColorFromTags(way.tags), way.tags[tagBarrier])));
   });
 }
 
