@@ -43,6 +43,8 @@ const getBuildingInfo = (tags) => {
     } else {
       maxHeight = Number(tags["building:levels"].replace("m", "")) * HEIGHT_FOR_LEVEL;
     }
+  } else if (tags["layer"]) {
+    maxHeight = HEIGHT_FOR_LEVEL * (Number(tags["layer"])+1);
   } else {
     maxHeight = getDefaultBuildingHeight(tags["building"]);
   }
