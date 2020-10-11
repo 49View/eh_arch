@@ -35,7 +35,10 @@ const OsmScene = (props) => {
         >
           {/* <ambientLight />*/}
           <pointLight position={[1000, 1000, 1000]} castShadow={true} />
-          <pointLight position={[-1000, -100, -1000]} castShadow={true} />
+          <pointLight position={[-1000, -1000, -1000]} castShadow={true} />
+          <hemisphereLight skyColor={0xffffbb} groundColor={0x040420} intensity={0.2}/>
+          {/*var light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );*/}
+          {/*scene.add( light );*/}
           {Content}
           {/* <GridHelper /> */}
           <Controls />

@@ -1,6 +1,6 @@
 const {graphTypeNode, roleInner, valueAlong, valueFlat, valueAirShaft} = require("../nameValues");
 const {extrudePoly} = require("../../geometry/polygon");
-const {exportGroup} = require("../nodeGraph");
+const {serializeElement} = require("../serialization");
 const {createRoof} = require("./roof");
 
 const HEIGHT_FOR_LEVEL = 2.97;
@@ -141,11 +141,11 @@ const groupFromBuilding = (elements, graphNode, name) => {
       o.holes && o.holes.forEach(h => {
         lateralFaces = lateralFaces.concat(extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight));
       });
-      elements.push(exportGroup(graphNode, name, lateralFaces, buildingInfo.colour));
+      elements.push(serializeElement(graphNode, name, lateralFaces, buildingInfo.colour));
       //Compute roof faces
       const roofFaces = createRoof(o, buildingInfo.roof, convexHull, orientedMinBoundingBox);
       // console.log("graphNode tags of complex roof " + JSON.stringify(graphNode.tags));
-      elements.push(exportGroup(graphNode, name, roofFaces, buildingInfo.roof.colour));
+      elements.push(serializeElement(graphNode, name, roofFaces, buildingInfo.roof.colour));
     });
   }
 }

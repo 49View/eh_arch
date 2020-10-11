@@ -1,7 +1,7 @@
-const {graphTypeRel, graphTypeWay, graphTypeNode, roleInner, roleOuter, getWidthFromWay, getColorFromTags} = require("./nameValues");
+const {graphTypeWay, graphTypeNode, roleInner, roleOuter, getWidthFromWay} = require("./nameValues");
 const {calcConvexHull} = require('../geometry/convexhull');
 const {calcOmbb} = require('../geometry/ombb');
-const {checkPointsOrder, offsetPolyline, computeBoundingBox, removeCollinearPoints, calcTileDelta, checkPolygonInsidePolygon, getTrianglesFromPolygon} = require("../geometry/polygon");
+const {checkPointsOrder, offsetPolyline, computeBoundingBox, removeCollinearPoints, calcTileDelta, checkPolygonInsidePolygon} = require("../geometry/polygon");
 const {calcCoordinate, convertToLocalCoordinate} = require("./coordinates");
 
 const createBasePolygon = (points) => {
@@ -65,28 +65,6 @@ const createClosedPath = (member, members) => {
   }
 
   return connectedMembers;
-}
-
-const exportGroup = (elem, name, faces, color) => {
-
-  const groups = [];
-
-  groups.push({
-    faces: faces,
-    colour: color,
-  });
-
-  return createMesh(elem.type+"-"+elem.id, elem.tags, name, elem.spatial, groups);
-}
-
-const createMesh = (id, tags, type, center, groups) => {
-  return {
-    id: id,
-    type: type,
-    center: center,
-    groups: groups,
-    tags: tags
-  }
 }
 
 const isClosedWay = way => {
@@ -215,7 +193,7 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
 }
 
 const createElements = (elements, ways, name, filter, elementCreator) => {
-  ways.filter(filter).forEach(w => {  // && w.id===364313092
+  ways.filter(filter).forEach(w => {
         try {
           elementCreator(elements, w, name);
         } catch (ex) {
@@ -350,6 +328,5 @@ const createPolygonsHierarchy = (ways) => {
 
 module.exports = {
   elaborateData,
-  exportGroup,
   createElements,
 }

@@ -66,7 +66,6 @@ const prepareData = (osmData) => {
     return {nodes,ways,rels}
 }
 
-
 const parseData = (osmData) => {
     const elements = osmData.elements;
     const nodes = [];
@@ -83,31 +82,7 @@ const parseData = (osmData) => {
     return {nodes,ways,rels}
 }
 
-const convertElementFacesToTriangles = (elements) => {
-    elements.forEach(e => {
-        const groupings = e.groups || [];
-        if ( groupings.length > 0 ) {
-            groupings.forEach(g => {
-                g.triangles = [];
-                let f = [];
-                for ( let i = 0; i < g.faces.length; i+= 3) {
-                    f = g.faces[i];
-                    g.triangles.push([f.x, f.y, f.z]);
-                    f = g.faces[i+2];
-                    g.triangles.push([f.x, f.y, f.z]);
-                    f = g.faces[i+1];
-                    g.triangles.push([f.x, f.y, f.z]);
-                }
-                delete g.faces;
-            })
-        }
-    });
-}
-
 const exportTile = elements => {
-
-    convertElementFacesToTriangles(elements);
-
     const jsonOutput = JSON.stringify({elements}, null, 4);
     fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {encoding: "utf8"});
     fs.writeFileSync("elements.json", jsonOutput, {encoding: "utf8"});

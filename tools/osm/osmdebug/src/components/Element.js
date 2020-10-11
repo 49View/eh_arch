@@ -8,7 +8,7 @@ const Element = (props) => {
   return (
     <Fragment>
         {
-          props.element.groups.map(g => (
+          props.element.meshes.map(g => (
             <Triangles
               position={props.position}
               vertices={g.triangles.map(p => new THREE.Vector3(p[0],p[2],p[1]))}

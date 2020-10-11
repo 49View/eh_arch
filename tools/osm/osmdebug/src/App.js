@@ -22,8 +22,8 @@ const App = () => {
           })
         }
       </select>
-      <input type="checkbox" checked={wireframe} onChange={e => setWireframe(e.target.checked)}></input> WIREFRAME
-      <input type="checkbox" checked={showAll} onChange={e => setShowAll(e.target.checked)}></input> SHOW ALL BUILDINGS
+      <input type="checkbox" checked={wireframe} onChange={e => setWireframe(e.target.checked)}/> WIREFRAME
+      <input type="checkbox" checked={showAll} onChange={e => setShowAll(e.target.checked)}/> SHOW ALL BUILDINGS
        {
          elementId &&
          <OsmScene

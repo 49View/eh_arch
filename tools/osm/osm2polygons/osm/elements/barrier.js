@@ -1,5 +1,5 @@
 const {getColorFromTags} = require("../nameValues");
-const {exportGroup} = require("../nodeGraph");
+const {serializeElement} = require("../serialization");
 const {extrudePoly, getTrianglesFromPolygon} = require("../../geometry/polygon");
 const {graphTypeWay} = require("../nameValues");
 
@@ -12,7 +12,7 @@ const barrierFromWay = (elements, way, name) => {
     let lateralFaces = extrudePoly(polygon.points, 0, barrierHeight);
     const topFace = getTrianglesFromPolygon(polygon.points, polygon.holes, barrierHeight);
     lateralFaces = lateralFaces.concat(topFace);
-    elements.push(exportGroup(way, name, lateralFaces, getColorFromTags(way.tags)));
+    elements.push(serializeElement(way, name, lateralFaces, getColorFromTags(way.tags)));
   });
 }
 
