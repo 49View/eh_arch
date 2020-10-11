@@ -1,6 +1,6 @@
 const {graphTypeNode, roleInner, valueAlong, valueFlat, valueAirShaft} = require("../nameValues");
 const {extrudePoly} = require("../../geometry/polygon");
-const {serializeElement} = require("../serialization");
+const {serializeElement, serializeMesh} = require("../serialization");
 const {createRoof} = require("./roof");
 
 const HEIGHT_FOR_LEVEL = 2.97;
@@ -136,16 +136,20 @@ const groupFromBuilding = (elements, graphNode, name) => {
     const polygons = graphNode.calc.polygons;
 
     polygons.filter(p => !p.role || p.role !== roleInner).forEach(o => {
+
       //Compute lateral faces
       let lateralFaces = extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight);
       o.holes && o.holes.forEach(h => {
         lateralFaces = lateralFaces.concat(extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight));
       });
-      elements.push(serializeElement(graphNode, name, lateralFaces, buildingInfo.colour));
+
       //Compute roof faces
       const roofFaces = createRoof(o, buildingInfo.roof, convexHull, orientedMinBoundingBox);
-      // console.log("graphNode tags of complex roof " + JSON.stringify(graphNode.tags));
-      elements.push(serializeElement(graphNode, name, roofFaces, buildingInfo.roof.colour));
+
+      // let buildingFaces = serializeMesh(lateralFaces, buildingInfo.colour, "lateral");
+      // let buildingFaces = serializeMesh(lateralFaces, buildingInfo.colour, "lateral");
+      elements.push(serializeElement(graphNode, name, serializeMesh(lateralFaces, buildingInfo.colour, "lateral")));
+      elements.push(serializeElement(graphNode, name, serializeMesh(roofFaces, buildingInfo.roof.colour, "roof")));
     });
   }
 }
