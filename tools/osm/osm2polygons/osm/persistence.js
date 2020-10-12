@@ -20,6 +20,7 @@ const getData = async (bbox, useCache) => {
         way["natural"="water"](${bbox.join(",")});
         way[${tagBarrier}](${bbox.join(",")});
         rel[${tagBarrier}](${bbox.join(",")});
+        node[${tagBarrier}](${bbox.join(",")});
         way["highway"](${bbox.join(",")});
         rel["highway"](${bbox.join(",")});
         way["railway"="rail"](${bbox.join(",")});
