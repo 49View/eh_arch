@@ -1,4 +1,7 @@
 
+const serializeTriangles = 0;
+const serializePoints = 1;
+
 const graphTypeWay  = "way";
 const graphTypeRel  = "relation";
 const graphTypeNode = "node";
@@ -157,6 +160,7 @@ const getWidthFromWay = (way) => {
 }
 
 module.exports = {
+  serializePoints, serializeTriangles,
   graphTypeWay, graphTypeRel, graphTypeNode,
   roleInner, roleOuter,
   getColorFromTags, getWidthFromWay,

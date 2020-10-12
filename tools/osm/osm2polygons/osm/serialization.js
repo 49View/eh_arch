@@ -1,3 +1,4 @@
+const {serializeTriangles} = require("./nameValues");
 
 const facesToTriangles = faces => {
   // Triangulate faces as array instead of x,y,z
@@ -13,11 +14,12 @@ const facesToTriangles = faces => {
   return triangles;
 }
 
-const serializeMesh = (faces, color, name) => {
+const serializeMesh = (faces, color, part, vertexType = serializeTriangles) => {
   return {
-    triangles: facesToTriangles(faces),
+    vertices: vertexType === serializeTriangles ? facesToTriangles(faces) : faces,
     colour: color,
-    name: name
+    part: part,
+    vertexType: vertexType
   };
 }
 

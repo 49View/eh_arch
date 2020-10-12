@@ -11,7 +11,7 @@ const Element = (props) => {
           props.element.meshes.map(g => (
             <Triangles
               position={props.position}
-              vertices={g.triangles.map(p => new THREE.Vector3(p[0],p[2],p[1]))}
+              vertices={g.vertices.map(p => new THREE.Vector3(p[0],p[2],p[1]))}
               wireframe={props.wireframe} color={props.wireframe?'#000000':g.colour}/>
           ))
         }
