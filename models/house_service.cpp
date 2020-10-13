@@ -9,6 +9,7 @@
 #include "house_service.hpp"
 
 #include <core/util.h>
+#include <core/descriptors/osm_bsdata.hpp>
 #include <core/math/vector_util.hpp>
 #include <core/file_manager.h>
 #include <core/resources/resource_builder.hpp>
@@ -63,8 +64,8 @@ std::shared_ptr<CollisionMesh> HouseService::createCollisionMesh( const HouseBSD
 
 void HouseService::loadPanorama( const HouseBSData *house, SceneGraph& sg ) {
     OSMData map{FM::readLocalFileC("elements.json")};
-    auto cc = sg.GB<GT::OSMTile>(map, V2f{-0.1344f, 51.4892f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::NearUnsorted), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
-    sg.GB<GT::OSMBuildings>(map, V2f{-0.1344f, 51.4892f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::Near), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
+    auto cc = sg.GB<GT::OSMTile>(&map, V2f{-0.1344f, 51.4892f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::NearUnsorted), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
+    sg.GB<GT::OSMBuildings>(&map, V2f{-0.1344f, 51.4892f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::Near), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
 //    GLTF2Service::save( sg, cc );
 }
 
