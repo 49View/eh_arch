@@ -22,11 +22,12 @@ const main = async (args) => {
   const coords = {lat: args.length===0 ? 51.4992784 : Number(args[0]), lon:  args.length===0 ? -0.125376 : Number(args[1]), zoom: args.length===0 ? 15 : Number(args[2])};
 
   const tileBoundary = getBoundingBox({...coords});
+  console.log(tileBoundary);
   const {nodes, ways, rels} = await getData(tileBoundary.bbox, useCache);
   elaborateData(tileBoundary, nodes, ways, rels);
   const elements = createTile(tileBoundary, nodes, ways, rels);
 
-  exportTile(elements);
+  exportTile(tileBoundary, elements);
 }
 
 main(process.argv.slice(2)).then(() => {
