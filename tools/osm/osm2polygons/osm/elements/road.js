@@ -4,15 +4,24 @@ const {graphTypeWay, graphTypeRel, graphTypeNode, getColorFromTags} = require(".
 
 const groupFromGraphNode = (elements, graphNode, type) => {
 
-  if ( graphNode.type === graphTypeWay || graphNode.type === graphTypeRel ) {
-    graphNode.calc && graphNode.calc.polygons && graphNode.calc.polygons.forEach(o => {
-      const faces = getTrianglesFromPolygon(o.points, o.holes,0);
-      const tags = {...graphNode.tags, ...o.tags};
-      elements.push(serializeElement(graphNode, type, serializeMesh(faces, getColorFromTags(tags))));
-    });
-  } else if ( graphNode.type === graphTypeNode ) {
-    elements.push(serializeElement(graphNode, type, serializeMesh([], getColorFromTags(graphNode.tags))));
+  const addNode = (node, faces = [], tags = null) => {
+    return {
+      node: node,
+      faces: faces,
+      tags: tags === null ? node.tags : tags
+    }
   }
+
+  let elemsToAdd = [];
+  if (graphNode.type === graphTypeWay || graphNode.type === graphTypeRel) {
+    graphNode.calc && graphNode.calc.polygons && graphNode.calc.polygons.forEach(o => {
+      elemsToAdd.push(addNode(graphNode, getTrianglesFromPolygon(o.points, o.holes, 0), {...graphNode.tags, ...o.tags}));
+    });
+  } else if (graphNode.type === graphTypeNode) {
+    elemsToAdd.push(addNode(graphNode));
+  }
+
+  elemsToAdd.forEach(e => elements.push(serializeElement(e.node, type, serializeMesh(e.faces, getColorFromTags(e.tags)), e.tags["highway"])));
 }
 
 module.exports = {

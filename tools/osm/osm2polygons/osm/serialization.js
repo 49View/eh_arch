@@ -3,12 +3,12 @@ const {serializeTriangles} = require("./nameValues");
 const facesToTriangles = faces => {
   // Triangulate faces as array instead of x,y,z
   let triangles = [];
-  for ( let i = 0; i < faces.length; i+= 3) {
+  for (let i = 0; i < faces.length; i += 3) {
     let f = faces[i];
     triangles.push([f.x, f.y, f.z]);
-    f = faces[i+2];
+    f = faces[i + 2];
     triangles.push([f.x, f.y, f.z]);
-    f = faces[i+1];
+    f = faces[i + 1];
     triangles.push([f.x, f.y, f.z]);
   }
   return triangles;
@@ -23,16 +23,26 @@ const serializeMesh = (faces, color, part, vertexType = serializeTriangles) => {
   };
 }
 
+const serializeTags = tags => {
+  let ret = [];
+  for (const [key, value] of Object.entries(tags)) {
+    ret.push({key, value});
+  }
+  return ret;
+}
+
 const serializeElement = (elem, type, meshes) => {
 
   const meshArray = Array.isArray(meshes) ? meshes : [meshes];
 
+  const sTags = serializeTags(elem.tags);
+
   return {
-    id: elem.type+"-"+elem.id,
+    id: elem.type + "-" + elem.id,
     type: type,
     center: elem.spatial,
-    meshes: meshArray,
-    tags: elem.tags
+    tags: sTags,
+    meshes: meshArray
   }
 }
 
