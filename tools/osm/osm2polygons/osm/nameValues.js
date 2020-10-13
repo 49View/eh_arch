@@ -48,8 +48,9 @@ const getColorFromTags = (tags) => {
         case "trunk_link":
           color = "#FBB29A";
           break;
+        case "tertiary":
         case "primary":
-          color = "#FDD7A1";
+          color = "#555555";
           break;
         case "primary_link":
           color = "#FDD7A1";
@@ -57,15 +58,14 @@ const getColorFromTags = (tags) => {
         case "secondary":
           color = "#F1EEE8";
           break;
-        case "tertiary":
-          color = "#FFDFFF";
-          break;
         case "residential":
           color = "#FFDFDF";
           break;
+        case "cycleway":
+          color = "#3FCF3F";
+          break;
         case "unclassified":
         case "track":
-        case "cycleway":
         case "bridleway":
         case "footway":
         case "path":
@@ -95,7 +95,7 @@ const getColorFromTags = (tags) => {
 
 const getWidthFromWay = (way) => {
   let roadLane = 1;
-  let roadWidth = 2;
+  let roadWidth = 0.8;
 
   if (way.tags) {
     switch (way.tags["highway"]) {
@@ -114,27 +114,24 @@ const getWidthFromWay = (way) => {
         break;
       case "primary":
       case "primary_link":
-        roadWidth = 1.5;
-        roadLane = 2;
-        break;
       case "secondary":
-        roadWidth = 0.8;
+      case "tertiary":
+        roadWidth = 1.4;
         roadLane = 2;
         break;
-      case "tertiary":
-        roadWidth = 1;
+      case "residential":
+        roadWidth = 0.75;
         roadLane = 2;
         break;
       case "unclassified":
-      case "residential":
-        roadWidth = 0.8;
-        roadLane = 1;
-        break;
       case "track":
-      case "cycleway":
       case "bridleway":
       case "footway":
       case "path":
+        break;
+      case "cycleway":
+        roadWidth = 1.0;
+        break;
       case "steps":
         roadWidth = 0.5;
         roadLane = 1;
@@ -143,6 +140,9 @@ const getWidthFromWay = (way) => {
         roadWidth = 0.8;
         roadLane = 1;
     }
+    // if (way.tags["lanes"] ) {
+    //   roadLane = Number(way.tags["lanes"]);
+    // }
     if (way.tags["railway"] && way.tags["railway"] === "rail") {
       roadWidth = 0.5;
       roadLane = 2;

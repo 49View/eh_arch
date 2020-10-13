@@ -24,6 +24,7 @@ const serializeMesh = (faces, color, part, vertexType = serializeTriangles) => {
 }
 
 const serializeTags = tags => {
+  if (!tags) return [];
   let ret = [];
   for (const [key, value] of Object.entries(tags)) {
     ret.push({key, value});
