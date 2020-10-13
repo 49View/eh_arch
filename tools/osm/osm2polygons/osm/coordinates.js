@@ -81,17 +81,6 @@ const getBoundingBox = (coords) => {
   const tileX = lon2tile(lon, zoom);
   const tileY = lat2tile(lat, zoom);
 
-  console.log(`${lat} ${lon}`);
-  console.log(`${tileX} ${tileY}`);
-
-  console.log(`TopLeft     ${tile2long(tileX, zoom)} ${tile2lat(tileY, zoom)}`)
-  console.log(`TopRight    ${tile2long(tileX+1, zoom)} ${tile2lat(tileY, zoom)}`)
-  console.log(`BottomLeft  ${tile2long(tileX, zoom)} ${tile2lat(tileY+1, zoom)}`)
-  console.log(`BottomRight ${tile2long(tileX+1, zoom)} ${tile2lat(tileY+1, zoom)}`)
-  console.log(`Center      ${tile2long(tileX+0.5, zoom)} ${tile2lat(tileY+0.5, zoom)}`)
-
-  console.log(`Zero        ${tile2long(0,0)} ${tile2lat(0,0)}`)
-
   const topLat    = tile2lat(tileY+1, zoom);
   const topLon    = tile2long(tileX, zoom);
   const bottomLat = tile2lat(tileY, zoom);
@@ -100,11 +89,14 @@ const getBoundingBox = (coords) => {
   const centerLat = tile2lat(tileY+0.5, zoom);
   const centerLon = tile2long(tileX+0.5, zoom);
 
-  const sizeX = calcDistance(centerLat, topLon, centerLat, bottomLon);
-  const sizeY = calcDistance(topLat, centerLon, bottomLat, centerLon);
+  const sizeX = calcDistance(topLat, topLon, topLat, bottomLon);
+  const sizeY = calcDistance(topLat, topLon, bottomLat, topLon);
 
   const halfW = 0.5;
   return {
+    zoom,
+    tileX,
+    tileY,
     bbox: [
       topLat   ,
       topLon   ,
@@ -120,6 +112,12 @@ const getBoundingBox = (coords) => {
       x: sizeX,
       y: sizeY,
     },
+    rect: [
+      -sizeX,
+      0.0,
+      0.0,
+      sizeY
+    ],
     tileClip: [
       {
         X: -sizeX*halfW,
@@ -142,10 +140,6 @@ const getBoundingBox = (coords) => {
       x: calcDistance(topLat, topLon, topLat, 0),
       y: calcDistance(topLat, topLon, 0, topLon),
     },
-    zero: {
-      lat: tile2lat(0,0),
-      lon: tile2long(0,0)
-    }
   };
 }
 
