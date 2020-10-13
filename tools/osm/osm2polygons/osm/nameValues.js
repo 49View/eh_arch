@@ -60,10 +60,10 @@ const getColorFromTags = (tags) => {
         case "tertiary":
           color = "#FFDFFF";
           break;
-        case "unclassified":
         case "residential":
           color = "#FFDFDF";
           break;
+        case "unclassified":
         case "track":
         case "cycleway":
         case "bridleway":
