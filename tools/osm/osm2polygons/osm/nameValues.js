@@ -25,6 +25,24 @@ const valueAlong = "along";
 // Buildings
 const valueAirShaft = "air_shaft";
 
+let globalColorSet = new Set();
+let globalMaterialSet = new Set();
+
+const convertOSMColorStringToColor = color => {
+  globalColorSet.add(color);
+  return color;
+}
+
+const convertOSMBuildingMaterialStringToColor = material => {
+  globalMaterialSet.add(material);
+  if ( material === "brick" ) {
+    return "#B47155";
+  }
+  if ( material === "stone" ) {
+    return "#DED5CC"
+  }
+  return "#DDDDDD";
+}
 
 const getColorFromTags = (tags) => {
   let color = "#808080";
@@ -161,6 +179,7 @@ const getWidthFromWay = (way) => {
 }
 
 module.exports = {
+  convertOSMColorStringToColor, convertOSMBuildingMaterialStringToColor, globalColorSet, globalMaterialSet,
   serializePoints, serializeTriangles,
   graphTypeWay, graphTypeRel, graphTypeNode,
   roleInner, roleOuter,

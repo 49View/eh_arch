@@ -1,3 +1,9 @@
+const {convertOSMBuildingMaterialStringToColor} = require("../nameValues");
+const {convertOSMColorStringToColor} = require("../nameValues");
+const {valueDone} = require("../nameValues");
+const {valueHipped} = require("../nameValues");
+const {valueGabled} = require("../nameValues");
+const {valuePyramidal} = require("../nameValues");
 const {graphTypeNode, roleInner, valueAlong, valueFlat, valueAirShaft} = require("../nameValues");
 const {extrudePoly} = require("../../geometry/polygon");
 const {serializeElement, serializeMesh} = require("../serialization");
@@ -5,8 +11,7 @@ const {createRoof} = require("./roof");
 
 const HEIGHT_FOR_LEVEL = 2.97;
 const DEFAULT_BUILDING_HEIGHT = HEIGHT_FOR_LEVEL * 3;
-const DEFAULT_ROOF_COLOUR = "#ee2222";
-const DEFAULT_BUILDING_COLOUR = "#eeeeee";
+const DEFAULT_ROOF_COLOUR = "#866B5D";
 
 const getDefaultBuildingHeight = (buildingType) => {
 
@@ -18,6 +23,10 @@ const getDefaultBuildingHeight = (buildingType) => {
   return DEFAULT_BUILDING_HEIGHT;
 }
 
+const getRandomDefaultBuildingColor = () => {
+  const defaultBuildingColors = ["#7C7462", "#E3E2E0", "#DBCDBC", "#D4B2AA", "#566C86", "#7A7894", "#E1E2E2", "#D2C5BC", "#BC9799"];
+  return defaultBuildingColors[Math.floor(Math.random() * defaultBuildingColors.length)];
+}
 
 const getBuildingInfo = (tags) => {
   let minHeight, maxHeight, colour;
@@ -49,10 +58,15 @@ const getBuildingInfo = (tags) => {
     maxHeight = getDefaultBuildingHeight(tags["building"]);
   }
 
-  if (tags["building:colour"]) {
-    colour = tags["building:colour"];
+  const buildingColor = tags["building:colour"];
+  const buildingMaterial = tags["building:material"];
+
+  if (buildingColor) {
+    colour = convertOSMColorStringToColor(buildingColor);
+  } else if (!buildingColor && buildingMaterial) {
+    colour = convertOSMBuildingMaterialStringToColor(buildingMaterial);
   } else {
-    colour = DEFAULT_BUILDING_COLOUR;
+    colour = getRandomDefaultBuildingColor();
   }
 
   if (!colour.startsWith("#")) {
@@ -60,15 +74,15 @@ const getBuildingInfo = (tags) => {
   }
 
   if (tags["roof:shape"] === "pyramidal" || tags["building:roof:shape"] === "pyramidal") {
-    roofShape = "pyramidal";
+    roofShape = valuePyramidal;
   } else if (tags["roof:shape"] === "gabled" || tags["building:roof:shape"] === "gabled") {
-    roofShape = "gabled";
+    roofShape = valueGabled;
   } else if (tags["roof:shape"] === "hipped" || tags["building:roof:shape"] === "hipped") {
-    roofShape = "hipped";
+    roofShape = valueHipped;
   } else if (tags["roof:shape"] === "dome" || tags["building:roof:shape"] === "dome") {
-    roofShape = "dome";
+    roofShape = valueDone;
   } else { //FLAT
-    roofShape = "flat";
+    roofShape = valueFlat;
   }
 
   if (tags["roof:height"]) {
@@ -77,10 +91,10 @@ const getBuildingInfo = (tags) => {
     roofHeight = Number(tags["building:roof:height"].replace("m", ""));
   } else if (tags["roof:levels"]) {
     roofHeight = Number(tags["roof:levels"].replace("m", "")) * HEIGHT_FOR_LEVEL;
-    roofShape = "gabled";
+    if ( roofShape === valueFlat ) roofShape = "gabled";
   } else if (tags["building:roof:levels"]) {
     roofHeight = Number(tags["building:roof:levels"].replace("m", "")) * HEIGHT_FOR_LEVEL;
-    roofShape = "gabled";
+    if ( roofShape === valueFlat ) roofShape = "gabled";
   } else {
     if (roofShape === valueFlat) {
       roofHeight = 0;
