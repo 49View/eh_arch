@@ -48,7 +48,7 @@ const offsetPolyline = (offset, points) => {
     subj[0] = pts.map(p => {
       return {X: p.x, Y: p.y}
     });
-    const scale = 100;
+    const scale = 10000;
     ClipperLib.JS.ScaleUpPaths(subj, scale);
     let co = new ClipperLib.ClipperOffset(2, 0.25);
     co.AddPaths(subj, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etOpenRound);
@@ -227,6 +227,11 @@ const removeCollinearPoints = (nodes) => {
     nodes.slice(0, nodes.length - 1).forEach(n => {
       points.push({...n});
     })
+  } else {
+    // points = [...nodes];
+    points = nodes.map(n => {
+      return {...n}
+    });
   }
 
   if (points.length > 3) {
@@ -403,28 +408,23 @@ const twoLinesIntersectParameter = (pointALine1, pointBLine1, pointALine2, point
     / ((line2Vector.y * line1Vector.x) - (line2Vector.x * line1Vector.y));
 }
 
-const checkPointsOrder = (points, convexHull) => {
+const checkPointsOrder = (points) => {
 
   if (points.length < 3) return points;
 
-  let i1, i2, i3;
-
-  //console.log(convexHull.length);
-
-  i1 = points.findIndex(p => p.id === convexHull[0].id);
-  i2 = points.findIndex(p => p.id === convexHull[1].id);
-  i3 = points.findIndex(p => p.id === convexHull[2].id);
-
-  if (i2 < i1) i2 = i2 + points.length;
-  if (i3 < i1) i3 = i3 + points.length;
-
-  if (i1 < i2 && i2 < i3) {
-    //console.log("Point order correct");
-    return points;
-  } else {
-    //console.log("Reverse point list order");
-    return points.reverse();
+  // size_t i1, i2;
+  let i2 = 0;
+  let area = 0.0;
+  for ( let i1 = 0; i1 < points.length; i1++ ) {
+    i2 = i1 + 1;
+    if ( i2 === points.length ) i2 = 0;
+    area += points[i1].x * points[i2].y - points[i1].y * points[i2].x;
   }
+
+  if ( area > 0 ) return points;
+  if ( area < 0 ) return points.reverse();
+  console.log("[ERROR] cannot get winding order of these points cos area is 0");
+
 }
 
 module.exports = {

@@ -50,16 +50,16 @@ const getColorFromTags = (tags) => {
           break;
         case "tertiary":
         case "primary":
-          color = "#555555";
+          color = "#666666";
           break;
         case "primary_link":
           color = "#FDD7A1";
           break;
         case "secondary":
-          color = "#F1EEE8";
+          color = "#AAAAAA";
           break;
         case "residential":
-          color = "#FFDFDF";
+          color = "#999999";
           break;
         case "cycleway":
           color = "#3FCF3F";
@@ -120,7 +120,8 @@ const getWidthFromWay = (way) => {
         roadLane = 2;
         break;
       case "residential":
-        roadWidth = 0.75;
+      case "service":
+        roadWidth = 0.8;
         roadLane = 2;
         break;
       case "unclassified":

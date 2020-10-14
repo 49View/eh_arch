@@ -70,12 +70,12 @@ const createClosedPath = (member, members) => {
 const isClosedWay = way => {
   const isClosed = way.nodes[0].id === way.nodes[way.nodes.length - 1].id;
 
-  if ( way.tags ) {
-    if ( way.tags["area"] === "yes" ) {
+  if (way.tags) {
+    if (way.tags["area"] === "yes") {
       return true;
     }
     const highway = way.tags['highway'];
-    if ( highway && (highway !== "pedestrian" && highway !== "footway") ) {
+    if (highway && (highway !== "pedestrian" && highway !== "footway")) {
       return false;
     }
   }
@@ -97,7 +97,9 @@ const getPolygonFromWay = (tileBoundary, way) => {
   //with some modifications
 
   const convexHull = calcConvexHull(points);
-  checkPointsOrder(points, convexHull);
+  if ( isClosed ) {
+    checkPointsOrder(points);
+  }
   const ombb = calcOmbb(convexHull);
 
   const {roadWidth, roadLane} = getWidthFromWay(way);
@@ -175,8 +177,7 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
   rel.spatial = computeBoundingBox(tileBoundary, relPoints);
   polygons.forEach(p => {
     convertToLocalCoordinate(p.points, rel.spatial.center.x, rel.spatial.center.y);
-    const convexHull = calcConvexHull(p.points);
-    checkPointsOrder(p.points, convexHull);
+    checkPointsOrder(p.points);
   });
   //Create reference between inner and outer
   polygons.filter(p => p.role === roleOuter).forEach(o => {
@@ -194,13 +195,13 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
 
 const createElements = (elements, ways, name, filter, elementCreator) => {
   ways.filter(filter).forEach(w => {
-        try {
-          elementCreator(elements, w, name);
-        } catch (ex) {
-          console.log(`Error in ${w.id} ${name}`, ex);
-        }
+      try {
+        elementCreator(elements, w, name);
+      } catch (ex) {
+        console.log(`Error in ${w.id} ${name}`, ex);
       }
-    );
+    }
+  );
 }
 
 const findElement = (list, id) => {
@@ -284,7 +285,7 @@ const computePolygons = (tileBoundary, nodes, ways, rels) => {
 
   const wayFilter = w => notInRelationshipFilter(w) || innerWayInRelationshipFilter(w);
 
-  ways.filter( wayFilter ).forEach(w => {
+  ways.filter(wayFilter).forEach(w => {
       try {
         w.calc = {...getPolygonFromWay(tileBoundary, w)};
       } catch (ex) {
