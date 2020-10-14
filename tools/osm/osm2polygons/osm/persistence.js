@@ -87,7 +87,7 @@ const exportTile = (tileBoundary, elements) => {
     const jsonOutput = JSON.stringify({tileBoundary, elements}, null, 4);
     fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {encoding: "utf8"});
     fs.writeFileSync("elements.json", jsonOutput, {encoding: "utf8"});
-    fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/debug/elements.json", jsonOutput, {encoding: "utf8"});
+    fs.writeFileSync("../../../../f9.com/builds/wasm_renderer/elements.json", jsonOutput, {encoding: "utf8"});
 }
 
 module.exports = {getData,exportTile}

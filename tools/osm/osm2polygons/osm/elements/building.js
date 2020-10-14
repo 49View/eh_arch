@@ -77,8 +77,10 @@ const getBuildingInfo = (tags) => {
     roofHeight = Number(tags["building:roof:height"].replace("m", ""));
   } else if (tags["roof:levels"]) {
     roofHeight = Number(tags["roof:levels"].replace("m", "")) * HEIGHT_FOR_LEVEL;
+    roofShape = "gabled";
   } else if (tags["building:roof:levels"]) {
     roofHeight = Number(tags["building:roof:levels"].replace("m", "")) * HEIGHT_FOR_LEVEL;
+    roofShape = "gabled";
   } else {
     if (roofShape === valueFlat) {
       roofHeight = 0;
