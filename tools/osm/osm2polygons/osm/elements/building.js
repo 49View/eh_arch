@@ -10,8 +10,10 @@ const {serializeElement, serializeMesh} = require("../serialization");
 const {createRoof} = require("./roof");
 
 const HEIGHT_FOR_LEVEL = 2.97;
-const DEFAULT_BUILDING_HEIGHT = HEIGHT_FOR_LEVEL * 3;
-const DEFAULT_ROOF_COLOUR = "#866B5D";
+
+const getDefaultBuildingHeightWithRandomFactor = (randomFactor) => {
+  return (HEIGHT_FOR_LEVEL * 3.0) *  (1.0 + Math.random()*randomFactor);
+}
 
 const getDefaultBuildingHeight = (buildingType) => {
 
@@ -20,18 +22,34 @@ const getDefaultBuildingHeight = (buildingType) => {
       return 0.1;
     }
   }
-  return DEFAULT_BUILDING_HEIGHT;
+  return getDefaultBuildingHeightWithRandomFactor(0.1);
 }
 
-const getRandomDefaultBuildingColor = () => {
-  const defaultBuildingColors = ["#7C7462",
-    "#E3E2E0",
+const getRandomDefaultBuildingColor = type => {
+  const defaultResidentialBuildingColors = [
     "#DBCDBC",
     "#D4B2AA",
-    "#E1E2E2",
     "#D2C5BC",
     "#BC9799"];
-  return defaultBuildingColors[Math.floor(Math.random() * defaultBuildingColors.length)];
+
+  const defaultCommercialBuildingColors = [
+    "#7C7462",
+    "#E3E2E0",
+    "#E1E2E2",
+    "#D2C5BC"];
+
+  const randomResidential = defaultResidentialBuildingColors[Math.floor(Math.random() * defaultResidentialBuildingColors.length)];
+  const randomCommercial = defaultCommercialBuildingColors[Math.floor(Math.random() * defaultCommercialBuildingColors.length)];
+  if ( type && type !== "yes" ) {
+    switch (type) {
+      case "residential":
+        return randomResidential;
+      default:
+        return randomCommercial;
+    }
+  }
+  
+  return Math.random() > 0.5 ? randomCommercial : randomResidential;
 }
 
 const getBuildingInfo = (tags) => {
@@ -72,7 +90,7 @@ const getBuildingInfo = (tags) => {
   } else if (!buildingColor && buildingMaterial) {
     buildingColor = convertOSMBuildingMaterialStringToColor(buildingMaterial);
   } else {
-    buildingColor = getRandomDefaultBuildingColor();
+    buildingColor = getRandomDefaultBuildingColor(tags["building"]);
   }
 
   if (!buildingColor.startsWith("#")) {
@@ -120,7 +138,7 @@ const getBuildingInfo = (tags) => {
   } else if (tags["building:colour"]) {
     roofColour = buildingColor;
   } else {
-    roofColour = getRandomDefaultBuildingColor();
+    roofColour = getRandomDefaultBuildingColor(tags["building"]);
   }
   if (!roofColour.startsWith("#")) {
     roofColour = "#" + roofColour;

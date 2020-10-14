@@ -1,5 +1,3 @@
-const {globalMaterialSet} = require("./osm/nameValues");
-const {globalColorSet} = require("./osm/nameValues");
 const {elaborateData} = require("./osm/nodeGraph");
 const {getBoundingBox} = require("./osm/coordinates");
 const {getData, exportTile} = require("./osm/persistence");
@@ -28,9 +26,6 @@ const main = async (args) => {
   const {nodes, ways, rels} = await getData(tileBoundary.bbox, useCache);
   elaborateData(tileBoundary, nodes, ways, rels);
   const elements = createTile(tileBoundary, nodes, ways, rels);
-
-  console.log(globalColorSet);
-  console.log(globalMaterialSet);
 
   exportTile(tileBoundary, elements);
 }
