@@ -30,6 +30,20 @@ let globalMaterialSet = new Set();
 
 const convertOSMColorStringToColor = color => {
   globalColorSet.add(color);
+  switch (color) {
+    case "light_grey":
+      return "#DCDCDC";
+    case "grey":
+      return "#7f7f7f";
+    case "light_brown":
+      return "#FFDEAD";
+    case "brown":
+      return "#CD853F";
+    case "dark_brown":
+      return "#8B4513";
+    case "white":
+      return "#FFFFFF";
+  }
   return color;
 }
 

@@ -24,12 +24,18 @@ const getDefaultBuildingHeight = (buildingType) => {
 }
 
 const getRandomDefaultBuildingColor = () => {
-  const defaultBuildingColors = ["#7C7462", "#E3E2E0", "#DBCDBC", "#D4B2AA", "#566C86", "#7A7894", "#E1E2E2", "#D2C5BC", "#BC9799"];
+  const defaultBuildingColors = ["#7C7462",
+    "#E3E2E0",
+    "#DBCDBC",
+    "#D4B2AA",
+    "#E1E2E2",
+    "#D2C5BC",
+    "#BC9799"];
   return defaultBuildingColors[Math.floor(Math.random() * defaultBuildingColors.length)];
 }
 
 const getBuildingInfo = (tags) => {
-  let minHeight, maxHeight, colour;
+  let minHeight, maxHeight;
   let roofOrientation, roofHeight, roofShape, roofColour;
 
   if (tags["min_height"]) {
@@ -58,19 +64,19 @@ const getBuildingInfo = (tags) => {
     maxHeight = getDefaultBuildingHeight(tags["building"]);
   }
 
-  const buildingColor = tags["building:colour"];
+  let buildingColor = tags["building:colour"];
   const buildingMaterial = tags["building:material"];
 
   if (buildingColor) {
-    colour = convertOSMColorStringToColor(buildingColor);
+    buildingColor = convertOSMColorStringToColor(buildingColor);
   } else if (!buildingColor && buildingMaterial) {
-    colour = convertOSMBuildingMaterialStringToColor(buildingMaterial);
+    buildingColor = convertOSMBuildingMaterialStringToColor(buildingMaterial);
   } else {
-    colour = getRandomDefaultBuildingColor();
+    buildingColor = getRandomDefaultBuildingColor();
   }
 
-  if (!colour.startsWith("#")) {
-    colour = "#" + colour;
+  if (!buildingColor.startsWith("#")) {
+    buildingColor = "#" + buildingColor;
   }
 
   if (tags["roof:shape"] === "pyramidal" || tags["building:roof:shape"] === "pyramidal") {
@@ -110,11 +116,11 @@ const getBuildingInfo = (tags) => {
   }
 
   if (tags["roof:colour"]) {
-    roofColour = tags["roof:colour"];
+    roofColour = convertOSMColorStringToColor(tags["roof:colour"]);
   } else if (tags["building:colour"]) {
-    roofColour = tags["building:colour"];
+    roofColour = buildingColor;
   } else {
-    roofColour = DEFAULT_ROOF_COLOUR;
+    roofColour = getRandomDefaultBuildingColor();
   }
   if (!roofColour.startsWith("#")) {
     roofColour = "#" + roofColour;
@@ -132,7 +138,7 @@ const getBuildingInfo = (tags) => {
   return {
     minHeight: minHeight,
     maxHeight: maxHeight,
-    colour: colour,
+    colour: buildingColor,
     roof: {
       minHeight: roofMinHeight,
       maxHeight: roofMaxHeight,
