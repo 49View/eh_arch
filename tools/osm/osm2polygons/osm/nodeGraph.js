@@ -1,8 +1,12 @@
-const {graphTypeWay, graphTypeNode, roleInner, roleOuter, getWidthFromWay} = require("./nameValues");
+const {graphTypeWay, graphTypeRel,  graphTypeNode, roleInner, roleOuter, getWidthFromWay} = require("./nameValues");
 const {calcConvexHull} = require('../geometry/convexhull');
 const {calcOmbb} = require('../geometry/ombb');
 const {checkPointsOrder, offsetPolyline, computeBoundingBox, removeCollinearPoints, calcTileDelta, checkPolygonInsidePolygon} = require("../geometry/polygon");
 const {calcCoordinate, convertToLocalCoordinate} = require("./coordinates");
+
+const isNode = w => w.type && w.type === graphTypeNode;
+const isWay = w => w.type && w.type === graphTypeWay;
+const isRel = w => w.type && w.type === graphTypeRel;
 
 const createBasePolygon = (points) => {
   const polygon = [];
@@ -328,6 +332,7 @@ const createPolygonsHierarchy = (ways) => {
 }
 
 module.exports = {
+  isWay, isRel, isNode,
   elaborateData,
   createElements,
 }

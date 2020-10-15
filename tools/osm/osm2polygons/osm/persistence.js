@@ -12,26 +12,31 @@ const getData = async (bbox, useCache) => {
 
     const query=`[out:json][timeout:25];
     (
-        rel["building"](${bbox.join(",")});
-        rel["building:part"](${bbox.join(",")});
         way["building"](${bbox.join(",")});
         way["building:part"](${bbox.join(",")});
-        rel["natural"="water"](${bbox.join(",")});
-        way["natural"="water"](${bbox.join(",")});
-        way[${tagBarrier}](${bbox.join(",")});
-        rel[${tagBarrier}](${bbox.join(",")});
-        node[${tagBarrier}](${bbox.join(",")});
         way["highway"](${bbox.join(",")});
-        rel["highway"](${bbox.join(",")});
         way["railway"="rail"](${bbox.join(",")});
         way["amenity"="parking"](${bbox.join(",")});
         way["landuse"](${bbox.join(",")});
-        rel["landuse"](${bbox.join(",")});
+        way["natural"="water"](${bbox.join(",")});
         way["leisure"](${bbox.join(",")});
-        rel["leisure"](${bbox.join(",")});
         way["area"](${bbox.join(",")});
+        way[${tagBarrier}](${bbox.join(",")});
+        
+        rel["building"](${bbox.join(",")});
+        rel["building:part"](${bbox.join(",")});
+        rel["highway"](${bbox.join(",")});
+        rel["natural"="water"](${bbox.join(",")});        
+        rel[${tagBarrier}](${bbox.join(",")});
+        rel["landuse"](${bbox.join(",")});
+        rel["leisure"](${bbox.join(",")});
         rel["area"](${bbox.join(",")});
-        node["natural"="tree"](${bbox.join(",")});
+        
+        node["natural"](${bbox.join(",")});
+        node["historic"](${bbox.join(",")});
+        node["amenity"](${bbox.join(",")});
+        node["highway"](${bbox.join(",")});        
+        node[${tagBarrier}](${bbox.join(",")});
     );
     (
         ._;

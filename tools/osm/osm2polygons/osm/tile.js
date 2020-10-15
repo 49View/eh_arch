@@ -2,7 +2,7 @@ const {groupFromGraphNode} = require("./elements/road");
 const {groupFromBarrier} = require("./elements/barrier");
 const {tagBarrier} = require("./nameValues");
 const {groupFromBuilding} = require("./elements/building");
-const {createElements} = require('./nodeGraph.js');
+const {createElements, isNode} = require('./nodeGraph.js');
 
 const buildingFilter = w => {
     return w.tags && (w.tags["building"] || w.tags["building:part"]);
@@ -31,7 +31,26 @@ const roadFilter = w => {
 }
 
 const treeFilter = w => {
-    return w.tags && (w.tags["natural"] === "tree");
+    return isNode(w) && w.tags && (w.tags["natural"] === "tree");
+}
+
+const monumentNodeFilter = w => {
+    return isNode(w) && w.tags && (w.tags["historic"] === "monument");
+}
+
+const transportNodeFilter = w => {
+    return isNode(w) && w.tags && (w.tags["highway"] === "bus_stop");
+}
+
+const phoneBoothFilter = w => {
+    return isNode(w) && w.tags && (w.tags["amenity"] === "telephone");
+}
+
+const nodeSingleEntitiesFilter = w => {
+    return treeFilter(w) ||
+           monumentNodeFilter(w) ||
+           transportNodeFilter(w) ||
+           phoneBoothFilter(w);
 }
 
 const unclassifiedFilter = w => {
@@ -83,7 +102,7 @@ const createTile = (tileBoundary, nodes, ways, rels) => {
 
     const tileAreas = [
         addTileAreaFilter("building", buildingFilter, groupFromBuilding),
-        addTileAreaFilter("tree", treeFilter),
+        addTileAreaFilter("entity", nodeSingleEntitiesFilter),
         addTileAreaFilter("unclassified", unclassifiedFilter),
         addTileAreaFilter("park", parkFilter),
         addTileAreaFilter("parking", parkingFilter),
