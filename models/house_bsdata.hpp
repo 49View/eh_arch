@@ -601,7 +601,7 @@ JSONDATA_R_H(HouseBSData, ArchStructural, hash, type,
     float worktopHeight = 0.9f;
     float bathRoomSinkHeight = 0.9f;
     Color4f defaultWallColor = C4fc::WHITE;
-    subdivisionAccuray accuracy = accuracyNone;
+    subdivisionAccuracy accuracy = accuracyNone;
     std::vector<CameraPath> tourPaths;
     std::vector<std::shared_ptr<FloorBSData>> mFloors;
 
