@@ -1,6 +1,7 @@
 
 const serializeTriangles = 0;
 const serializePoints = 1;
+const serializeVertices = 2;
 
 const graphTypeWay  = "way";
 const graphTypeRel  = "relation";
@@ -194,7 +195,7 @@ const getWidthFromWay = (way) => {
 
 module.exports = {
   convertOSMColorStringToColor, convertOSMBuildingMaterialStringToColor, globalColorSet, globalMaterialSet,
-  serializePoints, serializeTriangles,
+  serializePoints, serializeTriangles, serializeVertices,
   graphTypeWay, graphTypeRel, graphTypeNode,
   roleInner, roleOuter,
   getColorFromTags, getWidthFromWay,

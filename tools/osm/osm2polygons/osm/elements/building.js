@@ -1,3 +1,4 @@
+const {serializeVertices} = require("../nameValues");
 const {convertOSMBuildingMaterialStringToColor} = require("../nameValues");
 const {convertOSMColorStringToColor} = require("../nameValues");
 const {valueDone} = require("../nameValues");
@@ -5,7 +6,6 @@ const {valueHipped} = require("../nameValues");
 const {valueGabled} = require("../nameValues");
 const {valuePyramidal} = require("../nameValues");
 const {graphTypeNode, roleInner, valueAlong, valueFlat, valueAirShaft} = require("../nameValues");
-const {extrudePoly} = require("../../geometry/polygon");
 const {serializeElement, serializeMesh} = require("../serialization");
 const {createRoof} = require("./roof");
 
@@ -81,6 +81,11 @@ const getBuildingInfo = (tags) => {
   } else {
     maxHeight = getDefaultBuildingHeight(tags["building"]);
   }
+  // Check if minHeight == maxHeight, in this case just add a small delta
+  if ( maxHeight === minHeight ) {
+    maxHeight = minHeight + 0.1;
+  }
+
 
   let buildingColor = tags["building:colour"];
   const buildingMaterial = tags["building:material"];
@@ -178,11 +183,12 @@ const groupFromBuilding = (elements, graphNode, name) => {
     polygons.filter(p => !p.role || p.role !== roleInner).forEach(o => {
       let meshes = [];
       //Compute lateral faces
-      const exteriorFaces = extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight);
-      meshes.push(serializeMesh(exteriorFaces, buildingInfo.colour, "lateral"));
+      // const exteriorFaces = extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight);
+      meshes.push(serializeMesh(o.points, buildingInfo.colour, "lateral", serializeVertices, buildingInfo.minHeight, buildingInfo.maxHeight));
       o.holes && o.holes.forEach(h => {
-        const interiorFaces = extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight);
-        meshes.push(serializeMesh(interiorFaces, buildingInfo.colour, "lateral"));
+        // const interiorFaces = extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight);
+        // meshes.push(serializeMesh(interiorFaces, buildingInfo.colour, "lateral"));
+        meshes.push(serializeMesh([...h.points].reverse(), buildingInfo.colour, "lateral", serializeVertices, buildingInfo.minHeight, buildingInfo.maxHeight));
       });
 
       //Compute roof faces

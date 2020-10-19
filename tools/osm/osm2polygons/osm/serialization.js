@@ -1,3 +1,4 @@
+const {serializeVertices} = require("./nameValues");
 const {serializeTriangles} = require("./nameValues");
 
 const facesToTriangles = faces => {
@@ -14,12 +15,24 @@ const facesToTriangles = faces => {
   return triangles;
 }
 
-const serializeMesh = (faces, color, part, vertexType = serializeTriangles) => {
+const pointsToVertices = faces => {
+  // Triangulate faces as array instead of x,y,z
+  let triangles = [];
+  for (let i = 0; i < faces.length; i++) {
+    let f = faces[i];
+    triangles.push([f.x, f.y, 0.0]);
+  }
+  return triangles;
+}
+
+const serializeMesh = (faces, color, part, vertexType = serializeTriangles, minHeight = 0.0, maxHeight = 0.0) => {
   return {
-    vertices: vertexType === serializeTriangles ? facesToTriangles(faces) : faces,
+    vertices: vertexType === serializeTriangles ? facesToTriangles(faces) : (vertexType === serializeVertices ? pointsToVertices(faces) : faces),
     colour: color,
     part: part,
-    vertexType: vertexType
+    vertexType: vertexType,
+    minHeight: minHeight,
+    maxHeight: maxHeight,
   };
 }
 
