@@ -48,7 +48,7 @@ const getRandomDefaultBuildingColor = type => {
         return randomCommercial;
     }
   }
-  
+
   return Math.random() > 0.5 ? randomCommercial : randomResidential;
 }
 
@@ -176,19 +176,19 @@ const groupFromBuilding = (elements, graphNode, name) => {
     const polygons = graphNode.calc.polygons;
 
     polygons.filter(p => !p.role || p.role !== roleInner).forEach(o => {
-
+      let meshes = [];
       //Compute lateral faces
-      let lateralFaces = extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight);
+      const exteriorFaces = extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight);
+      meshes.push(serializeMesh(exteriorFaces, buildingInfo.colour, "lateral"));
       o.holes && o.holes.forEach(h => {
-        lateralFaces = lateralFaces.concat(extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight));
+        const interiorFaces = extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight);
+        meshes.push(serializeMesh(interiorFaces, buildingInfo.colour, "lateral"));
       });
 
       //Compute roof faces
       const roofFaces = createRoof(o, buildingInfo.roof, convexHull, orientedMinBoundingBox);
-
-      let lateralMesh = serializeMesh(lateralFaces, buildingInfo.colour, "lateral");
-      let roofMesh    = serializeMesh(roofFaces, buildingInfo.roof.colour, "roof");
-      elements.push(serializeElement(graphNode, name, [lateralMesh, roofMesh]));
+      meshes.push(serializeMesh(roofFaces, buildingInfo.roof.colour, "roof"));
+      elements.push(serializeElement(graphNode, name, meshes));
     });
   }
 }
