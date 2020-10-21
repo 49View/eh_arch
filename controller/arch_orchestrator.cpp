@@ -161,10 +161,16 @@ void ArchOrchestrator::loadHouse( const std::string& _pid, const PostHouseLoadCa
                                   const PostHouseLoadCallback& ccfailure ) {
     Renderer::clearColor(C4fc::XTORGBA("8ae9e9"));
     Http::getNoCache(Url{ "/propertybim/" + _pid }, [&, ccf]( HttpResponeParams params ) {
+        bool bLoadFailed = true;
         if ( !params.BufferString().empty() ) {
-            houseJson.reset(std::make_shared<HouseBSData>(params.BufferString()));
-            if ( ccf ) ccf();
-        } else {
+            auto newHouseInstance = std::make_shared<HouseBSData>(params.BufferString());
+            if ( newHouseInstance->version >= SHouseJSONVersion ) {
+                bLoadFailed = false;
+                houseJson.reset(newHouseInstance);
+                if ( ccf ) ccf();
+            }
+        }
+        if ( bLoadFailed ) {
             if ( ccfailure ) ccfailure();
         }
     });
