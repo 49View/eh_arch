@@ -63,15 +63,9 @@ std::shared_ptr<CollisionMesh> HouseService::createCollisionMesh( const HouseBSD
 }
 
 void HouseService::loadPanorama( const HouseBSData *house, SceneGraph& sg ) {
-//    HOD::resolver<OSMData>(sg, nullptr, [&]() {
-//        OSMData map{FM::readLocalFileC("../../elements.json")};
-//        sg.GB<GT::OSMTile>(&map, V2f{-0.1344f, 51.4892f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::NearUnsorted), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
-//        sg.GB<GT::OSMBuildings>(&map, V2f{-0.1344f, 51.4892f}, GT::Bucket(GTBucket::Near), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
-//    });
-
-    OSMData map{FM::readLocalFileC("../../elements.json")};
-    sg.GB<GT::OSMTile>(&map, V2f{-0.1344f, 51.4892f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::NearUnsorted), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
-    sg.GB<GT::OSMBuildings>(&map, V2f{-0.1344f, 51.4892f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::Near), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
+//    OSMData map{FM::readLocalFileC("../../elements.json")};
+//    sg.GB<GT::OSMTile>(&map, V2f{-0.1344f, 51.4892f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::NearUnsorted), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
+//    sg.GB<GT::OSMBuildings>(&map, V2f{-0.1344f, 51.4892f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::Near), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
 //    GLTF2Service::save( sg, cc );
 }
 
