@@ -27,6 +27,7 @@
 #include <eh_arch/controller/arch_render_controller.hpp>
 #include <eh_arch/controller/arch_explorer.hpp>
 #include <eh_arch/render/house_render.hpp>
+#include <poly/osm/osm_names.hpp>
 
 ArchOrchestrator::ArchOrchestrator( SceneGraph& _sg, RenderOrchestrator& _rsg, ArchRenderController& _arc, ArchExplorer& _ae ) :
     sg(_sg), rsg(_rsg), arc(_arc), archExplorer(_ae) {
@@ -40,6 +41,9 @@ namespace HOD { // HighOrderDependency
 
         sg.clearNodes();
         ret.addDep(sg, ResourceGroup::Image, data->defaultSkybox);
+        for ( const auto& elem : OSMGeomEntityList() ) {
+            ret.addDep(sg, ResourceGroup::Geom, elem);
+        }
         ret.addDep(sg, ResourceGroup::Material, data->defaultPanoramaOSMMaterial.materialHash);
         for ( const auto& floor : data->mFloors ) {
             ret.addDep(sg, ResourceGroup::Material, floor->externalWallsMaterial.materialHash);
