@@ -51,9 +51,11 @@ prepareProperty( const PropertyListing& property, ArchOrchestrator& asg, SceneGr
     auto floorplanImage = RawImage{ FM::readLocalFileC(mediaFolder + property.floorplanUrl) };
     sg.addRawImageIM(property._id, floorplanImage);
     asg.loadHouse(property._id, [&, property]() {
-        HouseMakerBitmap::prepareImages(asg.H(), *sg.get<RawImage>(property._id));
-        asg.centerCameraMiddleOfHouse();
-        asg.onEvent(ArchIOEvents::AIOE_OnLoad);
+        if ( asg.H()->version >= SHouseJSONVersion ) {
+            HouseMakerBitmap::prepareImages(asg.H(), *sg.get<RawImage>(property._id));
+            asg.centerCameraMiddleOfHouse();
+            asg.onEvent(ArchIOEvents::AIOE_OnLoad);
+        }
     }, [&, property]() {
         asg.setHouse(HouseMakerBitmap::makeEmpty(property, *sg.get<RawImage>(property._id)));
         asg.centerCameraMiddleOfHouse();
