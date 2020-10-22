@@ -48,7 +48,7 @@ void OutdoorAreaBuilder::addPoint( const V2f& _p, int _bIndex ) {
     refresh();
 }
 
-[[maybe_unused]] OutdoorAreaBuilder::OutdoorAreaBuilder( SceneGraph& sg, RenderOrchestrator& rsg ) : sg(sg), rsg(rsg) {
+[[maybe_unused]] OutdoorAreaBuilder::OutdoorAreaBuilder( RenderOrchestrator& rsg ) : rsg(rsg) {
     rrBucket = CommandBufferLimits::UnsortedStart + 3;
     clear();
 }

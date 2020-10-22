@@ -15,7 +15,7 @@ class ArchOrchestrator;
 
 class OutdoorAreaBuilder {
 public:
-    [[maybe_unused]] OutdoorAreaBuilder( SceneGraph& sg, RenderOrchestrator& rsg );
+    [[maybe_unused]] OutdoorAreaBuilder( RenderOrchestrator& rsg );
     void addPoint( const V2f& _p, int bIndex );
     void undo();
     void redo();
@@ -35,7 +35,6 @@ public:
     void makeTerrace();
 
 private:
-    SceneGraph& sg;
     Memento<OutdoorAreaBSData> outdoorAreaData;
     std::vector<V3f> computedSnapPoints{};
     RenderOrchestrator& rsg;

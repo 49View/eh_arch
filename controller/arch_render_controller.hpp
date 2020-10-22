@@ -145,6 +145,6 @@ private:
     ArchViewingMode viewingMode = ArchViewingMode::AVM_Hidden;
     RDSPreMult mPm{ Matrix4f::MIDENTITY() };
     FloorPlanRenderMode mRenderMode = FloorPlanRenderMode::Normal2d;
-    Matrix4f floorplanNavigationMatrix = Matrix4f::MIDENTITY();
+//    Matrix4f floorplanNavigationMatrix = Matrix4f::MIDENTITY();
     C4f selectedColor = C4fc::ORANGE_SCHEME1_1;
 };
