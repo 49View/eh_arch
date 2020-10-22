@@ -41,10 +41,10 @@ namespace HOD { // HighOrderDependency
 
         sg.clearNodes();
         ret.addDep(sg, ResourceGroup::Image, data->defaultSkybox);
-        for ( const auto& elem : OSMGeomEntityList() ) {
-            ret.addDep(sg, ResourceGroup::Geom, elem);
-        }
-        ret.addDep(sg, ResourceGroup::Material, data->defaultPanoramaOSMMaterial.materialHash);
+//        for ( const auto& elem : OSMGeomEntityList() ) {
+//            ret.addDep(sg, ResourceGroup::Geom, elem);
+//        }
+//        ret.addDep(sg, ResourceGroup::Material, data->defaultPanoramaOSMMaterial.materialHash);
         for ( const auto& floor : data->mFloors ) {
             ret.addDep(sg, ResourceGroup::Material, floor->externalWallsMaterial.materialHash);
             for ( const auto& room : floor->rooms ) {
