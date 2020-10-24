@@ -321,7 +321,7 @@ struct TimeDecrement {
 struct BakeLightmaps {
     void operator()( ArchOrchestrator& asg, RenderOrchestrator& rsg ) {
         if ( asg.H() ) {
-            LightmapManager::bakeLightmaps(rsg.SG(), rsg.RR(), {GLTF2Tag, ArchType::CurtainT});
+            LightmapManager::bakeLightmaps(rsg.SG(), rsg.RR(), asg.H()->propertyId, {GLTF2Tag, ArchType::CurtainT});
         }
     }
 };
