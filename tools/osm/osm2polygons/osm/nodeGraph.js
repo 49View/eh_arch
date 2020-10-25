@@ -95,6 +95,7 @@ const getPolygonFromWay = (tileBoundary, way) => {
   if (points.length < 3 && isClosed) {
     throw new Error("Invalid way " + way.id);
   }
+
   way.spatial = computeBoundingBox(tileBoundary, points);
   convertToLocalCoordinate(points, way.spatial.center.x, way.spatial.center.y);
   //Using: https://github.com/geidav/ombb-rotating-calipers
@@ -139,6 +140,8 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
         tags: m.ref.tags,
         nodes: []
       }
+      m.ref.spatial = computeBoundingBox(tileBoundary, removeCollinearPoints(m.ref.nodes));
+
       //Copy point but not last (same than first)
       for (let i = 0; i < m.ref.nodes.length - 1; i++) {
         polygon.nodes.push({...m.ref.nodes[i]});
@@ -160,6 +163,7 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
             nodes: []
           }
           connectedMembers.forEach(m => {
+            m.ref.spatial = computeBoundingBox(tileBoundary, removeCollinearPoints(m.ref.nodes));
             for (let i = 0; i < m.ref.nodes.length - 1; i++) {
               polygon.nodes.push({...m.ref.nodes[i]});
             }
