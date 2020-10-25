@@ -614,6 +614,7 @@ public:
     void reRoot( float, ArchRescaleSpaceT ) override;
     void elevate( float _elevation );
     FloorBSData *addFloorFromData( const JMATH::Rect2f& _rect );
+    [[nodiscard]] std::string getLightmapID() const;
 
 protected:
     void updateVolumeInternal() override;

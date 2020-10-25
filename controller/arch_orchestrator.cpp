@@ -19,8 +19,10 @@
 
 #include <poly/collision_mesh.hpp>
 #include <poly/scene_graph.h>
+#include <poly/converters/gltf2/gltf2.h>
 
 #include <render_scene_graph/render_orchestrator.h>
+#include <render_scene_graph/lightmap_manager.hpp>
 
 #include <eh_arch/models/house_bsdata.hpp>
 #include <eh_arch/models/house_service.hpp>
@@ -41,6 +43,7 @@ namespace HOD { // HighOrderDependency
 
         sg.clearNodes();
         ret.addDep(sg, ResourceGroup::Image, data->defaultSkybox);
+        ret.addDep(sg, ResourceGroup::Image, data->getLightmapID());
 //        for ( const auto& elem : OSMGeomEntityList() ) {
 //            ret.addDep(sg, ResourceGroup::Geom, elem);
 //        }
@@ -144,6 +147,7 @@ void ArchOrchestrator::make3dHouse( const PostHouse3dResolvedCallback& ccf ) {
             sg.loadCollisionMesh(HouseService::createCollisionMesh(H()));
             hrc = HouseRender::make3dGeometry(rsg.RR(), sg, H());
             if ( ccf ) ccf();
+            LightmapManager::deserialiseLightmap(rsg.SG(), rsg.RR(), H()->getLightmapID(), {GLTF2Tag, ArchType::CurtainT});
             rsg.RR().setLoadingFlag(false);
             rsg.changeTime("14:00", H()->sourceData.northCompassAngle);
             V3f probePos = HouseService::centerOfBiggestRoom(H(), 1.25f);

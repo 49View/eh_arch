@@ -75,6 +75,10 @@ FloorBSData *HouseBSData::addFloorFromData( const JMATH::Rect2f& _rect ) {
     return f.get();
 }
 
+std::string HouseBSData::getLightmapID() const {
+    return propertyId + "_lightmap";
+}
+
 // *********************************************************************************************************************
 // Floor
 // *********************************************************************************************************************
