@@ -60,10 +60,10 @@ V3f HouseBSData::GeoOffset() const {
 
 void HouseBSData::elevate( float _elevation ) {
     elevation = _elevation;
-    for ( auto& floor : mFloors ) {
-        floor->elevation = floor->number * ( floor->concreteHeight + floor->Height() );
-    }
-    updateVolume();
+//    for ( auto& floor : mFloors ) {
+//        floor->elevation = floor->number * ( floor->concreteHeight + floor->Height() );
+//    }
+//    updateVolume();
 }
 
 FloorBSData *HouseBSData::addFloorFromData( const JMATH::Rect2f& _rect ) {

@@ -151,11 +151,13 @@ namespace RoomRender {
         sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3fc::UP_AXIS * -zPull } + w->Position(), w->floorMaterial,
                                        GT::Tag(ArchType::FloorT));
 
+        auto roomPos = w->Position();
+        auto roomHeight = w->Height();
         for ( const auto& lf : w->mLightFittings ) {
-            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, lRootH, w->Position() + XZY::C(lf.lightPosition) + V3fc::UP_AXIS * 0.023f);
+            auto spotlightGeom = sg.GB<GT::Asset>(w->spotlightGeom, lRootH, roomPos + XZY::C(lf.lightPosition) + V3fc::UP_AXIS * 0.023f);
             auto lKey = lf.key;
             sg.add<Light>(lKey,
-                          Light{ LightType_Point, lf.key, w->spotlightGeom, XZY::C(lf.lightPosition) + V3fc::UP_AXIS_NEG * w->spotLightYOffset*2.0f + w->Position(),
+                          Light{ LightType_Point, lf.key, w->spotlightGeom, XZY::C(lf.lightPosition) + V3fc::UP_AXIS_NEG * w->spotLightYOffset*2.0f + roomPos + (V3f::UP_AXIS() * w->elevation),
                                  3.5f, 0.0f, V3fc::Y_AXIS * .5f });
         }
         for ( const auto& lf : w->mSwitchesLocators ) {
@@ -184,7 +186,7 @@ namespace RoomRender {
             KitchenRender::render(sg, lRootH, w);
         }
 
-        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3fc::UP_AXIS * (w->Height() - zPull) } + w->Position(),
+        sg.GB<GT::Extrude>(outline, lRootH, V3f{ V3fc::UP_AXIS * (roomHeight - zPull) } + w->Position(),
                                          w->ceilingMaterial,
                                          GT::Tag(ArchType::CeilingT));
 
