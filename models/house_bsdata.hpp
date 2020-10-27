@@ -464,7 +464,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type,
            mWallSegments, mWallSegmentsSorted, mPerimeterSegments, mvCovingSegments, mvSkirtingSegments,
            mMaxEnclosingBoundingBox, mLightFittings, mSocketLocators, mSwitchesLocators, maxSizeEnclosedHP1,
            maxSizeEnclosedHP2, maxSizeEnclosedWP1, maxSizeEnclosedWP2, mLongestWall, mLongestWallOpposite,
-           mLongestWallOppositePoint, elevation, mPerimeter, area, mCovingPerimeter, minLightFittingDistance,
+           mLongestWallOppositePoint, floorElevation, mPerimeter, area, mCovingPerimeter, minLightFittingDistance,
            mArchitravesWidth, defaultCeilingThickness, spotLightYOffset, wallsMaterial, floorMaterial, ceilingMaterial,
            covingProfile, skirtingProfile, skirtingMaterial, covingMaterial, spotlightGeom, kitchenData)
     std::vector<ASTypeT> roomTypes{};
@@ -494,7 +494,7 @@ JSONDATA_H(RoomBSData, ArchStructural, hash, type,
     int32_t mLongestWall = -1;
     int32_t mLongestWallOpposite = -1;
     Vector2f mLongestWallOppositePoint = V2fc::ZERO;
-    float elevation = 0.0f;
+    float floorElevation = 0.0f;
     float mPerimeter = 0.0f;
     float area = 0.0f;
     float mCovingPerimeter = 0.0f;
@@ -525,12 +525,12 @@ private:
 
 JSONDATA_H(FloorBSData, ArchStructural, hash, type,
            albedo, bbox, bbox3d, size, centre, pos, rotation, scaling, mTriangles2d, linkedHash, sequencePart,
-           number, elevation, area, concreteHeight, hasCoving, doorHeight, windowHeight,
+           number, floorElevation, area, concreteHeight, hasCoving, doorHeight, windowHeight,
            windowBaseOffset, offsetFromFloorAnchor, offsetFromFloorAnchor3d, ceilingContours, mPerimeterSegments,
            perimeterArchSegments, anchorPoint, walls, windows, doors, stairs, rooms, outdoorAreas, orphanedUShapes)
 
     int32_t number = -1; // As in floor number, ground floor = 1, etc...
-    float elevation = 0.0f;
+    float floorElevation = 0.0f;
     
     float area = 0.0f;
     float concreteHeight = 0.0f;

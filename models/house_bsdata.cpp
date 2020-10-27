@@ -178,7 +178,7 @@ RoomBSData::RoomBSData( const RoomPreData& _preData, const float _floorHeight, c
     }
     mHasCoving = !RS::hasRoomType(this, ASType::Kitchen);
     size = V3f{ _preData.bboxInternal.calcWidth(), _floorHeight, _preData.bboxInternal.calcHeight() };
-    elevation = _elevation;
+    floorElevation = _elevation;
 }
 
 void RoomBSData::reRoot( float _scale, ArchRescaleSpaceT _scaleSpace ) {
@@ -239,7 +239,7 @@ void RoomBSData::updateVolumeInternal() {
             bbox.expand(ep.p2);
         }
     }
-    bbox3d.calc(bbox, elevation, elevation + Height(), Matrix4f::IDENTITY());
+    bbox3d.calc(bbox, floorElevation, floorElevation + Height(), Matrix4f::IDENTITY());
 
     for ( auto& i : mFittedFurniture ) {
         mergeVolume(i->updateVolume());
