@@ -202,10 +202,16 @@ namespace RoomService {
         return ret;
     }
 
+    static constexpr float sensibleMaxCovingHeight = 0.15f;
     float middleHeightFromObject( RoomBSData *r, FittedFurniture *base, FittedFurniture *dec ) {
-        constexpr float sensibleMaxCovingHeight = 0.15f;
         return ( ( r->Height() - sensibleMaxCovingHeight - base->Height() - dec->Height() ) / 2.0f );
     }
+
+    float middleHeightFromRoom( RoomBSData *r, FittedFurniture *dec, float randOff = .0f ) {
+        auto ret = half(r->Height()) + randOff;
+        return ret > 0.0f && ret + dec->Height() < (r->Height()-sensibleMaxCovingHeight) ? ret : -1.0f;
+    }
+
 
     const ArchSegment *getWallSegmentFor( RoomBSData *r, const WSLO wslo, uint32_t _exactIndex ) {
         const ArchSegment *ls = nullptr;
@@ -447,12 +453,15 @@ namespace RoomService {
                                  const FurniturePlacementRule& fpd ) {
         FT main = fpd.getBase(0);
         WSLO refWall = fpd.getWallSegmentId().type;
-        bool completed = true;
+        bool completed = false;
         auto mainF = furns.spawn(main);
         for ( uint32_t rwIndex = 0UL; rwIndex < r->mWallSegmentsSorted.size(); rwIndex++ ) {
-            completed = RS::placeWallAligned(
-                    FurnitureRuleParams{ f, r, mainF, FRPWSLO{ refWall }, FRPSlackScalar{ fpd.getSlack(0).x() },
-                                         rwIndex });
+            auto h1 = middleHeightFromRoom(r, mainF.get(), -0.25f);
+            if ( h1 >= 0.0f) {
+                completed = RS::placeWallAligned(
+                        FurnitureRuleParams{ f, r, mainF, FRPWSLO{ refWall }, FRPSlackScalar{ fpd.getSlack(0).x() },
+                                             rwIndex, h1 });
+            }
             if ( completed ) break;
         }
         return completed;
