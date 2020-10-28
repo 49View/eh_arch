@@ -242,11 +242,13 @@ namespace RoomService {
         switch ( where ) {
             case PivotPointPosition::TopLeft:
                 pivotOffset = source->widthNormal * ( source->HalfWidth() + dest->HalfWidth() + slack.x() );
-                dest->position(XZY::C(source->Position2d() + pivotOffset, source->Height()));
+                pivotOffset += source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y() );
+                dest->position(XZY::C(source->Position2d() + pivotOffset, 0.0f));
                 break;
             case PivotPointPosition::TopRight:
                 pivotOffset = source->widthNormal * ( -source->HalfWidth() - dest->HalfWidth() + slack.x() );
-                dest->position(XZY::C(source->Position2d() + pivotOffset, source->Height()));
+                pivotOffset += source->depthNormal * ( -source->HalfDepth() + dest->HalfDepth() + slack.y());
+                dest->position(XZY::C(source->Position2d() + pivotOffset, 0.0f));
                 break;
             case PivotPointPosition::TopCenter:
                 dest->position(XZY::C(source->Position2d(), source->Height() + slack.y()));
