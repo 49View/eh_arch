@@ -18,7 +18,7 @@ const getData = async (bbox, useCache) => {
         way["railway"="rail"](${bbox.join(",")});
         way["amenity"="parking"](${bbox.join(",")});
         way["landuse"](${bbox.join(",")});
-        way["natural"="water"](${bbox.join(",")});
+        way["natural"](${bbox.join(",")});
         way["leisure"](${bbox.join(",")});
         way["area"](${bbox.join(",")});
         way[${tagBarrier}](${bbox.join(",")});
@@ -26,7 +26,7 @@ const getData = async (bbox, useCache) => {
         rel["building"](${bbox.join(",")});
         rel["building:part"](${bbox.join(",")});
         rel["highway"](${bbox.join(",")});
-        rel["natural"="water"](${bbox.join(",")});        
+        rel["natural"](${bbox.join(",")});        
         rel[${tagBarrier}](${bbox.join(",")});
         rel["landuse"](${bbox.join(",")});
         rel["leisure"](${bbox.join(",")});

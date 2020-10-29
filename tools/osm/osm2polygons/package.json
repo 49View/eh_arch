@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js 51.4992784 -0.125376 15 useCache"
+    "start": "node index.js 50.8208 -0.1326 15 useCache"
   },
   "author": "Shinobi and Dado",
   "license": "ISC",

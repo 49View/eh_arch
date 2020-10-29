@@ -20,6 +20,10 @@ const waterFilter = w => {
     return w.tags && w.tags["natural"] === "water";
 }
 
+const beachFilter = w => {
+    return w.tags && w.tags["natural"] === "beach";
+}
+
 const barrierFilter = w => {
     return w.tags && w.tags[tagBarrier];
 }
@@ -42,6 +46,10 @@ const transportNodeFilter = w => {
     return isNode(w) && w.tags && (w.tags["highway"] === "bus_stop");
 }
 
+const lampPostNodeFilter = w => {
+    return isNode(w) && w.tags && (w.tags["highway"] === "street_lamp");
+}
+
 const phoneBoothFilter = w => {
     return isNode(w) && w.tags && (w.tags["amenity"] === "telephone");
 }
@@ -50,6 +58,7 @@ const nodeSingleEntitiesFilter = w => {
     return treeFilter(w) ||
            monumentNodeFilter(w) ||
            transportNodeFilter(w) ||
+           lampPostNodeFilter(w) ||
            phoneBoothFilter(w);
 }
 
@@ -107,6 +116,7 @@ const createTile = (tileBoundary, nodes, ways, rels) => {
         addTileAreaFilter("park", parkFilter),
         addTileAreaFilter("parking", parkingFilter),
         addTileAreaFilter("water", waterFilter),
+        addTileAreaFilter("beach", beachFilter),
         addTileAreaFilter("road", roadFilter),
         addTileAreaFilter(tagBarrier, barrierFilter, groupFromBarrier),
     ]
