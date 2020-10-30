@@ -1,10 +1,12 @@
+import {mapModel} from "../models/map";
+
 const axios = require('axios')
 const qs = require('qs');
 const fs = require('fs');
 const {graphTypeRel, graphTypeWay, graphTypeNode, tagBarrier} = require("./nameValues");
 const OVERPASSAPI_URL="http://overpass-api.de/api/interpreter";
 
-const getData = async (bbox, useCache) => {
+export const getData = async (bbox, useCache) => {
 
     if (useCache) {
         return getDataLocal();
@@ -88,11 +90,27 @@ const parseData = (osmData) => {
     return {nodes,ways,rels}
 }
 
-const exportTile = (tileBoundary, elements) => {
-    const jsonOutput = JSON.stringify({tileBoundary, elements}, null, 4);
-    // fs.writeFileSync("../osmdebug/src/elements.json", jsonOutput, {encoding: "utf8"});
-    fs.writeFileSync("../../../../builds/elements.json", jsonOutput, {encoding: "utf8"});
-}
+export const exportTile = async (tileBoundary, elements) => {
 
-module.exports = {getData,exportTile}
+    const bulkOps = elements.map(update => ({
+        updateOne: {
+            filter: { id: update.id },
+            update: { $set: update },
+            upsert: true
+        }
+    }));
+    const results = await mapModel.collection.bulkWrite(bulkOps);
+
+    console.log( "Write result: " + JSON.stringify(results) );
+    //console.log( "Updating database: " + (results.BulkWriteResult.result.ok === 1 ? "OK" : results) );
+
+    // for ( const elem of elements ) {
+    //     await mapModel.findOneAndUpdate({id: elem.id}, elem, {
+    //         upsert: true,
+    //         new: true,
+    //         setDefaultsOnInsert: true
+    //     });
+    // }
+    // console.log(elements.length + " map entities exported")
+}
 

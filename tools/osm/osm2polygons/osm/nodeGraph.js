@@ -1,3 +1,4 @@
+const {serializeLocation} = require("./coordinates");
 const {graphTypeWay, graphTypeRel,  graphTypeNode, roleInner, roleOuter, getWidthFromWay} = require("./nameValues");
 const {calcConvexHull} = require('../geometry/convexhull');
 const {calcOmbb} = require('../geometry/ombb');
@@ -281,7 +282,8 @@ const computePolygons = (tileBoundary, nodes, ways, rels) => {
     node.spatial = {
       ...calcTileDelta(node, tileBoundary.tilePos),
       lat: node.lat,
-      lon: node.lon
+      lon: node.lon,
+      location: serializeLocation(node.lon, node.lat)
     };
   });
 

@@ -55,6 +55,7 @@ const serializeElement = (elem, type, meshes) => {
     id: elem.type + "-" + elem.id,
     type: type,
     center: elem.spatial,
+    location: elem.spatial.location,
     tags: sTags,
     meshes: meshArray
   }

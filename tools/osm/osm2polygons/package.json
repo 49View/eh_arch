@@ -5,14 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js 50.8208 -0.1326 15 useCache"
+    "start": "node -r esm index.js 50.8208 -0.1326 15 useCache"
   },
   "author": "Shinobi and Dado",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
-    "decimal.js": "^10.2.0",
+    "eh_db": "^1.0.3",
+    "esm": "^3.2.25",
     "js-clipper": "^1.0.1",
+    "mongoose": "^5.10.11",
     "poly2tri": "^1.5.0",
     "qs": "^6.9.4"
   }

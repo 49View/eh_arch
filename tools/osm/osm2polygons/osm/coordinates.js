@@ -75,6 +75,13 @@ const calcDistance = (latitude1, longitude1, latitude2, longitude2) => {
   return (R * c);
 }
 
+const serializeLocation = (lon, lat) => {
+  return {
+    type: "Point",
+    coordinates:[lon, lat]
+  }
+}
+
 const getBoundingBox = (coords) => {
 
   const {lat, lon, zoom} = {...coords};
@@ -106,7 +113,7 @@ const getBoundingBox = (coords) => {
     center: {
       ...project(centerLat, centerLon),
       lat: centerLat,
-      lon: centerLon
+      lon: centerLon,
     },
     size: {
       x: sizeX,
@@ -156,4 +163,5 @@ module.exports = {
   convertToLocalCoordinate,
   calcNodeCoordinates,
   getBoundingBox,
+  serializeLocation
 }

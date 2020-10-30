@@ -1,5 +1,6 @@
 const poly2tri = require('poly2tri');
 const ClipperLib = require('js-clipper');
+const {serializeLocation} = require("../osm/coordinates");
 const {Vector} = require('../geometry/vector');
 const {calcOmbb} = require("./ombb");
 const {calcConvexHull} = require("./convexhull");
@@ -316,7 +317,8 @@ const computeBoundingBox = (tileBoundary, points) => {
   sizeX = maxX - minX;
   sizeY = maxY - minY;
 
-  return {minX, minY, maxX, maxY, center, sizeX, sizeY, lat, lon, ...calcTileDelta(center, tileBoundary.tilePos)}
+  return {minX, minY, maxX, maxY, center, sizeX, sizeY, lat, lon,
+    location: serializeLocation(lat, lon), ...calcTileDelta(center, tileBoundary.tilePos)}
 }
 
 const checkPointInsidePolygon = (polygon, point) => {

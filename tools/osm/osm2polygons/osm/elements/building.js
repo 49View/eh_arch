@@ -183,7 +183,6 @@ const groupFromBuilding = (elements, graphNode, name) => {
     polygons.filter(p => !p.role || p.role !== roleInner).forEach(o => {
       let meshes = [];
       //Compute lateral faces
-      // const exteriorFaces = extrudePoly(o.points, buildingInfo.minHeight, buildingInfo.maxHeight);
       meshes.push(serializeMesh(o.points, buildingInfo.colour, "lateral", serializeVertices, buildingInfo.minHeight, buildingInfo.maxHeight));
       o.holes && o.holes.forEach(h => {
         // const interiorFaces = extrudePoly([...h.points].reverse(), buildingInfo.minHeight, buildingInfo.maxHeight);
