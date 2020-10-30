@@ -1,4 +1,4 @@
-import {mapModel} from "../models/map";
+import {osmModel} from "../../models/osm";
 
 const axios = require('axios')
 const qs = require('qs');
@@ -99,7 +99,7 @@ export const exportTile = async (tileBoundary, elements) => {
             upsert: true
         }
     }));
-    const results = await mapModel.collection.bulkWrite(bulkOps);
+    const results = await osmModel.collection.bulkWrite(bulkOps);
 
     console.log( "Write result: " + JSON.stringify(results) );
     //console.log( "Updating database: " + (results.BulkWriteResult.result.ok === 1 ? "OK" : results) );

@@ -1,8 +1,8 @@
 import {initDB} from "eh_db";
-import {elaborateData} from "./osm/nodeGraph";
-import {getBoundingBox} from "./osm/coordinates";
-import {exportTile, getData} from "./osm/persistence";
-import {createTile} from "./osm/tile";
+import {elaborateData} from "./osm/services/nodeGraph";
+import {getBoundingBox} from "./osm/services/coordinates";
+import {exportTile, getData} from "./osm/services/persistence";
+import {createTile} from "./osm/services/tile";
 
 const main = async (args) => {
 
