@@ -1,4 +1,4 @@
-import {osmModel} from "../../models/osm";
+import {osmModel} from "../models/osm";
 
 const axios = require('axios')
 const qs = require('qs');

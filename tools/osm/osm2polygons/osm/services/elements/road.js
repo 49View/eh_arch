@@ -1,5 +1,5 @@
 const {serializeElement, serializeMesh} = require("../serialization");
-const {getTrianglesFromPolygon} = require("../../../geometry/polygon");
+const {getTrianglesFromPolygon} = require("../../geometry/polygon");
 const {graphTypeWay, graphTypeRel, graphTypeNode, getColorFromTags} = require("../nameValues");
 
 const groupFromGraphNode = (elements, graphNode, type) => {

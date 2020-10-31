@@ -1,7 +1,7 @@
 const poly2tri = require('poly2tri');
 const ClipperLib = require('js-clipper');
-const {serializeLocation} = require("../osm/services/coordinates");
-const {Vector} = require('../geometry/vector');
+const {serializeLocation} = require("../services/coordinates");
+const {Vector} = require('./vector');
 const {calcOmbb} = require("./ombb");
 const {calcConvexHull} = require("./convexhull");
 

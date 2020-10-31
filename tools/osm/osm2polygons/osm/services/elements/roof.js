@@ -1,6 +1,6 @@
 const {valuePyramidal, valueDone, valueGabled, valueHipped, valueAlong} = require("../nameValues");
-const {getTrianglesFromPolygon, extrudePoly,pointOnLine, distanceFromLine, twoLinesIntersectParameter} = require("../../../geometry/polygon");
-const {Vector} = require("../../../geometry/vector");
+const {getTrianglesFromPolygon, extrudePoly,pointOnLine, distanceFromLine, twoLinesIntersectParameter} = require("../../geometry/polygon");
+const {Vector} = require("../../geometry/vector");
 
 const createRoof = (polygon, roofInfo, convexHull, ombb) => {
   if (roofInfo.shape===valuePyramidal) {

@@ -1,8 +1,8 @@
 const {serializeLocation} = require("./coordinates");
 const {graphTypeWay, graphTypeRel,  graphTypeNode, roleInner, roleOuter, getWidthFromWay} = require("./nameValues");
-const {calcConvexHull} = require('../../geometry/convexhull');
-const {calcOmbb} = require('../../geometry/ombb');
-const {checkPointsOrder, offsetPolyline, computeBoundingBox, removeCollinearPoints, calcTileDelta, checkPolygonInsidePolygon} = require("../../geometry/polygon");
+const {calcConvexHull} = require('../geometry/convexhull');
+const {calcOmbb} = require('../geometry/ombb');
+const {checkPointsOrder, offsetPolyline, computeBoundingBox, removeCollinearPoints, calcTileDelta, checkPolygonInsidePolygon} = require("../geometry/polygon");
 const {calcCoordinate, convertToLocalCoordinate} = require("./coordinates");
 
 const isNode = w => w.type && w.type === graphTypeNode;
@@ -283,7 +283,7 @@ const computePolygons = (tileBoundary, nodes, ways, rels) => {
       ...calcTileDelta(node, tileBoundary.tilePos),
       lat: node.lat,
       lon: node.lon,
-      location: serializeLocation(node.lon, node.lat)
+      location: serializeLocation(node.lat, node.lon)
     };
   });
 
