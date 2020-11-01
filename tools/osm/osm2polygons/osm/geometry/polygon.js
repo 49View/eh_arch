@@ -318,7 +318,8 @@ const computeBoundingBox = (tileBoundary, points) => {
   sizeY = maxY - minY;
 
   return {minX, minY, maxX, maxY, center, sizeX, sizeY, lat, lon,
-    location: serializeLocation(lat, lon), ...calcTileDelta(center, tileBoundary.tilePos)}
+    location: serializeLocation(lon, lat),
+    ...calcTileDelta(center, tileBoundary.tilePos)}
 }
 
 const checkPointInsidePolygon = (polygon, point) => {

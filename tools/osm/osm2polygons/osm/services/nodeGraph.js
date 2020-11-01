@@ -283,7 +283,7 @@ const computePolygons = (tileBoundary, nodes, ways, rels) => {
       ...calcTileDelta(node, tileBoundary.tilePos),
       lat: node.lat,
       lon: node.lon,
-      location: serializeLocation(node.lat, node.lon)
+      location: serializeLocation(node.lon, node.lat)
     };
   });
 
