@@ -19,36 +19,51 @@ function tile2lat(y,z) {
 RAD2DEG = 180 / Math.PI;
 PI_4 = Math.PI / 4;
 const TILE_SIZE = 256;
+const EARTH_RADIUS = 6378137;
 
-// const lat2y = lat => {
-//     return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
-// }
+const DEG2RAD = (a) => {
+  return ((a) / (180 / Math.PI));
+}
+
+const lat2y = lat => {
+    return Math.log(Math.tan((lat / 90 + 1) * PI_4 )) * RAD2DEG;
+}
+
+function project_meters(lat, lon) {
+  return {
+    x: DEG2RAD(lon) * EARTH_RADIUS,
+    y: Math.log(Math.tan( DEG2RAD(lat) / 2 + PI_4 )) * EARTH_RADIUS
+  }
+}
+
 
 // The mapping between latitude, longitude and pixels is defined by the web
 // mercator projection.
-function project(lat, lon) {
+function project(lat, lon, scale) {
   let sinY = Math.sin((lat * Math.PI) / 180);
 
   // Truncating to 0.9999 effectively limits latitude to 89.189. This is
   // about a third of a tile past the edge of the world tile.
   sinY = Math.min(Math.max(sinY, -0.9999), 0.9999);
 
+  const totalScale = scale * TILE_SIZE;
   return {
-    x: TILE_SIZE * (0.5 + lon / 360),
-    y: TILE_SIZE * (0.5 - Math.log((1 + sinY) / (1 - sinY)) / (4 * Math.PI))
+    x: totalScale * (0.5 + lon / 360),
+    y: totalScale * (0.5 - Math.log((1 + sinY) / (1 - sinY)) / (4 * Math.PI))
   }
 }
 
-const calcNodeCoordinates = n => {
-  return {
-    x: calcDistance(n.lat, 0, n.lat, n.lon),
-    y: calcDistance(0, n.lon, n.lat, n.lon)
-  }
-}
+// const calcNodeCoordinates = n => {
+//   return {
+//     x: calcDistance(n.lat, 0, n.lat, n.lon),
+//     y: calcDistance(0, n.lon, n.lat, n.lon)
+//   }
+// }
 
 const calcCoordinate = (nodes) => {
+  const scale = 1 << 15;
   nodes.forEach(n => {
-    const nc = calcNodeCoordinates(n);
+    const nc = {...project_meters(n.lat, n.lon)};
     n.x = nc.x;
     n.y = nc.y;
   })
@@ -111,7 +126,7 @@ const getBoundingBox = (coords) => {
       bottomLon
     ],
     center: {
-      ...project(centerLat, centerLon),
+      // ...project(centerLat, centerLon),
       lat: centerLat,
       lon: centerLon,
     },
@@ -143,25 +158,25 @@ const getBoundingBox = (coords) => {
         Y: -sizeY*halfW
       },
     ],
-    tilePos: {
-      x: calcDistance(topLat, topLon, topLat, 0),
-      y: calcDistance(topLat, topLon, 0, topLon),
-    },
+    // tilePos: {
+    //   x: calcDistance(topLat, topLon, topLat, 0),
+    //   y: calcDistance(topLat, topLon, 0, topLon),
+    // },
   };
 }
 
-const convertToLocalCoordinate = (points, originX, originY) => {
-  points.forEach(p => {
-    p.x = p.x - originX;
-    p.y = p.y - originY;
-  });
-}
+// const convertToLocalCoordinate = (points, originX, originY) => {
+//   points.forEach(p => {
+//     p.x = p.x - originX;
+//     p.y = p.y - originY;
+//   });
+// }
 
 module.exports = {
   calcDistance,
   calcCoordinate,
-  convertToLocalCoordinate,
-  calcNodeCoordinates,
+  // convertToLocalCoordinate,
+  // calcNodeCoordinates,
   getBoundingBox,
   serializeLocation
 }

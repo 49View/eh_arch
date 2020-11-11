@@ -1,3 +1,5 @@
+import {sanitizeNumber} from "../../geometry/utils";
+
 const {serializeVertices} = require("../nameValues");
 const {convertOSMBuildingMaterialStringToColor} = require("../nameValues");
 const {convertOSMColorStringToColor} = require("../nameValues");
@@ -159,12 +161,12 @@ const getBuildingInfo = (tags) => {
   const roofMaxHeight = maxHeight + roofHeight;
 
   return {
-    minHeight: minHeight,
-    maxHeight: maxHeight,
+    minHeight: sanitizeNumber(minHeight),
+    maxHeight: sanitizeNumber(maxHeight),
     colour: buildingColor,
     roof: {
-      minHeight: roofMinHeight,
-      maxHeight: roofMaxHeight,
+      minHeight: sanitizeNumber(roofMinHeight),
+      maxHeight: sanitizeNumber(roofMaxHeight),
       shape: roofShape,
       orientation: roofOrientation,
       colour: roofColour
@@ -174,7 +176,7 @@ const getBuildingInfo = (tags) => {
 
 const groupFromBuilding = (elements, graphNode, name) => {
 
-  if (graphNode.type !== graphTypeNode) {
+  if (graphNode.type !== graphTypeNode && graphNode.calc !== undefined ) {
     const buildingInfo = getBuildingInfo(graphNode.tags);
     const convexHull = graphNode.calc.convexHull;
     const orientedMinBoundingBox = graphNode.calc.ombb;

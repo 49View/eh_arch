@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node -r esm index.js 22.2957289 114.1730795 15 noCache"
+    "start": "node -r esm index.js 22.2957289 114.1730795 15 useCache"
   },
   "author": "Shinobi and Dado",
   "license": "ISC",

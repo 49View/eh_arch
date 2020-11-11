@@ -98,7 +98,7 @@ const getPolygonFromWay = (tileBoundary, way) => {
   }
 
   way.spatial = computeBoundingBox(tileBoundary, points);
-  convertToLocalCoordinate(points, way.spatial.center.x, way.spatial.center.y);
+  // convertToLocalCoordinate(points, way.spatial.center.x, way.spatial.center.y);
   //Using: https://github.com/geidav/ombb-rotating-calipers
   //with some modifications
 
@@ -113,7 +113,7 @@ const getPolygonFromWay = (tileBoundary, way) => {
 
   const absolutePolygon = [];
   polygon.forEach(p => {
-    absolutePolygon.push({x: p.x + way.spatial.center.x, y: p.y + way.spatial.center.y});
+    absolutePolygon.push({x: p.x, y: p.y});
   })
 
   const polygons = [];
@@ -185,7 +185,7 @@ const getPolygonsFromMultipolygonRelation = (tileBoundary, rel) => {
   //Compute local bounding box and correct point direction
   rel.spatial = computeBoundingBox(tileBoundary, relPoints);
   polygons.forEach(p => {
-    convertToLocalCoordinate(p.points, rel.spatial.center.x, rel.spatial.center.y);
+    // convertToLocalCoordinate(p.points, rel.spatial.center.x, rel.spatial.center.y);
     checkPointsOrder(p.points);
   });
   //Create reference between inner and outer
@@ -281,8 +281,6 @@ const computePolygons = (tileBoundary, nodes, ways, rels) => {
   nodes.forEach(node => {
     node.spatial = {
       ...calcTileDelta(node, tileBoundary.tilePos),
-      lat: node.lat,
-      lon: node.lon,
       location: serializeLocation(node.lon, node.lat)
     };
   });

@@ -7,9 +7,9 @@ const facesToTriangles = faces => {
   for (let i = 0; i < faces.length; i += 3) {
     let f = faces[i];
     triangles.push([f.x, f.y, f.z]);
-    f = faces[i + 2];
-    triangles.push([f.x, f.y, f.z]);
     f = faces[i + 1];
+    triangles.push([f.x, f.y, f.z]);
+    f = faces[i + 2];
     triangles.push([f.x, f.y, f.z]);
   }
   return triangles;

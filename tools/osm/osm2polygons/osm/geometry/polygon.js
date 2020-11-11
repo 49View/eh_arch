@@ -271,9 +271,9 @@ const removeCollinearPoints = (nodes) => {
 
 const calcTileDelta = ( center, tilePos ) => {
   return {
-    deltaPosInTile : [
-      center.x - tilePos.x,
-      center.y - tilePos.y
+    tilePos : [
+      center.x,// - tilePos.x,
+      center.y// - tilePos.y
     ]
   };
 }
