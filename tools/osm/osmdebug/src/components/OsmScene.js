@@ -11,7 +11,7 @@ const OsmScene = (props) => {
 
     Content = props.elements.map(b =>
       <Element
-        position={[b.center.deltaPosInTile[0],0,b.center.deltaPosInTile[1]]}
+        position={[b.center.tilePos[0],0,b.center.tilePos[1]]}
         element={b}
         wireframe={props.wireframe}
       />
