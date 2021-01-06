@@ -10,7 +10,7 @@
   "author": "Shinobi and Dado",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "eh_db": "^1.0.3",
     "esm": "^3.2.25",
     "js-clipper": "^1.0.1",
